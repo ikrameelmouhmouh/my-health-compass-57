@@ -1,77 +1,79 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Check, ArrowRight } from "lucide-react";
+import { LANGUAGES, useI18n, type Language } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Apex — Calibrate your metabolism" },
-      { name: "description", content: "A precision nutrition, fasting and training protocol for serious people. Calibrate your daily targets in under two minutes." },
-      { property: "og:title", content: "Apex — Calibrate your metabolism" },
-      { property: "og:description", content: "Precision nutrition and training. Calibrate your daily targets in two minutes." },
+      { title: "Vita — Your personal health plan" },
+      { name: "description", content: "Nutrition, intermittent fasting, workouts and progress — all in one calm, personalized app." },
+      { property: "og:title", content: "Vita — Your personal health plan" },
+      { property: "og:description", content: "Nutrition, fasting, workouts and progress in one app." },
     ],
   }),
-  component: Welcome,
+  component: LanguagePicker,
 });
 
-function Welcome() {
+function LanguagePicker() {
+  const { lang, setLang, t } = useI18n();
+  const navigate = useNavigate();
+
+  // First-run routing: if user has already been through this, jump them ahead.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const introDone = localStorage.getItem("vita.intro_done");
+    const langSet = localStorage.getItem("vita.lang");
+    if (langSet && introDone) navigate({ to: "/welcome", replace: true });
+    else if (langSet) navigate({ to: "/intro", replace: true });
+  }, [navigate]);
+
   return (
-    <main className="relative mx-auto flex min-h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-background px-6 pb-10 pt-14">
-      {/* Glow */}
-      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 size-[420px] -translate-x-1/2 rounded-full bg-brand/20 blur-3xl" />
-
-      <header className="relative flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="grid size-8 place-items-center rounded-lg border border-hairline bg-surface">
-            <div className="size-2 rounded-full bg-brand shadow-[0_0_12px_currentColor]" />
-          </div>
-          <span className="font-display text-sm font-semibold tracking-tight">APEX</span>
+    <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background px-6 pb-10 pt-14">
+      <div className="flex items-center gap-2">
+        <div className="grid size-9 place-items-center rounded-2xl bg-brand/15">
+          <span className="size-2.5 rounded-full bg-brand" />
         </div>
-        <span className="font-display text-[10px] uppercase tracking-[0.25em] text-muted-foreground">v 1.0</span>
-      </header>
+        <span className="font-display text-base font-semibold tracking-tight">{t("app.name")}</span>
+      </div>
 
-      <section className="relative mt-20 flex-1">
-        <p className="font-display text-[10px] uppercase tracking-[0.3em] text-brand">Protocol initialized</p>
-        <h1 className="mt-5 font-display text-[44px] font-bold uppercase leading-[0.95] tracking-tight text-balance">
-          Calibrate your <span className="text-brand">metabolism.</span>
-        </h1>
-        <p className="mt-5 max-w-[36ch] text-pretty text-sm leading-relaxed text-muted-foreground">
-          Precision nutrition and training, built around the way your body actually moves.
-          Set your blueprint in under two minutes.
-        </p>
+      <div className="mt-10">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-balance">{t("lang.title")}</h1>
+        <p className="mt-3 text-sm text-muted-foreground">{t("lang.subtitle")}</p>
+      </div>
 
-        {/* Metric strip */}
-        <div className="mt-10 grid grid-cols-3 gap-3">
-          {[
-            { k: "BMR", v: "MSJ" },
-            { k: "TDEE", v: "5 lvl" },
-            { k: "Macro", v: "P / F / C" },
-          ].map((m) => (
-            <div key={m.k} className="rounded-2xl border border-hairline bg-surface px-3 py-4">
-              <div className="font-display text-[9px] uppercase tracking-widest text-muted-foreground">{m.k}</div>
-              <div className="mt-2 font-display text-sm font-semibold">{m.v}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className="mt-8 space-y-2.5">
+        {LANGUAGES.map((l) => {
+          const selected = lang === l.code;
+          return (
+            <button
+              key={l.code}
+              type="button"
+              onClick={() => setLang(l.code as Language)}
+              className={`flex w-full items-center gap-4 rounded-2xl border bg-card px-4 py-4 text-left transition-all ${
+                selected ? "border-brand/70 ring-2 ring-brand/15" : "border-border hover:border-brand/30"
+              }`}
+            >
+              <span className="text-2xl leading-none" aria-hidden>{l.flag}</span>
+              <div className="flex-1">
+                <div className="font-display text-base font-semibold">{l.native}</div>
+                <div className="text-xs text-muted-foreground">{l.label}</div>
+              </div>
+              <div className={`grid size-6 place-items-center rounded-full transition-colors ${selected ? "bg-brand text-brand-foreground" : "border border-border"}`}>
+                {selected && <Check className="size-3.5" strokeWidth={3} />}
+              </div>
+            </button>
+          );
+        })}
+      </div>
 
-      <footer className="relative mt-10 space-y-3">
-        <Link
-          to="/register"
-          className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-foreground font-display text-sm font-bold uppercase tracking-widest text-background transition-colors hover:bg-brand hover:text-brand-foreground"
-        >
-          Begin assessment
-          <ArrowRight className="size-4" />
-        </Link>
-        <Link
-          to="/login"
-          className="flex h-12 w-full items-center justify-center rounded-2xl border border-hairline bg-surface text-sm font-medium text-foreground"
-        >
-          I already have an account
-        </Link>
-        <p className="pt-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground">
-          By continuing you agree to the protocol terms.
-        </p>
-      </footer>
+      <button
+        onClick={() => navigate({ to: "/intro" })}
+        className="mt-auto mb-2 mt-10 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-display text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+      >
+        {t("lang.continue")}
+        <ArrowRight className="size-4 rtl:rotate-180" />
+      </button>
     </main>
   );
 }
