@@ -73,10 +73,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#050505" },
-      { title: "Apex — Precision health & nutrition" },
-      { name: "description", content: "Precision nutrition, fasting and training protocols. Calibrate your metabolism, hit your targets." },
-      { property: "og:title", content: "Apex — Precision health & nutrition" },
+      { name: "theme-color", content: "#f5f0e8" },
+      { title: "Apex — Calm precision for health & nutrition" },
+      { name: "description", content: "Calm, precise nutrition, fasting and training. Calibrate your metabolism, hit your targets." },
+      { property: "og:title", content: "Apex — Calm precision for health & nutrition" },
       { property: "og:description", content: "Calibrate your metabolism. Hit your targets." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -87,9 +87,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&display=swap",
       },
     ],
+
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -99,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
