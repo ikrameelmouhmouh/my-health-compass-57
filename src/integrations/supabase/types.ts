@@ -27,8 +27,10 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"] | null
           goal: Database["public"]["Enums"]["goal_type"] | null
           goal_weight_kg: number | null
+          health_integration_preference: string | null
           height_cm: number | null
           id: string
+          language: string
           maintenance_calories: number | null
           onboarding_completed: boolean
           protein_g: number | null
@@ -48,8 +50,10 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           goal?: Database["public"]["Enums"]["goal_type"] | null
           goal_weight_kg?: number | null
+          health_integration_preference?: string | null
           height_cm?: number | null
           id: string
+          language?: string
           maintenance_calories?: number | null
           onboarding_completed?: boolean
           protein_g?: number | null
@@ -69,8 +73,10 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           goal?: Database["public"]["Enums"]["goal_type"] | null
           goal_weight_kg?: number | null
+          health_integration_preference?: string | null
           height_cm?: number | null
           id?: string
+          language?: string
           maintenance_calories?: number | null
           onboarding_completed?: boolean
           protein_g?: number | null
