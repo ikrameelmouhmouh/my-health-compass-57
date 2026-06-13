@@ -4,12 +4,13 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useT, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Create your account — Apex" },
-      { name: "description", content: "Create your Apex account to begin your precision health protocol." },
+      { title: "Create your account — Vita" },
+      { name: "description", content: "Create your Vita account to start your personalized health plan." },
     ],
   }),
   component: Register,
@@ -22,6 +23,8 @@ const schema = z.object({
 });
 
 function Register() {
+  const t = useT();
+  const { lang } = useI18n();
   const navigate = useNavigate();
   const [form, setForm] = useState({ displayName: "", email: "", password: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
@@ -41,7 +44,7 @@ function Register() {
     }
     setErrors({});
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: result.data.email,
       password: result.data.password,
       options: {
@@ -49,53 +52,49 @@ function Register() {
         data: { display_name: result.data.displayName },
       },
     });
-    setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    if (error) { setLoading(false); toast.error(error.message); return; }
+
+    // Save chosen language to profile (best-effort)
+    if (data.user) {
+      await supabase.from("profiles").update({ language: lang }).eq("id", data.user.id);
     }
-    toast.success("Account created. Calibrating...");
+    setLoading(false);
     navigate({ to: "/onboarding" });
   }
 
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background px-6 pb-10 pt-10">
-      <Link to="/" className="inline-flex size-10 items-center justify-center rounded-full border border-hairline bg-surface">
-        <ArrowLeft className="size-4" />
+      <Link to="/welcome" className="inline-flex size-10 items-center justify-center rounded-full border border-border bg-card">
+        <ArrowLeft className="size-4 rtl:rotate-180" />
       </Link>
 
       <div className="mt-10">
-        <p className="font-display text-[10px] uppercase tracking-[0.3em] text-brand">Step 01 / 03</p>
-        <h1 className="mt-3 font-display text-4xl font-bold uppercase tracking-tight">
-          Forge your <span className="text-brand">blueprint.</span>
-        </h1>
-        <p className="mt-3 max-w-[40ch] text-sm leading-relaxed text-muted-foreground">
-          Create an account so your protocol travels with you.
-        </p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">{t("auth.register.title")}</h1>
+        <p className="mt-3 text-sm text-muted-foreground">{t("auth.register.subtitle")}</p>
       </div>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-3">
-        <Field label="Display name" error={errors.displayName}>
+        <Field label={t("auth.field.name")} error={errors.displayName}>
           <input
             type="text"
             autoComplete="name"
             value={form.displayName}
             onChange={(e) => setForm({ ...form, displayName: e.target.value })}
-            placeholder="Elias Thorne"
+            placeholder="Alex"
             className="w-full bg-transparent text-base font-medium outline-none placeholder:text-muted-foreground/50"
           />
         </Field>
-        <Field label="Email" error={errors.email}>
+        <Field label={t("auth.field.email")} error={errors.email}>
           <input
             type="email"
             autoComplete="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            placeholder="you@domain.com"
+            placeholder="you@example.com"
             className="w-full bg-transparent text-base font-medium outline-none placeholder:text-muted-foreground/50"
           />
         </Field>
-        <Field label="Password" error={errors.password}>
+        <Field label={t("auth.field.password")} error={errors.password}>
           <input
             type="password"
             autoComplete="new-password"
@@ -109,17 +108,17 @@ function Register() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand font-display text-sm font-bold uppercase tracking-widest text-brand-foreground transition-opacity disabled:opacity-50"
+          className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-display text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-50"
         >
-          {loading ? "Generating..." : "Generate protocol"}
-          <ArrowRight className="size-4" />
+          {loading ? "…" : t("auth.register.cta")}
+          <ArrowRight className="size-4 rtl:rotate-180" />
         </button>
       </form>
 
       <p className="mt-auto pt-8 text-center text-sm text-muted-foreground">
-        Already calibrated?{" "}
+        {t("auth.register.switch")}{" "}
         <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
-          Sign in
+          {t("auth.sign_in")}
         </Link>
       </p>
     </main>
@@ -128,8 +127,8 @@ function Register() {
 
 export function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
-    <div className={`rounded-2xl border bg-surface px-4 py-3 transition-colors ${error ? "border-destructive/60" : "border-hairline focus-within:border-brand/60"}`}>
-      <label className="block font-display text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
+    <div className={`rounded-2xl border bg-card px-4 py-3 transition-colors ${error ? "border-destructive/60" : "border-border focus-within:border-brand/60"}`}>
+      <label className="block font-display text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
         {label}
       </label>
       <div className="mt-1">{children}</div>

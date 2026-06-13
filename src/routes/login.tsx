@@ -5,12 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Field } from "./register";
+import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign in — Apex" },
-      { name: "description", content: "Sign in to your Apex account." },
+      { title: "Sign in — Vita" },
+      { name: "description", content: "Sign in to your Vita account." },
     ],
   }),
   component: Login,
@@ -22,6 +23,7 @@ const schema = z.object({
 });
 
 function Login() {
+  const t = useT();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
@@ -42,39 +44,33 @@ function Login() {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword(result.data);
     setLoading(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
+    if (error) { toast.error(error.message); return; }
     navigate({ to: "/profile" });
   }
 
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background px-6 pb-10 pt-10">
-      <Link to="/" className="inline-flex size-10 items-center justify-center rounded-full border border-hairline bg-surface">
-        <ArrowLeft className="size-4" />
+      <Link to="/welcome" className="inline-flex size-10 items-center justify-center rounded-full border border-border bg-card">
+        <ArrowLeft className="size-4 rtl:rotate-180" />
       </Link>
 
       <div className="mt-10">
-        <p className="font-display text-[10px] uppercase tracking-[0.3em] text-brand">Returning operator</p>
-        <h1 className="mt-3 font-display text-4xl font-bold uppercase tracking-tight">
-          Welcome <span className="text-brand">back.</span>
-        </h1>
-        <p className="mt-3 text-sm text-muted-foreground">Resume your protocol where you left off.</p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight">{t("auth.login.title")}</h1>
+        <p className="mt-3 text-sm text-muted-foreground">{t("auth.login.subtitle")}</p>
       </div>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-3">
-        <Field label="Email" error={errors.email}>
+        <Field label={t("auth.field.email")} error={errors.email}>
           <input
             type="email"
             autoComplete="email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            placeholder="you@domain.com"
+            placeholder="you@example.com"
             className="w-full bg-transparent text-base font-medium outline-none placeholder:text-muted-foreground/50"
           />
         </Field>
-        <Field label="Password" error={errors.password}>
+        <Field label={t("auth.field.password")} error={errors.password}>
           <input
             type="password"
             autoComplete="current-password"
@@ -88,17 +84,17 @@ function Login() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-brand font-display text-sm font-bold uppercase tracking-widest text-brand-foreground disabled:opacity-50"
+          className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-display text-sm font-semibold text-primary-foreground disabled:opacity-50"
         >
-          {loading ? "Authenticating..." : "Engage"}
-          <ArrowRight className="size-4" />
+          {loading ? "…" : t("auth.login.cta")}
+          <ArrowRight className="size-4 rtl:rotate-180" />
         </button>
       </form>
 
       <p className="mt-auto pt-8 text-center text-sm text-muted-foreground">
-        New here?{" "}
+        {t("auth.login.switch")}{" "}
         <Link to="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
-          Create an account
+          {t("auth.create_account")}
         </Link>
       </p>
     </main>
