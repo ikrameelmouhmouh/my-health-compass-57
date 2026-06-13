@@ -1,15 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-export const LANGUAGES = [
+export const LANGUAGES: ReadonlyArray<{ code: string; label: string; native: string; flag: string; rtl?: boolean }> = [
   { code: "en", label: "English", native: "English", flag: "🇬🇧" },
   { code: "nl", label: "Dutch", native: "Nederlands", flag: "🇳🇱" },
   { code: "ar", label: "Arabic", native: "العربية", flag: "🇸🇦", rtl: true },
   { code: "fr", label: "French", native: "Français", flag: "🇫🇷" },
   { code: "de", label: "German", native: "Deutsch", flag: "🇩🇪" },
   { code: "es", label: "Spanish", native: "Español", flag: "🇪🇸" },
-] as const;
+];
 
-export type Language = (typeof LANGUAGES)[number]["code"];
+export type Language = "en" | "nl" | "ar" | "fr" | "de" | "es";
+
 
 type Dict = Record<string, string>;
 type Translations = Record<Language, Dict>;
