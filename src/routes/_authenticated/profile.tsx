@@ -420,19 +420,19 @@ function QuickAction({ icon: Icon, label, onClick }: { icon: React.ElementType; 
   );
 }
 
-function CardShell({ title, icon: Icon, children, action }: { title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode }) {
+function CardShell({ title, icon: Icon, children, action, compact }: { title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; compact?: boolean }) {
   return (
-    <div className="rounded-3xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="grid size-8 place-items-center rounded-xl bg-brand/12">
-            <Icon className="size-4 text-brand" />
+    <div className={`rounded-3xl border border-border bg-card ${compact ? "p-4" : "p-5"}`}>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className={`grid shrink-0 place-items-center rounded-xl bg-brand/12 ${compact ? "size-7" : "size-8"}`}>
+            <Icon className={compact ? "size-3.5 text-brand" : "size-4 text-brand"} />
           </div>
-          <h2 className="font-display text-[13px] font-semibold tracking-tight">{title}</h2>
+          <h2 className="truncate font-display text-[12px] font-semibold tracking-tight sm:text-[13px]">{title}</h2>
         </div>
         {action}
       </div>
-      <div className="mt-4">{children}</div>
+      <div className={compact ? "mt-3" : "mt-4"}>{children}</div>
     </div>
   );
 }
