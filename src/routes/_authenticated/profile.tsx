@@ -470,8 +470,11 @@ function Ring({ pct: p, size = 76, label, sub }: { pct: number; size?: number; l
 }
 
 /* --------------------------------- Cards --------------------------------- */
-function NutritionCard({ consumed, target, remaining, burned, meals, onLogFood }: {
+function NutritionCard({ consumed, target, remaining, burned, meals, onLogFood, protein, carbs, fat }: {
   consumed: number; target: number; remaining: number; burned: number; meals: number; onLogFood: () => void;
+  protein: { have: number; goal: number };
+  carbs: { have: number; goal: number };
+  fat: { have: number; goal: number };
 }) {
   return (
     <CardShell title="Nutrition" icon={Apple} action={
@@ -488,6 +491,11 @@ function NutritionCard({ consumed, target, remaining, burned, meals, onLogFood }
           <StatRow label="Burned" value={`${burned.toLocaleString()} kcal`} muted />
           <StatRow label="Meals" value={`${meals}`} muted />
         </div>
+      </div>
+      <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border/60 pt-4">
+        <MacroBlock label="Protein" {...protein} />
+        <MacroBlock label="Carbs" {...carbs} />
+        <MacroBlock label="Fat" {...fat} />
       </div>
     </CardShell>
   );
