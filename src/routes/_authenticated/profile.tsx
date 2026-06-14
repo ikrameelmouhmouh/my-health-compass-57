@@ -327,17 +327,6 @@ function Profile() {
         </Link>
       </div>
 
-      {/* Quick actions */}
-      <section className="mt-5 grid grid-cols-4 gap-2">
-        <QuickAction icon={Droplet} label="Water" onClick={() => addWater(250)} />
-        <QuickAction icon={UtensilsCrossed} label="Food" onClick={() => setOpenSheet("food")} />
-        <QuickAction icon={Scale} label="Weight" onClick={() => setOpenSheet("weight")} />
-        <QuickAction
-          icon={PlayCircle}
-          label={workout ? "Start" : "Workout"}
-          onClick={() => workout ? update({ workoutCompleted: true }) : setOpenSheet("workout")}
-        />
-      </section>
 
       {/* Cards */}
       <section className="mt-5 space-y-3">
