@@ -175,6 +175,9 @@ function Profile() {
             burned={day.caloriesOut}
             meals={day.meals}
             onLogFood={() => setOpenSheet("food")}
+            protein={{ have: day.protein, goal: proteinTarget }}
+            carbs={{ have: day.carbs, goal: carbsTarget }}
+            fat={{ have: day.fat, goal: fatTarget }}
           />
         );
       case "macros":
