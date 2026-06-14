@@ -522,54 +522,67 @@ function MacroBlock({ label, have, goal }: { label: string; have: number; goal: 
   );
 }
 
-function WaterCard({ ml, goal, onAdd, onOpen }: { ml: number; goal: number; onAdd: (n: number) => void; onOpen: () => void }) {
+function WaterCard({ ml, goal, onAdd, onOpen, compact }: { ml: number; goal: number; onAdd: (n: number) => void; onOpen: () => void; compact?: boolean }) {
   return (
-    <CardShell title="Hydration" icon={Droplet} action={
-      <button onClick={onOpen} className="text-[11px] font-medium text-muted-foreground hover:text-foreground">Details</button>
+    <CardShell title="Hydration" icon={Droplet} compact={compact} action={
+      !compact && (
+        <button onClick={onOpen} className="text-[11px] font-medium text-muted-foreground hover:text-foreground">Details</button>
+      )
     }>
-      <div className="flex items-end justify-between">
-        <div>
-          <div className="font-display text-3xl font-semibold tabular-nums leading-none">{(ml / 1000).toFixed(2)}L</div>
-          <div className="mt-1 text-[11px] text-muted-foreground">of {(goal / 1000).toFixed(1)}L goal · {Math.round(pct(ml, goal))}%</div>
+      <div className="flex items-end justify-between gap-2">
+        <div className="min-w-0">
+          <div className={`font-display font-semibold tabular-nums leading-none ${compact ? "text-2xl" : "text-3xl"}`}>{(ml / 1000).toFixed(2)}<span className="text-base">L</span></div>
+          <div className="mt-1 text-[10px] text-muted-foreground">of {(goal / 1000).toFixed(1)}L · {Math.round(pct(ml, goal))}%</div>
         </div>
-        <div className="flex gap-1.5">
-          <button onClick={() => onAdd(-250)} className="grid size-9 place-items-center rounded-full border border-border bg-background hover:bg-accent"><Minus className="size-4" /></button>
-          <button onClick={() => onAdd(250)} className="grid size-9 place-items-center rounded-full bg-brand text-brand-foreground"><Plus className="size-4" /></button>
+        <div className="flex shrink-0 gap-1">
+          <button onClick={() => onAdd(-250)} className={`grid place-items-center rounded-full border border-border bg-background hover:bg-accent ${compact ? "size-7" : "size-9"}`}><Minus className={compact ? "size-3" : "size-4"} /></button>
+          <button onClick={() => onAdd(250)} className={`grid place-items-center rounded-full bg-brand text-brand-foreground ${compact ? "size-7" : "size-9"}`}><Plus className={compact ? "size-3" : "size-4"} /></button>
         </div>
       </div>
-      <Bar pct={pct(ml, goal)} className="mt-4" />
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        {[250, 500, 750].map((amt) => (
-          <button key={amt} onClick={() => onAdd(amt)} className="rounded-xl border border-border bg-background/50 px-2 py-1.5 text-[11px] font-semibold hover:bg-accent">
-            +{amt}ml
-          </button>
-        ))}
-      </div>
+      <Bar pct={pct(ml, goal)} className={compact ? "mt-3" : "mt-4"} />
+      {!compact && (
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          {[250, 500, 750].map((amt) => (
+            <button key={amt} onClick={() => onAdd(amt)} className="rounded-xl border border-border bg-background/50 px-2 py-1.5 text-[11px] font-semibold hover:bg-accent">
+              +{amt}ml
+            </button>
+          ))}
+        </div>
+      )}
     </CardShell>
   );
 }
 
-function StepsCard({ steps, goal, onChange }: { steps: number; goal: number; onChange: (s: number) => void }) {
+function StepsCard({ steps, goal, onChange, compact }: { steps: number; goal: number; onChange: (s: number) => void; compact?: boolean }) {
   return (
-    <CardShell title="Steps" icon={Footprints} action={
-      <input
-        type="number"
-        value={steps}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
-        className="w-20 rounded-md border border-border bg-background px-2 py-1 text-right text-[11px] font-semibold tabular-nums"
-      />
+    <CardShell title="Steps" icon={Footprints} compact={compact} action={
+      !compact && (
+        <input
+          type="number"
+          value={steps}
+          onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
+          className="w-20 rounded-md border border-border bg-background px-2 py-1 text-right text-[11px] font-semibold tabular-nums"
+        />
+      )
     }>
-      <div className="flex items-end justify-between">
-        <div>
-          <div className="font-display text-3xl font-semibold tabular-nums leading-none">{steps.toLocaleString()}</div>
-          <div className="mt-1 text-[11px] text-muted-foreground">of {goal.toLocaleString()} · {Math.round(pct(steps, goal))}%</div>
+      <div className="flex items-end justify-between gap-2">
+        <div className="min-w-0">
+          <div className={`font-display font-semibold tabular-nums leading-none ${compact ? "text-2xl" : "text-3xl"}`}>{steps.toLocaleString()}</div>
+          <div className="mt-1 text-[10px] text-muted-foreground">of {goal.toLocaleString()} · {Math.round(pct(steps, goal))}%</div>
         </div>
-        <div className="text-right text-[11px] text-muted-foreground">
-          <div>{Math.max(0, goal - steps).toLocaleString()}</div>
-          <div className="text-[10px] uppercase tracking-wider">to go</div>
-        </div>
+        {compact ? (
+          <div className="flex shrink-0 gap-1">
+            <button onClick={() => onChange(Math.max(0, steps - 500))} className="grid size-7 place-items-center rounded-full border border-border bg-background hover:bg-accent"><Minus className="size-3" /></button>
+            <button onClick={() => onChange(steps + 500)} className="grid size-7 place-items-center rounded-full bg-brand text-brand-foreground"><Plus className="size-3" /></button>
+          </div>
+        ) : (
+          <div className="text-right text-[11px] text-muted-foreground">
+            <div>{Math.max(0, goal - steps).toLocaleString()}</div>
+            <div className="text-[10px] uppercase tracking-wider">to go</div>
+          </div>
+        )}
       </div>
-      <Bar pct={pct(steps, goal)} className="mt-4" />
+      <Bar pct={pct(steps, goal)} className={compact ? "mt-3" : "mt-4"} />
     </CardShell>
   );
 }
