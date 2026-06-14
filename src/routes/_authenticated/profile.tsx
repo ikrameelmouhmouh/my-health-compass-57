@@ -564,29 +564,15 @@ function WaterCard({ ml, goal, onAdd, onOpen, compact }: { ml: number; goal: num
   );
 }
 
-function StepsCard({ steps, goal, onChange, compact }: { steps: number; goal: number; onChange: (s: number) => void; compact?: boolean }) {
+function StepsCard({ steps, goal, compact }: { steps: number; goal: number; onChange?: (s: number) => void; compact?: boolean }) {
   return (
-    <CardShell title="Steps" icon={Footprints} compact={compact} action={
-      !compact && (
-        <input
-          type="number"
-          value={steps}
-          onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
-          className="w-20 rounded-md border border-border bg-background px-2 py-1 text-right text-[11px] font-semibold tabular-nums"
-        />
-      )
-    }>
+    <CardShell title="Steps" icon={Footprints} compact={compact}>
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
           <div className={`font-display font-semibold tabular-nums leading-none ${compact ? "text-2xl" : "text-3xl"}`}>{steps.toLocaleString()}</div>
           <div className="mt-1 text-[10px] text-muted-foreground">of {goal.toLocaleString()} · {Math.round(pct(steps, goal))}%</div>
         </div>
-        {compact ? (
-          <div className="flex shrink-0 gap-1">
-            <button onClick={() => onChange(Math.max(0, steps - 500))} className="grid size-7 place-items-center rounded-full border border-border bg-background hover:bg-accent"><Minus className="size-3" /></button>
-            <button onClick={() => onChange(steps + 500)} className="grid size-7 place-items-center rounded-full bg-brand text-brand-foreground"><Plus className="size-3" /></button>
-          </div>
-        ) : (
+        {!compact && (
           <div className="text-right text-[11px] text-muted-foreground">
             <div>{Math.max(0, goal - steps).toLocaleString()}</div>
             <div className="text-[10px] uppercase tracking-wider">to go</div>
@@ -594,6 +580,9 @@ function StepsCard({ steps, goal, onChange, compact }: { steps: number; goal: nu
         )}
       </div>
       <Bar pct={pct(steps, goal)} className={compact ? "mt-3" : "mt-4"} />
+      <div className={`${compact ? "mt-2" : "mt-3"} text-[10px] text-muted-foreground`}>
+        Auto-sync with Apple Health coming soon
+      </div>
     </CardShell>
   );
 }
