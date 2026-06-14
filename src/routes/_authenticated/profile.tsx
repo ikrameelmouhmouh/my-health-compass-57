@@ -338,7 +338,16 @@ function Profile() {
 
       {/* Cards */}
       <section className="mt-5 space-y-3">
-        {visibleCards.map(renderCard)}
+        {rows.map((row, i) =>
+          row.length === 2 ? (
+            <div key={`row-${i}`} className="grid grid-cols-2 gap-3">
+              {renderCard(row[0], true)}
+              {renderCard(row[1], true)}
+            </div>
+          ) : (
+            renderCard(row[0], false)
+          )
+        )}
         {visibleCards.length === 0 && (
           <div className="rounded-3xl border border-dashed border-border bg-card/50 p-8 text-center">
             <p className="text-sm text-muted-foreground">All cards are hidden.</p>
