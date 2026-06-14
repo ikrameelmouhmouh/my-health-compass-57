@@ -621,64 +621,110 @@ function FastingCard({ active, elapsed, remaining, windowHours, pct: p, streak, 
   );
 }
 
-function WeightCard({ current, delta, goal, progress, onLog }: {
-  current: number; delta: number; goal: number; progress: number; onLog: () => void;
+function WeightCard({ current, delta, goal, progress, onLog, compact }: {
+  current: number; delta: number; goal: number; progress: number; onLog: () => void; compact?: boolean;
 }) {
   const deltaColor = delta < 0 ? "text-brand" : delta > 0 ? "text-destructive" : "text-muted-foreground";
   return (
-    <CardShell title="Weight" icon={Scale} action={
-      <button onClick={onLog} className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-[11px] font-semibold text-brand-foreground">
+    <CardShell title="Weight" icon={Scale} compact={compact} action={
+      <button onClick={onLog} className={`inline-flex items-center gap-1 rounded-full bg-brand font-semibold text-brand-foreground ${compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]"}`}>
         <Plus className="size-3" /> Log
       </button>
     }>
-      <div className="flex items-end justify-between">
-        <div>
-          <div className="font-display text-3xl font-semibold tabular-nums leading-none">{current.toFixed(1)}<span className="ml-1 text-sm text-muted-foreground">kg</span></div>
-          <div className={`mt-1 inline-flex items-center gap-1 text-[11px] font-semibold ${deltaColor}`}>
+      {compact ? (
+        <>
+          <div className="font-display text-2xl font-semibold tabular-nums leading-none">
+            {current.toFixed(1)}<span className="ml-0.5 text-sm text-muted-foreground">kg</span>
+          </div>
+          <div className={`mt-1 inline-flex items-center gap-1 text-[10px] font-semibold ${deltaColor}`}>
             <ArrowUpRight className={`size-3 ${delta < 0 ? "rotate-180" : ""}`} />
             {delta === 0 ? "No change" : `${delta > 0 ? "+" : ""}${delta.toFixed(1)} kg`}
           </div>
-        </div>
-        <div className="text-right">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Goal</div>
-          <div className="font-display text-lg font-semibold tabular-nums">{goal.toFixed(1)} kg</div>
-        </div>
-      </div>
-      <Bar pct={progress} className="mt-4" />
-      <div className="mt-2 text-[11px] text-muted-foreground">{Math.round(progress)}% toward goal</div>
+          <Bar pct={progress} className="mt-3" />
+          <div className="mt-1.5 flex items-baseline justify-between text-[10px] text-muted-foreground">
+            <span>{Math.round(progress)}% to goal</span>
+            <span className="font-display font-semibold tabular-nums text-foreground">{goal.toFixed(1)} kg</span>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex items-end justify-between">
+            <div>
+              <div className="font-display text-3xl font-semibold tabular-nums leading-none">{current.toFixed(1)}<span className="ml-1 text-sm text-muted-foreground">kg</span></div>
+              <div className={`mt-1 inline-flex items-center gap-1 text-[11px] font-semibold ${deltaColor}`}>
+                <ArrowUpRight className={`size-3 ${delta < 0 ? "rotate-180" : ""}`} />
+                {delta === 0 ? "No change" : `${delta > 0 ? "+" : ""}${delta.toFixed(1)} kg`}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Goal</div>
+              <div className="font-display text-lg font-semibold tabular-nums">{goal.toFixed(1)} kg</div>
+            </div>
+          </div>
+          <Bar pct={progress} className="mt-4" />
+          <div className="mt-2 text-[11px] text-muted-foreground">{Math.round(progress)}% toward goal</div>
+        </>
+      )}
     </CardShell>
   );
 }
 
-function ActivityCard({ burned, activeMin, onChange }: { burned: number; activeMin: number; onChange: (b: number, m: number) => void }) {
+function ActivityCard({ burned, activeMin, onChange, compact }: { burned: number; activeMin: number; onChange: (b: number, m: number) => void; compact?: boolean }) {
+  const goalKcal = 500;
+  const p = pct(burned, goalKcal);
   return (
-    <CardShell title="Activity" icon={Flame}>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Burned</div>
-          <div className="mt-1 flex items-baseline gap-1">
+    <CardShell title="Activity" icon={Flame} compact={compact}>
+      {compact ? (
+        <>
+          <div className="flex items-baseline gap-1">
             <input
               type="number"
               value={burned}
               onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0), activeMin)}
-              className="w-16 bg-transparent font-display text-xl font-semibold tabular-nums outline-none"
+              className="w-14 bg-transparent font-display text-2xl font-semibold tabular-nums leading-none outline-none"
             />
-            <span className="text-[10px] text-muted-foreground">kcal</span>
+            <span className="text-[11px] text-muted-foreground">kcal</span>
           </div>
-        </div>
-        <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Active</div>
-          <div className="mt-1 flex items-baseline gap-1">
+          <div className="mt-1 text-[10px] text-muted-foreground">
             <input
               type="number"
               value={activeMin}
               onChange={(e) => onChange(burned, Math.max(0, Number(e.target.value) || 0))}
-              className="w-16 bg-transparent font-display text-xl font-semibold tabular-nums outline-none"
+              className="w-8 bg-transparent text-[10px] font-semibold tabular-nums text-foreground outline-none"
             />
-            <span className="text-[10px] text-muted-foreground">min</span>
+            <span> active min</span>
+          </div>
+          <Bar pct={p} className="mt-3" />
+          <div className="mt-1.5 text-[10px] text-muted-foreground">{Math.round(p)}% of {goalKcal} kcal</div>
+        </>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Burned</div>
+            <div className="mt-1 flex items-baseline gap-1">
+              <input
+                type="number"
+                value={burned}
+                onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0), activeMin)}
+                className="w-16 bg-transparent font-display text-xl font-semibold tabular-nums outline-none"
+              />
+              <span className="text-[10px] text-muted-foreground">kcal</span>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Active</div>
+            <div className="mt-1 flex items-baseline gap-1">
+              <input
+                type="number"
+                value={activeMin}
+                onChange={(e) => onChange(burned, Math.max(0, Number(e.target.value) || 0))}
+                className="w-16 bg-transparent font-display text-xl font-semibold tabular-nums outline-none"
+              />
+              <span className="text-[10px] text-muted-foreground">min</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </CardShell>
   );
 }
