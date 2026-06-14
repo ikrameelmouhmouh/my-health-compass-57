@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { BottomNav } from "@/components/bottom-nav";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
@@ -23,5 +24,10 @@ function AuthenticatedLayout() {
       </div>
     );
   }
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <BottomNav />
+    </>
+  );
 }
