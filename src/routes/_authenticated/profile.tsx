@@ -272,7 +272,7 @@ function Profile() {
   }
 
   return (
-    <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-24 pt-8">
+    <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
       {/* Header */}
       <header className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
