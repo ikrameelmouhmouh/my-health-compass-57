@@ -3,9 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Check, Apple, Activity, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, AlertTriangle } from "lucide-react";
 import {
-  ACTIVITY_OPTIONS,
   calculateMacros,
   type ActivityLevel,
   type Gender,
@@ -18,8 +17,6 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   component: Onboarding,
 });
 
-type HealthPref = "apple_health" | "google_fit" | "both" | "skipped";
-
 interface State {
   gender: Gender | null;
   age: number;
@@ -30,7 +27,6 @@ interface State {
   weeklyChangeKg: number;
   activityLevel: ActivityLevel | null;
   workoutFrequency: number;
-  healthPref: HealthPref | null;
 }
 
 const initialState: State = {
@@ -43,10 +39,9 @@ const initialState: State = {
   weeklyChangeKg: 0.5,
   activityLevel: null,
   workoutFrequency: 3,
-  healthPref: null,
 };
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 9;
 
 function Onboarding() {
   const t = useT();
@@ -71,15 +66,14 @@ function Onboarding() {
   const canContinue = useMemo(() => {
     switch (step) {
       case 0: return !!state.gender;
-      case 1: return state.age > 10 && state.age < 110;
-      case 2: return state.heightCm > 100 && state.heightCm < 250;
-      case 3: return state.currentWeightKg > 30 && state.currentWeightKg < 300;
-      case 4: return state.goalWeightKg > 30 && state.goalWeightKg < 300;
+      case 1: return state.age >= 13 && state.age <= 100;
+      case 2: return state.heightCm >= 120 && state.heightCm <= 230;
+      case 3: return state.currentWeightKg >= 35 && state.currentWeightKg <= 250;
+      case 4: return state.goalWeightKg >= 35 && state.goalWeightKg <= 250;
       case 5: return !!state.goal;
       case 6: return state.goal === "maintain" || (state.weeklyChangeKg > 0 && state.weeklyChangeKg <= 1.0);
       case 7: return !!state.activityLevel;
       case 8: return state.workoutFrequency >= 0 && state.workoutFrequency <= 14;
-      case 9: return !!state.healthPref;
       default: return true;
     }
   }, [step, state]);
@@ -113,7 +107,6 @@ function Onboarding() {
         protein_g: macros.proteinG,
         fat_g: macros.fatG,
         carbs_g: macros.carbsG,
-        health_integration_preference: state.healthPref,
         onboarding_completed: true,
       })
       .eq("id", user.id);
@@ -145,13 +138,25 @@ function Onboarding() {
         {step === 0 && <StepGender value={state.gender} onChange={(v) => setState({ ...state, gender: v })} />}
         {step === 1 && <StepNumber title={t("onb.age.title")} subtitle={t("onb.age.subtitle")} unit={t("onb.age.unit")} min={13} max={100} value={state.age} step={1} onChange={(v) => setState({ ...state, age: v })} />}
         {step === 2 && <StepNumber title={t("onb.height.title")} subtitle={t("onb.height.subtitle")} unit={t("onb.height.unit")} min={120} max={230} value={state.heightCm} step={1} onChange={(v) => setState({ ...state, heightCm: v })} />}
-        {step === 3 && <StepNumber title={t("onb.weight.title")} subtitle={t("onb.weight.subtitle")} unit={t("onb.weight.unit")} min={35} max={250} value={state.currentWeightKg} step={0.5} fractional onChange={(v) => setState({ ...state, currentWeightKg: v })} />}
-        {step === 4 && <StepNumber title={t("onb.goalweight.title")} subtitle={t("onb.goalweight.subtitle")} unit={t("onb.weight.unit")} min={35} max={250} value={state.goalWeightKg} step={0.5} fractional onChange={(v) => setState({ ...state, goalWeightKg: v })} />}
+        {step === 3 && <StepNumber title={t("onb.weight.title")} subtitle={t("onb.weight.subtitle")} unit={t("onb.weight.unit")} min={35} max={250} value={state.currentWeightKg} step={0.1} fractional onChange={(v) => setState({ ...state, currentWeightKg: v })} />}
+        {step === 4 && (
+          <StepNumber
+            title={t("onb.goalweight.title")}
+            subtitle={t("onb.goalweight.subtitle")}
+            unit={t("onb.weight.unit")}
+            min={35}
+            max={250}
+            value={state.goalWeightKg}
+            step={0.1}
+            fractional
+            onChange={(v) => setState({ ...state, goalWeightKg: v })}
+            warning={goalWeightWarning(state.goalWeightKg, state.heightCm, t)}
+          />
+        )}
         {step === 5 && <StepGoal value={state.goal} onChange={(v) => setState({ ...state, goal: v })} />}
         {step === 6 && <StepPace goal={state.goal} value={state.weeklyChangeKg} onChange={(v) => setState({ ...state, weeklyChangeKg: v })} />}
         {step === 7 && <StepActivity value={state.activityLevel} onChange={(v) => setState({ ...state, activityLevel: v })} />}
         {step === 8 && <StepNumber title={t("onb.training.title")} subtitle={t("onb.training.subtitle")} unit={t("onb.training.unit")} min={0} max={14} value={state.workoutFrequency} step={1} onChange={(v) => setState({ ...state, workoutFrequency: v })} />}
-        {step === 9 && <StepHealth value={state.healthPref} onChange={(v) => setState({ ...state, healthPref: v })} />}
       </div>
 
       <button
@@ -164,6 +169,15 @@ function Onboarding() {
       </button>
     </main>
   );
+}
+
+function goalWeightWarning(goalKg: number, heightCm: number, t: (k: string) => string): string | null {
+  if (!heightCm || heightCm < 100) return null;
+  const m = heightCm / 100;
+  const bmi = goalKg / (m * m);
+  if (bmi < 18.5) return t("onb.goalweight.warn_low");
+  if (bmi > 27.5) return t("onb.goalweight.warn_high");
+  return null;
 }
 
 /* ---------- Step components ---------- */
@@ -179,6 +193,7 @@ function StepHeader({ title, subtitle }: { title: string; subtitle: string }) {
 
 function StepGender({ value, onChange }: { value: Gender | null; onChange: (v: Gender) => void }) {
   const t = useT();
+  // Keep DB enum values (male/female/other) but relabel "other" as Prefer not to say.
   const options: { v: Gender; label: string }[] = [
     { v: "male",   label: t("onb.gender.male") },
     { v: "female", label: t("onb.gender.female") },
@@ -194,6 +209,9 @@ function StepGender({ value, onChange }: { value: Gender | null; onChange: (v: G
           </OptionCard>
         ))}
       </div>
+      <p className="mt-6 text-xs leading-relaxed text-muted-foreground">
+        {t("onb.gender.helper")}
+      </p>
     </>
   );
 }
@@ -263,16 +281,23 @@ function StepPace({ goal, value, onChange }: { goal: Goal | null; value: number;
 
 function StepActivity({ value, onChange }: { value: ActivityLevel | null; onChange: (v: ActivityLevel) => void }) {
   const t = useT();
+  const options: { v: ActivityLevel; label: string; desc: string }[] = [
+    { v: "sedentary",   label: t("onb.activity.sedentary"),   desc: t("onb.activity.sedentary_desc") },
+    { v: "light",       label: t("onb.activity.light"),       desc: t("onb.activity.light_desc") },
+    { v: "moderate",    label: t("onb.activity.moderate"),    desc: t("onb.activity.moderate_desc") },
+    { v: "very_active", label: t("onb.activity.very_active"), desc: t("onb.activity.very_active_desc") },
+    { v: "athlete",     label: t("onb.activity.athlete"),     desc: t("onb.activity.athlete_desc") },
+  ];
   return (
     <>
       <StepHeader title={t("onb.activity.title")} subtitle={t("onb.activity.subtitle")} />
       <div className="mt-8 grid gap-3">
-        {ACTIVITY_OPTIONS.map((o) => (
-          <OptionCard key={o.value} selected={value === o.value} onClick={() => onChange(o.value)}>
+        {options.map((o) => (
+          <OptionCard key={o.v} selected={value === o.v} onClick={() => onChange(o.v)}>
             <div className="flex w-full items-center justify-between gap-3 text-left">
               <div>
                 <div className="font-display text-sm font-semibold">{o.label}</div>
-                <div className="text-xs text-muted-foreground">{o.description}</div>
+                <div className="text-xs text-muted-foreground">{o.desc}</div>
               </div>
             </div>
           </OptionCard>
@@ -283,66 +308,61 @@ function StepActivity({ value, onChange }: { value: ActivityLevel | null; onChan
 }
 
 function StepNumber({
-  title, subtitle, unit, min, max, step = 1, value, onChange, fractional = false,
+  title, subtitle, unit, min, max, step = 1, value, onChange, fractional = false, warning,
 }: {
   title: string; subtitle: string; unit: string;
   min: number; max: number; step?: number; value: number;
   fractional?: boolean;
   onChange: (v: number) => void;
+  warning?: string | null;
 }) {
+  const t = useT();
+  const [text, setText] = useState<string>(fractional ? value.toFixed(1) : String(value));
+
+  useEffect(() => {
+    setText(fractional ? value.toFixed(1) : String(value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  function commit(raw: string) {
+    const normalized = raw.replace(",", ".");
+    const n = Number(normalized);
+    if (!Number.isFinite(n)) return;
+    const clamped = Math.min(max, Math.max(min, n));
+    const rounded = fractional ? Math.round(clamped * 10) / 10 : Math.round(clamped);
+    onChange(rounded);
+    setText(fractional ? rounded.toFixed(1) : String(rounded));
+  }
+
   return (
     <>
       <StepHeader title={title} subtitle={subtitle} />
-      <div className="mt-12 text-center">
-        <div className="inline-flex items-baseline gap-3">
-          <span className="font-display text-7xl font-semibold tabular-nums tracking-tighter">
-            {fractional ? value.toFixed(1) : value}
-          </span>
+      <div className="mt-10">
+        <div className="flex items-baseline justify-center gap-3 rounded-3xl border border-border bg-card px-6 py-8">
+          <input
+            type="text"
+            inputMode="decimal"
+            value={text}
+            placeholder={t("onb.input.placeholder")}
+            onChange={(e) => setText(e.target.value)}
+            onBlur={(e) => commit(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+            }}
+            className="w-[7ch] bg-transparent text-center font-display text-6xl font-semibold tabular-nums tracking-tighter outline-none placeholder:text-muted-foreground/40"
+          />
           <span className="font-display text-base font-medium text-muted-foreground">{unit}</span>
         </div>
-      </div>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="mt-10 w-full accent-[var(--brand)]"
-      />
-      <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
-        <span>{min}</span>
-        <span>{max}</span>
-      </div>
-    </>
-  );
-}
-
-function StepHealth({ value, onChange }: { value: HealthPref | null; onChange: (v: HealthPref) => void }) {
-  const t = useT();
-  const options: { v: HealthPref; icon: React.ElementType; label: string; desc: string }[] = [
-    { v: "apple_health", icon: Apple,    label: t("onb.health.apple"),  desc: t("onb.health.apple_desc") },
-    { v: "google_fit",   icon: Activity, label: t("onb.health.google"), desc: t("onb.health.google_desc") },
-    { v: "both",         icon: Check,    label: t("onb.health.both"),   desc: t("onb.health.both_desc") },
-    { v: "skipped",      icon: X,        label: t("onb.health.skip"),   desc: t("onb.health.skip_desc") },
-  ];
-  return (
-    <>
-      <StepHeader title={t("onb.health.title")} subtitle={t("onb.health.subtitle")} />
-      <div className="mt-8 grid gap-3">
-        {options.map((o) => (
-          <OptionCard key={o.v} selected={value === o.v} onClick={() => onChange(o.v)}>
-            <div className="flex w-full items-center gap-3 text-left">
-              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand/15">
-                <o.icon className="size-4 text-brand" />
-              </div>
-              <div className="flex-1">
-                <div className="font-display text-sm font-semibold">{o.label}</div>
-                <div className="text-xs text-muted-foreground">{o.desc}</div>
-              </div>
-            </div>
-          </OptionCard>
-        ))}
+        <div className="mt-3 flex items-center justify-between px-2 text-[11px] text-muted-foreground">
+          <span>{min}</span>
+          <span>{max}</span>
+        </div>
+        {warning && (
+          <div className="mt-5 flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-700 dark:text-amber-300">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <p className="text-xs leading-relaxed">{warning}</p>
+          </div>
+        )}
       </div>
     </>
   );
