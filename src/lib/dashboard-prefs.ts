@@ -13,15 +13,17 @@ export type DashCardId =
 
 export const DEFAULT_ORDER: DashCardId[] = [
   "nutrition",
-  "macros",
   "fasting",
   "workout",
   "water",
   "steps",
   "activity",
   "weight",
+  "macros",
   "goals",
 ];
+
+export const DEFAULT_HIDDEN: DashCardId[] = ["macros"];
 
 export const CARD_LABELS: Record<DashCardId, string> = {
   nutrition: "Nutrition",
@@ -37,20 +39,19 @@ export const CARD_LABELS: Record<DashCardId, string> = {
 
 type Prefs = { order: DashCardId[]; hidden: DashCardId[] };
 
-const KEY = "vita.dashboard.prefs.v1";
+const KEY = "vita.dashboard.prefs.v2";
 
 function load(): Prefs {
-  if (typeof window === "undefined") return { order: DEFAULT_ORDER, hidden: [] };
+  if (typeof window === "undefined") return { order: DEFAULT_ORDER, hidden: DEFAULT_HIDDEN };
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return { order: DEFAULT_ORDER, hidden: [] };
+    if (!raw) return { order: DEFAULT_ORDER, hidden: DEFAULT_HIDDEN };
     const p = JSON.parse(raw) as Prefs;
-    // merge any new cards added since persisted prefs
     const order = [...p.order.filter((c) => DEFAULT_ORDER.includes(c))];
     for (const c of DEFAULT_ORDER) if (!order.includes(c)) order.push(c);
     return { order, hidden: p.hidden?.filter((c) => DEFAULT_ORDER.includes(c)) ?? [] };
   } catch {
-    return { order: DEFAULT_ORDER, hidden: [] };
+    return { order: DEFAULT_ORDER, hidden: DEFAULT_HIDDEN };
   }
 }
 
@@ -79,7 +80,7 @@ export function useDashboardPrefs() {
     }));
   }, []);
 
-  const reset = useCallback(() => setPrefs({ order: DEFAULT_ORDER, hidden: [] }), []);
+  const reset = useCallback(() => setPrefs({ order: DEFAULT_ORDER, hidden: DEFAULT_HIDDEN }), []);
 
   return { prefs, move, toggle, reset };
 }
