@@ -13,15 +13,17 @@ export type DashCardId =
 
 export const DEFAULT_ORDER: DashCardId[] = [
   "nutrition",
-  "macros",
   "fasting",
   "workout",
   "water",
   "steps",
   "activity",
   "weight",
+  "macros",
   "goals",
 ];
+
+export const DEFAULT_HIDDEN: DashCardId[] = ["macros"];
 
 export const CARD_LABELS: Record<DashCardId, string> = {
   nutrition: "Nutrition",
