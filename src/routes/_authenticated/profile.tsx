@@ -144,7 +144,26 @@ function Profile() {
 
   const visibleCards = prefs.order.filter((c) => !prefs.hidden.includes(c));
 
-  function renderCard(id: DashCardId) {
+  // Group adjacent visible cards into side-by-side pairs.
+  const PAIRS: Array<[DashCardId, DashCardId]> = [
+    ["water", "steps"],
+    ["activity", "weight"],
+  ];
+  const isPair = (a: DashCardId, b: DashCardId) =>
+    PAIRS.some(([x, y]) => (a === x && b === y) || (a === y && b === x));
+  const rows: DashCardId[][] = [];
+  for (let i = 0; i < visibleCards.length; i++) {
+    const cur = visibleCards[i];
+    const nxt = visibleCards[i + 1];
+    if (nxt && isPair(cur, nxt)) {
+      rows.push([cur, nxt]);
+      i++;
+    } else {
+      rows.push([cur]);
+    }
+  }
+
+  function renderCard(id: DashCardId, compact = false) {
     switch (id) {
       case "nutrition":
         return (
@@ -171,6 +190,7 @@ function Profile() {
         return (
           <WaterCard
             key={id}
+            compact={compact}
             ml={day.waterMl}
             goal={WATER_GOAL_ML}
             onAdd={(amt) => addWater(amt)}
@@ -181,6 +201,7 @@ function Profile() {
         return (
           <StepsCard
             key={id}
+            compact={compact}
             steps={day.steps}
             goal={STEP_GOAL}
             onChange={(s) => update({ steps: s })}
@@ -204,6 +225,7 @@ function Profile() {
         return (
           <WeightCard
             key={id}
+            compact={compact}
             current={currentWeight}
             delta={weightDelta}
             goal={goalWeight}
@@ -215,6 +237,7 @@ function Profile() {
         return (
           <ActivityCard
             key={id}
+            compact={compact}
             burned={day.caloriesOut}
             activeMin={day.activeMin}
             onChange={(b, m) => update({ caloriesOut: b, activeMin: m })}
