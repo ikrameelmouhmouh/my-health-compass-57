@@ -61,11 +61,16 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <Label className="text-sm font-semibold">Oefeningen ({exercises.length})</Label>
-            <Button type="button" size="sm" variant="outline" onClick={() => setCoachOpen(true)}>
-              <Sparkles className="mr-1 size-3.5" /> AI Coach
-            </Button>
+            <div className="flex gap-1.5">
+              <Button type="button" size="sm" variant="outline" onClick={() => setLibOpen(true)}>
+                <BookOpen className="mr-1 size-3.5" /> Bibliotheek
+              </Button>
+              <Button type="button" size="sm" variant="outline" onClick={() => setCoachOpen(true)}>
+                <Sparkles className="mr-1 size-3.5" /> AI Coach
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-2">
