@@ -25,7 +25,10 @@ function FitnessPage() {
       <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
         <Header />
         {!stored && !showWizard ? (
-          <EmptyState onStart={() => setShowWizard(true)} />
+          <>
+            <EmptyState onStart={() => setShowWizard(true)} />
+            <TemplatesSection />
+          </>
         ) : (
           <div className="mt-6">
             <WorkoutWizard
