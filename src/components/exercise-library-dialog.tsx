@@ -155,6 +155,8 @@ function DetailView({
   ex, onBack, onPick, pickLabel,
 }: { ex: LibraryExercise; onBack: () => void; onPick?: () => void; pickLabel: string }) {
   const [tab, setTab] = useState<"about" | "guide">("about");
+  const [zoom, setZoom] = useState(false);
+  const frames = getExerciseFrames(ex);
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border px-3 py-3">
@@ -169,9 +171,20 @@ function DetailView({
         <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight">{ex.name}</h2>
         <p className="text-sm text-muted-foreground">{ex.equipment}</p>
 
-        <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-muted/40">
-          <img src={ex.image} alt={ex.name} className="aspect-square w-full object-cover" />
-        </div>
+        <button
+          type="button"
+          onClick={() => setZoom(true)}
+          className="group relative mt-4 block w-full overflow-hidden rounded-2xl border border-border bg-muted/40"
+          aria-label="Vergroot voorbeeld"
+        >
+          <AnimatedFrames frames={frames} alt={ex.name} className="aspect-square w-full object-cover" />
+          <span className="pointer-events-none absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">
+            <Play className="size-3 fill-white" /> Demo
+          </span>
+          <span className="pointer-events-none absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-black/55 text-white backdrop-blur">
+            <Maximize2 className="size-4" />
+          </span>
+        </button>
 
         <div className="mt-5 grid grid-cols-2 border-b border-border">
           {(["about", "guide"] as const).map((t) => (
