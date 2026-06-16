@@ -139,6 +139,16 @@ function Profile() {
     return () => clearInterval(id);
   }, [fasting.startedAt]);
 
+  if (isLoading || !p?.onboarding_completed) {
+    return (
+      <div className="grid min-h-[100dvh] place-items-center bg-background">
+        <div className="size-6 animate-spin rounded-full border-2 border-border border-t-brand" />
+      </div>
+    );
+  }
+
+
+
   async function changeLanguage(code: Language) {
     setLang(code);
     if (user) {
