@@ -120,6 +120,14 @@
 
   --brand: oklch(0.78 0.07 140);
   --brand-foreground: oklch(0.18 0.012 140);
+
+  /* cheerful module accents (dark — lighter chroma) */
+  --mod-home: oklch(0.78 0.13 18);
+  --mod-nutrition: oklch(0.80 0.13 55);
+  --mod-fasting: oklch(0.76 0.12 295);
+  --mod-fitness: oklch(0.78 0.10 150);
+  --mod-progress: oklch(0.76 0.11 240);
+  --mod-ai: oklch(0.84 0.13 85);
 }
 
 @layer base {
