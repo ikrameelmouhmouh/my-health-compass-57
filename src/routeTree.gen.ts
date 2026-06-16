@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedWeightRouteImport } from './routes/_authenticated/weight'
 import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated/social'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedPricingRouteImport } from './routes/_authenticated/pricing'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNutritionRouteImport } from './routes/_authenticated/nutrition'
 import { Route as AuthenticatedFitnessRouteImport } from './routes/_authenticated/fitness'
@@ -70,6 +71,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPricingRoute = AuthenticatedPricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/fitness': typeof AuthenticatedFitnessRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/pricing': typeof AuthenticatedPricingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/fitness': typeof AuthenticatedFitnessRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/pricing': typeof AuthenticatedPricingRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/_authenticated/fitness': typeof AuthenticatedFitnessRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/pricing': typeof AuthenticatedPricingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/social': typeof AuthenticatedSocialRoute
   '/_authenticated/weight': typeof AuthenticatedWeightRoute
@@ -174,6 +183,7 @@ export interface FileRouteTypes {
     | '/fitness'
     | '/nutrition'
     | '/onboarding'
+    | '/pricing'
     | '/profile'
     | '/social'
     | '/weight'
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
     | '/fitness'
     | '/nutrition'
     | '/onboarding'
+    | '/pricing'
     | '/profile'
     | '/social'
     | '/weight'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/_authenticated/fitness'
     | '/_authenticated/nutrition'
     | '/_authenticated/onboarding'
+    | '/_authenticated/pricing'
     | '/_authenticated/profile'
     | '/_authenticated/social'
     | '/_authenticated/weight'
@@ -292,6 +304,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/pricing': {
+      id: '/_authenticated/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof AuthenticatedPricingRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -350,6 +369,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedFitnessRoute: typeof AuthenticatedFitnessRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPricingRoute: typeof AuthenticatedPricingRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSocialRoute: typeof AuthenticatedSocialRoute
   AuthenticatedWeightRoute: typeof AuthenticatedWeightRoute
@@ -361,6 +381,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedFitnessRoute: AuthenticatedFitnessRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPricingRoute: AuthenticatedPricingRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSocialRoute: AuthenticatedSocialRoute,
   AuthenticatedWeightRoute: AuthenticatedWeightRoute,
