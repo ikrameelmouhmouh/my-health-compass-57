@@ -23,7 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   useDashboardPrefs, useDayLog, useWeightLog, useTodayWorkout, useFasting,
-  CARD_LABELS, type DashCardId,
+  useCaloriePrefs, calcCalorieBudget,
+  CARD_LABELS, type DashCardId, type CalorieBudget, type CalorieMode,
 } from "@/lib/dashboard-prefs";
 
 export const Route = createFileRoute("/_authenticated/profile")({
