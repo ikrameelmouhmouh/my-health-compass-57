@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, UtensilsCrossed, Dumbbell, TrendingUp, Sparkles, Users } from "lucide-react";
+import { Home, UtensilsCrossed, Dumbbell, TrendingUp, Users } from "lucide-react";
 
 const items = [
   { to: "/profile", label: "Home", icon: Home },
@@ -7,7 +7,6 @@ const items = [
   { to: "/fitness", label: "Workouts", icon: Dumbbell },
   { to: "/social", label: "Sociaal", icon: Users },
   { to: "/weight", label: "Progress", icon: TrendingUp },
-  { to: "/ai-coach", label: "AI", icon: Sparkles },
 ] as const;
 
 export function BottomNav() {
