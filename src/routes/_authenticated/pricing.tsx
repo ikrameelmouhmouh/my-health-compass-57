@@ -193,8 +193,7 @@ function PricingPage() {
               {loading ? <Loader2 className="size-4 animate-spin" /> : "Start 7 dagen gratis trial"}
             </Button>
             <p className="text-[11px] text-center text-muted-foreground">
-              Geen kosten tijdens de trial. Eenvoudig opzegbaar. Door verder te gaan ga je akkoord met onze{" "}
-              <Link to="/privacy" className="underline">privacy policy</Link>.
+              Geen kosten tijdens de trial. Eenvoudig opzegbaar via Beheer abonnement.
             </p>
           </>
         )}
