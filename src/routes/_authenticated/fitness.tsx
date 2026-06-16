@@ -216,7 +216,9 @@ function Dashboard({
         })}
       </div>
 
+      <LibrarySection />
       <TemplatesSection />
+
 
       {/* Progression notes */}
       {plan.progressionNotes && (
