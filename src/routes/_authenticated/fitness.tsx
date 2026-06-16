@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight } from "lucide-react";
+import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { WorkoutWizard } from "@/components/workout-wizard";
@@ -13,19 +13,34 @@ export const Route = createFileRoute("/_authenticated/fitness")({
   component: FitnessPage,
 });
 
+type View = "gym" | "activities";
+
+
 const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 function FitnessPage() {
   const { stored, loaded, save, clear, toggleCompleted } = useWorkoutPlan();
   const [showWizard, setShowWizard] = useState(false);
   const [openDay, setOpenDay] = useState<string | null>(null);
+  const [view, setView] = useState<View>("gym");
 
   if (!loaded) return <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10" />;
+
+  if (view === "activities") {
+    return (
+      <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
+        <Header />
+        <ViewTabs view={view} setView={setView} />
+        <ActivitiesSection />
+      </main>
+    );
+  }
 
   if (!stored || showWizard) {
     return (
       <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
         <Header />
+        <ViewTabs view={view} setView={setView} />
         {!stored && !showWizard ? (
           <>
             <EmptyState onStart={() => setShowWizard(true)} />
@@ -52,8 +67,34 @@ function FitnessPage() {
     toggleCompleted={toggleCompleted}
     openDay={openDay}
     setOpenDay={setOpenDay}
+    view={view}
+    setView={setView}
   />;
 }
+
+function ViewTabs({ view, setView }: { view: View; setView: (v: View) => void }) {
+  const tabs: { id: View; label: string; icon: typeof Dumbbell }[] = [
+    { id: "gym", label: "Gym", icon: Dumbbell },
+    { id: "activities", label: "Workouts", icon: Activity },
+  ];
+  return (
+    <div className="mt-5 grid grid-cols-2 gap-1 rounded-2xl border border-border bg-card/50 p-1">
+      {tabs.map((t) => {
+        const active = view === t.id;
+        return (
+          <button
+            key={t.id}
+            onClick={() => setView(t.id)}
+            className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${active ? "bg-brand text-white shadow" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <t.icon className="size-4" /> {t.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 
 function Header() {
   return (
@@ -94,7 +135,7 @@ function EmptyState({ onStart }: { onStart: () => void }) {
 }
 
 function Dashboard({
-  stored, onRegenerate, onClear, toggleCompleted, openDay, setOpenDay,
+  stored, onRegenerate, onClear, toggleCompleted, openDay, setOpenDay, view, setView,
 }: {
   stored: ReturnType<typeof useWorkoutPlan>["stored"];
   onRegenerate: () => void;
@@ -102,7 +143,10 @@ function Dashboard({
   toggleCompleted: (d: string) => void;
   openDay: string | null;
   setOpenDay: (d: string | null) => void;
+  view: View;
+  setView: (v: View) => void;
 }) {
+
   const plan = stored?.plan;
   const completedDays = stored?.completedDays ?? [];
   const wizard = stored?.wizard;
@@ -136,6 +180,9 @@ function Dashboard({
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
       <Header />
+      <ViewTabs view={view} setView={setView} />
+
+
 
       {/* Program summary card */}
       <div className="mt-6 rounded-3xl border border-border bg-gradient-to-br from-brand/15 to-card p-5">
@@ -372,6 +419,68 @@ function LibrarySection() {
       </button>
 
       <ExerciseLibraryDialog open={open} onClose={() => setOpen(false)} />
+    </section>
+  );
+}
+
+type ActivityItem = {
+  id: string;
+  name: string;
+  desc: string;
+  icon: typeof Activity;
+  kcalPerHour: number;
+  category: "Cardio" | "Buiten" | "Sport" | "Wellness";
+};
+
+const ACTIVITIES: ActivityItem[] = [
+  { id: "swim", name: "Zwemmen", desc: "Volledig lichaam, gewrichtsvriendelijk", icon: Waves, kcalPerHour: 500, category: "Cardio" },
+  { id: "bike", name: "Fietsen", desc: "Buiten fietsen of toer", icon: Bike, kcalPerHour: 450, category: "Buiten" },
+  { id: "run-outdoor", name: "Buiten hardlopen", desc: "Joggen of duurloop", icon: Footprints, kcalPerHour: 600, category: "Buiten" },
+  { id: "walk", name: "Wandelen", desc: "Stevige wandeling in de natuur", icon: Trees, kcalPerHour: 250, category: "Buiten" },
+  { id: "hike", name: "Hiken", desc: "Wandeling in heuvels of bergen", icon: Mountain, kcalPerHour: 400, category: "Buiten" },
+  { id: "football", name: "Voetballen", desc: "Wedstrijd of training", icon: Activity, kcalPerHour: 550, category: "Sport" },
+  { id: "basketball", name: "Basketbal", desc: "Pick-up game of training", icon: Activity, kcalPerHour: 500, category: "Sport" },
+  { id: "tennis", name: "Tennis", desc: "Singles of dubbel", icon: Activity, kcalPerHour: 450, category: "Sport" },
+  { id: "padel", name: "Padel", desc: "Wedstrijd of recreatief", icon: Activity, kcalPerHour: 420, category: "Sport" },
+  { id: "boxing", name: "Boksen", desc: "Bagwork of sparring", icon: Activity, kcalPerHour: 650, category: "Sport" },
+  { id: "yoga", name: "Yoga", desc: "Flow of restorative", icon: HeartPulse, kcalPerHour: 250, category: "Wellness" },
+  { id: "hiit", name: "HIIT", desc: "Korte explosieve intervallen", icon: Activity, kcalPerHour: 700, category: "Cardio" },
+];
+
+function ActivitiesSection() {
+  const categories = ["Cardio", "Buiten", "Sport", "Wellness"] as const;
+  return (
+    <section className="mt-6 space-y-6">
+      <div>
+        <h2 className="font-display text-xl font-semibold tracking-tight">Workouts & activiteiten</h2>
+        <p className="mt-1 text-xs text-muted-foreground">Naast gym — zwemmen, fietsen, hardlopen, sporten en meer.</p>
+      </div>
+      {categories.map((cat) => {
+        const items = ACTIVITIES.filter((a) => a.category === cat);
+        if (items.length === 0) return null;
+        return (
+          <div key={cat}>
+            <h3 className="mb-2 text-sm font-semibold">{cat}</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {items.map((a) => (
+                <button
+                  key={a.id}
+                  className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-card/50 p-3 text-left transition hover:bg-card"
+                >
+                  <div className="grid size-10 place-items-center rounded-xl bg-brand/15 text-brand">
+                    <a.icon className="size-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{a.name}</p>
+                    <p className="line-clamp-2 text-[11px] text-muted-foreground">{a.desc}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">~{a.kcalPerHour} kcal/u</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </section>
   );
 }
