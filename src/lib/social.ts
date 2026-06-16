@@ -62,7 +62,7 @@ export function useMyProfile() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, display_name, username, bio, avatar_url")
+        .select("id, display_name, username, bio")
         .eq("id", user!.id)
         .maybeSingle();
       if (error) throw error;
@@ -96,7 +96,7 @@ export function useFriendSearch(query: string) {
       const q = query.trim();
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url")
+        .select("id, display_name, username")
         .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
         .neq("id", user!.id)
         .limit(20);
@@ -155,7 +155,7 @@ export function useFriends() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url")
+        .select("id, display_name, username")
         .in("id", otherIds);
       if (error) throw error;
       const map: Record<string, Profile> = {};
@@ -276,7 +276,7 @@ export function useFeed() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url")
+        .select("id, display_name, username")
         .in("id", authorIds);
       if (error) throw error;
       const map: Record<string, Profile> = {};
@@ -517,7 +517,7 @@ export function useChallengeLeaderboard(challenge: Challenge | null) {
 
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url")
+        .select("id, display_name, username")
         .in("id", userIds);
       const profMap: Record<string, Profile> = {};
       (profiles ?? []).forEach((p: any) => (profMap[p.id] = p));
