@@ -104,9 +104,6 @@ function Dashboard({
     () => (plan ? [...plan.days].sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day)) : []),
     [plan],
   );
-    () => [...plan.days].sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day)),
-    [plan.days],
-  );
 
   const today = new Date().toISOString().slice(0, 10);
   const todayName = DAY_ORDER[(new Date().getDay() + 6) % 7];
@@ -119,15 +116,14 @@ function Dashboard({
     return null;
   }, [sortedDays, todayName]);
 
+  if (!stored || !plan || !wizard) return null;
+
   const trainingDays = sortedDays.filter((d) => !d.rest).length;
-  const doneThisWeek = sortedDays.filter((d) => !d.rest && completedDays.includes(`${today}:${d.day}`)).length;
-  // simpler: count completedDays in last 7 days
   const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6);
   const completedWeek = completedDays.filter((k) => {
     const date = k.split(":")[0];
     return date >= weekStart.toISOString().slice(0, 10);
   }).length;
-  void doneThisWeek;
   const progressPct = trainingDays > 0 ? Math.min(100, Math.round((completedWeek / trainingDays) * 100)) : 0;
 
   return (
