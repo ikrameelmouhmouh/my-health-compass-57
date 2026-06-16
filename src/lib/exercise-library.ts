@@ -31,11 +31,14 @@ export type LibraryExercise = {
   primary: MuscleGroup[];
   secondary: MuscleGroup[];
   image: string;
+  /** Frames that, when looped, form a short video preview of the movement. */
+  frames: string[];
   steps: string[];
 };
 
-const IMG = (slug: string) =>
-  `https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/${slug}/images/0.jpg`;
+const BASE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises";
+const IMG = (slug: string) => `${BASE}/${slug}/images/0.jpg`;
+const FRAMES = (slug: string) => [`${BASE}/${slug}/images/0.jpg`, `${BASE}/${slug}/images/1.jpg`];
 
 export const EXERCISES: LibraryExercise[] = [
   // ===== LEGS =====
