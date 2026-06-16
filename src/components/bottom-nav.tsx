@@ -2,12 +2,12 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, UtensilsCrossed, Timer, Dumbbell, TrendingUp, Sparkles } from "lucide-react";
 
 const items = [
-  { to: "/profile", label: "Home", icon: Home },
-  { to: "/nutrition", label: "Nutrition", icon: UtensilsCrossed },
-  { to: "/fasting", label: "Fasting", icon: Timer },
-  { to: "/fitness", label: "Workouts", icon: Dumbbell },
-  { to: "/weight", label: "Progress", icon: TrendingUp },
-  { to: "/ai-coach", label: "AI", icon: Sparkles },
+  { to: "/profile", label: "Home", icon: Home, accent: "var(--mod-home)" },
+  { to: "/nutrition", label: "Nutrition", icon: UtensilsCrossed, accent: "var(--mod-nutrition)" },
+  { to: "/fasting", label: "Fasting", icon: Timer, accent: "var(--mod-fasting)" },
+  { to: "/fitness", label: "Workouts", icon: Dumbbell, accent: "var(--mod-fitness)" },
+  { to: "/weight", label: "Progress", icon: TrendingUp, accent: "var(--mod-progress)" },
+  { to: "/ai-coach", label: "AI", icon: Sparkles, accent: "var(--mod-ai)" },
 ] as const;
 
 export function BottomNav() {
@@ -26,15 +26,21 @@ export function BottomNav() {
           {items.map((it) => {
             const active = pathname === it.to;
             const Icon = it.icon;
+            const activeStyle = active
+              ? {
+                  backgroundColor: it.accent,
+                  color: "white",
+                  boxShadow: `0 6px 18px -6px color-mix(in oklab, ${it.accent} 65%, transparent)`,
+                }
+              : { color: it.accent };
             return (
               <li key={it.to} className="flex-1">
                 <Link
                   to={it.to}
                   aria-current={active ? "page" : undefined}
+                  style={activeStyle}
                   className={`group relative flex min-h-[52px] items-center justify-center gap-1.5 rounded-full px-2 py-2 transition-all duration-300 ease-out ${
-                    active
-                      ? "bg-brand text-brand-foreground shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--brand)_60%,transparent)]"
-                      : "text-muted-foreground hover:text-foreground active:scale-95"
+                    active ? "" : "opacity-60 hover:opacity-100 active:scale-95"
                   }`}
                 >
                   <Icon
