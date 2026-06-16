@@ -9,6 +9,8 @@ import { ExerciseLibraryDialog } from "@/components/exercise-library-dialog";
 import { useWorkoutPlan, useTemplates, newTemplate, type WorkoutTemplate } from "@/lib/workout-prefs";
 import { EXERCISES } from "@/lib/exercise-library";
 import { WorkoutSessionDialog } from "@/components/workout-session-dialog";
+import { ProgramLibrary } from "@/components/program-library";
+
 import type { Exercise } from "@/lib/workout.functions";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
@@ -47,8 +49,10 @@ function FitnessPage() {
           <>
             <EmptyState onStart={() => setShowWizard(true)} />
             <LibrarySection />
+            <ProgramLibrary />
             <TemplatesSection />
           </>
+
         ) : (
           <div className="mt-6">
             <WorkoutWizard
@@ -273,7 +277,9 @@ function Dashboard({
       </div>
 
       <LibrarySection />
+      <ProgramLibrary />
       <TemplatesSection />
+
 
 
       {/* Progression notes */}
