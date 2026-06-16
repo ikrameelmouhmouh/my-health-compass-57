@@ -1,19 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 import {
-  LogOut, Settings2, Sun, Moon, Globe, Check,
+  Settings2, Settings,
   Apple, Timer, Dumbbell, LineChart, Droplet, Footprints, Flame,
   Plus, Minus, Sliders, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
   CheckCircle2, Circle, PlayCircle, Scale, UtensilsCrossed, ArrowUpRight,
 } from "lucide-react";
-import { useTheme } from "@/lib/theme-context";
-import { LANGUAGES, useI18n, useT, type Language } from "@/lib/i18n";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useT } from "@/lib/i18n";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription, SheetFooter,
 } from "@/components/ui/sheet";
@@ -40,11 +36,8 @@ const STEP_GOAL = 10000;
 
 function Profile() {
   const t = useT();
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const { theme, toggle } = useTheme();
-  const { lang, setLang } = useI18n();
-  const qc = useQueryClient();
 
   const { prefs, move, toggle: toggleCard, reset } = useDashboardPrefs();
   const { day, update, addWater, addMeal } = useDayLog();
@@ -65,9 +58,6 @@ function Profile() {
         supabase.from("profiles").select("*").eq("id", user!.id).maybeSingle(),
         supabase.from("subscriptions").select("*").eq("user_id", user!.id).maybeSingle(),
       ]);
-      if (profileRes.data?.language && profileRes.data.language !== lang) {
-        setLang(profileRes.data.language as Language);
-      }
       return { profile: profileRes.data, subscription: subRes.data };
     },
   });
@@ -77,6 +67,28 @@ function Profile() {
       navigate({ to: "/onboarding", replace: true });
     }
   }, [isLoading, data, navigate]);
+
+  // Fasting derived (must run on every render — hooks order)
+  const fastInfo = useMemo(() => {
+    if (!fasting.startedAt) {
+      return { active: false, hoursElapsed: 0, hoursLeft: 0, pct: 0 };
+    }
+    const elapsedMs = Date.now() - new Date(fasting.startedAt).getTime();
+    const elapsedH = elapsedMs / 3_600_000;
+    return {
+      active: true,
+      hoursElapsed: elapsedH,
+      hoursLeft: Math.max(0, fasting.windowHours - elapsedH),
+      pct: Math.min(100, (elapsedH / fasting.windowHours) * 100),
+    };
+  }, [fasting]);
+
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!fasting.startedAt) return;
+    const id = setInterval(() => setTick((n) => n + 1), 30_000);
+    return () => clearInterval(id);
+  }, [fasting.startedAt]);
 
   if (isLoading || !data?.profile?.onboarding_completed) {
     return (
@@ -121,37 +133,6 @@ function Profile() {
   const goalProgress = goalWeight !== startWeight
     ? Math.max(0, Math.min(100, ((startWeight - currentWeight) / (startWeight - goalWeight)) * 100))
     : 0;
-
-  // Fasting derived
-  const fastInfo = useMemo(() => {
-    if (!fasting.startedAt) {
-      return { active: false, hoursElapsed: 0, hoursLeft: 0, pct: 0 };
-    }
-    const elapsedMs = Date.now() - new Date(fasting.startedAt).getTime();
-    const elapsedH = elapsedMs / 3_600_000;
-    return {
-      active: true,
-      hoursElapsed: elapsedH,
-      hoursLeft: Math.max(0, fasting.windowHours - elapsedH),
-      pct: Math.min(100, (elapsedH / fasting.windowHours) * 100),
-    };
-  }, [fasting]);
-
-  // tick every 30s for fasting timer
-  const [, setTick] = useState(0);
-  useEffect(() => {
-    if (!fasting.startedAt) return;
-    const id = setInterval(() => setTick((n) => n + 1), 30_000);
-    return () => clearInterval(id);
-  }, [fasting.startedAt]);
-
-  async function changeLanguage(code: Language) {
-    setLang(code);
-    if (user) {
-      await supabase.from("profiles").update({ language: code }).eq("id", user.id);
-      qc.invalidateQueries({ queryKey: ["profile", user.id] });
-    }
-  }
 
   const greeting = greetingFor(new Date());
 
