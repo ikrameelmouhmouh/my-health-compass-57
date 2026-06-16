@@ -136,7 +136,7 @@ function ProgressPage() {
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-4 pb-32 pt-8">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
+        <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[color-mix(in_oklab,var(--mod-progress)_22%,transparent)] text-[var(--mod-progress)]">
           <TrendingUp className="size-6" />
         </div>
         <div className="min-w-0 flex-1">

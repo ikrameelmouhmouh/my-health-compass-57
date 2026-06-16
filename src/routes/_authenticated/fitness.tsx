@@ -105,7 +105,7 @@ function ViewTabs({ view, setView }: { view: View; setView: (v: View) => void })
 function Header() {
   return (
     <div className="flex items-center gap-3">
-      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
+      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[color-mix(in_oklab,var(--mod-fitness)_22%,transparent)] text-[var(--mod-fitness)]">
         <Dumbbell className="size-6" />
       </div>
       <div className="min-w-0">
@@ -613,7 +613,7 @@ function ActivitiesSection() {
                   key={a.id}
                   className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-card/50 p-3 text-left transition hover:bg-card"
                 >
-                  <div className="grid size-10 place-items-center rounded-xl bg-brand/15 text-brand">
+                  <div className="grid size-10 place-items-center rounded-xl bg-[color-mix(in_oklab,var(--mod-fitness)_22%,transparent)] text-[var(--mod-fitness)]">
                     <a.icon className="size-5" />
                   </div>
                   <div className="min-w-0">

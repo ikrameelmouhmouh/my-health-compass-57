@@ -152,7 +152,7 @@ function Nutrition() {
       {/* Empty state for whole day */}
       {dayMeals.length === 0 && (
         <div className="mt-6 rounded-3xl border border-dashed border-border bg-card/50 p-8 text-center">
-          <div className="mx-auto mb-2 grid size-12 place-items-center rounded-full bg-brand/15 text-brand">
+          <div className="mx-auto mb-2 grid size-12 place-items-center rounded-full bg-[color-mix(in_oklab,var(--mod-nutrition)_22%,transparent)] text-[var(--mod-nutrition)]">
             <Flame className="size-5" />
           </div>
           <p className="text-sm font-semibold">Nothing logged {isToday ? "today" : "this day"}</p>
@@ -216,7 +216,7 @@ function MealSection({
         {!disabled && (
           <button
             onClick={onAdd}
-            className="grid size-8 place-items-center rounded-full bg-brand/15 text-brand"
+            className="grid size-8 place-items-center rounded-full bg-[color-mix(in_oklab,var(--mod-nutrition)_22%,transparent)] text-[var(--mod-nutrition)]"
             aria-label={`Add to ${label}`}
           >
             <Plus className="size-4" />
