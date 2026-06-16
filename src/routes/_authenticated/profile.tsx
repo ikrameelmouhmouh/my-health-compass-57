@@ -4,9 +4,9 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Settings2, Settings,
+  Settings, Sliders,
   Apple, Timer, Dumbbell, LineChart, Droplet, Footprints, Flame,
-  Plus, Minus, Sliders, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
+  Plus, Minus, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
   CheckCircle2, Circle, PlayCircle, Scale, UtensilsCrossed, ArrowUpRight,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
