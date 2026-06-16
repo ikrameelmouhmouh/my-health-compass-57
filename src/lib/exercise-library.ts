@@ -104,6 +104,7 @@ export const EXERCISES: LibraryExercise[] = [
     primary: ["Quads", "Glutes"],
     secondary: ["Hamstrings", "Core"],
     image: IMG("Barbell_Squat"),
+    variants: SQUAT_VARIANTS,
     steps: [
       "Plaats de barbell op je bovenrug, voeten op schouderbreedte.",
       "Zak gecontroleerd tot je dijen parallel zijn aan de grond.",
@@ -184,6 +185,7 @@ export const EXERCISES: LibraryExercise[] = [
     primary: ["Chest"],
     secondary: ["Triceps", "Shoulders"],
     image: IMG("Barbell_Bench_Press_-_Medium_Grip"),
+    variants: BENCH_VARIANTS,
     steps: [
       "Lig plat op de bank, handen iets breder dan schouderbreedte.",
       "Laat de stang gecontroleerd zakken tot je borst.",
