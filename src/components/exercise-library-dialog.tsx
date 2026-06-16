@@ -1,12 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X, ChevronLeft, Lightbulb, Plus } from "lucide-react";
+import { Search, X, ChevronLeft, Lightbulb, Plus, Maximize2, Play } from "lucide-react";
 import {
   EXERCISES,
   EQUIPMENT_FILTERS,
   MUSCLE_FILTERS,
+  getExerciseFrames,
   type LibraryExercise,
   type Equipment,
   type MuscleGroup,
