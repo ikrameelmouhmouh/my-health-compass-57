@@ -80,6 +80,7 @@ function Profile() {
   const p = data?.profile;
   const sub = data?.subscription;
 
+
   const isPremium = sub?.tier === "premium" && sub?.status === "active";
 
   // Derived stats
