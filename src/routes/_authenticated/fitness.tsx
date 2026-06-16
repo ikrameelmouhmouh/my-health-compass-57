@@ -277,7 +277,9 @@ function Dashboard({
       </div>
 
       <LibrarySection />
+      <ProgramLibrary />
       <TemplatesSection />
+
 
 
       {/* Progression notes */}
