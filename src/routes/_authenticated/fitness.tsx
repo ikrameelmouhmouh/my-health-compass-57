@@ -8,6 +8,8 @@ import { TemplateEditor } from "@/components/template-editor";
 import { ExerciseLibraryDialog } from "@/components/exercise-library-dialog";
 import { useWorkoutPlan, useTemplates, newTemplate, type WorkoutTemplate } from "@/lib/workout-prefs";
 import { EXERCISES } from "@/lib/exercise-library";
+import { WorkoutSessionDialog } from "@/components/workout-session-dialog";
+import type { Exercise } from "@/lib/workout.functions";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
   component: FitnessPage,
@@ -146,6 +148,7 @@ function Dashboard({
   view: View;
   setView: (v: View) => void;
 }) {
+  const [activeSession, setActiveSession] = useState<{ name: string; exercises: Exercise[] } | null>(null);
 
   const plan = stored?.plan;
   const completedDays = stored?.completedDays ?? [];
@@ -256,6 +259,12 @@ function Dashboard({
                       {ex.notes && <p className="mt-1 text-xs text-muted-foreground">{ex.notes}</p>}
                     </div>
                   ))}
+                  <Button
+                    className="mt-2 w-full"
+                    onClick={() => setActiveSession({ name: `${d.day}: ${d.focus}`, exercises: d.exercises })}
+                  >
+                    ▶ Start training
+                  </Button>
                 </div>
               )}
             </div>
@@ -283,6 +292,14 @@ function Dashboard({
           Clear plan
         </button>
       </div>
+      {activeSession && (
+        <WorkoutSessionDialog
+          open
+          onClose={() => setActiveSession(null)}
+          workoutName={activeSession.name}
+          exercises={activeSession.exercises}
+        />
+      )}
     </main>
   );
 }
@@ -301,6 +318,7 @@ function TemplatesSection() {
   const { templates, loaded, upsert, remove } = useTemplates();
   const [editing, setEditing] = useState<WorkoutTemplate | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [activeSession, setActiveSession] = useState<WorkoutTemplate | null>(null);
 
   if (!loaded) return null;
 
@@ -366,6 +384,9 @@ function TemplatesSection() {
                         <p className="text-xs text-muted-foreground">{ex.sets} × {ex.reps} · rust {ex.restSec}s</p>
                       </div>
                     ))}
+                    <Button className="mt-2 w-full" onClick={() => setActiveSession(t)}>
+                      ▶ Start training
+                    </Button>
                   </div>
                 )}
               </div>
@@ -380,6 +401,15 @@ function TemplatesSection() {
           initial={editing}
           onClose={() => setEditing(null)}
           onSave={(t) => { upsert(t); setEditing(null); }}
+        />
+      )}
+      {activeSession && (
+        <WorkoutSessionDialog
+          open
+          onClose={() => setActiveSession(null)}
+          workoutName={activeSession.name}
+          exercises={activeSession.exercises}
+          templateId={activeSession.id}
         />
       )}
     </section>
