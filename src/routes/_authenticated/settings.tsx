@@ -5,7 +5,7 @@ import { LANGUAGES, useI18n, useT, type Language } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ChevronLeft, ChevronRight, Sun, Moon, Globe, LogOut, Sliders, Check,
+  ChevronLeft, ChevronRight, Sun, Moon, Globe, LogOut, Check,
   Sparkles, RefreshCw,
 } from "lucide-react";
 import {
@@ -150,13 +150,6 @@ function SettingsPage() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-        <Divider />
-        <LinkRow
-          to="/profile"
-          search={{ customize: "1" } as never}
-          icon={Sliders}
-          label="Customize dashboard"
-        />
       </Group>
 
       {/* Plan */}
