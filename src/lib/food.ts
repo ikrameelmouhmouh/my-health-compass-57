@@ -250,7 +250,7 @@ export function useFoodLibrary() {
     setFavorites((list) => {
       const exists = list.some((f) => f.id === food.id);
       if (exists) return list.filter((f) => f.id !== food.id);
-      return [{ ...food, source: "favorite" }, ...list].slice(0, 100);
+      return [{ ...food, source: "favorite" as const }, ...list].slice(0, 100);
     });
   }, []);
 
