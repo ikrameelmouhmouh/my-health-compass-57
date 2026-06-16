@@ -83,7 +83,7 @@ function FastingPage() {
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
       <header className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
+          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[color-mix(in_oklab,var(--mod-fasting)_22%,transparent)] text-[var(--mod-fasting)]">
             <Timer className="size-6" />
           </div>
           <div>
@@ -219,7 +219,7 @@ function FastingPage() {
           <ul className="space-y-2">
             {state.history.slice(0, 20).map((e) => (
               <li key={e.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-                <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${e.completed ? "bg-brand/15 text-brand" : "bg-muted text-muted-foreground"}`}>
+                <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${e.completed ? "bg-[color-mix(in_oklab,var(--mod-fasting)_22%,transparent)] text-[var(--mod-fasting)]" : "bg-muted text-muted-foreground"}`}>
                   {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
                 </div>
                 <div className="min-w-0 flex-1">
