@@ -4,12 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Plus, ScanLine, Flame, Trash2, ChevronLeft, ChevronRight, Heart,
+  Plus, Flame, Trash2, ChevronLeft, ChevronRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import {
-  useMeals, MEAL_TYPES, todayKey,
+  useMeals, MEAL_TYPES,
   type MealType, type LoggedMeal,
 } from "@/lib/food";
 import { useDayLog } from "@/lib/dashboard-prefs";
