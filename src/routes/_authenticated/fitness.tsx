@@ -338,3 +338,41 @@ function TemplatesSection() {
     </section>
   );
 }
+
+function LibrarySection() {
+  const [open, setOpen] = useState(false);
+  const preview = EXERCISES.slice(0, 6);
+  return (
+    <section className="mt-8">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold">Oefeningen bibliotheek</h3>
+          <p className="text-xs text-muted-foreground">Bekijk alle gym oefeningen met uitvoering</p>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
+          <BookOpen className="mr-1 size-4" /> Alles
+        </Button>
+      </div>
+
+      <button
+        onClick={() => setOpen(true)}
+        className="grid w-full grid-cols-3 gap-2 rounded-2xl border border-border bg-card/50 p-3 text-left transition hover:bg-card"
+      >
+        {preview.map((ex) => (
+          <div key={ex.id} className="space-y-1">
+            <div className="aspect-square overflow-hidden rounded-xl bg-muted">
+              <img src={ex.image} alt={ex.name} loading="lazy" className="size-full object-cover" />
+            </div>
+            <p className="truncate text-[10px] text-muted-foreground">{ex.name}</p>
+          </div>
+        ))}
+        <div className="col-span-3 mt-1 flex items-center justify-end text-xs text-muted-foreground">
+          {EXERCISES.length} oefeningen <ChevronRight className="ml-1 size-3" />
+        </div>
+      </button>
+
+      <ExerciseLibraryDialog open={open} onClose={() => setOpen(false)} />
+    </section>
+  );
+}
+
