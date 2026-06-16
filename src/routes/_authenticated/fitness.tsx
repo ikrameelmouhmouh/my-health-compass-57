@@ -22,13 +22,25 @@ function FitnessPage() {
   const { stored, loaded, save, clear, toggleCompleted } = useWorkoutPlan();
   const [showWizard, setShowWizard] = useState(false);
   const [openDay, setOpenDay] = useState<string | null>(null);
+  const [view, setView] = useState<View>("gym");
 
   if (!loaded) return <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10" />;
+
+  if (view === "activities") {
+    return (
+      <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
+        <Header />
+        <ViewTabs view={view} setView={setView} />
+        <ActivitiesSection />
+      </main>
+    );
+  }
 
   if (!stored || showWizard) {
     return (
       <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
         <Header />
+        <ViewTabs view={view} setView={setView} />
         {!stored && !showWizard ? (
           <>
             <EmptyState onStart={() => setShowWizard(true)} />
@@ -55,8 +67,34 @@ function FitnessPage() {
     toggleCompleted={toggleCompleted}
     openDay={openDay}
     setOpenDay={setOpenDay}
+    view={view}
+    setView={setView}
   />;
 }
+
+function ViewTabs({ view, setView }: { view: View; setView: (v: View) => void }) {
+  const tabs: { id: View; label: string; icon: typeof Dumbbell }[] = [
+    { id: "gym", label: "Gym", icon: Dumbbell },
+    { id: "activities", label: "Workouts", icon: Activity },
+  ];
+  return (
+    <div className="mt-5 grid grid-cols-2 gap-1 rounded-2xl border border-border bg-card/50 p-1">
+      {tabs.map((t) => {
+        const active = view === t.id;
+        return (
+          <button
+            key={t.id}
+            onClick={() => setView(t.id)}
+            className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${active ? "bg-brand text-white shadow" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <t.icon className="size-4" /> {t.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 
 function Header() {
   return (
