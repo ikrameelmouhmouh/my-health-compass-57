@@ -83,7 +83,7 @@ function ListView({
   onSelect: (ex: LibraryExercise) => void;
   onClose: () => void;
 }) {
-  return (
+  const gender = useGender();
     <>
       <div className="border-b border-border px-5 pb-3 pt-5">
         <div className="flex items-center justify-between">
