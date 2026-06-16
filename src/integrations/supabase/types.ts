@@ -403,36 +403,48 @@ export type Database = {
       }
       subscriptions: {
         Row: {
-          created_at: string
+          cancel_at_period_end: boolean | null
+          created_at: string | null
           current_period_end: string | null
-          provider: string | null
-          provider_customer_id: string | null
-          provider_subscription_id: string | null
-          status: Database["public"]["Enums"]["subscription_status"]
-          tier: Database["public"]["Enums"]["subscription_tier"]
-          updated_at: string
+          current_period_start: string | null
+          environment: string
+          id: string
+          price_id: string
+          product_id: string
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at: string | null
           user_id: string
         }
         Insert: {
-          created_at?: string
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
           current_period_end?: string | null
-          provider?: string | null
-          provider_customer_id?: string | null
-          provider_subscription_id?: string | null
-          status?: Database["public"]["Enums"]["subscription_status"]
-          tier?: Database["public"]["Enums"]["subscription_tier"]
-          updated_at?: string
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id: string
+          product_id: string
+          status?: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at?: string | null
           user_id: string
         }
         Update: {
-          created_at?: string
+          cancel_at_period_end?: boolean | null
+          created_at?: string | null
           current_period_end?: string | null
-          provider?: string | null
-          provider_customer_id?: string | null
-          provider_subscription_id?: string | null
-          status?: Database["public"]["Enums"]["subscription_status"]
-          tier?: Database["public"]["Enums"]["subscription_tier"]
-          updated_at?: string
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id?: string
+          product_id?: string
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -580,6 +592,10 @@ export type Database = {
     }
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      has_active_subscription: {
+        Args: { check_env?: string; user_uuid: string }
+        Returns: boolean
+      }
       is_challenge_participant: {
         Args: { _cid: string; _uid: string }
         Returns: boolean
@@ -594,13 +610,6 @@ export type Database = {
         | "athlete"
       gender_type: "male" | "female" | "other"
       goal_type: "lose" | "maintain" | "gain"
-      subscription_status:
-        | "active"
-        | "trialing"
-        | "canceled"
-        | "past_due"
-        | "inactive"
-      subscription_tier: "free" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -737,14 +746,6 @@ export const Constants = {
       ],
       gender_type: ["male", "female", "other"],
       goal_type: ["lose", "maintain", "gain"],
-      subscription_status: [
-        "active",
-        "trialing",
-        "canceled",
-        "past_due",
-        "inactive",
-      ],
-      subscription_tier: ["free", "premium"],
     },
   },
 } as const
