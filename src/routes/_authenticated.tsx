@@ -28,6 +28,7 @@ function AuthenticatedLayout() {
   return (
     <>
       <Outlet />
+      <AiFab />
       <BottomNav />
     </>
   );
