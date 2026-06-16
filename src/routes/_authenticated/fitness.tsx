@@ -135,7 +135,7 @@ function EmptyState({ onStart }: { onStart: () => void }) {
 }
 
 function Dashboard({
-  stored, onRegenerate, onClear, toggleCompleted, openDay, setOpenDay,
+  stored, onRegenerate, onClear, toggleCompleted, openDay, setOpenDay, view, setView,
 }: {
   stored: ReturnType<typeof useWorkoutPlan>["stored"];
   onRegenerate: () => void;
@@ -143,7 +143,10 @@ function Dashboard({
   toggleCompleted: (d: string) => void;
   openDay: string | null;
   setOpenDay: (d: string | null) => void;
+  view: View;
+  setView: (v: View) => void;
 }) {
+
   const plan = stored?.plan;
   const completedDays = stored?.completedDays ?? [];
   const wizard = stored?.wizard;
