@@ -522,6 +522,11 @@ function NutritionCard({ budget, meals, mode, onToggleMode, onLogFood, protein, 
             <div className="font-display text-sm font-semibold tabular-nums text-muted-foreground">
               {budget.allowance.toLocaleString()}
             </div>
+            {mode === "smart" && budget.earned > 0 && (
+              <div className="mt-0.5 text-[10px] font-medium tabular-nums text-brand">
+                +{budget.earned.toLocaleString()} earned
+              </div>
+            )}
           </div>
         </div>
 
@@ -540,12 +545,19 @@ function NutritionCard({ budget, meals, mode, onToggleMode, onLogFood, protein, 
             <span className="text-xs text-muted-foreground">eaten</span>
           </div>
           {budget.totalBurn > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-medium text-brand">
               <Flame className="size-3" />
-              {budget.totalBurn.toLocaleString()} burned
+              +{budget.totalBurn.toLocaleString()} burned
             </span>
           )}
         </div>
+
+        {mode === "smart" && budget.totalBurn > 0 && (
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Activity added <span className="font-semibold text-foreground">+{budget.earned.toLocaleString()} kcal</span> to today's goal.
+          </p>
+        )}
+
       </div>
 
       <div className="mt-5 grid grid-cols-3 gap-2 border-t border-border/60 pt-4">
