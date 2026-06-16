@@ -47,8 +47,10 @@ function FitnessPage() {
           <>
             <EmptyState onStart={() => setShowWizard(true)} />
             <LibrarySection />
+            <ProgramLibrary />
             <TemplatesSection />
           </>
+
         ) : (
           <div className="mt-6">
             <WorkoutWizard
