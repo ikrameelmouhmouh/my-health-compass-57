@@ -1,6 +1,20 @@
-// Curated gym exercise library. Images are hosted by the open-source
-// free-exercise-db project (public-domain GIFs/JPEGs).
-// Source: https://github.com/yuhonas/free-exercise-db
+// Curated gym exercise library.
+// - Default frames come from the open-source free-exercise-db project
+//   (https://github.com/yuhonas/free-exercise-db).
+// - When `variants` is provided for an exercise, gender-specific AI-rendered
+//   3D-anatomy frames are used instead (see src/assets/exercises/).
+
+import type { AppGender } from "@/lib/gender";
+
+// AI-rendered 3D anatomy frames (male + female)
+import squatM0 from "@/assets/exercises/barbell-squat-male-0.jpg";
+import squatM1 from "@/assets/exercises/barbell-squat-male-1.jpg";
+import squatF0 from "@/assets/exercises/barbell-squat-female-0.jpg";
+import squatF1 from "@/assets/exercises/barbell-squat-female-1.jpg";
+import benchM0 from "@/assets/exercises/barbell-bench-press-male-0.jpg";
+import benchM1 from "@/assets/exercises/barbell-bench-press-male-1.jpg";
+import benchF0 from "@/assets/exercises/barbell-bench-press-female-0.jpg";
+import benchF1 from "@/assets/exercises/barbell-bench-press-female-1.jpg";
 
 export type Equipment =
   | "Machine"
@@ -24,6 +38,8 @@ export type MuscleGroup =
   | "Core"
   | "Full body";
 
+export type ExerciseVariants = Partial<Record<AppGender, string[]>>;
+
 export type LibraryExercise = {
   id: string;
   name: string;
@@ -31,16 +47,24 @@ export type LibraryExercise = {
   primary: MuscleGroup[];
   secondary: MuscleGroup[];
   image: string;
-  /** Frames that, when looped, form a short video preview of the movement. */
+  /** Default frames that, when looped, form a short video preview. */
   frames?: string[];
+  /** Gender-specific 3D-anatomy frames. When present, override `frames`. */
+  variants?: ExerciseVariants;
   steps: string[];
 };
 
 const BASE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises";
 const IMG = (slug: string) => `${BASE}/${slug}/0.jpg`;
 
-/** Returns the looping preview frames for an exercise (animated GIF-style). */
-export function getExerciseFrames(ex: LibraryExercise): string[] {
+/** Returns the looping preview frames for an exercise, gender-aware when available. */
+export function getExerciseFrames(ex: LibraryExercise, gender?: AppGender): string[] {
+  if (gender && ex.variants?.[gender]?.length) return ex.variants[gender] as string[];
+  // Fall back to the opposite gender's variant if only one is rendered yet.
+  if (ex.variants) {
+    const any = ex.variants.male ?? ex.variants.female;
+    if (any?.length) return any;
+  }
   if (ex.frames && ex.frames.length > 0) return ex.frames;
   // free-exercise-db hosts two frames per exercise (0.jpg / 1.jpg) — perfect for a loop.
   const m = ex.image.match(/\/exercises\/([^/]+)\//);
@@ -48,6 +72,14 @@ export function getExerciseFrames(ex: LibraryExercise): string[] {
   const slug = m[1];
   return [`${BASE}/${slug}/0.jpg`, `${BASE}/${slug}/1.jpg`];
 }
+
+/** Returns true when the exercise has gender-specific AI-rendered demos. */
+export function hasGenderVariants(ex: LibraryExercise): boolean {
+  return !!(ex.variants?.male?.length || ex.variants?.female?.length);
+}
+
+const SQUAT_VARIANTS: ExerciseVariants = { male: [squatM0, squatM1], female: [squatF0, squatF1] };
+const BENCH_VARIANTS: ExerciseVariants = { male: [benchM0, benchM1], female: [benchF0, benchF1] };
 
 export const EXERCISES: LibraryExercise[] = [
   // ===== LEGS =====
@@ -72,6 +104,7 @@ export const EXERCISES: LibraryExercise[] = [
     primary: ["Quads", "Glutes"],
     secondary: ["Hamstrings", "Core"],
     image: IMG("Barbell_Squat"),
+    variants: SQUAT_VARIANTS,
     steps: [
       "Plaats de barbell op je bovenrug, voeten op schouderbreedte.",
       "Zak gecontroleerd tot je dijen parallel zijn aan de grond.",
@@ -152,6 +185,7 @@ export const EXERCISES: LibraryExercise[] = [
     primary: ["Chest"],
     secondary: ["Triceps", "Shoulders"],
     image: IMG("Barbell_Bench_Press_-_Medium_Grip"),
+    variants: BENCH_VARIANTS,
     steps: [
       "Lig plat op de bank, handen iets breder dan schouderbreedte.",
       "Laat de stang gecontroleerd zakken tot je borst.",
