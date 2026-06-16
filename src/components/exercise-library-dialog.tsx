@@ -245,6 +245,65 @@ function DetailView({
           </Button>
         </div>
       )}
+
+      {zoom && (
+        <Lightbox frames={frames} title={ex.name} onClose={() => setZoom(false)} />
+      )}
+    </div>
+  );
+}
+
+/** Cross-fades through a series of frames to mimic a short looping demo video. */
+function AnimatedFrames({
+  frames, alt, className, intervalMs = 650,
+}: { frames: string[]; alt: string; className?: string; intervalMs?: number }) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (frames.length < 2) return;
+    const t = window.setInterval(() => setI((v) => (v + 1) % frames.length), intervalMs);
+    return () => window.clearInterval(t);
+  }, [frames, intervalMs]);
+  return (
+    <div className={`relative ${className?.includes("aspect-") ? "" : ""}`}>
+      <div className="relative w-full overflow-hidden">
+        {frames.map((src, idx) => (
+          <img
+            key={src}
+            src={src}
+            alt={alt}
+            loading="lazy"
+            className={`${className ?? ""} ${idx === 0 ? "" : "absolute inset-0"} transition-opacity duration-300 ${idx === i ? "opacity-100" : "opacity-0"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Lightbox({ frames, title, onClose }: { frames: string[]; title: string; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+  return (
+    <div className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur" role="dialog" aria-label={`${title} voorbeeld`}>
+      <div className="flex items-center justify-between px-4 py-3 text-white">
+        <p className="truncate text-sm font-medium">{title}</p>
+        <button onClick={onClose} className="grid size-9 place-items-center rounded-full bg-white/10 hover:bg-white/20" aria-label="Sluit">
+          <X className="size-5" />
+        </button>
+      </div>
+      <div className="flex flex-1 items-center justify-center p-3">
+        <div className="w-full max-w-2xl overflow-hidden rounded-2xl">
+          <AnimatedFrames frames={frames} alt={title} className="aspect-square w-full object-contain bg-black" intervalMs={550} />
+        </div>
+      </div>
+      <p className="pb-4 text-center text-xs text-white/60">Tik buiten of druk Esc om te sluiten</p>
     </div>
   );
 }
