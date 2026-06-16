@@ -210,6 +210,8 @@ function Dashboard({
         })}
       </div>
 
+      <TemplatesSection />
+
       {/* Progression notes */}
       {plan.progressionNotes && (
         <div className="mt-6 rounded-2xl border border-border bg-card/50 p-4">
