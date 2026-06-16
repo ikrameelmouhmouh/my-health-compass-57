@@ -41,6 +41,10 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
   const [selected, setSelected] = useState<FoodItem | null>(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const analyzePhoto = useServerFn(analyzeMealPhoto);
 
   const { favorites, custom, toggleFavorite, isFavorite, addCustom, removeCustom } = useFoodLibrary();
 
