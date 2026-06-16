@@ -384,6 +384,9 @@ function TemplatesSection() {
                         <p className="text-xs text-muted-foreground">{ex.sets} × {ex.reps} · rust {ex.restSec}s</p>
                       </div>
                     ))}
+                    <Button className="mt-2 w-full" onClick={() => setActiveSession(t)}>
+                      ▶ Start training
+                    </Button>
                   </div>
                 )}
               </div>
