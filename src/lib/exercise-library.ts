@@ -183,20 +183,47 @@ const mk = (
 ): LibraryExercise => ({ id, name, equipment, primary, secondary, image: PLACEHOLDER_IMG, steps });
 
 
+/**
+ * Fallback gender-aware 3D-anatomy demos per primary muscle group.
+ * Used for catalog exercises that don't yet have a dedicated AI demo,
+ * so every exercise still shows a male + female start/end animation.
+ */
+const FALLBACK_BY_MUSCLE: Record<MuscleGroup, ExerciseVariants> = {
+  Chest: variants(benchM0, benchM1, benchF0, benchF1),
+  Back: variants(latM0, latM1, latF0, latF1),
+  Shoulders: variants(ohpM0, ohpM1, ohpF0, ohpF1),
+  Biceps: variants(bcM0, bcM1, bcF0, bcF1),
+  Triceps: variants(tpdM0, tpdM1, tpdF0, tpdF1),
+  Quads: variants(sqM0, sqM1, sqF0, sqF1),
+  Hamstrings: variants(rdlM0, rdlM1, rdlF0, rdlF1),
+  Glutes: variants(hipM0, hipM1, hipF0, hipF1),
+  Calves: variants(calfM0, calfM1, calfF0, calfF1),
+  Core: variants(plankM0, plankM1, plankF0, plankF1),
+  "Full body": variants(dlM0, dlM1, dlF0, dlF1),
+};
+
+function resolveVariants(ex: LibraryExercise): ExerciseVariants | undefined {
+  if (ex.variants?.male?.length || ex.variants?.female?.length) return ex.variants;
+  const primary = ex.primary[0];
+  return primary ? FALLBACK_BY_MUSCLE[primary] : undefined;
+}
+
 /** Returns the looping preview frames for an exercise, gender-aware when available. */
 export function getExerciseFrames(ex: LibraryExercise, gender?: AppGender): string[] {
-  if (gender && ex.variants?.[gender]?.length) return ex.variants[gender] as string[];
-  if (ex.variants) {
-    const any = ex.variants.male ?? ex.variants.female;
+  const v = resolveVariants(ex);
+  if (v) {
+    if (gender && v[gender]?.length) return v[gender] as string[];
+    const any = v.male ?? v.female;
     if (any?.length) return any;
   }
   if (ex.frames && ex.frames.length > 0) return ex.frames;
   return [ex.image];
 }
 
-/** Returns true when the exercise has gender-specific AI-rendered demos. */
+/** Returns true when the exercise has gender-specific AI-rendered demos (incl. fallback). */
 export function hasGenderVariants(ex: LibraryExercise): boolean {
-  return !!(ex.variants?.male?.length || ex.variants?.female?.length);
+  const v = resolveVariants(ex);
+  return !!(v?.male?.length || v?.female?.length);
 }
 
 export const EXERCISES: LibraryExercise[] = [
