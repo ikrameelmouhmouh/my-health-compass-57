@@ -37,16 +37,16 @@ export type LibraryExercise = {
 };
 
 const BASE = "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises";
-const IMG = (slug: string) => `${BASE}/${slug}/images/0.jpg`;
+const IMG = (slug: string) => `${BASE}/${slug}/0.jpg`;
 
 /** Returns the looping preview frames for an exercise (animated GIF-style). */
 export function getExerciseFrames(ex: LibraryExercise): string[] {
   if (ex.frames && ex.frames.length > 0) return ex.frames;
   // free-exercise-db hosts two frames per exercise (0.jpg / 1.jpg) — perfect for a loop.
-  const m = ex.image.match(/\/exercises\/([^/]+)\/images\//);
+  const m = ex.image.match(/\/exercises\/([^/]+)\//);
   if (!m) return [ex.image];
   const slug = m[1];
-  return [`${BASE}/${slug}/images/0.jpg`, `${BASE}/${slug}/images/1.jpg`];
+  return [`${BASE}/${slug}/0.jpg`, `${BASE}/${slug}/1.jpg`];
 }
 
 export const EXERCISES: LibraryExercise[] = [
