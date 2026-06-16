@@ -289,28 +289,13 @@ function Profile() {
           <IconBtn aria-label="Customize dashboard" onClick={() => setOpenSheet("customize")}>
             <Sliders className="size-4" />
           </IconBtn>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-card" aria-label={t("profile.language")}>
-                <Globe className="size-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
-              {LANGUAGES.map((l) => (
-                <DropdownMenuItem key={l.code} onClick={() => changeLanguage(l.code as Language)} className="cursor-pointer">
-                  <span className="mr-2">{l.flag}</span>
-                  <span className="flex-1">{l.native}</span>
-                  {lang === l.code && <Check className="size-3.5" />}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <IconBtn aria-label={t("profile.theme")} onClick={toggle}>
-            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          </IconBtn>
-          <IconBtn aria-label={t("profile.signout")} onClick={async () => { await signOut(); navigate({ to: "/" }); }}>
-            <LogOut className="size-4" />
-          </IconBtn>
+          <Link
+            to="/settings"
+            aria-label="Settings"
+            className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-card transition hover:bg-accent"
+          >
+            <Settings className="size-4" />
+          </Link>
         </div>
       </header>
 
@@ -322,7 +307,7 @@ function Profile() {
             {isPremium ? `Vita ${t("profile.plus")}` : t("profile.free")}
           </span>
         </div>
-        <Link to="/onboarding" className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground">
+        <Link to="/settings" className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground">
           <Settings2 className="size-3.5" />
           {t("profile.recalc")}
         </Link>
