@@ -77,16 +77,9 @@ function Profile() {
     }
   }, [isLoading, data, navigate]);
 
-  if (isLoading || !data?.profile?.onboarding_completed) {
-    return (
-      <div className="grid min-h-[100dvh] place-items-center bg-background">
-        <div className="size-6 animate-spin rounded-full border-2 border-border border-t-brand" />
-      </div>
-    );
-  }
+  const p = data?.profile;
+  const sub = data?.subscription;
 
-  const p = data.profile;
-  const sub = data.subscription;
   const isPremium = sub?.tier === "premium" && sub?.status === "active";
 
   // Derived stats
