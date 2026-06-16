@@ -209,34 +209,189 @@ export function useTodayWorkout() {
 }
 
 // ----- Fasting -----
-export type FastingState = { startedAt: string | null; windowHours: number; streak: number; lastCompletedDate: string | null };
-const FAST_KEY = "vita.fasting.v1";
+export type FastingProtocol = "12:12" | "14:10" | "16:8" | "18:6" | "20:4" | "OMAD";
+
+export const FASTING_PROTOCOLS: { id: FastingProtocol; fast: number; eat: number; label: string; desc: string }[] = [
+  { id: "12:12", fast: 12, eat: 12, label: "12:12", desc: "Beginner • balanced" },
+  { id: "14:10", fast: 14, eat: 10, label: "14:10", desc: "Gentle daily fast" },
+  { id: "16:8",  fast: 16, eat: 8,  label: "16:8",  desc: "Most popular" },
+  { id: "18:6",  fast: 18, eat: 6,  label: "18:6",  desc: "Advanced" },
+  { id: "20:4",  fast: 20, eat: 4,  label: "20:4",  desc: "Warrior diet" },
+  { id: "OMAD",  fast: 23, eat: 1,  label: "OMAD",  desc: "One meal a day" },
+];
+
+export function getProtocol(id: FastingProtocol) {
+  return FASTING_PROTOCOLS.find((p) => p.id === id) ?? FASTING_PROTOCOLS[2];
+}
+
+export type FastEntry = {
+  id: string;
+  startedAt: string;
+  endedAt: string;
+  durationMs: number;
+  targetMs: number;
+  completed: boolean;
+  protocol: FastingProtocol;
+};
+
+export type FastingState = {
+  protocol: FastingProtocol;
+  startedAt: string | null;
+  pausedAt: string | null;
+  pausedTotalMs: number;
+  windowHours: number;
+  streak: number;
+  longestStreak: number;
+  lastCompletedDate: string | null;
+  history: FastEntry[];
+};
+
+const FAST_KEY = "vita.fasting.v2";
+
+const DEFAULT_FAST: FastingState = {
+  protocol: "16:8",
+  startedAt: null,
+  pausedAt: null,
+  pausedTotalMs: 0,
+  windowHours: 16,
+  streak: 0,
+  longestStreak: 0,
+  lastCompletedDate: null,
+  history: [],
+};
+
+function loadFast(): FastingState {
+  if (typeof window === "undefined") return DEFAULT_FAST;
+  try {
+    const raw = localStorage.getItem(FAST_KEY);
+    if (!raw) {
+      const legacy = localStorage.getItem("vita.fasting.v1");
+      if (legacy) {
+        const v1 = JSON.parse(legacy);
+        return { ...DEFAULT_FAST, startedAt: v1.startedAt ?? null, windowHours: v1.windowHours ?? 16, streak: v1.streak ?? 0, lastCompletedDate: v1.lastCompletedDate ?? null };
+      }
+      return DEFAULT_FAST;
+    }
+    return { ...DEFAULT_FAST, ...JSON.parse(raw) };
+  } catch { return DEFAULT_FAST; }
+}
+
+export function notify(title: string, body?: string) {
+  if (typeof window === "undefined") return;
+  try {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(title, { body });
+    }
+  } catch {}
+}
+
+export async function requestNotificationPermission(): Promise<NotificationPermission> {
+  if (typeof window === "undefined" || !("Notification" in window)) return "denied";
+  if (Notification.permission === "default") return await Notification.requestPermission();
+  return Notification.permission;
+}
+
+function fmtDur(ms: number) {
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  return `${h}h ${m}m`;
+}
 
 export function useFasting() {
-  const [state, setState] = useState<FastingState>(() => {
-    if (typeof window === "undefined") return { startedAt: null, windowHours: 16, streak: 0, lastCompletedDate: null };
-    try {
-      const raw = localStorage.getItem(FAST_KEY);
-      if (!raw) return { startedAt: null, windowHours: 16, streak: 0, lastCompletedDate: null };
-      return JSON.parse(raw);
-    } catch { return { startedAt: null, windowHours: 16, streak: 0, lastCompletedDate: null }; }
-  });
+  const [state, setState] = useState<FastingState>(() => loadFast());
+
   useEffect(() => {
     try { localStorage.setItem(FAST_KEY, JSON.stringify(state)); } catch {}
   }, [state]);
-  const start = useCallback(() => setState((s) => ({ ...s, startedAt: new Date().toISOString() })), []);
+
+  const setProtocol = useCallback((id: FastingProtocol) => {
+    const p = getProtocol(id);
+    setState((s) => ({ ...s, protocol: id, windowHours: p.fast }));
+  }, []);
+
+  const start = useCallback(() => {
+    setState((s) => {
+      notify("Fast started", `Goal: ${getProtocol(s.protocol).fast}h`);
+      return { ...s, startedAt: new Date().toISOString(), pausedAt: null, pausedTotalMs: 0 };
+    });
+  }, []);
+
+  const pause = useCallback(() => {
+    setState((s) => (s.startedAt && !s.pausedAt ? { ...s, pausedAt: new Date().toISOString() } : s));
+  }, []);
+
+  const resume = useCallback(() => {
+    setState((s) => {
+      if (!s.pausedAt) return s;
+      const add = Date.now() - new Date(s.pausedAt).getTime();
+      return { ...s, pausedAt: null, pausedTotalMs: s.pausedTotalMs + add };
+    });
+  }, []);
+
+  const setStartTime = useCallback((iso: string) => {
+    setState((s) => ({ ...s, startedAt: iso, pausedTotalMs: 0, pausedAt: null }));
+  }, []);
+
   const stop = useCallback(() => setState((s) => {
     if (!s.startedAt) return s;
-    const hours = (Date.now() - new Date(s.startedAt).getTime()) / 3_600_000;
-    const completed = hours >= s.windowHours;
+    const proto = getProtocol(s.protocol);
+    const endedAt = new Date();
+    let pausedMs = s.pausedTotalMs;
+    if (s.pausedAt) pausedMs += endedAt.getTime() - new Date(s.pausedAt).getTime();
+    const durationMs = endedAt.getTime() - new Date(s.startedAt).getTime() - pausedMs;
+    const targetMs = proto.fast * 3_600_000;
+    const completed = durationMs >= targetMs;
     const today = todayKey();
+    const entry: FastEntry = {
+      id: (typeof crypto !== "undefined" && "randomUUID" in crypto) ? crypto.randomUUID() : String(Date.now()),
+      startedAt: s.startedAt,
+      endedAt: endedAt.toISOString(),
+      durationMs,
+      targetMs,
+      completed,
+      protocol: s.protocol,
+    };
+    const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+    const sameDay = s.lastCompletedDate === today;
+    const consecutive = s.lastCompletedDate === yesterday;
+    const newStreak = completed
+      ? sameDay ? s.streak : consecutive ? s.streak + 1 : 1
+      : s.streak;
+    notify(completed ? "Fast complete!" : "Fast ended", `${fmtDur(durationMs)} • ${completed ? "Goal reached" : "Below goal"}`);
     return {
       ...s,
       startedAt: null,
-      streak: completed ? (s.lastCompletedDate === today ? s.streak : s.streak + 1) : s.streak,
+      pausedAt: null,
+      pausedTotalMs: 0,
+      streak: newStreak,
+      longestStreak: Math.max(s.longestStreak, newStreak),
       lastCompletedDate: completed ? today : s.lastCompletedDate,
+      history: [entry, ...s.history].slice(0, 365),
     };
   }), []);
-  const setWindow = useCallback((h: number) => setState((s) => ({ ...s, windowHours: h })), []);
-  return { state, start, stop, setWindow };
+
+  const deleteEntry = useCallback((id: string) => {
+    setState((s) => ({ ...s, history: s.history.filter((e) => e.id !== id) }));
+  }, []);
+
+  const updateEntry = useCallback((id: string, patch: Partial<Pick<FastEntry, "startedAt" | "endedAt">>) => {
+    setState((s) => ({
+      ...s,
+      history: s.history.map((e) => {
+        if (e.id !== id) return e;
+        const startedAt = patch.startedAt ?? e.startedAt;
+        const endedAt = patch.endedAt ?? e.endedAt;
+        const durationMs = new Date(endedAt).getTime() - new Date(startedAt).getTime();
+        return { ...e, startedAt, endedAt, durationMs, completed: durationMs >= e.targetMs };
+      }),
+    }));
+  }, []);
+
+  const setWindow = useCallback((h: number) => {
+    const match = FASTING_PROTOCOLS.find((p) => p.fast === h);
+    if (match) setProtocol(match.id);
+  }, [setProtocol]);
+
+  return { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry, setWindow };
 }
+
