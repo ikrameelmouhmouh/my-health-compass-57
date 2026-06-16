@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search, ScanLine, Heart, Plus, X, ChevronLeft, Loader2, Flame,
-  Minus, Trash2,
+  Minus, Trash2, Camera, Sparkles,
 } from "lucide-react";
 import {
   Dialog, DialogContent,
@@ -13,6 +13,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { BarcodeScanner } from "@/components/barcode-scanner";
+import { useServerFn } from "@tanstack/react-start";
+import { analyzeMealPhoto } from "@/lib/food-ai.functions";
 import {
   searchFoods, lookupBarcode, computeNutrition,
   useFoodLibrary, MEAL_TYPES, inferMealType,
