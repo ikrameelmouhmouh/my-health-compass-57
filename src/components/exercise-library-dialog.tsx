@@ -84,6 +84,7 @@ function ListView({
   onClose: () => void;
 }) {
   const gender = useGender();
+  return (
     <>
       <div className="border-b border-border px-5 pb-3 pt-5">
         <div className="flex items-center justify-between">
