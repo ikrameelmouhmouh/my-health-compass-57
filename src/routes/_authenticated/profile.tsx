@@ -77,17 +77,23 @@ function Profile() {
     }
   }, [isLoading, data, navigate]);
 
-  const p = data?.profile;
-  const sub = data?.subscription;
+  if (isLoading || !data?.profile?.onboarding_completed) {
+    return (
+      <div className="grid min-h-[100dvh] place-items-center bg-background">
+        <div className="size-6 animate-spin rounded-full border-2 border-border border-t-brand" />
+      </div>
+    );
+  }
 
+  const p = data.profile;
+  const sub = data.subscription;
   const isPremium = sub?.tier === "premium" && sub?.status === "active";
 
   // Derived stats
-  const calorieTarget = p?.daily_calories ?? 0;
-  const proteinTarget = p?.protein_g ?? 0;
-  const carbsTarget = p?.carbs_g ?? 0;
-  const fatTarget = p?.fat_g ?? 0;
-
+  const calorieTarget = p.daily_calories ?? 0;
+  const proteinTarget = p.protein_g ?? 0;
+  const carbsTarget = p.carbs_g ?? 0;
+  const fatTarget = p.fat_g ?? 0;
 
   const budget = calcCalorieBudget({
     target: calorieTarget,
@@ -106,12 +112,11 @@ function Profile() {
     (Math.min(waterPct, 100) + Math.min(stepsPct, 100) + Math.min(nutritionPct, 100) + (day.workoutCompleted ? 100 : 0)) / 4
   );
 
-  const currentWeight = weights.at(-1)?.kg ?? Number(p?.current_weight_kg ?? 0);
-  const previousWeight = weights.at(-2)?.kg ?? Number(p?.current_weight_kg ?? currentWeight);
+  const currentWeight = weights.at(-1)?.kg ?? Number(p.current_weight_kg ?? 0);
+  const previousWeight = weights.at(-2)?.kg ?? Number(p.current_weight_kg ?? currentWeight);
   const weightDelta = +(currentWeight - previousWeight).toFixed(1);
-  const goalWeight = Number(p?.goal_weight_kg ?? currentWeight);
-  const startWeight = Number(p?.current_weight_kg ?? currentWeight);
-
+  const goalWeight = Number(p.goal_weight_kg ?? currentWeight);
+  const startWeight = Number(p.current_weight_kg ?? currentWeight);
   const goalProgress = goalWeight !== startWeight
     ? Math.max(0, Math.min(100, ((startWeight - currentWeight) / (startWeight - goalWeight)) * 100))
     : 0;
@@ -138,16 +143,6 @@ function Profile() {
     const id = setInterval(() => setTick((n) => n + 1), 30_000);
     return () => clearInterval(id);
   }, [fasting.startedAt]);
-
-  if (isLoading || !p?.onboarding_completed) {
-    return (
-      <div className="grid min-h-[100dvh] place-items-center bg-background">
-        <div className="size-6 animate-spin rounded-full border-2 border-border border-t-brand" />
-      </div>
-    );
-  }
-
-
 
   async function changeLanguage(code: Language) {
     setLang(code);

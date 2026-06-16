@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Snowflake, Wind, Zap, Target, Sailboat, Music, Heart, Timer, Move, Flame, Tent, Anchor, Flower2, Crosshair, Fish, Gamepad2, Accessibility, TrendingUp } from "lucide-react";
+import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { WorkoutWizard } from "@/components/workout-wizard";
@@ -8,10 +8,6 @@ import { TemplateEditor } from "@/components/template-editor";
 import { ExerciseLibraryDialog } from "@/components/exercise-library-dialog";
 import { useWorkoutPlan, useTemplates, newTemplate, type WorkoutTemplate } from "@/lib/workout-prefs";
 import { EXERCISES } from "@/lib/exercise-library";
-import { WorkoutSessionDialog } from "@/components/workout-session-dialog";
-import { ProgramLibrary } from "@/components/program-library";
-
-import type { Exercise } from "@/lib/workout.functions";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
   component: FitnessPage,
@@ -49,10 +45,8 @@ function FitnessPage() {
           <>
             <EmptyState onStart={() => setShowWizard(true)} />
             <LibrarySection />
-            <ProgramLibrary />
             <TemplatesSection />
           </>
-
         ) : (
           <div className="mt-6">
             <WorkoutWizard
@@ -105,7 +99,7 @@ function ViewTabs({ view, setView }: { view: View; setView: (v: View) => void })
 function Header() {
   return (
     <div className="flex items-center gap-3">
-      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[color-mix(in_oklab,var(--mod-fitness)_22%,transparent)] text-[var(--mod-fitness)]">
+      <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
         <Dumbbell className="size-6" />
       </div>
       <div className="min-w-0">
@@ -152,7 +146,6 @@ function Dashboard({
   view: View;
   setView: (v: View) => void;
 }) {
-  const [activeSession, setActiveSession] = useState<{ name: string; exercises: Exercise[] } | null>(null);
 
   const plan = stored?.plan;
   const completedDays = stored?.completedDays ?? [];
@@ -263,12 +256,6 @@ function Dashboard({
                       {ex.notes && <p className="mt-1 text-xs text-muted-foreground">{ex.notes}</p>}
                     </div>
                   ))}
-                  <Button
-                    className="mt-2 w-full"
-                    onClick={() => setActiveSession({ name: `${d.day}: ${d.focus}`, exercises: d.exercises })}
-                  >
-                    ▶ Start training
-                  </Button>
                 </div>
               )}
             </div>
@@ -277,9 +264,7 @@ function Dashboard({
       </div>
 
       <LibrarySection />
-      <ProgramLibrary />
       <TemplatesSection />
-
 
 
       {/* Progression notes */}
@@ -298,14 +283,6 @@ function Dashboard({
           Clear plan
         </button>
       </div>
-      {activeSession && (
-        <WorkoutSessionDialog
-          open
-          onClose={() => setActiveSession(null)}
-          workoutName={activeSession.name}
-          exercises={activeSession.exercises}
-        />
-      )}
     </main>
   );
 }
@@ -324,7 +301,6 @@ function TemplatesSection() {
   const { templates, loaded, upsert, remove } = useTemplates();
   const [editing, setEditing] = useState<WorkoutTemplate | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [activeSession, setActiveSession] = useState<WorkoutTemplate | null>(null);
 
   if (!loaded) return null;
 
@@ -390,9 +366,6 @@ function TemplatesSection() {
                         <p className="text-xs text-muted-foreground">{ex.sets} × {ex.reps} · rust {ex.restSec}s</p>
                       </div>
                     ))}
-                    <Button className="mt-2 w-full" onClick={() => setActiveSession(t)}>
-                      ▶ Start training
-                    </Button>
                   </div>
                 )}
               </div>
@@ -407,15 +380,6 @@ function TemplatesSection() {
           initial={editing}
           onClose={() => setEditing(null)}
           onSave={(t) => { upsert(t); setEditing(null); }}
-        />
-      )}
-      {activeSession && (
-        <WorkoutSessionDialog
-          open
-          onClose={() => setActiveSession(null)}
-          workoutName={activeSession.name}
-          exercises={activeSession.exercises}
-          templateId={activeSession.id}
         />
       )}
     </section>
@@ -459,142 +423,32 @@ function LibrarySection() {
   );
 }
 
-type ActivityCategory =
-  | "Cardio"
-  | "Buiten"
-  | "Sport"
-  | "Wellness"
-  | "Kracht & Functioneel"
-  | "Watersport"
-  | "Wintersport"
-  | "Dans & Vechtsport"
-  | "Overig";
-
 type ActivityItem = {
   id: string;
   name: string;
   desc: string;
   icon: typeof Activity;
   kcalPerHour: number;
-  category: ActivityCategory;
+  category: "Cardio" | "Buiten" | "Sport" | "Wellness";
 };
 
 const ACTIVITIES: ActivityItem[] = [
-  // Cardio
-  { id: "hiit", name: "HIIT", desc: "Korte explosieve intervallen", icon: Zap, kcalPerHour: 700, category: "Cardio" },
-  { id: "indoor-run", name: "Hardlopen (binnen)", desc: "Loopband", icon: Footprints, kcalPerHour: 600, category: "Cardio" },
-  { id: "indoor-bike", name: "Indoor fietsen", desc: "Spinning / hometrainer", icon: Bike, kcalPerHour: 500, category: "Cardio" },
-  { id: "elliptical", name: "Crosstrainer", desc: "Elliptische trainer", icon: Activity, kcalPerHour: 450, category: "Cardio" },
-  { id: "rowing", name: "Roeien", desc: "Roeimachine", icon: Waves, kcalPerHour: 550, category: "Cardio" },
-  { id: "stair-stepper", name: "Stair stepper", desc: "Trapmachine", icon: TrendingUp, kcalPerHour: 500, category: "Cardio" },
-  { id: "jump-rope", name: "Touwtjespringen", desc: "Snel en explosief", icon: Activity, kcalPerHour: 700, category: "Cardio" },
-  { id: "mixed-cardio", name: "Gemengde cardio", desc: "Combinatie van cardio", icon: HeartPulse, kcalPerHour: 500, category: "Cardio" },
-  { id: "hand-cycling", name: "Handfietsen", desc: "Bovenlichaam cardio", icon: Bike, kcalPerHour: 400, category: "Cardio" },
-  { id: "wheelchair-run", name: "Rolstoel (looptempo)", desc: "Sneller tempo", icon: Accessibility, kcalPerHour: 500, category: "Cardio" },
-  { id: "wheelchair-walk", name: "Rolstoel (wandeltempo)", desc: "Rustig tempo", icon: Accessibility, kcalPerHour: 300, category: "Cardio" },
-  { id: "fitness-gaming", name: "Fitness gaming", desc: "Actieve videogames", icon: Gamepad2, kcalPerHour: 350, category: "Cardio" },
-
-  // Buiten
-  { id: "run-outdoor", name: "Buiten hardlopen", desc: "Joggen of duurloop", icon: Footprints, kcalPerHour: 600, category: "Buiten" },
-  { id: "walk", name: "Wandelen", desc: "Stevige wandeling", icon: Footprints, kcalPerHour: 250, category: "Buiten" },
-  { id: "indoor-walk", name: "Wandelen (binnen)", desc: "Loopband wandelen", icon: Footprints, kcalPerHour: 230, category: "Buiten" },
+  { id: "swim", name: "Zwemmen", desc: "Volledig lichaam, gewrichtsvriendelijk", icon: Waves, kcalPerHour: 500, category: "Cardio" },
   { id: "bike", name: "Fietsen", desc: "Buiten fietsen of toer", icon: Bike, kcalPerHour: 450, category: "Buiten" },
+  { id: "run-outdoor", name: "Buiten hardlopen", desc: "Joggen of duurloop", icon: Footprints, kcalPerHour: 600, category: "Buiten" },
+  { id: "walk", name: "Wandelen", desc: "Stevige wandeling in de natuur", icon: Trees, kcalPerHour: 250, category: "Buiten" },
   { id: "hike", name: "Hiken", desc: "Wandeling in heuvels of bergen", icon: Mountain, kcalPerHour: 400, category: "Buiten" },
-  { id: "nature", name: "Natuurwandeling", desc: "Bos en park", icon: Trees, kcalPerHour: 280, category: "Buiten" },
-  { id: "climb", name: "Klimmen", desc: "Boulderen of sportklimmen", icon: Mountain, kcalPerHour: 550, category: "Buiten" },
-  { id: "equestrian", name: "Paardrijden", desc: "Dressuur of buitenrit", icon: Activity, kcalPerHour: 350, category: "Buiten" },
-  { id: "hunting", name: "Jagen", desc: "Buitenactiviteit", icon: Crosshair, kcalPerHour: 300, category: "Buiten" },
-  { id: "fishing", name: "Vissen", desc: "Rustige buitensport", icon: Fish, kcalPerHour: 200, category: "Buiten" },
-  { id: "archery", name: "Boogschieten", desc: "Precisiesport", icon: Target, kcalPerHour: 250, category: "Buiten" },
-  { id: "play", name: "Spelen", desc: "Actief buiten spelen", icon: Activity, kcalPerHour: 300, category: "Buiten" },
-
-  // Sport
   { id: "football", name: "Voetballen", desc: "Wedstrijd of training", icon: Activity, kcalPerHour: 550, category: "Sport" },
   { id: "basketball", name: "Basketbal", desc: "Pick-up game of training", icon: Activity, kcalPerHour: 500, category: "Sport" },
   { id: "tennis", name: "Tennis", desc: "Singles of dubbel", icon: Activity, kcalPerHour: 450, category: "Sport" },
   { id: "padel", name: "Padel", desc: "Wedstrijd of recreatief", icon: Activity, kcalPerHour: 420, category: "Sport" },
-  { id: "table-tennis", name: "Tafeltennis", desc: "Snelle reflexen", icon: Activity, kcalPerHour: 280, category: "Sport" },
-  { id: "badminton", name: "Badminton", desc: "Racketsport", icon: Activity, kcalPerHour: 400, category: "Sport" },
-  { id: "squash", name: "Squash", desc: "Intensieve racketsport", icon: Activity, kcalPerHour: 600, category: "Sport" },
-  { id: "racquetball", name: "Racquetball", desc: "Racketsport binnen", icon: Activity, kcalPerHour: 550, category: "Sport" },
-  { id: "pickleball", name: "Pickleball", desc: "Mix tennis/badminton", icon: Activity, kcalPerHour: 350, category: "Sport" },
-  { id: "volleyball", name: "Volleybal", desc: "Indoor of beach", icon: Activity, kcalPerHour: 400, category: "Sport" },
-  { id: "handball", name: "Handbal", desc: "Teamsport", icon: Activity, kcalPerHour: 500, category: "Sport" },
-  { id: "rugby", name: "Rugby", desc: "Contactsport", icon: Activity, kcalPerHour: 600, category: "Sport" },
-  { id: "american-football", name: "American Football", desc: "Wedstrijd of training", icon: Activity, kcalPerHour: 580, category: "Sport" },
-  { id: "australian-football", name: "Australian Football", desc: "AFL", icon: Activity, kcalPerHour: 580, category: "Sport" },
-  { id: "baseball", name: "Honkbal", desc: "Wedstrijd of training", icon: Activity, kcalPerHour: 350, category: "Sport" },
-  { id: "softball", name: "Softbal", desc: "Wedstrijd of training", icon: Activity, kcalPerHour: 350, category: "Sport" },
-  { id: "cricket", name: "Cricket", desc: "Wedstrijd of training", icon: Activity, kcalPerHour: 350, category: "Sport" },
-  { id: "hockey", name: "Hockey", desc: "Veld of ijs", icon: Activity, kcalPerHour: 500, category: "Sport" },
-  { id: "lacrosse", name: "Lacrosse", desc: "Teamsport", icon: Activity, kcalPerHour: 500, category: "Sport" },
-  { id: "golf", name: "Golf", desc: "Volledige ronde", icon: Activity, kcalPerHour: 280, category: "Sport" },
-  { id: "bowling", name: "Bowlen", desc: "Recreatief", icon: Activity, kcalPerHour: 200, category: "Sport" },
-  { id: "disc-sports", name: "Frisbee sport", desc: "Ultimate of disc golf", icon: Activity, kcalPerHour: 350, category: "Sport" },
-  { id: "skating", name: "Skaten", desc: "Inline of rolschaatsen", icon: Activity, kcalPerHour: 450, category: "Sport" },
-  { id: "gymnastics", name: "Turnen", desc: "Gymnastiek", icon: Activity, kcalPerHour: 400, category: "Sport" },
-  { id: "track-field", name: "Atletiek", desc: "Sprint, springen, werpen", icon: Activity, kcalPerHour: 500, category: "Sport" },
-  { id: "fencing", name: "Schermen", desc: "Floret, sabel, degen", icon: Activity, kcalPerHour: 350, category: "Sport" },
-  { id: "triathlon", name: "Triatlon", desc: "Zwem-fiets-loop", icon: HeartPulse, kcalPerHour: 650, category: "Sport" },
-
-  // Watersport
-  { id: "swim", name: "Zwemmen", desc: "Volledig lichaam, gewrichtsvriendelijk", icon: Waves, kcalPerHour: 500, category: "Watersport" },
-  { id: "water-fitness", name: "Aquafitness", desc: "Workout in het water", icon: Waves, kcalPerHour: 350, category: "Watersport" },
-  { id: "water-polo", name: "Waterpolo", desc: "Teamsport in water", icon: Waves, kcalPerHour: 550, category: "Watersport" },
-  { id: "sailing", name: "Zeilen", desc: "Op het water", icon: Sailboat, kcalPerHour: 250, category: "Watersport" },
-  { id: "paddle", name: "Peddelsport", desc: "Kajak, kano, SUP", icon: Anchor, kcalPerHour: 400, category: "Watersport" },
-  { id: "surfing", name: "Surfen", desc: "Golfsurf of windsurf", icon: Waves, kcalPerHour: 350, category: "Watersport" },
-
-  // Wintersport
-  { id: "downhill-ski", name: "Skiën", desc: "Afdaling", icon: Snowflake, kcalPerHour: 450, category: "Wintersport" },
-  { id: "xc-ski", name: "Langlaufen", desc: "Cross-country", icon: Snowflake, kcalPerHour: 600, category: "Wintersport" },
-  { id: "snowboard", name: "Snowboarden", desc: "Piste of park", icon: Snowflake, kcalPerHour: 450, category: "Wintersport" },
-  { id: "snow-sports", name: "Sneeuwsport", desc: "Overige wintersport", icon: Snowflake, kcalPerHour: 400, category: "Wintersport" },
-  { id: "ice-skating", name: "Schaatsen", desc: "Indoor of natuurijs", icon: Snowflake, kcalPerHour: 450, category: "Wintersport" },
-  { id: "curling", name: "Curling", desc: "IJssport", icon: Snowflake, kcalPerHour: 250, category: "Wintersport" },
-
-  // Dans & Vechtsport
-  { id: "boxing", name: "Boksen", desc: "Bagwork of sparring", icon: Activity, kcalPerHour: 650, category: "Dans & Vechtsport" },
-  { id: "kickboxing", name: "Kickboksen", desc: "Stand-up vechtsport", icon: Activity, kcalPerHour: 700, category: "Dans & Vechtsport" },
-  { id: "mma", name: "MMA", desc: "Mixed martial arts", icon: Activity, kcalPerHour: 700, category: "Dans & Vechtsport" },
-  { id: "martial-arts", name: "Vechtsport", desc: "Karate, judo, BJJ", icon: Activity, kcalPerHour: 600, category: "Dans & Vechtsport" },
-  { id: "wrestling", name: "Worstelen", desc: "Mat sport", icon: Activity, kcalPerHour: 600, category: "Dans & Vechtsport" },
-  { id: "dance", name: "Dansen", desc: "Vrije dans", icon: Music, kcalPerHour: 400, category: "Dans & Vechtsport" },
-  { id: "social-dance", name: "Sociale dans", desc: "Salsa, swing, ballroom", icon: Music, kcalPerHour: 350, category: "Dans & Vechtsport" },
-
-  // Kracht & Functioneel
-  { id: "strength", name: "Krachttraining", desc: "Traditioneel met gewichten", icon: Dumbbell, kcalPerHour: 400, category: "Kracht & Functioneel" },
-  { id: "functional", name: "Functionele kracht", desc: "Compound bewegingen", icon: Dumbbell, kcalPerHour: 450, category: "Kracht & Functioneel" },
-  { id: "core", name: "Core training", desc: "Buik en romp", icon: Flame, kcalPerHour: 300, category: "Kracht & Functioneel" },
-  { id: "cross-training", name: "Crosstraining", desc: "Variatie aan oefeningen", icon: Activity, kcalPerHour: 500, category: "Kracht & Functioneel" },
-  { id: "step-training", name: "Step training", desc: "Aerobic met step", icon: TrendingUp, kcalPerHour: 400, category: "Kracht & Functioneel" },
-  { id: "flexibility", name: "Flexibiliteit", desc: "Stretchen en mobiliteit", icon: Move, kcalPerHour: 150, category: "Kracht & Functioneel" },
-  { id: "cooldown", name: "Cooldown", desc: "Rustige afsluiting", icon: Wind, kcalPerHour: 120, category: "Kracht & Functioneel" },
-  { id: "prep-recovery", name: "Warming-up & herstel", desc: "Voorbereiding en herstel", icon: Timer, kcalPerHour: 150, category: "Kracht & Functioneel" },
-
-  // Wellness
+  { id: "boxing", name: "Boksen", desc: "Bagwork of sparring", icon: Activity, kcalPerHour: 650, category: "Sport" },
   { id: "yoga", name: "Yoga", desc: "Flow of restorative", icon: HeartPulse, kcalPerHour: 250, category: "Wellness" },
-  { id: "pilates", name: "Pilates", desc: "Controle en core", icon: Flower2, kcalPerHour: 250, category: "Wellness" },
-  { id: "tai-chi", name: "Tai chi", desc: "Bewegende meditatie", icon: Flower2, kcalPerHour: 200, category: "Wellness" },
-  { id: "barre", name: "Barre", desc: "Ballet-geïnspireerd", icon: Flower2, kcalPerHour: 300, category: "Wellness" },
-  { id: "mind-body", name: "Mind & Body", desc: "Geest en lichaam", icon: Heart, kcalPerHour: 200, category: "Wellness" },
-
-  // Overig
-  { id: "other", name: "Overig", desc: "Andere activiteit", icon: Tent, kcalPerHour: 300, category: "Overig" },
+  { id: "hiit", name: "HIIT", desc: "Korte explosieve intervallen", icon: Activity, kcalPerHour: 700, category: "Cardio" },
 ];
 
 function ActivitiesSection() {
-  const categories: ActivityCategory[] = [
-    "Cardio",
-    "Kracht & Functioneel",
-    "Buiten",
-    "Sport",
-    "Watersport",
-    "Wintersport",
-    "Dans & Vechtsport",
-    "Wellness",
-    "Overig",
-  ];
+  const categories = ["Cardio", "Buiten", "Sport", "Wellness"] as const;
   return (
     <section className="mt-6 space-y-6">
       <div>
@@ -613,7 +467,7 @@ function ActivitiesSection() {
                   key={a.id}
                   className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-card/50 p-3 text-left transition hover:bg-card"
                 >
-                  <div className="grid size-10 place-items-center rounded-xl bg-[color-mix(in_oklab,var(--mod-fitness)_22%,transparent)] text-[var(--mod-fitness)]">
+                  <div className="grid size-10 place-items-center rounded-xl bg-brand/15 text-brand">
                     <a.icon className="size-5" />
                   </div>
                   <div className="min-w-0">

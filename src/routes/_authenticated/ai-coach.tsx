@@ -18,7 +18,7 @@ function AiCoachPage() {
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
       <div className="flex items-center gap-3">
-        <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-[color-mix(in_oklab,var(--mod-ai)_25%,transparent)] text-[var(--mod-ai)]">
+        <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
           <Sparkles className="size-6" />
         </div>
         <div className="min-w-0">
