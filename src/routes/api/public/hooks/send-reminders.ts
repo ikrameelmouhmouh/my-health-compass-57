@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import webpush from "web-push";
 
 // Public cron endpoint. Authenticated by Supabase anon apikey header.
 // Sends daily workout-reminder pushes to users with no completed session today
@@ -19,6 +18,7 @@ export const Route = createFileRoute("/api/public/hooks/send-reminders")({
         const subject = process.env.VAPID_SUBJECT || "mailto:noreply@vita.app";
         if (!vapidPrivate) return new Response("VAPID not configured", { status: 500 });
 
+        const { default: webpush } = await import("web-push");
         webpush.setVapidDetails(subject, vapidPublic, vapidPrivate);
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
