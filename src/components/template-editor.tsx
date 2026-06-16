@@ -25,6 +25,7 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
   const [focus, setFocus] = useState(initial.focus ?? "");
   const [exercises, setExercises] = useState<Exercise[]>(initial.exercises);
   const [coachOpen, setCoachOpen] = useState(false);
+  const [libOpen, setLibOpen] = useState(false);
 
   const updateEx = (i: number, patch: Partial<Exercise>) =>
     setExercises((c) => c.map((e, idx) => (idx === i ? { ...e, ...patch } : e)));
