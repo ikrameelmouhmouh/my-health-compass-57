@@ -259,6 +259,12 @@ function Dashboard({
                       {ex.notes && <p className="mt-1 text-xs text-muted-foreground">{ex.notes}</p>}
                     </div>
                   ))}
+                  <Button
+                    className="mt-2 w-full"
+                    onClick={() => setActiveSession({ name: `${d.day}: ${d.focus}`, exercises: d.exercises })}
+                  >
+                    ▶ Start training
+                  </Button>
                 </div>
               )}
             </div>
