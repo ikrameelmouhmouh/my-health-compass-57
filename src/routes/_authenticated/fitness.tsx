@@ -29,6 +29,7 @@ function FitnessPage() {
         {!stored && !showWizard ? (
           <>
             <EmptyState onStart={() => setShowWizard(true)} />
+            <LibrarySection />
             <TemplatesSection />
           </>
         ) : (
