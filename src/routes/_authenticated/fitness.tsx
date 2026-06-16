@@ -423,3 +423,68 @@ function LibrarySection() {
   );
 }
 
+type ActivityItem = {
+  id: string;
+  name: string;
+  desc: string;
+  icon: typeof Activity;
+  kcalPerHour: number;
+  category: "Cardio" | "Buiten" | "Sport" | "Wellness";
+};
+
+const ACTIVITIES: ActivityItem[] = [
+  { id: "swim", name: "Zwemmen", desc: "Volledig lichaam, gewrichtsvriendelijk", icon: Waves, kcalPerHour: 500, category: "Cardio" },
+  { id: "bike", name: "Fietsen", desc: "Buiten fietsen of toer", icon: Bike, kcalPerHour: 450, category: "Buiten" },
+  { id: "run-outdoor", name: "Buiten hardlopen", desc: "Joggen of duurloop", icon: Footprints, kcalPerHour: 600, category: "Buiten" },
+  { id: "walk", name: "Wandelen", desc: "Stevige wandeling in de natuur", icon: Trees, kcalPerHour: 250, category: "Buiten" },
+  { id: "hike", name: "Hiken", desc: "Wandeling in heuvels of bergen", icon: Mountain, kcalPerHour: 400, category: "Buiten" },
+  { id: "football", name: "Voetballen", desc: "Wedstrijd of training", icon: Activity, kcalPerHour: 550, category: "Sport" },
+  { id: "basketball", name: "Basketbal", desc: "Pick-up game of training", icon: Activity, kcalPerHour: 500, category: "Sport" },
+  { id: "tennis", name: "Tennis", desc: "Singles of dubbel", icon: Activity, kcalPerHour: 450, category: "Sport" },
+  { id: "padel", name: "Padel", desc: "Wedstrijd of recreatief", icon: Activity, kcalPerHour: 420, category: "Sport" },
+  { id: "boxing", name: "Boksen", desc: "Bagwork of sparring", icon: Activity, kcalPerHour: 650, category: "Sport" },
+  { id: "yoga", name: "Yoga", desc: "Flow of restorative", icon: HeartPulse, kcalPerHour: 250, category: "Wellness" },
+  { id: "hiit", name: "HIIT", desc: "Korte explosieve intervallen", icon: Activity, kcalPerHour: 700, category: "Cardio" },
+];
+
+function ActivitiesSection() {
+  const categories = ["Cardio", "Buiten", "Sport", "Wellness"] as const;
+  return (
+    <section className="mt-6 space-y-6">
+      <div>
+        <h2 className="font-display text-xl font-semibold tracking-tight">Workouts & activiteiten</h2>
+        <p className="mt-1 text-xs text-muted-foreground">Naast gym — zwemmen, fietsen, hardlopen, sporten en meer.</p>
+      </div>
+      {categories.map((cat) => {
+        const items = ACTIVITIES.filter((a) => a.category === cat);
+        if (items.length === 0) return null;
+        return (
+          <div key={cat}>
+            <h3 className="mb-2 text-sm font-semibold">{cat}</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {items.map((a) => (
+                <button
+                  key={a.id}
+                  className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-card/50 p-3 text-left transition hover:bg-card"
+                >
+                  <div className="grid size-10 place-items-center rounded-xl bg-brand/15 text-brand">
+                    <a.icon className="size-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{a.name}</p>
+                    <p className="line-clamp-2 text-[11px] text-muted-foreground">{a.desc}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">~{a.kcalPerHour} kcal/u</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </section>
+  );
+}
+
+  );
+}
+
