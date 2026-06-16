@@ -318,6 +318,7 @@ function TemplatesSection() {
   const { templates, loaded, upsert, remove } = useTemplates();
   const [editing, setEditing] = useState<WorkoutTemplate | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [activeSession, setActiveSession] = useState<WorkoutTemplate | null>(null);
 
   if (!loaded) return null;
 
