@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Sparkles } from "lucide-react";
+import { Plus, Trash2, Sparkles, BookOpen } from "lucide-react";
 import type { Exercise } from "@/lib/workout.functions";
 import { type WorkoutTemplate } from "@/lib/workout-prefs";
 import { CoachSuggestDialog } from "./coach-suggest-dialog";
+import { ExerciseLibraryDialog } from "./exercise-library-dialog";
 
 const DAYS = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"];
 
@@ -24,6 +25,7 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
   const [focus, setFocus] = useState(initial.focus ?? "");
   const [exercises, setExercises] = useState<Exercise[]>(initial.exercises);
   const [coachOpen, setCoachOpen] = useState(false);
+  const [libOpen, setLibOpen] = useState(false);
 
   const updateEx = (i: number, patch: Partial<Exercise>) =>
     setExercises((c) => c.map((e, idx) => (idx === i ? { ...e, ...patch } : e)));
@@ -59,11 +61,16 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <Label className="text-sm font-semibold">Oefeningen ({exercises.length})</Label>
-            <Button type="button" size="sm" variant="outline" onClick={() => setCoachOpen(true)}>
-              <Sparkles className="mr-1 size-3.5" /> AI Coach
-            </Button>
+            <div className="flex gap-1.5">
+              <Button type="button" size="sm" variant="outline" onClick={() => setLibOpen(true)}>
+                <BookOpen className="mr-1 size-3.5" /> Bibliotheek
+              </Button>
+              <Button type="button" size="sm" variant="outline" onClick={() => setCoachOpen(true)}>
+                <Sparkles className="mr-1 size-3.5" /> AI Coach
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -122,6 +129,18 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
           defaultFocus={focus}
           onClose={() => setCoachOpen(false)}
           onAdd={(items) => { setExercises((c) => [...c, ...items]); setCoachOpen(false); }}
+        />
+
+        <ExerciseLibraryDialog
+          open={libOpen}
+          onClose={() => setLibOpen(false)}
+          pickLabel="Aan training toevoegen"
+          onPick={(ex) =>
+            setExercises((c) => [
+              ...c,
+              { name: ex.name, sets: 3, reps: "10", restSec: 90, suggestedWeight: "" },
+            ])
+          }
         />
       </DialogContent>
     </Dialog>
