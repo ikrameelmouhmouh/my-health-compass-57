@@ -485,6 +485,3 @@ function ActivitiesSection() {
   );
 }
 
-  );
-}
-
