@@ -101,6 +101,9 @@ function Dashboard({
   const wizard = stored?.wizard;
 
   const sortedDays = useMemo(
+    () => (plan ? [...plan.days].sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day)) : []),
+    [plan],
+  );
     () => [...plan.days].sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day)),
     [plan.days],
   );
