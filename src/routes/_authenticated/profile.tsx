@@ -28,6 +28,7 @@ import {
 } from "@/lib/dashboard-prefs";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
+import { RetentionSection } from "@/components/retention-section";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({ meta: [{ title: "Today — Vita" }] }),
@@ -368,6 +369,13 @@ function Profile() {
           </div>
         )}
       </section>
+
+      {/* Retention: streaks, week overview, badges, push */}
+      <div className="mt-5">
+        <RetentionSection />
+      </div>
+
+
 
       {/* --- Sheets / Dialogs --- */}
       <CustomizeSheet
