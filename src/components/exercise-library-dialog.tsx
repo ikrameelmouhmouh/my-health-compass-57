@@ -83,6 +83,7 @@ function ListView({
   onSelect: (ex: LibraryExercise) => void;
   onClose: () => void;
 }) {
+  const gender = useGender();
   return (
     <>
       <div className="border-b border-border px-5 pb-3 pt-5">
@@ -106,23 +107,26 @@ function ListView({
           <p className="py-10 text-center text-sm text-muted-foreground">Geen oefeningen gevonden.</p>
         ) : (
           <div className="space-y-2">
-            {items.map((ex) => (
-              <button
-                key={ex.id}
-                onClick={() => onSelect(ex)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card/50 p-2.5 text-left transition hover:bg-card"
-              >
-                <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
-                  <img src={ex.image} alt={ex.name} loading="lazy" className="size-full object-cover" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{ex.name}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {ex.equipment} · {ex.primary.join(", ")}
-                  </p>
-                </div>
-              </button>
-            ))}
+            {items.map((ex) => {
+              const thumb = getExerciseFrames(ex, gender)[0];
+              return (
+                <button
+                  key={ex.id}
+                  onClick={() => onSelect(ex)}
+                  className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card/50 p-2.5 text-left transition hover:bg-card"
+                >
+                  <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
+                    <img src={thumb} alt={ex.name} loading="lazy" className="size-full object-cover" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{ex.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {ex.equipment} · {ex.primary.join(", ")}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
