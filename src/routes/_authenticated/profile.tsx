@@ -106,11 +106,12 @@ function Profile() {
     (Math.min(waterPct, 100) + Math.min(stepsPct, 100) + Math.min(nutritionPct, 100) + (day.workoutCompleted ? 100 : 0)) / 4
   );
 
-  const currentWeight = weights.at(-1)?.kg ?? Number(p.current_weight_kg ?? 0);
-  const previousWeight = weights.at(-2)?.kg ?? Number(p.current_weight_kg ?? currentWeight);
+  const currentWeight = weights.at(-1)?.kg ?? Number(p?.current_weight_kg ?? 0);
+  const previousWeight = weights.at(-2)?.kg ?? Number(p?.current_weight_kg ?? currentWeight);
   const weightDelta = +(currentWeight - previousWeight).toFixed(1);
-  const goalWeight = Number(p.goal_weight_kg ?? currentWeight);
-  const startWeight = Number(p.current_weight_kg ?? currentWeight);
+  const goalWeight = Number(p?.goal_weight_kg ?? currentWeight);
+  const startWeight = Number(p?.current_weight_kg ?? currentWeight);
+
   const goalProgress = goalWeight !== startWeight
     ? Math.max(0, Math.min(100, ((startWeight - currentWeight) / (startWeight - goalWeight)) * 100))
     : 0;
