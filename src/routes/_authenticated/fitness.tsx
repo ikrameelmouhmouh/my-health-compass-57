@@ -403,6 +403,15 @@ function TemplatesSection() {
           onSave={(t) => { upsert(t); setEditing(null); }}
         />
       )}
+      {activeSession && (
+        <WorkoutSessionDialog
+          open
+          onClose={() => setActiveSession(null)}
+          workoutName={activeSession.name}
+          exercises={activeSession.exercises}
+          templateId={activeSession.id}
+        />
+      )}
     </section>
   );
 }
