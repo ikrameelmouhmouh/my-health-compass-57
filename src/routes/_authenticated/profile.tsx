@@ -88,14 +88,21 @@ function Profile() {
 
   // Derived stats
   const calorieTarget = p.daily_calories ?? 0;
-  const caloriesRemaining = Math.max(0, calorieTarget - day.caloriesIn);
   const proteinTarget = p.protein_g ?? 0;
   const carbsTarget = p.carbs_g ?? 0;
   const fatTarget = p.fat_g ?? 0;
 
+  const budget = calcCalorieBudget({
+    target: calorieTarget,
+    eaten: day.caloriesIn,
+    workoutBurn: day.caloriesOut,
+    steps: day.steps,
+    prefs: caloriePrefs,
+  });
+
   const waterPct = pct(day.waterMl, WATER_GOAL_ML);
   const stepsPct = pct(day.steps, STEP_GOAL);
-  const nutritionPct = pct(day.caloriesIn, calorieTarget);
+  const nutritionPct = pct(day.caloriesIn, budget.allowance);
   const workoutDone = day.workoutCompleted ? 100 : workout ? 0 : 0;
 
   const overallPct = Math.round(
