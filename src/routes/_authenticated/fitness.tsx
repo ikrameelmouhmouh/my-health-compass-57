@@ -292,6 +292,14 @@ function Dashboard({
           Clear plan
         </button>
       </div>
+      {activeSession && (
+        <WorkoutSessionDialog
+          open
+          onClose={() => setActiveSession(null)}
+          workoutName={activeSession.name}
+          exercises={activeSession.exercises}
+        />
+      )}
     </main>
   );
 }
