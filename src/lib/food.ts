@@ -106,30 +106,72 @@ function mapOFFProduct(p: any): FoodItem | null {
   };
 }
 
+const OFF_FIELDS =
+  "code,product_name,product_name_nl,generic_name,generic_name_nl,brands,image_small_url,image_thumb_url,image_url,nutriments,serving_size,serving_quantity";
+
+function preferNl(p: any) {
+  if (p && (p.product_name_nl || p.generic_name_nl)) {
+    return {
+      ...p,
+      product_name: p.product_name_nl || p.product_name,
+      generic_name: p.generic_name_nl || p.generic_name,
+    };
+  }
+  return p;
+}
+
 export async function searchFoods(query: string, signal?: AbortSignal): Promise<FoodItem[]> {
   const q = query.trim();
   if (!q) return [];
-  const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
+  // Search Dutch index first (NL products, Albert Heijn / Jumbo / etc.), then fall back to world.
+  const nlUrl = `https://nl.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
     q
-  )}&search_simple=1&action=process&json=1&page_size=25&fields=code,product_name,generic_name,brands,image_small_url,image_thumb_url,image_url,nutriments,serving_size,serving_quantity`;
-  const res = await fetch(url, { signal });
-  if (!res.ok) return [];
-  const data = await res.json();
-  const items: FoodItem[] = (data.products ?? [])
-    .map(mapOFFProduct)
-    .filter(Boolean) as FoodItem[];
-  return items;
+  )}&search_simple=1&action=process&json=1&page_size=25&lc=nl&cc=nl&fields=${OFF_FIELDS}`;
+  const worldUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
+    q
+  )}&search_simple=1&action=process&json=1&page_size=15&lc=nl&fields=${OFF_FIELDS}`;
+
+  const fetchList = async (url: string) => {
+    try {
+      const res = await fetch(url, { signal });
+      if (!res.ok) return [] as FoodItem[];
+      const data = await res.json();
+      return ((data.products ?? []) as any[])
+        .map((p) => mapOFFProduct(preferNl(p)))
+        .filter(Boolean) as FoodItem[];
+    } catch {
+      return [] as FoodItem[];
+    }
+  };
+
+  const [nl, world] = await Promise.all([fetchList(nlUrl), fetchList(worldUrl)]);
+  const seen = new Set<string>();
+  const merged: FoodItem[] = [];
+  for (const item of [...nl, ...world]) {
+    const key = item.barcode || item.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(item);
+  }
+  return merged;
 }
 
 export async function lookupBarcode(code: string): Promise<FoodItem | null> {
   const c = code.replace(/\D/g, "");
   if (!c) return null;
-  const url = `https://world.openfoodfacts.org/api/v2/product/${c}.json?fields=code,product_name,generic_name,brands,image_small_url,image_thumb_url,image_url,nutriments,serving_size,serving_quantity`;
-  const res = await fetch(url);
-  if (!res.ok) return null;
-  const data = await res.json();
-  if (data.status !== 1) return null;
-  return mapOFFProduct(data.product);
+  const urls = [
+    `https://nl.openfoodfacts.org/api/v2/product/${c}.json?lc=nl&cc=nl&fields=${OFF_FIELDS}`,
+    `https://world.openfoodfacts.org/api/v2/product/${c}.json?lc=nl&fields=${OFF_FIELDS}`,
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data.status === 1) return mapOFFProduct(preferNl(data.product));
+    } catch {}
+  }
+  return null;
 }
 
 // ============ Meals storage ============
