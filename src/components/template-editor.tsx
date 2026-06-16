@@ -130,6 +130,18 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
           onClose={() => setCoachOpen(false)}
           onAdd={(items) => { setExercises((c) => [...c, ...items]); setCoachOpen(false); }}
         />
+
+        <ExerciseLibraryDialog
+          open={libOpen}
+          onClose={() => setLibOpen(false)}
+          pickLabel="Aan training toevoegen"
+          onPick={(ex) =>
+            setExercises((c) => [
+              ...c,
+              { name: ex.name, sets: 3, reps: "10", restSec: 90, suggestedWeight: "" },
+            ])
+          }
+        />
       </DialogContent>
     </Dialog>
   );
