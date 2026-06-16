@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/nutrition")({
 
 function Nutrition() {
   const { user } = useAuth();
-  const { meals, removeMeal, logMeal, mealsOn } = useMeals();
+  const { removeMeal, logMeal, mealsOn } = useMeals();
   const { day, addMeal } = useDayLog();
   const [open, setOpen] = useState(false);
   const [defaultMealType, setDefaultMealType] = useState<MealType | undefined>();
