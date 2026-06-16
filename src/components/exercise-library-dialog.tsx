@@ -158,7 +158,9 @@ function DetailView({
 }: { ex: LibraryExercise; onBack: () => void; onPick?: () => void; pickLabel: string }) {
   const [tab, setTab] = useState<"about" | "guide">("about");
   const [zoom, setZoom] = useState(false);
-  const frames = getExerciseFrames(ex);
+  const gender = useGender();
+  const frames = getExerciseFrames(ex, gender);
+  const isAnatomy = hasGenderVariants(ex);
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border px-3 py-3">
@@ -181,7 +183,7 @@ function DetailView({
         >
           <AnimatedFrames frames={frames} alt={ex.name} className="aspect-square w-full object-cover" />
           <span className="pointer-events-none absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">
-            <Play className="size-3 fill-white" /> Demo
+            <Play className="size-3 fill-white" /> {isAnatomy ? `Demo · ${gender === "female" ? "Vrouw" : "Man"}` : "Demo"}
           </span>
           <span className="pointer-events-none absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-black/55 text-white backdrop-blur">
             <Maximize2 className="size-4" />
