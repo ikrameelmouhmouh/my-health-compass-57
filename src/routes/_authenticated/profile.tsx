@@ -88,7 +88,7 @@ function Profile() {
 
   const p = data.profile;
   const sub = data.subscription;
-  const isPremium = sub?.tier === "premium" && sub?.status === "active";
+  const isPremium = !!sub && ["active", "trialing", "past_due"].includes(sub.status) && (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
 
   // Derived stats
   const calorieTarget = p.daily_calories ?? 0;

@@ -37,7 +37,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
 
       const sessionParams: Stripe.Checkout.SessionCreateParams = {
         mode: "subscription",
-        ui_mode: "embedded",
+        ui_mode: "embedded_page",
         line_items: [{ price: price.id, quantity: 1 }],
         return_url: data.returnUrl,
         subscription_data: {

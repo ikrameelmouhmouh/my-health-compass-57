@@ -23,6 +23,7 @@ import { Route as AuthenticatedNutritionRouteImport } from './routes/_authentica
 import { Route as AuthenticatedFitnessRouteImport } from './routes/_authenticated/fitness'
 import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticated/fasting'
 import { Route as AuthenticatedAiCoachRouteImport } from './routes/_authenticated/ai-coach'
+import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 
 const WelcomeRoute = WelcomeRouteImport.update({
@@ -94,6 +95,12 @@ const AuthenticatedAiCoachRoute = AuthenticatedAiCoachRouteImport.update({
   path: '/ai-coach',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const ApiPublicPaymentsWebhookRoute =
+  ApiPublicPaymentsWebhookRouteImport.update({
+    id: '/api/public/payments/webhook',
+    path: '/api/public/payments/webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksSendRemindersRoute =
   ApiPublicHooksSendRemindersRouteImport.update({
     id: '/api/public/hooks/send-reminders',
@@ -116,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -132,6 +140,7 @@ export interface FileRoutesByTo {
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -150,6 +159,7 @@ export interface FileRoutesById {
   '/_authenticated/social': typeof AuthenticatedSocialRoute
   '/_authenticated/weight': typeof AuthenticatedWeightRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/social'
     | '/weight'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/social'
     | '/weight'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/payments/webhook'
   id:
     | '__root__'
     | '/'
@@ -201,6 +213,7 @@ export interface FileRouteTypes {
     | '/_authenticated/social'
     | '/_authenticated/weight'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -211,6 +224,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   WelcomeRoute: typeof WelcomeRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
+  ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -313,6 +327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiCoachRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/public/payments/webhook': {
+      id: '/api/public/payments/webhook'
+      path: '/api/public/payments/webhook'
+      fullPath: '/api/public/payments/webhook'
+      preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/send-reminders': {
       id: '/api/public/hooks/send-reminders'
       path: '/api/public/hooks/send-reminders'
@@ -357,6 +378,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   WelcomeRoute: WelcomeRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
+  ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
