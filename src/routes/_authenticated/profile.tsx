@@ -26,6 +26,8 @@ import {
   useCaloriePrefs, calcCalorieBudget,
   CARD_LABELS, type DashCardId, type CalorieBudget, type CalorieMode,
 } from "@/lib/dashboard-prefs";
+import { FoodLogDialog } from "@/components/food-log-dialog";
+import { useMeals } from "@/lib/food";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({ meta: [{ title: "Today — Vita" }] }),
@@ -49,6 +51,7 @@ function Profile() {
   const { workout, save: saveWorkout } = useTodayWorkout();
   const { state: fasting, start: startFast, stop: stopFast } = useFasting();
   const { prefs: caloriePrefs, toggleMode: toggleCalorieMode } = useCaloriePrefs();
+  const { logMeal } = useMeals();
 
   // dialog state
   const [openSheet, setOpenSheet] = useState<null | "water" | "weight" | "food" | "workout" | "customize">(null);
@@ -386,10 +389,14 @@ function Profile() {
         onSubmit={(kg) => { addWeight(kg); setOpenSheet(null); }}
       />
 
-      <FoodDialog
+      <FoodLogDialog
         open={openSheet === "food"}
         onOpenChange={(o) => !o && setOpenSheet(null)}
-        onSubmit={(m) => { addMeal(m); setOpenSheet(null); }}
+        onLogged={(entry) => {
+          logMeal({ food: entry.food, serving: entry.serving, servingCount: entry.servingCount, mealType: entry.mealType });
+          addMeal({ kcal: entry.kcal, protein: entry.protein, carbs: entry.carbs, fat: entry.fat });
+          setOpenSheet(null);
+        }}
       />
 
       <WorkoutDialog
