@@ -48,6 +48,7 @@ function Profile() {
   const { log: weights, addEntry: addWeight } = useWeightLog();
   const { workout, save: saveWorkout } = useTodayWorkout();
   const { state: fasting, start: startFast, stop: stopFast } = useFasting();
+  const { prefs: caloriePrefs, toggleMode: toggleCalorieMode } = useCaloriePrefs();
 
   // dialog state
   const [openSheet, setOpenSheet] = useState<null | "water" | "weight" | "food" | "workout" | "customize">(null);
