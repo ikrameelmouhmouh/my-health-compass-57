@@ -178,15 +178,22 @@ function Profile() {
         return (
           <NutritionCard
             key={id}
-            consumed={day.caloriesIn}
-            target={calorieTarget}
-            remaining={caloriesRemaining}
-            burned={day.caloriesOut}
+            budget={budget}
             meals={day.meals}
+            mode={caloriePrefs.mode}
+            onToggleMode={toggleCalorieMode}
             onLogFood={() => setOpenSheet("food")}
             protein={{ have: day.protein, goal: proteinTarget }}
             carbs={{ have: day.carbs, goal: carbsTarget }}
             fat={{ have: day.fat, goal: fatTarget }}
+          />
+        );
+      case "activitySummary":
+        return (
+          <ActivitySummaryCard
+            key={id}
+            steps={day.steps}
+            budget={budget}
           />
         );
       case "macros":
