@@ -30,12 +30,15 @@ export function ExerciseLibraryDialog({ open, onClose, onPick, pickLabel = "Toev
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    return EXERCISES.filter((e) => {
-      if (eq !== "All" && e.equipment !== eq) return false;
-      if (mu !== "All" && !e.primary.includes(mu) && !e.secondary.includes(mu)) return false;
-      if (needle && !e.name.toLowerCase().includes(needle)) return false;
-      return true;
-    });
+    return EXERCISES
+      .filter((e) => {
+        if (eq !== "All" && e.equipment !== eq) return false;
+        if (mu !== "All" && !e.primary.includes(mu) && !e.secondary.includes(mu)) return false;
+        if (needle && !e.name.toLowerCase().includes(needle)) return false;
+        return true;
+      })
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name, "nl", { sensitivity: "base" }));
   }, [q, eq, mu]);
 
   const reset = () => { setSelected(null); };
