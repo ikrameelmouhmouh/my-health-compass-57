@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock } from "lucide-react";
+import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { WorkoutWizard } from "@/components/workout-wizard";
-import { useWorkoutPlan } from "@/lib/workout-prefs";
+import { TemplateEditor } from "@/components/template-editor";
+import { useWorkoutPlan, useTemplates, newTemplate, type WorkoutTemplate } from "@/lib/workout-prefs";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
   component: FitnessPage,
@@ -24,7 +25,10 @@ function FitnessPage() {
       <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
         <Header />
         {!stored && !showWizard ? (
-          <EmptyState onStart={() => setShowWizard(true)} />
+          <>
+            <EmptyState onStart={() => setShowWizard(true)} />
+            <TemplatesSection />
+          </>
         ) : (
           <div className="mt-6">
             <WorkoutWizard
@@ -209,6 +213,8 @@ function Dashboard({
         })}
       </div>
 
+      <TemplatesSection />
+
       {/* Progression notes */}
       {plan.progressionNotes && (
         <div className="mt-6 rounded-2xl border border-border bg-card/50 p-4">
@@ -236,5 +242,94 @@ function Stat({ icon: Icon, label, value }: { icon: typeof Calendar; label: stri
       <p className="mt-1 text-base font-semibold leading-none">{value}</p>
       <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
     </div>
+  );
+}
+
+function TemplatesSection() {
+  const { templates, loaded, upsert, remove } = useTemplates();
+  const [editing, setEditing] = useState<WorkoutTemplate | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  if (!loaded) return null;
+
+  return (
+    <section className="mt-8">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold">Eigen trainingen</h3>
+          <p className="text-xs text-muted-foreground">Bouw zelf je schema of laat de AI Coach helpen</p>
+        </div>
+        <Button size="sm" variant="outline" onClick={() => setEditing(newTemplate())}>
+          <Plus className="mr-1 size-4" /> Nieuw
+        </Button>
+      </div>
+
+      {templates.length === 0 ? (
+        <button
+          onClick={() => setEditing(newTemplate())}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card/30 p-6 text-sm text-muted-foreground hover:bg-card/50"
+        >
+          <Plus className="size-4" /> Nieuwe training toevoegen
+        </button>
+      ) : (
+        <div className="space-y-2">
+          {templates.map((t) => {
+            const open = expanded === t.id;
+            const sets = t.exercises.reduce((s, e) => s + e.sets, 0);
+            return (
+              <div key={t.id} className="rounded-2xl border border-border bg-card/50 p-3">
+                <button onClick={() => setExpanded(open ? null : t.id)} className="flex w-full items-start justify-between gap-2 text-left">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {[t.day, t.focus].filter(Boolean).join(" · ") || "Geen dag"}{" · "}
+                      {t.exercises.length} oef · {sets} sets
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setEditing(t); }}
+                      className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-background"
+                      aria-label="Bewerk"
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); if (confirm(`Verwijder "${t.name}"?`)) remove(t.id); }}
+                      className="grid size-8 place-items-center rounded-full text-muted-foreground hover:text-destructive"
+                      aria-label="Verwijder"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                </button>
+                {open && (
+                  <div className="mt-3 space-y-2 border-t border-border pt-3">
+                    {t.exercises.map((ex, i) => (
+                      <div key={i} className="rounded-lg bg-background/60 p-2 text-sm">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-medium">{ex.name}</p>
+                          <p className="text-xs text-muted-foreground">{ex.suggestedWeight}</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{ex.sets} × {ex.reps} · rust {ex.restSec}s</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {editing && (
+        <TemplateEditor
+          open
+          initial={editing}
+          onClose={() => setEditing(null)}
+          onSave={(t) => { upsert(t); setEditing(null); }}
+        />
+      )}
+    </section>
   );
 }
