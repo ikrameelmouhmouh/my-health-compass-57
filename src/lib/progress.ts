@@ -34,7 +34,9 @@ function load<T>(k: string, fb: T): T {
 export function useMeasurements() {
   const [list, setList] = useState<Measurement[]>(() => load<Measurement[]>(M_KEY, []));
   useEffect(() => { try { localStorage.setItem(M_KEY, JSON.stringify(list)); } catch {} }, [list]);
-  const add = useCallback((m: Measurement) => setList((l) => [...l, m].slice(-180)), []);
+  const add = useCallback((m: Measurement) => setList((l) =>
+    [...l, m].sort((a, b) => a.date.localeCompare(b.date)).slice(-180),
+  ), []);
   const remove = useCallback((date: string) => setList((l) => l.filter((m) => m.date !== date)), []);
   return { list, add, remove };
 }
@@ -45,7 +47,7 @@ export function usePhotos() {
   const add = useCallback((p: Omit<ProgressPhoto, "id">) => setList((l) => [
     { ...p, id: (typeof crypto !== "undefined" && "randomUUID" in crypto) ? crypto.randomUUID() : String(Date.now()) },
     ...l,
-  ].slice(0, 60)), []);
+  ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 60)), []);
   const remove = useCallback((id: string) => setList((l) => l.filter((p) => p.id !== id)), []);
   return { list, add, remove };
 }

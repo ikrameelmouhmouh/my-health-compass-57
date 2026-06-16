@@ -229,7 +229,7 @@ function ProgressPage() {
         <Card
           title="Progress photos"
           icon={Camera}
-          action={<PhotoUploader onAdd={(dataUrl) => addPhoto({ dataUrl, date: new Date().toISOString() })} />}
+          action={<PhotoUploader onAdd={(p) => addPhoto(p)} />}
         >
           {photos.length === 0 ? (
             <p className="py-6 text-center text-[12px] text-muted-foreground">Add your first photo to track visual progress.</p>
@@ -314,11 +314,30 @@ function ProgressPage() {
 }
 
 // ---------- dialogs ----------
-function WeightDialog({ onAdd }: { onAdd: (kg: number) => void }) {
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const dateToISO = (d: string) => {
+  // Preserve current time-of-day so sorting between same-day entries stays stable
+  const now = new Date();
+  const [y, m, dd] = d.split("-").map(Number);
+  const out = new Date(y, (m ?? 1) - 1, dd ?? 1, now.getHours(), now.getMinutes(), now.getSeconds());
+  return out.toISOString();
+};
+
+function DateField({ value, onChange, label = "Date" }: { value: string; onChange: (v: string) => void; label?: string }) {
+  return (
+    <div className="space-y-1">
+      <Label>{label}</Label>
+      <Input type="date" max={todayISO()} value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  );
+}
+
+function WeightDialog({ onAdd }: { onAdd: (kg: number, date?: string) => void }) {
   const [open, setOpen] = useState(false);
   const [v, setV] = useState("");
+  const [date, setDate] = useState(todayISO());
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setDate(todayISO()); }}>
       <DialogTrigger asChild>
         <Button size="sm" variant="ghost" className="h-7 gap-1 rounded-full text-[11px]">
           <Plus className="size-3.5" /> Log
@@ -326,11 +345,17 @@ function WeightDialog({ onAdd }: { onAdd: (kg: number) => void }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader><DialogTitle>Log weight</DialogTitle></DialogHeader>
-        <div className="space-y-2">
-          <Label>Weight (kg)</Label>
-          <Input type="number" step="0.1" value={v} onChange={(e) => setV(e.target.value)} />
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label>Weight (kg)</Label>
+            <Input type="number" step="0.1" value={v} onChange={(e) => setV(e.target.value)} />
+          </div>
+          <DateField value={date} onChange={setDate} />
         </div>
-        <Button onClick={() => { const n = Number(v); if (n > 0) { onAdd(n); setOpen(false); setV(""); } }}>Save</Button>
+        <Button onClick={() => {
+          const n = Number(v);
+          if (n > 0) { onAdd(n, dateToISO(date)); setOpen(false); setV(""); }
+        }}>Save</Button>
       </DialogContent>
     </Dialog>
   );
@@ -361,8 +386,9 @@ function MeasurementDialog({ onAdd, latest }: { onAdd: (m: { date: string; waist
   const [hips, setHips] = useState(String(latest?.hips ?? ""));
   const [chest, setChest] = useState(String(latest?.chest ?? ""));
   const [arms, setArms] = useState(String(latest?.arms ?? ""));
+  const [date, setDate] = useState(todayISO());
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setDate(todayISO()); }}>
       <DialogTrigger asChild>
         <Button size="sm" variant="ghost" className="h-7 gap-1 rounded-full text-[11px]"><Plus className="size-3.5" /> Add</Button>
       </DialogTrigger>
@@ -381,9 +407,10 @@ function MeasurementDialog({ onAdd, latest }: { onAdd: (m: { date: string; waist
             </div>
           ))}
         </div>
+        <DateField value={date} onChange={setDate} />
         <Button onClick={() => {
           onAdd({
-            date: new Date().toISOString(),
+            date: dateToISO(date),
             waist: waist ? Number(waist) : undefined,
             hips: hips ? Number(hips) : undefined,
             chest: chest ? Number(chest) : undefined,
@@ -396,8 +423,11 @@ function MeasurementDialog({ onAdd, latest }: { onAdd: (m: { date: string; waist
   );
 }
 
-function PhotoUploader({ onAdd }: { onAdd: (dataUrl: string) => void }) {
+function PhotoUploader({ onAdd }: { onAdd: (p: { dataUrl: string; date: string }) => void }) {
   const ref = useRef<HTMLInputElement>(null);
+  const [open, setOpen] = useState(false);
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [date, setDate] = useState(todayISO());
   return (
     <>
       <input
@@ -410,7 +440,11 @@ function PhotoUploader({ onAdd }: { onAdd: (dataUrl: string) => void }) {
           const f = e.target.files?.[0];
           if (!f) return;
           const r = new FileReader();
-          r.onload = () => onAdd(String(r.result));
+          r.onload = () => {
+            setDataUrl(String(r.result));
+            setDate(todayISO());
+            setOpen(true);
+          };
           r.readAsDataURL(f);
           e.target.value = "";
         }}
@@ -418,6 +452,23 @@ function PhotoUploader({ onAdd }: { onAdd: (dataUrl: string) => void }) {
       <Button size="sm" variant="ghost" className="h-7 gap-1 rounded-full text-[11px]" onClick={() => ref.current?.click()}>
         <Plus className="size-3.5" /> Photo
       </Button>
+      <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setDataUrl(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Add progress photo</DialogTitle></DialogHeader>
+          {dataUrl && (
+            <img src={dataUrl} alt="preview" className="mx-auto max-h-56 rounded-2xl object-cover" />
+          )}
+          <DateField value={date} onChange={setDate} />
+          <Button onClick={() => {
+            if (dataUrl) {
+              onAdd({ dataUrl, date: dateToISO(date) });
+              setOpen(false);
+              setDataUrl(null);
+            }
+          }}>Save</Button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
+
