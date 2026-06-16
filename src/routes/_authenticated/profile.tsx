@@ -4,9 +4,9 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Settings2, Settings,
+  Settings, Sliders,
   Apple, Timer, Dumbbell, LineChart, Droplet, Footprints, Flame,
-  Plus, Minus, Sliders, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
+  Plus, Minus, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
   CheckCircle2, Circle, PlayCircle, Scale, UtensilsCrossed, ArrowUpRight,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -300,17 +300,13 @@ function Profile() {
       </header>
 
       {/* Plan chip */}
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-4 flex items-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
           <span className={`size-1.5 rounded-full ${isPremium ? "bg-brand" : "bg-muted-foreground"}`} />
           <span className="font-display text-[11px] font-medium uppercase tracking-wider">
             {isPremium ? `Vita ${t("profile.plus")}` : t("profile.free")}
           </span>
         </div>
-        <Link to="/settings" className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground hover:text-foreground">
-          <Settings2 className="size-3.5" />
-          {t("profile.recalc")}
-        </Link>
       </div>
 
 
