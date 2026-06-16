@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_participants: {
+        Row: {
+          challenge_id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          ends_on: string
+          id: string
+          metric: string
+          starts_on: string
+          target: number | null
+          title: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          ends_on: string
+          id?: string
+          metric: string
+          starts_on: string
+          target?: number | null
+          title: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          ends_on?: string
+          id?: string
+          metric?: string
+          starts_on?: string
+          target?: number | null
+          title?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
       exercise_prs: {
         Row: {
           best_1rm_at: string | null
@@ -59,10 +124,168 @@ export type Database = {
         }
         Relationships: []
       }
+      friend_invites: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          inviter_id: string
+          message: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          inviter_id: string
+          message?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          inviter_id?: string
+          message?: string | null
+        }
+        Relationships: []
+      }
+      friendships: {
+        Row: {
+          created_at: string
+          friend_id: string
+          id: string
+          requested_by: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          friend_id: string
+          id?: string
+          requested_by: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          friend_id?: string
+          id?: string
+          requested_by?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      post_comments: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          body: string | null
+          comment_count: number
+          created_at: string
+          id: string
+          image_url: string | null
+          kind: string
+          like_count: number
+          payload: Json
+          title: string | null
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          body?: string | null
+          comment_count?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          kind: string
+          like_count?: number
+          payload?: Json
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          body?: string | null
+          comment_count?: number
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          kind?: string
+          like_count?: number
+          payload?: Json
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           activity_level: Database["public"]["Enums"]["activity_level"] | null
           age: number | null
+          bio: string | null
           carbs_g: number | null
           created_at: string
           current_weight_kg: number | null
@@ -80,12 +303,14 @@ export type Database = {
           onboarding_completed: boolean
           protein_g: number | null
           updated_at: string
+          username: string | null
           weekly_change_kg: number | null
           workout_frequency: number | null
         }
         Insert: {
           activity_level?: Database["public"]["Enums"]["activity_level"] | null
           age?: number | null
+          bio?: string | null
           carbs_g?: number | null
           created_at?: string
           current_weight_kg?: number | null
@@ -103,12 +328,14 @@ export type Database = {
           onboarding_completed?: boolean
           protein_g?: number | null
           updated_at?: string
+          username?: string | null
           weekly_change_kg?: number | null
           workout_frequency?: number | null
         }
         Update: {
           activity_level?: Database["public"]["Enums"]["activity_level"] | null
           age?: number | null
+          bio?: string | null
           carbs_g?: number | null
           created_at?: string
           current_weight_kg?: number | null
@@ -126,6 +353,7 @@ export type Database = {
           onboarding_completed?: boolean
           protein_g?: number | null
           updated_at?: string
+          username?: string | null
           weekly_change_kg?: number | null
           workout_frequency?: number | null
         }
@@ -351,7 +579,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      are_friends: { Args: { _a: string; _b: string }; Returns: boolean }
+      is_challenge_participant: {
+        Args: { _cid: string; _uid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       activity_level:
