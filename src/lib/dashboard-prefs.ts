@@ -8,11 +8,13 @@ export type DashCardId =
   | "fasting"
   | "weight"
   | "activity"
+  | "activitySummary"
   | "workout"
   | "goals";
 
 export const DEFAULT_ORDER: DashCardId[] = [
   "nutrition",
+  "activitySummary",
   "fasting",
   "workout",
   "water",
@@ -33,9 +35,64 @@ export const CARD_LABELS: Record<DashCardId, string> = {
   fasting: "Fasting",
   weight: "Weight",
   activity: "Activity",
+  activitySummary: "Activity summary",
   workout: "Today's workout",
   goals: "Daily goals",
 };
+
+// ----- Smart Calorie Adjustment preferences -----
+export type CalorieMode = "standard" | "smart";
+export type CaloriePrefs = { mode: CalorieMode; kcalPerStep: number };
+
+const CAL_PREFS_KEY = "vita.calorie.prefs.v1";
+const DEFAULT_CAL_PREFS: CaloriePrefs = { mode: "smart", kcalPerStep: 0.04 };
+
+export function useCaloriePrefs() {
+  const [prefs, setPrefs] = useState<CaloriePrefs>(() => {
+    if (typeof window === "undefined") return DEFAULT_CAL_PREFS;
+    try {
+      const raw = localStorage.getItem(CAL_PREFS_KEY);
+      return raw ? { ...DEFAULT_CAL_PREFS, ...JSON.parse(raw) } : DEFAULT_CAL_PREFS;
+    } catch { return DEFAULT_CAL_PREFS; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(CAL_PREFS_KEY, JSON.stringify(prefs)); } catch {}
+  }, [prefs]);
+  const setMode = useCallback((mode: CalorieMode) => setPrefs((p) => ({ ...p, mode })), []);
+  const toggleMode = useCallback(() => setPrefs((p) => ({ ...p, mode: p.mode === "smart" ? "standard" : "smart" })), []);
+  return { prefs, setMode, toggleMode };
+}
+
+export type CalorieBudget = {
+  target: number;
+  eaten: number;
+  walkingBurn: number;
+  workoutBurn: number;
+  totalBurn: number;
+  earned: number;
+  allowance: number;
+  remaining: number;
+  net: number;
+  mode: CalorieMode;
+};
+
+export function calcCalorieBudget(args: {
+  target: number; eaten: number; workoutBurn: number; steps: number; prefs: CaloriePrefs;
+}): CalorieBudget {
+  const walkingBurn = Math.round(Math.max(0, args.steps) * args.prefs.kcalPerStep);
+  const workoutBurn = Math.max(0, Math.round(args.workoutBurn));
+  const totalBurn = walkingBurn + workoutBurn;
+  const earned = args.prefs.mode === "smart" ? totalBurn : 0;
+  const allowance = Math.max(0, args.target) + earned;
+  const remaining = allowance - args.eaten;
+  const net = args.eaten - totalBurn;
+  return {
+    target: args.target,
+    eaten: args.eaten,
+    walkingBurn, workoutBurn, totalBurn, earned, allowance, remaining, net,
+    mode: args.prefs.mode,
+  };
+}
 
 type Prefs = { order: DashCardId[]; hidden: DashCardId[] };
 

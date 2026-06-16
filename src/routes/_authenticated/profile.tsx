@@ -23,7 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   useDashboardPrefs, useDayLog, useWeightLog, useTodayWorkout, useFasting,
-  CARD_LABELS, type DashCardId,
+  useCaloriePrefs, calcCalorieBudget,
+  CARD_LABELS, type DashCardId, type CalorieBudget, type CalorieMode,
 } from "@/lib/dashboard-prefs";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -47,6 +48,7 @@ function Profile() {
   const { log: weights, addEntry: addWeight } = useWeightLog();
   const { workout, save: saveWorkout } = useTodayWorkout();
   const { state: fasting, start: startFast, stop: stopFast } = useFasting();
+  const { prefs: caloriePrefs, toggleMode: toggleCalorieMode } = useCaloriePrefs();
 
   // dialog state
   const [openSheet, setOpenSheet] = useState<null | "water" | "weight" | "food" | "workout" | "customize">(null);
@@ -86,14 +88,21 @@ function Profile() {
 
   // Derived stats
   const calorieTarget = p.daily_calories ?? 0;
-  const caloriesRemaining = Math.max(0, calorieTarget - day.caloriesIn);
   const proteinTarget = p.protein_g ?? 0;
   const carbsTarget = p.carbs_g ?? 0;
   const fatTarget = p.fat_g ?? 0;
 
+  const budget = calcCalorieBudget({
+    target: calorieTarget,
+    eaten: day.caloriesIn,
+    workoutBurn: day.caloriesOut,
+    steps: day.steps,
+    prefs: caloriePrefs,
+  });
+
   const waterPct = pct(day.waterMl, WATER_GOAL_ML);
   const stepsPct = pct(day.steps, STEP_GOAL);
-  const nutritionPct = pct(day.caloriesIn, calorieTarget);
+  const nutritionPct = pct(day.caloriesIn, budget.allowance);
   const workoutDone = day.workoutCompleted ? 100 : workout ? 0 : 0;
 
   const overallPct = Math.round(
@@ -169,15 +178,22 @@ function Profile() {
         return (
           <NutritionCard
             key={id}
-            consumed={day.caloriesIn}
-            target={calorieTarget}
-            remaining={caloriesRemaining}
-            burned={day.caloriesOut}
+            budget={budget}
             meals={day.meals}
+            mode={caloriePrefs.mode}
+            onToggleMode={toggleCalorieMode}
             onLogFood={() => setOpenSheet("food")}
             protein={{ have: day.protein, goal: proteinTarget }}
             carbs={{ have: day.carbs, goal: carbsTarget }}
             fat={{ have: day.fat, goal: fatTarget }}
+          />
+        );
+      case "activitySummary":
+        return (
+          <ActivitySummaryCard
+            key={id}
+            steps={day.steps}
+            budget={budget}
           />
         );
       case "macros":
@@ -462,27 +478,46 @@ function Ring({ pct: p, size = 76, label, sub }: { pct: number; size?: number; l
 }
 
 /* --------------------------------- Cards --------------------------------- */
-function NutritionCard({ consumed, target, remaining, burned, meals, onLogFood, protein, carbs, fat }: {
-  consumed: number; target: number; remaining: number; burned: number; meals: number; onLogFood: () => void;
+function NutritionCard({ budget, meals, mode, onToggleMode, onLogFood, protein, carbs, fat }: {
+  budget: CalorieBudget; meals: number; mode: CalorieMode; onToggleMode: () => void; onLogFood: () => void;
   protein: { have: number; goal: number };
   carbs: { have: number; goal: number };
   fat: { have: number; goal: number };
 }) {
+  const consumedPct = pct(budget.eaten, budget.allowance);
+  const remainingLabel = budget.remaining >= 0 ? `${budget.remaining.toLocaleString()} kcal` : `${Math.abs(budget.remaining).toLocaleString()} over`;
   return (
-    <CardShell title="Nutrition" icon={Apple} action={
-      <button onClick={onLogFood} className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-[11px] font-semibold text-brand-foreground">
-        <Plus className="size-3" /> Log
-      </button>
+    <CardShell title="Calories" icon={Apple} action={
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={onToggleMode}
+          title={mode === "smart" ? "Smart Adjustment Mode" : "Standard Mode"}
+          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider border ${mode === "smart" ? "border-brand/60 bg-brand/10 text-brand" : "border-border bg-background text-muted-foreground"}`}
+        >
+          {mode === "smart" ? "Smart" : "Standard"}
+        </button>
+        <button onClick={onLogFood} className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-[11px] font-semibold text-brand-foreground">
+          <Plus className="size-3" /> Log
+        </button>
+      </div>
     }>
       <div className="flex items-center gap-5">
-        <Ring pct={pct(consumed, target)} label={`${Math.round(pct(consumed, target))}%`} sub="of target" />
-        <div className="flex-1 space-y-2">
-          <StatRow label="Consumed" value={`${consumed.toLocaleString()} kcal`} />
-          <StatRow label="Target" value={`${target.toLocaleString()} kcal`} />
-          <StatRow label="Remaining" value={`${remaining.toLocaleString()} kcal`} accent />
-          <StatRow label="Burned" value={`${burned.toLocaleString()} kcal`} muted />
-          <StatRow label="Meals" value={`${meals}`} muted />
+        <Ring pct={consumedPct} label={`${Math.round(consumedPct)}%`} sub="of allowance" />
+        <div className="flex-1 space-y-1.5">
+          <StatRow label="Target" value={`${budget.target.toLocaleString()} kcal`} muted />
+          <StatRow label="Eaten" value={`${budget.eaten.toLocaleString()} kcal`} />
+          <StatRow label="Burned" value={`− ${budget.totalBurn.toLocaleString()} kcal`} muted />
+          {mode === "smart" && (
+            <StatRow label="Earned" value={`+ ${budget.earned.toLocaleString()} kcal`} muted />
+          )}
+          <StatRow label="Allowance" value={`${budget.allowance.toLocaleString()} kcal`} />
+          <StatRow label="Remaining" value={remainingLabel} accent />
         </div>
+      </div>
+      <Bar pct={consumedPct} className="mt-4" />
+      <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
+        <span>Net: <span className="font-semibold tabular-nums text-foreground">{budget.net.toLocaleString()} kcal</span></span>
+        <span>{meals} meal{meals === 1 ? "" : "s"}</span>
       </div>
       <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border/60 pt-4">
         <MacroBlock label="Protein" {...protein} />
@@ -490,6 +525,38 @@ function NutritionCard({ consumed, target, remaining, burned, meals, onLogFood, 
         <MacroBlock label="Fat" {...fat} />
       </div>
     </CardShell>
+  );
+}
+
+function ActivitySummaryCard({ steps, budget }: { steps: number; budget: CalorieBudget }) {
+  return (
+    <CardShell title="Activity summary" icon={Flame}>
+      <div className="grid grid-cols-2 gap-2">
+        <SummaryTile label="Steps" value={steps.toLocaleString()} />
+        <SummaryTile label="Walking" value={`${budget.walkingBurn} kcal`} />
+        <SummaryTile label="Workout" value={`${budget.workoutBurn} kcal`} />
+        <SummaryTile label="Total burned" value={`${budget.totalBurn} kcal`} accent />
+      </div>
+      <div className="mt-3 rounded-2xl border border-border/60 bg-background/40 p-3">
+        <div className="flex items-baseline justify-between">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Net intake</span>
+          <span className="font-display text-base font-semibold tabular-nums">{budget.net.toLocaleString()} kcal</span>
+        </div>
+        <div className="mt-1 text-[10px] text-muted-foreground">
+          Eaten {budget.eaten.toLocaleString()} − Burned {budget.totalBurn.toLocaleString()}
+          {budget.mode === "smart" && ` · Allowance ${budget.allowance.toLocaleString()}`}
+        </div>
+      </div>
+    </CardShell>
+  );
+}
+
+function SummaryTile({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className={`mt-1 font-display text-lg font-semibold tabular-nums ${accent ? "text-brand" : ""}`}>{value}</div>
+    </div>
   );
 }
 
