@@ -229,7 +229,7 @@ function ProgressPage() {
         <Card
           title="Progress photos"
           icon={Camera}
-          action={<PhotoUploader onAdd={(dataUrl) => addPhoto({ dataUrl, date: new Date().toISOString() })} />}
+          action={<PhotoUploader onAdd={(p) => addPhoto(p)} />}
         >
           {photos.length === 0 ? (
             <p className="py-6 text-center text-[12px] text-muted-foreground">Add your first photo to track visual progress.</p>
