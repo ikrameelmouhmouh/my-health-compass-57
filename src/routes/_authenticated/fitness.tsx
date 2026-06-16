@@ -96,8 +96,9 @@ function Dashboard({
   openDay: string | null;
   setOpenDay: (d: string | null) => void;
 }) {
-  if (!stored) return null;
-  const { plan, completedDays, wizard } = stored;
+  const plan = stored?.plan;
+  const completedDays = stored?.completedDays ?? [];
+  const wizard = stored?.wizard;
 
   const sortedDays = useMemo(
     () => [...plan.days].sort((a, b) => DAY_ORDER.indexOf(a.day) - DAY_ORDER.indexOf(b.day)),
