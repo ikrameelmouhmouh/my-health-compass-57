@@ -80,14 +80,14 @@ function Profile() {
   const p = data?.profile;
   const sub = data?.subscription;
 
-
   const isPremium = sub?.tier === "premium" && sub?.status === "active";
 
   // Derived stats
-  const calorieTarget = p.daily_calories ?? 0;
-  const proteinTarget = p.protein_g ?? 0;
-  const carbsTarget = p.carbs_g ?? 0;
-  const fatTarget = p.fat_g ?? 0;
+  const calorieTarget = p?.daily_calories ?? 0;
+  const proteinTarget = p?.protein_g ?? 0;
+  const carbsTarget = p?.carbs_g ?? 0;
+  const fatTarget = p?.fat_g ?? 0;
+
 
   const budget = calcCalorieBudget({
     target: calorieTarget,
