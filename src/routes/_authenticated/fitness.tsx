@@ -148,6 +148,7 @@ function Dashboard({
   view: View;
   setView: (v: View) => void;
 }) {
+  const [activeSession, setActiveSession] = useState<{ name: string; exercises: Exercise[] } | null>(null);
 
   const plan = stored?.plan;
   const completedDays = stored?.completedDays ?? [];
