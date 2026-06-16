@@ -81,8 +81,37 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
     try {
       const food = await lookupBarcode(code);
       if (food) setSelected(food);
-      else alert(`No product found for barcode ${code}`);
+      else alert(`Geen product gevonden voor barcode ${code}`);
     } finally { setLoading(false); }
+  }
+
+  async function handlePhotoSelected(file: File) {
+    setAiError(null);
+    setAiAnalyzing(true);
+    try {
+      // Downscale to keep payload small (~max 1024px, JPEG)
+      const dataUrl = await downscaleToDataUrl(file, 1024, 0.85);
+      const result = await analyzePhoto({ data: { imageDataUrl: dataUrl } });
+      const grams = result.estimatedGrams;
+      const food: FoodItem = {
+        id: `ai:${Date.now()}`,
+        name: result.name,
+        brand: result.brand,
+        per100: result.per100,
+        servings: [
+          { label: `AI portie (~${grams} g)`, grams },
+          { label: "100 g", grams: 100 },
+          { label: "1 g", grams: 1 },
+        ],
+        verified: false,
+        source: "custom",
+      };
+      setSelected(food);
+    } catch (e: any) {
+      setAiError(e?.message || "Foto-analyse mislukt. Probeer het opnieuw.");
+    } finally {
+      setAiAnalyzing(false);
+    }
   }
 
   const listToShow: FoodItem[] =
