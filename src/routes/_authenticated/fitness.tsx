@@ -180,6 +180,9 @@ function Dashboard({
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
       <Header />
+      <ViewTabs view={view} setView={setView} />
+
+
 
       {/* Program summary card */}
       <div className="mt-6 rounded-3xl border border-border bg-gradient-to-br from-brand/15 to-card p-5">
