@@ -4,10 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Sparkles } from "lucide-react";
+import { Plus, Trash2, Sparkles, BookOpen } from "lucide-react";
 import type { Exercise } from "@/lib/workout.functions";
 import { type WorkoutTemplate } from "@/lib/workout-prefs";
 import { CoachSuggestDialog } from "./coach-suggest-dialog";
+import { ExerciseLibraryDialog } from "./exercise-library-dialog";
 
 const DAYS = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"];
 
