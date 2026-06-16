@@ -46,6 +46,14 @@
   --color-brand-foreground: var(--brand-foreground);
   --color-surface: var(--surface);
   --color-hairline: var(--hairline);
+
+  /* Module accents */
+  --color-mod-home: var(--mod-home);
+  --color-mod-nutrition: var(--mod-nutrition);
+  --color-mod-fasting: var(--mod-fasting);
+  --color-mod-fitness: var(--mod-fitness);
+  --color-mod-progress: var(--mod-progress);
+  --color-mod-ai: var(--mod-ai);
 }
 
 /* Light mode — Sage & Cream */
