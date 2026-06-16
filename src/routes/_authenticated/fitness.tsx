@@ -8,6 +8,8 @@ import { TemplateEditor } from "@/components/template-editor";
 import { ExerciseLibraryDialog } from "@/components/exercise-library-dialog";
 import { useWorkoutPlan, useTemplates, newTemplate, type WorkoutTemplate } from "@/lib/workout-prefs";
 import { EXERCISES } from "@/lib/exercise-library";
+import { WorkoutSessionDialog } from "@/components/workout-session-dialog";
+import type { Exercise } from "@/lib/workout.functions";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
   component: FitnessPage,
