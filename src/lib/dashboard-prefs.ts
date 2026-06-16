@@ -229,8 +229,12 @@ export function useWeightLog() {
   useEffect(() => {
     try { localStorage.setItem(WEIGHT_KEY, JSON.stringify(log)); } catch {}
   }, [log]);
-  const addEntry = useCallback((kg: number) => {
-    setLog((l) => [...l, { date: new Date().toISOString(), kg }].slice(-90));
+  const addEntry = useCallback((kg: number, date?: string) => {
+    setLog((l) =>
+      [...l, { date: date ?? new Date().toISOString(), kg }]
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .slice(-90),
+    );
   }, []);
   return { log, addEntry };
 }
