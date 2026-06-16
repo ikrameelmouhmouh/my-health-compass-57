@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Search, ScanLine, Heart, Plus, X, ChevronLeft, Loader2, Flame,
-  Minus, Trash2,
+  Minus, Trash2, Camera, Sparkles,
 } from "lucide-react";
 import {
   Dialog, DialogContent,
@@ -13,6 +13,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { BarcodeScanner } from "@/components/barcode-scanner";
+import { useServerFn } from "@tanstack/react-start";
+import { analyzeMealPhoto } from "@/lib/food-ai.functions";
 import {
   searchFoods, lookupBarcode, computeNutrition,
   useFoodLibrary, MEAL_TYPES, inferMealType,
@@ -39,6 +41,10 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
   const [selected, setSelected] = useState<FoodItem | null>(null);
   const [scanOpen, setScanOpen] = useState(false);
   const [customOpen, setCustomOpen] = useState(false);
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const analyzePhoto = useServerFn(analyzeMealPhoto);
 
   const { favorites, custom, toggleFavorite, isFavorite, addCustom, removeCustom } = useFoodLibrary();
 
@@ -75,8 +81,37 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
     try {
       const food = await lookupBarcode(code);
       if (food) setSelected(food);
-      else alert(`No product found for barcode ${code}`);
+      else alert(`Geen product gevonden voor barcode ${code}`);
     } finally { setLoading(false); }
+  }
+
+  async function handlePhotoSelected(file: File) {
+    setAiError(null);
+    setAiAnalyzing(true);
+    try {
+      // Downscale to keep payload small (~max 1024px, JPEG)
+      const dataUrl = await downscaleToDataUrl(file, 1024, 0.85);
+      const result = await analyzePhoto({ data: { imageDataUrl: dataUrl } });
+      const grams = result.estimatedGrams;
+      const food: FoodItem = {
+        id: `ai:${Date.now()}`,
+        name: result.name,
+        brand: result.brand,
+        per100: result.per100,
+        servings: [
+          { label: `AI portie (~${grams} g)`, grams },
+          { label: "100 g", grams: 100 },
+          { label: "1 g", grams: 1 },
+        ],
+        verified: false,
+        source: "custom",
+      };
+      setSelected(food);
+    } catch (e: any) {
+      setAiError(e?.message || "Foto-analyse mislukt. Probeer het opnieuw.");
+    } finally {
+      setAiAnalyzing(false);
+    }
   }
 
   const listToShow: FoodItem[] =
@@ -113,18 +148,52 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
             <>
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <button onClick={() => onOpenChange(false)} aria-label="Close">
+                <button onClick={() => onOpenChange(false)} aria-label="Sluiten">
                   <X className="size-5" />
                 </button>
-                <h2 className="font-display text-base font-semibold">Log food</h2>
-                <button
-                  onClick={() => setScanOpen(true)}
-                  className="grid size-9 place-items-center rounded-full bg-brand text-brand-foreground"
-                  aria-label="Scan barcode"
-                >
-                  <ScanLine className="size-4" />
-                </button>
+                <h2 className="font-display text-base font-semibold">Eten loggen</h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => photoInputRef.current?.click()}
+                    disabled={aiAnalyzing}
+                    className="grid size-9 place-items-center rounded-full bg-brand/15 text-brand disabled:opacity-50"
+                    aria-label="Foto analyseren met AI"
+                    title="Foto analyseren met AI"
+                  >
+                    {aiAnalyzing ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
+                  </button>
+                  <button
+                    onClick={() => setScanOpen(true)}
+                    className="grid size-9 place-items-center rounded-full bg-brand text-brand-foreground"
+                    aria-label="Barcode scannen"
+                  >
+                    <ScanLine className="size-4" />
+                  </button>
+                </div>
               </div>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) handlePhotoSelected(f);
+                }}
+              />
+              {aiAnalyzing && (
+                <div className="flex items-center gap-2 border-b border-border bg-brand/5 px-4 py-2 text-xs text-brand">
+                  <Sparkles className="size-3.5 animate-pulse" />
+                  AI analyseert je foto…
+                </div>
+              )}
+              {aiError && (
+                <div className="border-b border-border bg-destructive/10 px-4 py-2 text-xs text-destructive">
+                  {aiError}
+                </div>
+              )}
 
               {/* Search */}
               <div className="px-4 pt-3">
@@ -484,4 +553,27 @@ function Field({ label, value, onChange, type = "text", placeholder }: { label: 
       />
     </div>
   );
+}
+
+/* ---------------- helpers ---------------- */
+async function downscaleToDataUrl(file: File, maxDim = 1024, quality = 0.85): Promise<string> {
+  const bitmap = await createImageBitmap(file).catch(() => null);
+  if (!bitmap) {
+    // Fallback: just read as data URL
+    return await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result));
+      r.onerror = reject;
+      r.readAsDataURL(file);
+    });
+  }
+  const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+  const w = Math.round(bitmap.width * scale);
+  const h = Math.round(bitmap.height * scale);
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  return canvas.toDataURL("image/jpeg", quality);
 }
