@@ -148,18 +148,52 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
             <>
               {/* Header */}
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <button onClick={() => onOpenChange(false)} aria-label="Close">
+                <button onClick={() => onOpenChange(false)} aria-label="Sluiten">
                   <X className="size-5" />
                 </button>
-                <h2 className="font-display text-base font-semibold">Log food</h2>
-                <button
-                  onClick={() => setScanOpen(true)}
-                  className="grid size-9 place-items-center rounded-full bg-brand text-brand-foreground"
-                  aria-label="Scan barcode"
-                >
-                  <ScanLine className="size-4" />
-                </button>
+                <h2 className="font-display text-base font-semibold">Eten loggen</h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => photoInputRef.current?.click()}
+                    disabled={aiAnalyzing}
+                    className="grid size-9 place-items-center rounded-full bg-brand/15 text-brand disabled:opacity-50"
+                    aria-label="Foto analyseren met AI"
+                    title="Foto analyseren met AI"
+                  >
+                    {aiAnalyzing ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
+                  </button>
+                  <button
+                    onClick={() => setScanOpen(true)}
+                    className="grid size-9 place-items-center rounded-full bg-brand text-brand-foreground"
+                    aria-label="Barcode scannen"
+                  >
+                    <ScanLine className="size-4" />
+                  </button>
+                </div>
               </div>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) handlePhotoSelected(f);
+                }}
+              />
+              {aiAnalyzing && (
+                <div className="flex items-center gap-2 border-b border-border bg-brand/5 px-4 py-2 text-xs text-brand">
+                  <Sparkles className="size-3.5 animate-pulse" />
+                  AI analyseert je foto…
+                </div>
+              )}
+              {aiError && (
+                <div className="border-b border-border bg-destructive/10 px-4 py-2 text-xs text-destructive">
+                  {aiError}
+                </div>
+              )}
 
               {/* Search */}
               <div className="px-4 pt-3">
