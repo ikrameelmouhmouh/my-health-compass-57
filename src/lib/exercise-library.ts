@@ -123,7 +123,13 @@ export type Equipment =
   | "Cable"
   | "Bodyweight"
   | "Kettlebell"
-  | "Band";
+  | "Band"
+  | "Smith Machine"
+  | "TRX"
+  | "Landmine"
+  | "Assisted"
+  | "EZ Bar"
+  | "Other";
 
 export type MuscleGroup =
   | "Chest"
@@ -158,6 +164,24 @@ const variants = (m0: string, m1: string, f0: string, f1: string): ExerciseVaria
   male: [m0, m1],
   female: [f0, f1],
 });
+
+/** Lightweight inline placeholder for exercises without AI-rendered demos yet. */
+const PLACEHOLDER_IMG =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='#f1f1f3'/><g fill='none' stroke='#9a9aa3' stroke-width='3' stroke-linecap='round'><circle cx='32' cy='20' r='6'/><path d='M22 46c0-8 4-14 10-14s10 6 10 14'/></g></svg>`,
+  );
+
+/** Quick builder for the many catalog-only exercises (no AI demo yet). */
+const mk = (
+  id: string,
+  name: string,
+  equipment: Equipment,
+  primary: MuscleGroup[],
+  secondary: MuscleGroup[] = [],
+  steps: string[] = ["Voer de oefening uit met een gecontroleerde, vloeiende beweging."],
+): LibraryExercise => ({ id, name, equipment, primary, secondary, image: PLACEHOLDER_IMG, steps });
+
 
 /** Returns the looping preview frames for an exercise, gender-aware when available. */
 export function getExerciseFrames(ex: LibraryExercise, gender?: AppGender): string[] {
