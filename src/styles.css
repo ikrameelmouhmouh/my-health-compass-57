@@ -84,6 +84,14 @@
 
   --brand: oklch(0.62 0.06 140);
   --brand-foreground: oklch(0.985 0.008 80);
+
+  /* cheerful module accents (light) */
+  --mod-home: oklch(0.72 0.14 18);        /* coral/pink */
+  --mod-nutrition: oklch(0.74 0.14 55);   /* warm peach/orange */
+  --mod-fasting: oklch(0.66 0.13 295);    /* lavender */
+  --mod-fitness: oklch(0.62 0.10 150);    /* sage green */
+  --mod-progress: oklch(0.66 0.12 240);   /* soft blue */
+  --mod-ai: oklch(0.78 0.14 85);          /* sunny yellow */
 }
 
 /* Dark mode — warm forest */
