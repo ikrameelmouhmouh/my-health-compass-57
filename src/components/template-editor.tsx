@@ -50,8 +50,7 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
-        className="flex h-[100dvh] max-h-[100dvh] w-full max-w-md flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:h-[94dvh] sm:rounded-3xl sm:border"
-        showCloseButton={false}
+        className="flex h-[100dvh] max-h-[100dvh] w-full max-w-md flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:h-[94dvh] sm:rounded-3xl sm:border [&>button.absolute]:hidden"
       >
         {/* Top bar */}
         <div className="flex items-center justify-between px-4 pt-5">
