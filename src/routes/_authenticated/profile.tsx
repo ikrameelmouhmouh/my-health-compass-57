@@ -491,8 +491,12 @@ function NutritionCard({ budget, meals, mode, onToggleMode, onLogFood, protein, 
   carbs: { have: number; goal: number };
   fat: { have: number; goal: number };
 }) {
-  const consumedPct = pct(budget.eaten, budget.allowance);
-  const remainingLabel = budget.remaining >= 0 ? `${budget.remaining.toLocaleString()} kcal` : `${Math.abs(budget.remaining).toLocaleString()} over`;
+  const consumedPct = Math.min(100, pct(budget.eaten, budget.allowance));
+  const remaining = Math.max(0, budget.remaining);
+  const over = budget.remaining < 0;
+  const headline = over
+    ? `${Math.abs(budget.remaining).toLocaleString()} calories over`
+    : `You can still eat ${remaining.toLocaleString()} calories`;
   return (
     <CardShell title="Calories" icon={Apple} action={
       <div className="flex items-center gap-1.5">
@@ -508,25 +512,43 @@ function NutritionCard({ budget, meals, mode, onToggleMode, onLogFood, protein, 
         </button>
       </div>
     }>
-      <div className="flex items-center gap-5">
-        <Ring pct={consumedPct} label={`${Math.round(consumedPct)}%`} sub="of allowance" />
-        <div className="flex-1 space-y-1.5">
-          <StatRow label="Target" value={`${budget.target.toLocaleString()} kcal`} muted />
-          <StatRow label="Eaten" value={`${budget.eaten.toLocaleString()} kcal`} />
-          <StatRow label="Burned" value={`− ${budget.totalBurn.toLocaleString()} kcal`} muted />
-          {mode === "smart" && (
-            <StatRow label="Earned" value={`+ ${budget.earned.toLocaleString()} kcal`} muted />
+      <div className="pt-2">
+        <div className="flex items-start justify-between gap-4">
+          <h3 className={`font-display text-[22px] leading-[1.15] font-semibold tracking-tight ${over ? "text-destructive" : "text-foreground"}`}>
+            {headline}
+          </h3>
+          <div className="shrink-0 text-right">
+            <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Goal</div>
+            <div className="font-display text-sm font-semibold tabular-nums text-muted-foreground">
+              {budget.allowance.toLocaleString()}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-muted/60">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${over ? "bg-destructive" : "bg-brand"}`}
+            style={{ width: `${consumedPct}%` }}
+          />
+        </div>
+
+        <div className="mt-4 flex items-center justify-between">
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-display text-lg font-semibold tabular-nums text-foreground">
+              {budget.eaten.toLocaleString()}
+            </span>
+            <span className="text-xs text-muted-foreground">eaten</span>
+          </div>
+          {budget.totalBurn > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+              <Flame className="size-3" />
+              {budget.totalBurn.toLocaleString()} burned
+            </span>
           )}
-          <StatRow label="Allowance" value={`${budget.allowance.toLocaleString()} kcal`} />
-          <StatRow label="Remaining" value={remainingLabel} accent />
         </div>
       </div>
-      <Bar pct={consumedPct} className="mt-4" />
-      <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
-        <span>Net: <span className="font-semibold tabular-nums text-foreground">{budget.net.toLocaleString()} kcal</span></span>
-        <span>{meals} meal{meals === 1 ? "" : "s"}</span>
-      </div>
-      <div className="mt-4 grid grid-cols-3 gap-2 border-t border-border/60 pt-4">
+
+      <div className="mt-5 grid grid-cols-3 gap-2 border-t border-border/60 pt-4">
         <MacroBlock label="Protein" {...protein} />
         <MacroBlock label="Carbs" {...carbs} />
         <MacroBlock label="Fat" {...fat} />
