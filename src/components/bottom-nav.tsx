@@ -1,12 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, UtensilsCrossed, Dumbbell, TrendingUp, Users } from "lucide-react";
+import { Home, UtensilsCrossed, Dumbbell, TrendingUp, Timer } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 const items = [
   { to: "/profile", key: "nav.home", icon: Home },
   { to: "/nutrition", key: "nav.eat", icon: UtensilsCrossed },
   { to: "/fitness", key: "nav.workouts", icon: Dumbbell },
-  { to: "/social", key: "nav.social", icon: Users },
+  { to: "/fasting", key: "nav.fasting", icon: Timer },
   { to: "/weight", key: "nav.progress", icon: TrendingUp },
 ] as const;
 

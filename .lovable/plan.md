@@ -1,36 +1,48 @@
-# Intermittent Fasting integreren onder 'Eten'
 
-Doel: vasten logisch en zichtbaar maken zonder de bottom nav te veranderen. We houden de 5 tabs (Home, Eten, Workouts, Social, Vooruitgang) en geven vasten een prominente plek bovenaan `/nutrition`, met de bestaande snelkoppeling op het startscherm intact.
+## Doel
+Vasten verdient een prominente plek in de bottom nav omdat het een kernfunctie is. Social is minder centraal en kan samengevoegd worden met Vooruitgang als tabs binnen één scherm.
 
-## Wat er verandert
+## Nieuwe navigatiestructuur (5 tabs)
 
-### 1. `src/routes/_authenticated/nutrition.tsx` — Fasting-sectie bovenaan
-Direct onder de dag-header, vóór de meals-lijst, een compacte Fasting-kaart:
-- **Als er een actief venster is**: live timer (uren:minuten), voortgangsring, "Stop vasten"-knop, gekozen protocol (16:8, 18:6, OMAD…).
-- **Als er geen actief venster is**: laatste status ("12u geleden gestopt"), primaire knop "Start vasten", secundaire link "Geschiedenis".
-- Volledige UI blijft op `/fasting` (geschiedenis, protocol kiezen, instellingen). De kaart linkt erheen via "Bekijk alles".
+```text
+[ Home ] [ Eten ] [ Workouts ] [ Vasten ] [ Voortgang ]
+```
 
-### 2. `src/components/bottom-nav.tsx` — ongewijzigd
-5 tabs blijven exact zoals nu. Geen Fasting-tab, geen verschuiving van Vooruitgang.
+- **Vasten** krijgt eigen tab → directe toegang tot `/fasting` (timer, protocol, geschiedenis).
+- **Voortgang** wordt een scherm met tabs bovenaan: `Statistieken | Social`.
+- Social-route blijft bestaan voor deeplinks, maar primaire toegang loopt via Voortgang-tab.
 
-### 3. Startscherm (`/profile`) — bestaande Fasting-kaart blijft
-De huidige snelle toegang op het startscherm blijft staan; dat is nu de tweede ingang naast `/nutrition`.
+## Wijzigingen
 
-### 4. Route `/fasting` — blijft bestaan
-Bereikbaar via de kaart op `/nutrition` en de kaart op het startscherm. Niet meer via de bottom nav (was er ook niet).
+### 1. `src/components/bottom-nav.tsx`
+- Verwijder Social-item.
+- Voeg Vasten-item toe (icoon: `Timer`, route: `/fasting`).
+- Volgorde: Home, Eten, Workouts, Vasten, Voortgang.
 
-### 5. i18n
-Nieuwe keys voor de inline Fasting-kaart op nutrition (`nut.fastingTitle`, `nut.fastingActive`, `nut.fastingIdle`, `nut.startFast`, `nut.stopFast`, `nut.viewAll`) in alle 6 talen.
+### 2. `src/routes/_authenticated/progress.tsx`
+- Voeg een Tabs-component bovenaan toe: "Statistieken" (huidige inhoud) en "Social".
+- Social-tab rendert de bestaande Social-feed component (extraheren uit `social.tsx` indien nodig, of via dynamische import).
 
-## Waarom deze keuze (kort)
+### 3. `src/routes/_authenticated/social.tsx`
+- Blijft bestaan voor backwards-compatibiliteit / deeplinks.
+- Optioneel: bovenaan een hint "Social is nu onderdeel van Voortgang" met link.
 
-- **Overzicht behouden**: 5 tabs is iOS-best-practice; 6 wordt visueel druk en labels worden krap.
-- **Mentaal model klopt**: vasten = wanneer je eet, dus thuis onder 'Eten'.
-- **Twee ingangen**: startscherm-kaart voor snelle toegang, nutrition-sectie voor context naast je maaltijden.
-- **Geen verlies**: 'Vooruitgang' (gewicht/trends) blijft een eigen tab — die data is te belangrijk om te verstoppen.
+### 4. `src/routes/_authenticated/nutrition.tsx`
+- De Fasting-kaart die vorige beurt is toegevoegd: **behouden** als snelle toegang vanuit Eten (logisch want vasten = eetvenster). Geen wijziging.
 
-## Niet in scope
+### 5. `src/routes/_authenticated/profile.tsx` (startscherm)
+- Bestaande Fasting-shortcut: behouden of verwijderen? Aanbeveling: **verwijderen** nu Vasten een eigen tab heeft, om duplicatie te voorkomen en het startscherm overzichtelijk te houden.
 
-- Geen wijziging aan de bottom nav.
-- Geen verplaatsing van Vooruitgang.
-- Geen wijziging aan de fasting-logica/datamodel — alleen een nieuwe weergave-kaart die de bestaande state hergebruikt.
+### 6. `src/lib/i18n.tsx`
+- Nieuwe keys: `nav.fasting`, `progress.tabStats`, `progress.tabSocial` in alle 6 talen.
+
+## Overwegingen
+
+- **Voordeel**: Vasten staat altijd één tap weg; consistent met het feit dat het een dagelijkse routine is.
+- **Risico Social**: minder zichtbaar. Maar als de app primair fitness/nutrition is en Social secundair, is dat acceptabel.
+- **Voortgang + Social combinatie**: beide gaan over "jouw resultaten zien" — Stats toont eigen data, Social toont data van vrienden. Past thematisch.
+
+## Vraag voor jou
+Akkoord met:
+1. Fasting-shortcut op startscherm verwijderen (om duplicatie te voorkomen)?
+2. Social-tabs binnen Voortgang, of zou je Social liever volledig laten verdwijnen uit de hoofdnav (alleen via een knop op het profielscherm)?
