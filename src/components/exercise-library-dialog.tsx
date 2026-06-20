@@ -15,6 +15,7 @@ import {
 } from "@/lib/exercise-library";
 import { useGender } from "@/lib/gender";
 import { useT } from "@/lib/i18n";
+import { useExerciseT } from "@/lib/exercise-i18n";
 
 type Props = {
   open: boolean;
