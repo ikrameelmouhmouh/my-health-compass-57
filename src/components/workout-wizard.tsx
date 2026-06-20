@@ -5,12 +5,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Check, ChevronLeft, Sparkles } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { generateWorkoutPlan, type WizardInputT, type WorkoutPlan } from "@/lib/workout.functions";
+import { useI18n } from "@/lib/i18n";
 
-const GOALS = ["Lose Weight", "Build Muscle", "Increase Strength", "Improve Fitness", "Improve Endurance", "Body Recomposition"];
+const GOALS: { id: string; key: string }[] = [
+  { id: "Lose Weight", key: "wiz.goal.lose" },
+  { id: "Build Muscle", key: "wiz.goal.muscle" },
+  { id: "Increase Strength", key: "wiz.goal.strength" },
+  { id: "Improve Fitness", key: "wiz.goal.fitness" },
+  { id: "Improve Endurance", key: "wiz.goal.endurance" },
+  { id: "Body Recomposition", key: "wiz.goal.recomp" },
+];
 const EXPERIENCE = ["Beginner", "Intermediate", "Advanced"];
 const LOCATIONS = ["Gym", "Home", "Both"];
 const HOME_EQUIP = ["Dumbbells", "Resistance Bands", "Barbell", "Bench", "Pull Up Bar", "No Equipment"];
-const GYM_EQUIP = ["Full Gym Access"];
 const FREQ = [1, 2, 3, 4, 5, 6];
 const FOCUS = ["Glutes", "Legs", "Back", "Chest", "Shoulders", "Arms", "Core"];
 
@@ -21,6 +28,7 @@ type Props = {
 };
 
 export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
+  const { t } = useI18n();
   const [step, setStep] = useState(1);
   const [goal, setGoal] = useState(initial?.goal ?? "");
   const [experience, setExperience] = useState(initial?.experience ?? "");
@@ -52,7 +60,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
       case 3: return !!location;
       case 4: return !showEquipStep || equipment.length > 0;
       case 5: return frequency > 0;
-      case 6: return true; // focus optional but encouraged
+      case 6: return true;
       case 7: return true;
       default: return false;
     }
@@ -84,7 +92,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
       const plan = await generate({ data: wizard });
       onComplete(wizard, plan);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to generate plan");
+      setError(e instanceof Error ? e.message : t("wiz.error"));
     } finally {
       setLoading(false);
     }
@@ -104,70 +112,70 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
               <div key={i} className={`h-1 flex-1 rounded-full ${i < step ? "bg-brand" : "bg-muted"}`} />
             ))}
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">Step {step} of {totalSteps}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{t("wiz.step", { n: step, total: totalSteps })}</p>
         </div>
         {onCancel && !loading && (
-          <button onClick={onCancel} className="text-xs text-muted-foreground hover:text-foreground">Cancel</button>
+          <button onClick={onCancel} className="text-xs text-muted-foreground hover:text-foreground">{t("wiz.cancel")}</button>
         )}
       </div>
 
       {loading ? (
         <div className="flex flex-col items-center justify-center gap-3 py-16">
           <Loader2 className="size-8 animate-spin text-brand" />
-          <p className="text-sm font-medium">Building your personalized plan…</p>
-          <p className="text-xs text-muted-foreground">This takes about 15 seconds</p>
+          <p className="text-sm font-medium">{t("wiz.building")}</p>
+          <p className="text-xs text-muted-foreground">{t("wiz.building_sub")}</p>
         </div>
       ) : (
         <>
           {step === 1 && (
-            <Section title="What's your main goal?" subtitle="We'll tailor every detail to this.">
-              <Grid>{GOALS.map((g) => <Pill key={g} active={goal === g} onClick={() => setGoal(g)}>{g}</Pill>)}</Grid>
+            <Section title={t("wiz.q1.title")} subtitle={t("wiz.q1.sub")}>
+              <Grid>{GOALS.map((g) => <Pill key={g.id} active={goal === g.id} onClick={() => setGoal(g.id)}>{t(g.key)}</Pill>)}</Grid>
             </Section>
           )}
           {step === 2 && (
-            <Section title="Your training experience" subtitle="Helps us pick the right intensity.">
-              <Grid>{EXPERIENCE.map((g) => <Pill key={g} active={experience === g} onClick={() => setExperience(g)}>{g}</Pill>)}</Grid>
+            <Section title={t("wiz.q2.title")} subtitle={t("wiz.q2.sub")}>
+              <Grid>{EXPERIENCE.map((g) => <Pill key={g} active={experience === g} onClick={() => setExperience(g)}>{t(`wiz.exp.${g}`)}</Pill>)}</Grid>
             </Section>
           )}
           {step === 3 && (
-            <Section title="Where will you train?" subtitle="Choose your primary location.">
-              <Grid>{LOCATIONS.map((g) => <Pill key={g} active={location === g} onClick={() => setLocation(g)}>{g}</Pill>)}</Grid>
+            <Section title={t("wiz.q3.title")} subtitle={t("wiz.q3.sub")}>
+              <Grid>{LOCATIONS.map((g) => <Pill key={g} active={location === g} onClick={() => setLocation(g)}>{t(`wiz.loc.${g}`)}</Pill>)}</Grid>
             </Section>
           )}
           {step === 4 && showEquipStep && (
-            <Section title="Available equipment" subtitle="Select all you have access to.">
-              <Grid>{HOME_EQUIP.map((g) => <Pill key={g} active={equipment.includes(g)} onClick={() => toggle(equipment, g, setEquipment)} multi>{g}</Pill>)}</Grid>
-              {location === "Both" && <p className="mt-3 text-xs text-muted-foreground">Gym equipment is assumed available on gym days.</p>}
+            <Section title={t("wiz.q4.title")} subtitle={t("wiz.q4.sub")}>
+              <Grid>{HOME_EQUIP.map((g) => <Pill key={g} active={equipment.includes(g)} onClick={() => toggle(equipment, g, setEquipment)} multi>{t(`wiz.eq.${g}`)}</Pill>)}</Grid>
+              {location === "Both" && <p className="mt-3 text-xs text-muted-foreground">{t("wiz.q4.both")}</p>}
             </Section>
           )}
           {step === 5 && (
-            <Section title="Training frequency" subtitle="How many days per week?">
-              <Grid>{FREQ.map((n) => <Pill key={n} active={frequency === n} onClick={() => setFrequency(n)}>{n} {n === 1 ? "Day" : "Days"}</Pill>)}</Grid>
+            <Section title={t("wiz.q5.title")} subtitle={t("wiz.q5.sub")}>
+              <Grid>{FREQ.map((n) => <Pill key={n} active={frequency === n} onClick={() => setFrequency(n)}>{n} {n === 1 ? t("wiz.q5.day") : t("wiz.q5.days")}</Pill>)}</Grid>
             </Section>
           )}
           {step === 6 && (
-            <Section title="Focus areas" subtitle="Prioritize muscle groups (optional, multi-select).">
-              <Grid>{FOCUS.map((g) => <Pill key={g} active={focusAreas.includes(g)} onClick={() => toggle(focusAreas, g, setFocusAreas)} multi>{g}</Pill>)}</Grid>
+            <Section title={t("wiz.q6.title")} subtitle={t("wiz.q6.sub")}>
+              <Grid>{FOCUS.map((g) => <Pill key={g} active={focusAreas.includes(g)} onClick={() => toggle(focusAreas, g, setFocusAreas)} multi>{t(`wiz.focus.${g}`)}</Pill>)}</Grid>
             </Section>
           )}
           {step === 7 && (
-            <Section title="Preferences" subtitle="All optional — skip what doesn't apply.">
+            <Section title={t("wiz.q7.title")} subtitle={t("wiz.q7.sub")}>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Preferred duration (minutes)</label>
-                  <Input type="number" inputMode="numeric" placeholder="e.g. 45" value={duration} onChange={(e) => setDuration(e.target.value)} className="mt-1" />
+                  <label className="text-xs font-medium text-muted-foreground">{t("wiz.q7.duration")}</label>
+                  <Input type="number" inputMode="numeric" placeholder={t("wiz.q7.duration_ph")} value={duration} onChange={(e) => setDuration(e.target.value)} className="mt-1" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Injuries or limitations</label>
-                  <Textarea rows={2} placeholder="e.g. lower back pain" value={injuries} onChange={(e) => setInjuries(e.target.value)} className="mt-1" />
+                  <label className="text-xs font-medium text-muted-foreground">{t("wiz.q7.injuries")}</label>
+                  <Textarea rows={2} placeholder={t("wiz.q7.injuries_ph")} value={injuries} onChange={(e) => setInjuries(e.target.value)} className="mt-1" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Exercises to avoid</label>
-                  <Textarea rows={2} placeholder="e.g. deadlifts, burpees" value={avoid} onChange={(e) => setAvoid(e.target.value)} className="mt-1" />
+                  <label className="text-xs font-medium text-muted-foreground">{t("wiz.q7.avoid")}</label>
+                  <Textarea rows={2} placeholder={t("wiz.q7.avoid_ph")} value={avoid} onChange={(e) => setAvoid(e.target.value)} className="mt-1" />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">Favorite exercises</label>
-                  <Textarea rows={2} placeholder="e.g. squats, pull-ups" value={favorites} onChange={(e) => setFavorites(e.target.value)} className="mt-1" />
+                  <label className="text-xs font-medium text-muted-foreground">{t("wiz.q7.favs")}</label>
+                  <Textarea rows={2} placeholder={t("wiz.q7.favs_ph")} value={favorites} onChange={(e) => setFavorites(e.target.value)} className="mt-1" />
                 </div>
               </div>
             </Section>
@@ -177,10 +185,10 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
 
           <div className="pt-2">
             {step < totalSteps ? (
-              <Button className="w-full" disabled={!canNext} onClick={handleNext}>Continue</Button>
+              <Button className="w-full" disabled={!canNext} onClick={handleNext}>{t("wiz.continue")}</Button>
             ) : (
               <Button className="w-full" onClick={handleGenerate}>
-                <Sparkles className="mr-2 size-4" /> Generate my plan
+                <Sparkles className="mr-2 size-4" /> {t("wiz.generate")}
               </Button>
             )}
           </div>
