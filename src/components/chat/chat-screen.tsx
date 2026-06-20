@@ -567,16 +567,3 @@ export function ThreadChatScreen({
   );
 }
 
-// Tiny inline back button (kept for future use)
-export function _BackButton({ to, t }: { to: () => void; t: (k: string) => string }) {
-  return (
-    <button
-      type="button"
-      onClick={to}
-      aria-label={t("chat.back")}
-      className="grid size-9 place-items-center rounded-full text-foreground hover:bg-accent"
-    >
-      <ChevronLeft className="size-5 rtl:rotate-180" />
-    </button>
-  );
-}
