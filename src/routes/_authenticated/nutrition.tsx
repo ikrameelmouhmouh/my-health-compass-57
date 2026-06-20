@@ -1,17 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Plus, Flame, Trash2, ChevronLeft, ChevronRight,
+  Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
 } from "lucide-react";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import {
   useMeals, MEAL_TYPES,
   type MealType, type LoggedMeal,
 } from "@/lib/food";
-import { useDayLog } from "@/lib/dashboard-prefs";
+import { useDayLog, useFasting, getProtocol } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/nutrition")({
