@@ -173,10 +173,12 @@ function DetailView({
   ex, onBack, onPick, pickLabel,
 }: { ex: LibraryExercise; onBack: () => void; onPick?: () => void; pickLabel: string }) {
   const t = useT();
+  const tex = useExerciseT();
   const [tab, setTab] = useState<"about" | "guide">("about");
   const [zoom, setZoom] = useState(false);
   const gender = useGender();
   const frames = getExerciseFrames(ex, gender);
+  const tr = tex(ex.id, ex.name, ex.steps);
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border px-3 py-3">
