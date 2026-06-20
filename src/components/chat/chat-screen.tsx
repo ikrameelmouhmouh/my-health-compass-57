@@ -348,8 +348,6 @@ export function DraftChatScreen() {
         t={t}
         attachedName={file?.name ?? null}
       />
-      {/* unused — keeps Suppress unused-import for lang */}
-      <span className="hidden" data-lang={lang} />
     </main>
   );
 }
