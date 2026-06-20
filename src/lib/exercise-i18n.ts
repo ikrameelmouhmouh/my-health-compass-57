@@ -2,7 +2,7 @@
 // Six languages: English, Dutch, Arabic, French, German, Spanish.
 // Looked up by exercise id via `useExerciseT()`.
 
-import { useLang } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import type { Language } from "@/lib/i18n";
 
 type Entry = { name: string; steps: string[] };
