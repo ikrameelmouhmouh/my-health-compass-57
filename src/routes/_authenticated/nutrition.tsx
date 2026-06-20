@@ -77,7 +77,7 @@ function Nutrition() {
         </button>
         <div className="text-center">
           <h1 className="font-display text-xl font-semibold tracking-tight">
-            {isToday ? t("today.title") || "Today" : formatDate(viewDate, lang)}
+            {formatDate(viewDate, lang)}
           </h1>
           <p className="text-[11px] text-muted-foreground">{t("nutr.title")}</p>
         </div>
