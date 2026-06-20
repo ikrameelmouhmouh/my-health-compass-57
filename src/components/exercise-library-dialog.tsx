@@ -8,13 +8,14 @@ import {
   EQUIPMENT_FILTERS,
   MUSCLE_FILTERS,
   getExerciseFrames,
-  hasGenderVariants,
+  
   type LibraryExercise,
   type Equipment,
   type MuscleGroup,
 } from "@/lib/exercise-library";
 import { useGender } from "@/lib/gender";
 import { useT } from "@/lib/i18n";
+import { useExerciseT } from "@/lib/exercise-i18n";
 
 type Props = {
   open: boolean;
@@ -88,6 +89,7 @@ function ListView({
   onClose: () => void;
 }) {
   const t = useT();
+  const tex = useExerciseT();
   const gender = useGender();
   return (
     <>
@@ -115,6 +117,7 @@ function ListView({
           <div className="space-y-2">
             {items.map((ex) => {
               const thumb = getExerciseFrames(ex, gender)[0];
+              const tr = tex(ex.id, ex.name, ex.steps);
               return (
                 <button
                   key={ex.id}
@@ -122,10 +125,10 @@ function ListView({
                   className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card/50 p-2.5 text-left transition hover:bg-card"
                 >
                   <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
-                    <img src={thumb} alt={ex.name} loading="lazy" className="size-full object-cover" />
+                    <img src={thumb} alt={tr.name} loading="lazy" className="size-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{ex.name}</p>
+                    <p className="truncate font-medium">{tr.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
                       {ex.equipment} · {ex.primary.join(", ")}
                     </p>
@@ -170,11 +173,12 @@ function DetailView({
   ex, onBack, onPick, pickLabel,
 }: { ex: LibraryExercise; onBack: () => void; onPick?: () => void; pickLabel: string }) {
   const t = useT();
+  const tex = useExerciseT();
   const [tab, setTab] = useState<"about" | "guide">("about");
   const [zoom, setZoom] = useState(false);
   const gender = useGender();
   const frames = getExerciseFrames(ex, gender);
-  const isAnatomy = hasGenderVariants(ex);
+  const tr = tex(ex.id, ex.name, ex.steps);
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border px-3 py-3">
@@ -186,7 +190,7 @@ function DetailView({
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 pb-6">
-        <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight">{ex.name}</h2>
+        <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight">{tr.name}</h2>
         <p className="text-sm text-muted-foreground">{ex.equipment}</p>
 
         <button
@@ -195,9 +199,9 @@ function DetailView({
           className="group relative mt-4 block w-full overflow-hidden rounded-2xl border border-border bg-muted/40"
           aria-label={t("lib.zoom_aria")}
         >
-          <AnimatedFrames frames={frames} alt={ex.name} className="aspect-square w-full object-cover" />
+          <AnimatedFrames frames={frames} alt={tr.name} className="aspect-square w-full object-cover" />
           <span className="pointer-events-none absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">
-            <Play className="size-3 fill-white" /> {isAnatomy ? `${t("lib.demo")} · ${gender === "female" ? t("lib.female") : t("lib.male")}` : t("lib.demo")}
+            <Play className="size-3 fill-white" /> {t("lib.demo")}
           </span>
           <span className="pointer-events-none absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-black/55 text-white backdrop-blur">
             <Maximize2 className="size-4" />
@@ -244,7 +248,7 @@ function DetailView({
           </div>
         ) : (
           <ol className="mt-5 space-y-3">
-            {ex.steps.map((s, i) => (
+            {tr.steps.map((s, i) => (
               <li key={i} className="flex gap-3 rounded-2xl border border-border bg-card/50 p-3">
                 <span className="grid size-7 shrink-0 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
                   {i + 1}
@@ -265,7 +269,7 @@ function DetailView({
       )}
 
       {zoom && (
-        <Lightbox frames={frames} title={ex.name} onClose={() => setZoom(false)} />
+        <Lightbox frames={frames} title={tr.name} onClose={() => setZoom(false)} />
       )}
     </div>
   );
