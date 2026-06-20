@@ -74,11 +74,15 @@ function getDisplayName(
 }
 
 function getMessageText(message: UIMessage) {
-  return message.parts.map((part) => (part.type === "text" ? part.text : "")).join("").trim();
+  return message.parts
+    .map((part) => (part.type === "text" ? part.text : ""))
+    .join("")
+    .trim();
 }
 
 function assistantTextCount(messages: UIMessage[]) {
-  return messages.filter((message) => message.role === "assistant" && getMessageText(message)).length;
+  return messages.filter((message) => message.role === "assistant" && getMessageText(message))
+    .length;
 }
 
 function VitaAvatar({ size = 64 }: { size?: number }) {
