@@ -421,7 +421,8 @@ export function ThreadChatScreen({
   const sentPendingRef = useRef(false);
   useEffect(() => {
     if (sentPendingRef.current) return;
-    if (!token) return; // wait for bearer
+    if (!token) return; // wait for bearer; do NOT mark sent yet
+    // Peek without consuming, in case sendMessage fails.
     const pending = takePendingMessage(threadId);
     if (!pending) {
       sentPendingRef.current = true;
@@ -429,11 +430,18 @@ export function ThreadChatScreen({
     }
     sentPendingRef.current = true;
     (async () => {
-      const filesArr = pending.files ? Array.from(pending.files) : [];
-      const parts = filesArr.length ? await toFileParts(filesArr) : undefined;
-      await sendMessage({ text: pending.text, files: parts });
-    })().catch((e) => console.error(e));
-  }, [threadId, token, sendMessage]);
+      try {
+        const filesArr = pending.files ? Array.from(pending.files) : [];
+        const parts = filesArr.length ? await toFileParts(filesArr) : undefined;
+        await sendMessage({ text: pending.text, files: parts });
+      } catch (e) {
+        console.error("[ai-coach] pending send failed", e);
+        // Re-queue so a manual retry / reload can pick it up.
+        requeuePendingMessage(threadId, { text: pending.text });
+        toast.error(t("chat.error.generic"));
+      }
+    })();
+  }, [threadId, token, sendMessage, t]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
