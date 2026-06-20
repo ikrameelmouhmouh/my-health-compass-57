@@ -34,14 +34,15 @@ export function RetentionSection() {
       if (perm === "granted") {
         await disablePush(user.id);
         setPerm("default");
-        toast.success("Herinneringen uitgezet");
+        toast.success(t("ret.reminders_off"));
       } else {
         const r = await enablePush(user.id);
-        if (r.ok) { setPerm("granted"); toast.success("Herinneringen aan"); }
-        else toast.error(r.reason ?? "Kon niet activeren");
+        if (r.ok) { setPerm("granted"); toast.success(t("ret.reminders_on")); }
+        else toast.error(r.reason ?? t("ret.activation_failed"));
       }
     } finally { setBusy(false); }
   }
+
 
   return (
     <section className="space-y-4">
