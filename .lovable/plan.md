@@ -1,43 +1,77 @@
+# AI Coach: directe chat met snelacties
 
-# Plan: AI Coach chat toevoegen
+## Wat verandert er
 
-De groene "Chat met je coach — binnenkort" knop wordt een werkende AI-chat. Je kunt meerdere aparte gesprekken voeren met de coach, en alles wordt opgeslagen in je account zodat het op al je apparaten beschikbaar is.
+Nu: je tikt op AI Coach → ziet eerst een lijst met gesprekken → moet "Nieuw gesprek" maken → komt pas dan in de chat. Te omslachtig.
 
-## Wat je krijgt
+Nieuw (zoals ChatGPT/Bevel): je tikt op AI Coach → komt direct in een chat-scherm met Vita-avatar, welkomstregel, **snelactie-chips** en de typebalk. Oude gesprekken blijven bewaard, maar zitten achter een menu-knop (☰) linksboven — niet meer als verplichte tussenstap.
 
-- **Nieuw chatscherm** op `/ai-coach/:threadId` met een rustige iOS-stijl, passend bij de rest van de app.
-- **Threadlijst** op `/ai-coach` met al je gesprekken (titel, laatste bericht, datum). Knop "Nieuw gesprek" bovenin.
-- **Streaming antwoorden** van de coach (woorden verschijnen terwijl ze gegenereerd worden), met markdown-ondersteuning.
-- **AI-coach persoonlijkheid**: kent je profiel (doel, gewicht, calorie-target, taal) en geeft daarop afgestemd advies over voeding, vasten en workouts.
-- **6 talen** (en/nl/ar/fr/de/es) — de coach antwoordt in jouw ingestelde taal en de UI-strings worden direct vertaald.
-- **Bottom nav + AiFab** blijven werken; de "binnenkort"-knop op het profielscherm linkt straks naar `/ai-coach`.
+## Nieuwe layout van `/ai-coach`
 
-## Technisch (voor de volledigheid)
+```text
+┌───────────────────────────────┐
+│ ☰  Vita            ✎ nieuw   │  ← header met geschiedenis-drawer + nieuw-chat
+│                               │
+│        (Vita avatar)          │  ← alleen als chat leeg is
+│      Goed je te zien, {naam}  │
+│                               │
+│                               │
+│  [📷 Scan maaltijd]           │  ← horizontaal scrollbare chips
+│  [🏋️ Maak workoutplan]        │
+│  [🥗 Maaltijdideeën]          │
+│  [⚡ Snelle tip]              │
+│  [📊 Analyseer m'n week]      │
+│                               │
+│  ┌─────────────────────────┐  │
+│  │ Vraag Vita iets…    ➤ │  │  ← typebalk altijd zichtbaar
+│  └─────────────────────────┘  │
+└───────────────────────────────┘
+```
 
-### Database (migratie)
-- `chat_threads` (user_id, title, last_message_at) — RLS per user.
-- `chat_messages` (thread_id, role: user/assistant, content, created_at) — RLS via thread-eigenaar.
-- Beide met GRANTs voor `authenticated` + `service_role`.
+Zodra je iets stuurt (chip of getypt) → chips en welkomstblok verdwijnen, gesprek begint te streamen op dezelfde pagina, en wordt automatisch opgeslagen als nieuwe thread.
 
-### Backend
-- Streaming chat: `src/routes/api/chat.ts` (TanStack server route) → Lovable AI Gateway met `google/gemini-3-flash-preview` via AI SDK (`streamText` + `toUIMessageStreamResponse`).
-- Auth via bearer-token (Supabase user), thread-eigendom gevalideerd in de handler.
-- `onFinish`: assistant-bericht opslaan in `chat_messages` voor die thread.
-- Server functions (`src/lib/chat.functions.ts`) voor: `listThreads`, `createThread`, `getThreadMessages`, `deleteThread`, `renameThread` — allemaal achter `requireSupabaseAuth`.
+## Snelactie-chips (eerste set)
 
-### Frontend
-- AI Elements installeren: `conversation`, `message`, `prompt-input`, `shimmer`.
-- `src/routes/_authenticated/ai-coach.tsx` → threadlijst + "Nieuw gesprek" knop.
-- `src/routes/_authenticated/ai-coach.$threadId.tsx` → chat-window met `useChat` (AI SDK), gekeyed op `threadId`.
-- System prompt bevat profielcontext (taal, doel, dagelijkse cal-target).
-- Foutmeldingen voor rate limit (429) en credits op (402).
+Elke chip stuurt een vooraf-gevormde prompt naar Vita. Geen aparte schermen.
 
-### i18n
-- Nieuwe keys (titel, placeholder, "Nieuw gesprek", "Verwijderen", lege-staat, error-toasts) toegevoegd voor alle 6 talen tegelijk.
+1. **📷 Scan maaltijd** → opent fotokiezer; foto wordt als bericht meegestuurd met prompt "Schat calorieën en macro's van deze maaltijd."
+2. **🏋️ Maak workoutplan** → "Maak een workoutplan voor mij voor deze week, passend bij m'n profiel."
+3. **🥗 Maaltijdideeën** → "Geef 3 maaltijdideeën die binnen m'n dagelijkse calorie- en macrodoel passen."
+4. **⚡ Snelle tip** → "Geef me 1 concrete tip voor vandaag, gebaseerd op m'n doel."
+5. **📊 Analyseer m'n week** → "Hoe gaat het deze week met m'n voortgang? Wat valt op?"
+
+Tekst is per chip 1 woord + emoji; chips horizontaal scrollbaar zodat we er later makkelijk bij kunnen.
+
+## Geschiedenis-drawer
+
+Links-boven hamburger-icoon → side drawer met lijst van eerdere gesprekken (huidige threads-lijst, hergebruikt). Tikken laadt die thread in dezelfde chat-view. "Nieuw gesprek" knop bovenin de drawer en als pen-icoon rechtsboven in de header.
+
+## Foto-upload (scan maaltijd)
+
+- Verborgen `<input type="file" accept="image/*" capture="environment">` voor camera/galerij.
+- Foto wordt geüpload naar bestaande Supabase storage (of als data-URL meegestuurd voor de eerste versie als er nog geen bucket is — dan voeg ik een `chat-images` bucket toe met RLS per user).
+- Bericht naar Vita bevat de afbeelding (Gemini 3 Flash is multimodal — afbeeldingen worden ondersteund).
+
+## Technische wijzigingen
+
+- `src/routes/_authenticated/ai-coach.tsx` → wordt de chat-pagina zelf (niet meer threadlijst).
+- `src/routes/_authenticated/ai-coach.$threadId.tsx` → blijft, voor het openen van een specifieke oude thread vanuit de drawer.
+- Bij landen op `/ai-coach` zonder threadId: lokaal "draft" thread tot eerste bericht — pas dan wordt er een thread aangemaakt in de database (geen lege threads meer).
+- Nieuwe component `ChatQuickActions` met de chip-rij.
+- Nieuwe component `ChatHistoryDrawer` (shadcn `Sheet`) met de bestaande `listThreads`/`deleteThread` server functions.
+- Server route `/api/chat` uitbreiden: accepteert optioneel een image part in het laatste user-bericht en geeft die mee aan het model.
+- (Optioneel) Storage bucket `chat-images` met RLS — alleen als we afbeeldingen willen bewaren voor terugkijken; anders sturen we de foto inline mee en bewaren we alleen de tekst.
+- i18n keys toegevoegd voor chips, drawer-titel, en welkomsttekst — direct in alle 6 talen (en, nl, ar, fr, de, es).
 
 ## Wat blijft hetzelfde
-- Bottom nav, profielpagina, AiFab — geen visuele wijzigingen.
-- Geen veranderingen aan voeding/vasten/workouts.
 
-## Kosten
-- Elke chat-vraag gebruikt een paar Lovable AI credits (Gemini Flash is goedkoop). Je hebt nog ~176 credits.
+- Bottom nav, AiFab (verdwijnt al op /ai-coach), profiel.
+- Database (`chat_threads`, `chat_messages`) en bestaande RLS.
+- Model: `google/gemini-3-flash-preview` via Lovable AI Gateway.
+
+## Twee open keuzes
+
+1. **Foto's bewaren of niet?** Bewaren = je ziet ze terug in oude chats (kost wat opslag). Niet bewaren = lichter, foto verdwijnt na het gesprek.
+2. **Welkomsttekst**: "Goed je te zien, {voornaam}" (zoals Bevel) of iets neutraler zoals "Hoe kan ik je vandaag helpen?"
+
+Ik kan met optie "foto's niet bewaren" + Bevel-stijl welkomst starten als je niets anders kiest.
