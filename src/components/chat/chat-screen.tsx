@@ -336,7 +336,14 @@ export function ChatScreen({
   const messagesRef = useRef<UIMessage[]>(initialMessages);
   useEffect(() => {
     messagesRef.current = messages;
-    setDisplayMessages(messages);
+    setDisplayMessages((current) => {
+      const currentAssistantCount = current.filter((m) => m.role === "assistant").length;
+      const nextAssistantCount = messages.filter((m) => m.role === "assistant").length;
+      if (messages.length >= current.length || nextAssistantCount >= currentAssistantCount) {
+        return messages;
+      }
+      return current;
+    });
   }, [messages]);
 
   const isBusy = status === "submitted" || status === "streaming";
