@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
 import { useT, useI18n } from "@/lib/i18n";
-import { createThread } from "@/lib/chat.functions";
+import { createThread, getThreadMessages } from "@/lib/chat.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
 
@@ -319,7 +319,7 @@ export function ChatScreen({
     [],
   );
 
-  const { messages, sendMessage, status, stop } = useChat({
+  const { messages, setMessages, sendMessage, status, stop } = useChat({
     id: chatIdRef.current,
     messages: initialMessages,
     transport,
@@ -331,6 +331,11 @@ export function ChatScreen({
       else toast.error(t("chat.error.generic"));
     },
   });
+
+  const messagesRef = useRef(messages);
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const isBusy = status === "submitted" || status === "streaming";
 
@@ -352,17 +357,32 @@ export function ChatScreen({
     return th.id;
   }
 
+  async function syncThreadMessages(id: string) {
+    const rows = await getThreadMessages({ data: { threadId: id } });
+    setMessages(
+      rows.map((r) => ({
+        id: r.id,
+        role: r.role === "assistant" ? "assistant" : "user",
+        parts: [{ type: "text", text: r.content }],
+      })),
+    );
+  }
+
   async function sendNow(text: string, attached?: File | null) {
     try {
       // Make sure token is loaded before the transport fires.
       if (!tokenRef.current && tokenReadyRef.current) {
         await tokenReadyRef.current;
       }
-      await ensureThread();
+      const activeThreadId = await ensureThread();
       const parts = attached ? await toFileParts([attached]) : undefined;
       setInput("");
       setFile(null);
       await sendMessage({ text, files: parts });
+      window.setTimeout(() => {
+        const hasAssistant = messagesRef.current.some((m) => m.role === "assistant");
+        if (!hasAssistant) void syncThreadMessages(activeThreadId);
+      }, 150);
     } catch (e) {
       console.error("[ai-coach] send failed", e);
       toast.error(t("chat.error.generic"));
