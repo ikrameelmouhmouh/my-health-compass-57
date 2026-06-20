@@ -13,6 +13,7 @@ type Props = {
 };
 
 export function BarcodeScanner({ open, onClose, onDetected }: Props) {
+  const t = useT();
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -20,6 +21,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [manual, setManual] = useState("");
   const [showManual, setShowManual] = useState(false);
+
 
   useEffect(() => {
     if (!open) return;
