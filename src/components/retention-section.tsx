@@ -4,15 +4,18 @@ import { BADGES, useRetention } from "@/lib/retention";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { enablePush, disablePush, pushStatus, pushSupported } from "@/lib/push";
+import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export function RetentionSection() {
+  const t = useT();
   const { user } = useAuth();
   const { loading, stats, weekDays, earnedBadgeIds } = useRetention(user?.id);
   const [perm, setPerm] = useState<"granted" | "denied" | "default" | "unsupported">("default");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => { pushStatus().then(setPerm); }, []);
+
 
   if (!user || loading || !stats) {
     return (
@@ -31,14 +34,15 @@ export function RetentionSection() {
       if (perm === "granted") {
         await disablePush(user.id);
         setPerm("default");
-        toast.success("Herinneringen uitgezet");
+        toast.success(t("ret.reminders_off"));
       } else {
         const r = await enablePush(user.id);
-        if (r.ok) { setPerm("granted"); toast.success("Herinneringen aan"); }
-        else toast.error(r.reason ?? "Kon niet activeren");
+        if (r.ok) { setPerm("granted"); toast.success(t("ret.reminders_on")); }
+        else toast.error(r.reason ?? t("ret.activation_failed"));
       }
     } finally { setBusy(false); }
   }
+
 
   return (
     <section className="space-y-4">
@@ -46,25 +50,25 @@ export function RetentionSection() {
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-3xl border border-border bg-surface p-5">
           <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            <Flame className="h-3.5 w-3.5" /> Streak
+            <Flame className="h-3.5 w-3.5" /> {t("ret.streak")}
           </div>
           <div className="mt-2 font-display text-4xl font-bold">{stats.currentStreak}</div>
-          <div className="text-xs text-muted-foreground">Langste: {stats.longestStreak} dagen</div>
+          <div className="text-xs text-muted-foreground">{t("ret.longest")} {stats.longestStreak} {t("ret.days")}</div>
         </div>
         <div className="rounded-3xl border border-border bg-surface p-5">
           <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            <Calendar className="h-3.5 w-3.5" /> Deze week
+            <Calendar className="h-3.5 w-3.5" /> {t("ret.this_week")}
           </div>
           <div className="mt-2 font-display text-4xl font-bold">{stats.thisWeekWorkouts}</div>
-          <div className="text-xs text-muted-foreground">{stats.thisWeekMinutes} min · {stats.thisWeekVolumeKg} kg</div>
+          <div className="text-xs text-muted-foreground">{stats.thisWeekMinutes} {t("ret.min")} · {stats.thisWeekVolumeKg} kg</div>
         </div>
       </div>
 
       {/* Week chart */}
       <div className="rounded-3xl border border-border bg-surface p-5">
         <div className="mb-3 flex items-center justify-between">
-          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Weekoverzicht</div>
-          <div className="text-xs text-muted-foreground">{stats.daysActiveThisWeek}/7 actief</div>
+          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{t("ret.week_overview")}</div>
+          <div className="text-xs text-muted-foreground">{stats.daysActiveThisWeek}/7 {t("ret.active")}</div>
         </div>
         <div className="flex h-24 items-end gap-2">
           {weekDays.map((d) => {
@@ -88,7 +92,7 @@ export function RetentionSection() {
       {/* Badges */}
       <div className="rounded-3xl border border-border bg-surface p-5">
         <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          <Trophy className="h-3.5 w-3.5" /> Badges ({earnedBadgeIds.size}/{BADGES.length})
+          <Trophy className="h-3.5 w-3.5" /> {t("ret.badges")} ({earnedBadgeIds.size}/{BADGES.length})
         </div>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
           {BADGES.map((b) => {
@@ -110,15 +114,15 @@ export function RetentionSection() {
       {/* Push toggle */}
       <div className="flex items-center justify-between rounded-3xl border border-border bg-surface p-5">
         <div>
-          <div className="font-semibold">Herinneringen</div>
+          <div className="font-semibold">{t("ret.reminders")}</div>
           <div className="text-xs text-muted-foreground">
             {perm === "unsupported"
-              ? "Niet ondersteund op dit apparaat"
+              ? t("ret.unsupported")
               : perm === "denied"
-              ? "Geblokkeerd in browser-instellingen"
+              ? t("ret.denied")
               : perm === "granted"
-              ? "Workout-, streak- en maaltijdherinneringen aan"
-              : "Activeer pushmeldingen om streaks te behouden"}
+              ? t("ret.granted_desc")
+              : t("ret.enable_desc")}
           </div>
         </div>
         <Button
@@ -127,9 +131,10 @@ export function RetentionSection() {
           disabled={busy || perm === "unsupported" || perm === "denied"}
           onClick={toggle}
         >
-          {perm === "granted" ? <><BellOff className="mr-1.5 h-4 w-4" /> Uit</> : <><BellRing className="mr-1.5 h-4 w-4" /> Aan</>}
+          {perm === "granted" ? <><BellOff className="mr-1.5 h-4 w-4" /> {t("ret.off")}</> : <><BellRing className="mr-1.5 h-4 w-4" /> {t("ret.on")}</>}
         </Button>
       </div>
     </section>
   );
 }
+

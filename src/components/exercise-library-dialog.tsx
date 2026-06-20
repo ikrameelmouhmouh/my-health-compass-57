@@ -14,6 +14,7 @@ import {
   type MuscleGroup,
 } from "@/lib/exercise-library";
 import { useGender } from "@/lib/gender";
+import { useT } from "@/lib/i18n";
 
 type Props = {
   open: boolean;
@@ -22,7 +23,10 @@ type Props = {
   pickLabel?: string;
 };
 
-export function ExerciseLibraryDialog({ open, onClose, onPick, pickLabel = "Toevoegen" }: Props) {
+export function ExerciseLibraryDialog({ open, onClose, onPick, pickLabel }: Props) {
+  const t = useT();
+  const effectivePickLabel = pickLabel ?? t("lib.add");
+
   const [q, setQ] = useState("");
   const [eq, setEq] = useState<"All" | Equipment>("All");
   const [mu, setMu] = useState<"All" | MuscleGroup>("All");
@@ -56,7 +60,7 @@ export function ExerciseLibraryDialog({ open, onClose, onPick, pickLabel = "Toev
                 ? () => { onPick(selected); close(); }
                 : undefined
             }
-            pickLabel={pickLabel}
+            pickLabel={effectivePickLabel}
           />
         ) : (
           <ListView
@@ -83,28 +87,30 @@ function ListView({
   onSelect: (ex: LibraryExercise) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const gender = useGender();
   return (
     <>
       <div className="border-b border-border px-5 pb-3 pt-5">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl font-semibold tracking-tight">Oefeningen</h2>
-          <button onClick={onClose} className="grid size-8 place-items-center rounded-full hover:bg-muted" aria-label="Sluit">
+          <h2 className="font-display text-xl font-semibold tracking-tight">{t("lib.title")}</h2>
+          <button onClick={onClose} className="grid size-8 place-items-center rounded-full hover:bg-muted" aria-label={t("lib.close")}>
             <X className="size-4" />
           </button>
         </div>
         <div className="relative mt-3">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Zoek oefening..." className="pl-9" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("lib.search")} className="pl-9" />
         </div>
 
-        <FilterRow label="Spier" items={MUSCLE_FILTERS} value={mu} onChange={setMu} />
-        <FilterRow label="Materiaal" items={EQUIPMENT_FILTERS} value={eq} onChange={setEq} />
+        <FilterRow label={t("lib.muscle")} items={MUSCLE_FILTERS} value={mu} onChange={setMu} />
+        <FilterRow label={t("lib.equipment")} items={EQUIPMENT_FILTERS} value={eq} onChange={setEq} />
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 py-4">
         {items.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Geen oefeningen gevonden.</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">{t("lib.none_found")}</p>
+
         ) : (
           <div className="space-y-2">
             {items.map((ex) => {
@@ -163,6 +169,7 @@ function FilterRow<T extends string>({
 function DetailView({
   ex, onBack, onPick, pickLabel,
 }: { ex: LibraryExercise; onBack: () => void; onPick?: () => void; pickLabel: string }) {
+  const t = useT();
   const [tab, setTab] = useState<"about" | "guide">("about");
   const [zoom, setZoom] = useState(false);
   const gender = useGender();
@@ -171,8 +178,8 @@ function DetailView({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border px-3 py-3">
-        <button onClick={onBack} className="grid size-9 place-items-center rounded-full hover:bg-muted" aria-label="Terug">
-          <ChevronLeft className="size-5" />
+        <button onClick={onBack} className="grid size-9 place-items-center rounded-full hover:bg-muted" aria-label={t("lib.back")}>
+          <ChevronLeft className="size-5 rtl:rotate-180" />
         </button>
         <p className="text-xs text-muted-foreground">{ex.equipment}</p>
         <div className="size-9" />
@@ -186,11 +193,11 @@ function DetailView({
           type="button"
           onClick={() => setZoom(true)}
           className="group relative mt-4 block w-full overflow-hidden rounded-2xl border border-border bg-muted/40"
-          aria-label="Vergroot voorbeeld"
+          aria-label={t("lib.zoom_aria")}
         >
           <AnimatedFrames frames={frames} alt={ex.name} className="aspect-square w-full object-cover" />
           <span className="pointer-events-none absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">
-            <Play className="size-3 fill-white" /> {isAnatomy ? `Demo · ${gender === "female" ? "Vrouw" : "Man"}` : "Demo"}
+            <Play className="size-3 fill-white" /> {isAnatomy ? `${t("lib.demo")} · ${gender === "female" ? t("lib.female") : t("lib.male")}` : t("lib.demo")}
           </span>
           <span className="pointer-events-none absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-black/55 text-white backdrop-blur">
             <Maximize2 className="size-4" />
@@ -198,31 +205,31 @@ function DetailView({
         </button>
 
         <div className="mt-5 grid grid-cols-2 border-b border-border">
-          {(["about", "guide"] as const).map((t) => (
+          {(["about", "guide"] as const).map((key) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={key}
+              onClick={() => setTab(key)}
               className={`pb-2 text-sm font-medium transition ${
-                tab === t ? "border-b-2 border-foreground text-foreground" : "text-muted-foreground"
+                tab === key ? "border-b-2 border-foreground text-foreground" : "text-muted-foreground"
               }`}
             >
-              {t === "about" ? "Over" : "Gids"}
+              {key === "about" ? t("lib.tab_about") : t("lib.tab_guide")}
             </button>
           ))}
         </div>
 
         {tab === "about" ? (
           <div className="mt-5 space-y-5">
-            <Section title="Uitrusting">
+            <Section title={t("lib.equipment_label")}>
               <Chip filled>{ex.equipment}</Chip>
             </Section>
-            <Section title="Primaire spieren">
+            <Section title={t("lib.primary")}>
               <div className="flex flex-wrap gap-2">
                 {ex.primary.map((m) => <Chip key={m} filled>{m}</Chip>)}
               </div>
             </Section>
             {ex.secondary.length > 0 && (
-              <Section title="Secundaire spieren">
+              <Section title={t("lib.secondary")}>
                 <div className="flex flex-wrap gap-2">
                   {ex.secondary.map((m) => <Chip key={m}>{m}</Chip>)}
                 </div>
@@ -232,7 +239,7 @@ function DetailView({
               onClick={() => setTab("guide")}
               className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-4 text-sm font-medium text-foreground"
             >
-              <Lightbulb className="size-4" /> Hoe te registreren
+              <Lightbulb className="size-4" /> {t("lib.how_to_log")}
             </button>
           </div>
         ) : (
@@ -264,6 +271,7 @@ function DetailView({
   );
 }
 
+
 /** Cross-fades through a series of frames to mimic a short looping demo video. */
 function AnimatedFrames({
   frames, alt, className, intervalMs = 650,
@@ -292,6 +300,7 @@ function AnimatedFrames({
 }
 
 function Lightbox({ frames, title, onClose }: { frames: string[]; title: string; onClose: () => void }) {
+  const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -302,10 +311,10 @@ function Lightbox({ frames, title, onClose }: { frames: string[]; title: string;
     };
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur" role="dialog" aria-label={`${title} voorbeeld`}>
+    <div className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur" role="dialog" aria-label={`${title} ${t("lib.preview")}`}>
       <div className="flex items-center justify-between px-4 py-3 text-white">
         <p className="truncate text-sm font-medium">{title}</p>
-        <button onClick={onClose} className="grid size-9 place-items-center rounded-full bg-white/10 hover:bg-white/20" aria-label="Sluit">
+        <button onClick={onClose} className="grid size-9 place-items-center rounded-full bg-white/10 hover:bg-white/20" aria-label={t("lib.close")}>
           <X className="size-5" />
         </button>
       </div>
@@ -314,10 +323,11 @@ function Lightbox({ frames, title, onClose }: { frames: string[]; title: string;
           <AnimatedFrames frames={frames} alt={title} className="aspect-square w-full object-contain bg-black" intervalMs={550} />
         </div>
       </div>
-      <p className="pb-4 text-center text-xs text-white/60">Tik buiten of druk Esc om te sluiten</p>
+      <p className="pb-4 text-center text-xs text-white/60">{t("lib.dismiss_hint")}</p>
     </div>
   );
 }
+
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
