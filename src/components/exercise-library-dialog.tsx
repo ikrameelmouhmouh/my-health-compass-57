@@ -14,6 +14,7 @@ import {
   type MuscleGroup,
 } from "@/lib/exercise-library";
 import { useGender } from "@/lib/gender";
+import { useT } from "@/lib/i18n";
 
 type Props = {
   open: boolean;
@@ -22,7 +23,10 @@ type Props = {
   pickLabel?: string;
 };
 
-export function ExerciseLibraryDialog({ open, onClose, onPick, pickLabel = "Toevoegen" }: Props) {
+export function ExerciseLibraryDialog({ open, onClose, onPick, pickLabel }: Props) {
+  const t = useT();
+  const effectivePickLabel = pickLabel ?? t("lib.add");
+
   const [q, setQ] = useState("");
   const [eq, setEq] = useState<"All" | Equipment>("All");
   const [mu, setMu] = useState<"All" | MuscleGroup>("All");
