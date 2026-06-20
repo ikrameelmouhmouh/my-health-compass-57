@@ -502,6 +502,7 @@ export function ChatScreen({
           ),
         );
       });
+      await syncThreadMessages(activeThreadId);
     } catch (e) {
       console.error("[ai-coach] quick send failed", e);
       toast.error(t("chat.error.generic"));
