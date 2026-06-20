@@ -454,6 +454,54 @@ export function ChatScreen({
     }
   }
 
+  async function sendQuick(text: string) {
+    if (quickBusy) return;
+    setQuickBusy(true);
+    try {
+      if (!tokenRef.current && tokenReadyRef.current) {
+        await tokenReadyRef.current;
+      }
+      const activeThreadId = await ensureThread();
+      const userMessage: UIMessage = {
+        id: `quick-user-${Date.now()}`,
+        role: "user",
+        parts: [{ type: "text", text }],
+      };
+      const assistantMessage: UIMessage = {
+        id: `quick-assistant-${Date.now()}`,
+        role: "assistant",
+        parts: [{ type: "text", text: "" }],
+      };
+      const nextMessages = [...displayMessagesRef.current, userMessage, assistantMessage];
+      messagesRef.current = nextMessages;
+      setDisplayMessages(nextMessages);
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: tokenRef.current ? `Bearer ${tokenRef.current}` : "",
+        },
+        body: JSON.stringify({ threadId: activeThreadId, lang: langRef.current, messages: [userMessage] }),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      await readStreamText(response, (assistantText) => {
+        setDisplayMessages((current) =>
+          current.map((message) =>
+            message.id === assistantMessage.id
+              ? { ...message, parts: [{ type: "text", text: assistantText }] }
+              : message,
+          ),
+        );
+      });
+    } catch (e) {
+      console.error("[ai-coach] quick send failed", e);
+      toast.error(t("chat.error.generic"));
+    } finally {
+      setQuickBusy(false);
+    }
+  }
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const text = input.trim();
@@ -464,7 +512,7 @@ export function ChatScreen({
 
   function handlePick(_label: string, prompt: string) {
     if (isBusy) return;
-    void sendNow(prompt, null);
+    void sendQuick(prompt);
   }
 
   function handlePickPhoto() {
