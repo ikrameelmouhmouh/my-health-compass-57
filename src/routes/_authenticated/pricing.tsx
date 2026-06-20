@@ -26,6 +26,8 @@ function stripeJs() {
 
 
 function PricingPage() {
+  const t = useT();
+  const { lang } = useI18n();
   const navigate = useNavigate();
   const { isPro, isTrialing, subscription } = useSubscription();
   const country = useCustomerCountry();
@@ -37,15 +39,19 @@ function PricingPage() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const checkoutRef = useRef<HTMLDivElement>(null);
-  const [embedded, setEmbedded] = useState<any>(null);
+  const [, setEmbedded] = useState<any>(null);
 
   const priceId = interval === "monthly" ? "pro_monthly" : "pro_yearly";
+  const FEATURES = [t("price.f1"), t("price.f2"), t("price.f3"), t("price.f4"), t("price.f5"), t("price.f6")];
+  const localeMap: Record<string, string> = { en: "en-US", nl: "nl-NL", ar: "ar", fr: "fr-FR", de: "de-DE", es: "es-ES" };
+  const dateLocale = localeMap[lang] ?? "en-US";
 
   async function startCheckout() {
     if (!TOKEN) {
-      toast.error("Betalingen niet geconfigureerd.");
+      toast.error(t("price.not_configured"));
       return;
     }
+
     setLoading(true);
     try {
       const result = await createCheckout({
