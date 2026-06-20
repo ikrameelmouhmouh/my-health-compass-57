@@ -248,7 +248,7 @@ function DetailView({
           </div>
         ) : (
           <ol className="mt-5 space-y-3">
-            {ex.steps.map((s, i) => (
+            {tr.steps.map((s, i) => (
               <li key={i} className="flex gap-3 rounded-2xl border border-border bg-card/50 p-3">
                 <span className="grid size-7 shrink-0 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
                   {i + 1}
