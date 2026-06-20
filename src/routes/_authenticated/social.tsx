@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/social")({
 
 type Tab = "feed" | "friends" | "challenges";
 
-function SocialPage() {
+export function SocialPage() {
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>("feed");
   const [composeOpen, setComposeOpen] = useState(false);
