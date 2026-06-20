@@ -651,6 +651,8 @@ const translations: Translations = {
     "chat.quick.tip.prompt": "Give me 1 concrete tip for today, based on my goal.",
     "chat.quick.week": "Analyze my week",
     "chat.quick.week.prompt": "How am I doing this week with my progress? What stands out?",
+    "chat.opening": "Opening Vita…",
+    "chat.connecting": "Connecting to Vita…",
 
     "coachs.intro": "Tell us where to focus. The coach will suggest exercises, sets, reps and weight.",
     "coachs.focus": "Focus / muscle group",
