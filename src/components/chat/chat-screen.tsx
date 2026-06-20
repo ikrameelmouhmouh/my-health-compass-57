@@ -429,8 +429,11 @@ export function ThreadChatScreen({
       return;
     }
     sentPendingRef.current = true;
-    const filesArr = pending.files ? Array.from(pending.files) : undefined;
-    void sendMessage({ text: pending.text, files: filesArr });
+    (async () => {
+      const filesArr = pending.files ? Array.from(pending.files) : [];
+      const parts = filesArr.length ? await toFileParts(filesArr) : undefined;
+      await sendMessage({ text: pending.text, files: parts });
+    })().catch((e) => console.error(e));
   }, [threadId, token, sendMessage]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -440,10 +443,10 @@ export function ThreadChatScreen({
   }, [messages, status]);
 
   async function sendNow(text: string, attached?: File | null) {
-    const files = attached ? [attached] : undefined;
+    const parts = attached ? await toFileParts([attached]) : undefined;
     setInput("");
     setFile(null);
-    await sendMessage({ text, files });
+    await sendMessage({ text, files: parts });
   }
 
   function handleSubmit(e: FormEvent) {
