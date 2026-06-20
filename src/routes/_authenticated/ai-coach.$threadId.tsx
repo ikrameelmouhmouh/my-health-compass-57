@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import type { UIMessage } from "ai";
-import { ThreadChatScreen } from "@/components/chat/chat-screen";
+import { ChatScreen } from "@/components/chat/chat-screen";
 import { getThreadMessages } from "@/lib/chat.functions";
 
 export const Route = createFileRoute("/_authenticated/ai-coach/$threadId")({
@@ -42,5 +42,7 @@ function ChatThreadPage() {
     );
   }
 
-  return <ThreadChatScreen threadId={threadId} initialMessages={initial} />;
+  // key ensures a fresh ChatScreen instance per thread (e.g. when switching
+  // from history) so messages don't bleed across threads.
+  return <ChatScreen key={threadId} initialThreadId={threadId} initialMessages={initial} />;
 }

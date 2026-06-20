@@ -3,7 +3,6 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   Camera,
-  Loader2,
   Menu,
   Plus,
   Send,
@@ -18,6 +17,12 @@ import {
 } from "react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
+
+import { useAuth } from "@/lib/auth-context";
+import { useT, useI18n } from "@/lib/i18n";
+import { createThread } from "@/lib/chat.functions";
+import { supabase } from "@/integrations/supabase/client";
+import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -38,17 +43,6 @@ async function toFileParts(files: File[]) {
     })),
   );
 }
-
-import { useAuth } from "@/lib/auth-context";
-import { useT, useI18n } from "@/lib/i18n";
-import { createThread } from "@/lib/chat.functions";
-import { supabase } from "@/integrations/supabase/client";
-import {
-  requeuePendingMessage,
-  setPendingMessage,
-  takePendingMessage,
-} from "@/lib/chat-pending";
-import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
 
 type QuickAction = {
   key: string;
@@ -206,7 +200,6 @@ function Composer({
   );
 }
 
-/** Empty greeting + quick actions shown above the composer in draft mode. */
 function GreetingPanel({
   name,
   t,
@@ -224,7 +217,6 @@ function GreetingPanel({
   );
 }
 
-/** Sticky header used on both draft and thread screens. */
 function ChatHeader({
   showNewLink,
   activeThreadId,
@@ -270,128 +262,50 @@ function ChatHeader({
   );
 }
 
-/* ────────────────────────────────────────────── DRAFT ───────── */
-export function DraftChatScreen() {
-  const t = useT();
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [input, setInput] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+/* ───────────────────────────── UNIFIED CHAT SCREEN ───────── */
 
-  const name = getDisplayName(user);
-
-  async function startNewThread(text: string, attached?: File | null) {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const th = await createThread({ data: {} });
-      const files = attached ? [attached] : undefined;
-      setPendingMessage(th.id, { text, files });
-      navigate({ to: "/ai-coach/$threadId", params: { threadId: th.id } });
-    } catch (e) {
-      console.error(e);
-      toast.error(t("chat.error.generic"));
-      setBusy(false);
-    }
-  }
-
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    const text = input.trim();
-    if (!text && !file) return;
-    const finalText = text || t("chat.image_caption");
-    void startNewThread(finalText, file);
-  }
-
-  function handlePick(_label: string, prompt: string) {
-    void startNewThread(prompt, null);
-  }
-
-  function handlePickPhoto() {
-    fileInputRef.current?.click();
-  }
-
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (f) setFile(f);
-    e.target.value = "";
-  }
-
-  return (
-    <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background">
-      <ChatHeader showNewLink={false} t={t} />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleFileChange}
-      />
-      <div className="flex flex-1 flex-col pb-[calc(env(safe-area-inset-bottom)+200px)]">
-        <GreetingPanel name={name} t={t} />
-        <div className="px-4">
-          <ChipRow onPick={handlePick} onPickPhoto={handlePickPhoto} t={t} />
-        </div>
-      </div>
-      {busy && (
-        <div className="pointer-events-none fixed inset-0 z-40 grid place-items-center bg-background/60 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="size-6 animate-spin text-brand" />
-            <p className="text-sm font-medium text-foreground">{t("chat.opening")}</p>
-          </div>
-        </div>
-      )}
-      <Composer
-        input={input}
-        setInput={setInput}
-        onSubmit={handleSubmit}
-        onPickPhoto={handlePickPhoto}
-        isBusy={false}
-        t={t}
-        attachedName={file?.name ?? null}
-      />
-    </main>
-  );
-}
-
-/* ────────────────────────────────────────── THREAD VIEW ───────── */
-export function ThreadChatScreen({
-  threadId,
+export function ChatScreen({
+  initialThreadId,
   initialMessages,
 }: {
-  threadId: string;
+  initialThreadId?: string;
   initialMessages: UIMessage[];
 }) {
   const t = useT();
   const { lang } = useI18n();
   const { user } = useAuth();
-  const [token, setToken] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setToken(data.session?.access_token ?? null);
-    });
-  }, []);
-
-  // Stable refs the transport reads at request time so we don't recreate it.
-  const threadIdRef = useRef(threadId);
-  const langRef = useRef(lang);
-  const tokenRef = useRef<string | null>(token);
+  // threadId state — null when this is a brand-new draft chat.
+  const [threadId, setThreadId] = useState<string | null>(initialThreadId ?? null);
+  const threadIdRef = useRef<string | null>(threadId);
   useEffect(() => {
     threadIdRef.current = threadId;
   }, [threadId]);
+
+  // Stable chat id — never changes for the lifetime of this mount.
+  // useChat keeps a single message buffer keyed by this id.
+  const chatIdRef = useRef<string>(
+    initialThreadId ?? (typeof crypto !== "undefined" ? crypto.randomUUID() : `draft-${Date.now()}`),
+  );
+
+  // Token — fetched once, kept in a ref so the transport always sees the latest.
+  const tokenRef = useRef<string | null>(null);
+  const tokenReadyRef = useRef<Promise<string | null> | null>(null);
+  if (!tokenReadyRef.current) {
+    tokenReadyRef.current = supabase.auth.getSession().then(({ data }) => {
+      const tok = data.session?.access_token ?? null;
+      tokenRef.current = tok;
+      return tok;
+    });
+  }
+
+  const langRef = useRef(lang);
   useEffect(() => {
     langRef.current = lang;
   }, [lang]);
-  useEffect(() => {
-    tokenRef.current = token;
-  }, [token]);
 
   const transport = useMemo(
     () =>
@@ -406,7 +320,7 @@ export function ThreadChatScreen({
   );
 
   const { messages, sendMessage, status, stop } = useChat({
-    id: threadId,
+    id: chatIdRef.current,
     messages: initialMessages,
     transport,
     onError: (err) => {
@@ -420,43 +334,39 @@ export function ThreadChatScreen({
 
   const isBusy = status === "submitted" || status === "streaming";
 
-  // Send a pending message handed off from the draft screen on first mount.
-  const sentPendingRef = useRef(false);
-  useEffect(() => {
-    if (sentPendingRef.current) return;
-    if (!token) return; // wait for bearer; do NOT mark sent yet
-    // Peek without consuming, in case sendMessage fails.
-    const pending = takePendingMessage(threadId);
-    if (!pending) {
-      sentPendingRef.current = true;
-      return;
-    }
-    sentPendingRef.current = true;
-    (async () => {
-      try {
-        const filesArr = pending.files ? Array.from(pending.files) : [];
-        const parts = filesArr.length ? await toFileParts(filesArr) : undefined;
-        await sendMessage({ text: pending.text, files: parts });
-      } catch (e) {
-        console.error("[ai-coach] pending send failed", e);
-        // Re-queue so a manual retry / reload can pick it up.
-        requeuePendingMessage(threadId, { text: pending.text });
-        toast.error(t("chat.error.generic"));
-      }
-    })();
-  }, [threadId, token, sendMessage, t]);
-
   const scrollerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, status]);
 
+  async function ensureThread(): Promise<string> {
+    if (threadIdRef.current) return threadIdRef.current;
+    const th = await createThread({ data: {} });
+    threadIdRef.current = th.id;
+    setThreadId(th.id);
+    // Silently update URL so refresh / share works, no remount.
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", `/ai-coach/${th.id}`);
+    }
+    return th.id;
+  }
+
   async function sendNow(text: string, attached?: File | null) {
-    const parts = attached ? await toFileParts([attached]) : undefined;
-    setInput("");
-    setFile(null);
-    await sendMessage({ text, files: parts });
+    try {
+      // Make sure token is loaded before the transport fires.
+      if (!tokenRef.current && tokenReadyRef.current) {
+        await tokenReadyRef.current;
+      }
+      await ensureThread();
+      const parts = attached ? await toFileParts([attached]) : undefined;
+      setInput("");
+      setFile(null);
+      await sendMessage({ text, files: parts });
+    } catch (e) {
+      console.error("[ai-coach] send failed", e);
+      toast.error(t("chat.error.generic"));
+    }
   }
 
   function handleSubmit(e: FormEvent) {
@@ -485,20 +395,9 @@ export function ThreadChatScreen({
   const name = getDisplayName(user);
   const isEmpty = messages.length === 0;
 
-  if (token === null) {
-    return (
-      <div className="grid min-h-[100dvh] place-items-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="size-6 animate-spin rounded-full border-2 border-hairline border-t-brand" />
-          <p className="text-sm font-medium text-foreground">{t("chat.connecting")}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background">
-      <ChatHeader showNewLink t={t} activeThreadId={threadId} />
+      <ChatHeader showNewLink={!!threadId || !isEmpty} t={t} activeThreadId={threadId ?? undefined} />
       <input
         ref={fileInputRef}
         type="file"
@@ -582,4 +481,3 @@ export function ThreadChatScreen({
     </main>
   );
 }
-
