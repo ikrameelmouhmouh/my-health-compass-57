@@ -3,7 +3,6 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   Camera,
-  ChevronLeft,
   Loader2,
   Menu,
   Plus,
