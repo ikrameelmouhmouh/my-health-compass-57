@@ -20,6 +20,7 @@ import {
   useFoodLibrary, MEAL_TYPES, inferMealType,
   type FoodItem, type FoodServing, type MealType,
 } from "@/lib/food";
+import { useI18n } from "@/lib/i18n";
 
 type Props = {
   open: boolean;
@@ -34,6 +35,7 @@ type Props = {
 type Tab = "all" | "favorites" | "custom";
 
 export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }: Props) {
+  const { t } = useI18n();
   const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<FoodItem[]>([]);
@@ -48,7 +50,6 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
 
   const { favorites, custom, toggleFavorite, isFavorite, addCustom, removeCustom } = useFoodLibrary();
 
-  // Reset on close
   useEffect(() => {
     if (!open) {
       setSelected(null);
@@ -59,20 +60,19 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
     }
   }, [open]);
 
-  // Debounced search
   useEffect(() => {
     if (tab !== "all") return;
     const q = query.trim();
     if (q.length < 2) { setResults([]); return; }
     const ctrl = new AbortController();
     setLoading(true);
-    const t = setTimeout(async () => {
+    const tm = setTimeout(async () => {
       try {
         const r = await searchFoods(q, ctrl.signal);
         setResults(r);
       } catch {} finally { setLoading(false); }
     }, 350);
-    return () => { clearTimeout(t); ctrl.abort(); };
+    return () => { clearTimeout(tm); ctrl.abort(); };
   }, [query, tab]);
 
   async function handleBarcode(code: string) {
@@ -81,7 +81,7 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
     try {
       const food = await lookupBarcode(code);
       if (food) setSelected(food);
-      else alert(`Geen product gevonden voor barcode ${code}`);
+      else alert(t("food.no_barcode", { code }));
     } finally { setLoading(false); }
   }
 
@@ -89,7 +89,6 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
     setAiError(null);
     setAiAnalyzing(true);
     try {
-      // Downscale to keep payload small (~max 1024px, JPEG)
       const dataUrl = await downscaleToDataUrl(file, 1024, 0.85);
       const result = await analyzePhoto({ data: { imageDataUrl: dataUrl } });
       const grams = result.estimatedGrams;
@@ -99,16 +98,16 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
         brand: result.brand,
         per100: result.per100,
         servings: [
-          { label: `AI portie (~${grams} g)`, grams },
-          { label: "100 g", grams: 100 },
-          { label: "1 g", grams: 1 },
+          { label: t("food.ai_serving", { g: grams }), grams },
+          { label: t("food.serving_100"), grams: 100 },
+          { label: t("food.serving_1"), grams: 1 },
         ],
         verified: false,
         source: "custom",
       };
       setSelected(food);
     } catch (e: any) {
-      setAiError(e?.message || "Foto-analyse mislukt. Probeer het opnieuw.");
+      setAiError(e?.message || t("food.ai_failed"));
     } finally {
       setAiAnalyzing(false);
     }
@@ -146,26 +145,25 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
             />
           ) : (
             <>
-              {/* Header */}
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <button onClick={() => onOpenChange(false)} aria-label="Sluiten">
+                <button onClick={() => onOpenChange(false)} aria-label={t("food.close")}>
                   <X className="size-5" />
                 </button>
-                <h2 className="font-display text-base font-semibold">Eten loggen</h2>
+                <h2 className="font-display text-base font-semibold">{t("food.title")}</h2>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => photoInputRef.current?.click()}
                     disabled={aiAnalyzing}
                     className="grid size-9 place-items-center rounded-full bg-brand/15 text-brand disabled:opacity-50"
-                    aria-label="Foto analyseren met AI"
-                    title="Foto analyseren met AI"
+                    aria-label={t("food.ai_aria")}
+                    title={t("food.ai_aria")}
                   >
                     {aiAnalyzing ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
                   </button>
                   <button
                     onClick={() => setScanOpen(true)}
                     className="grid size-9 place-items-center rounded-full bg-brand text-brand-foreground"
-                    aria-label="Barcode scannen"
+                    aria-label={t("food.scan_aria")}
                   >
                     <ScanLine className="size-4" />
                   </button>
@@ -186,7 +184,7 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
               {aiAnalyzing && (
                 <div className="flex items-center gap-2 border-b border-border bg-brand/5 px-4 py-2 text-xs text-brand">
                   <Sparkles className="size-3.5 animate-pulse" />
-                  AI analyseert je foto…
+                  {t("food.ai_analyzing")}
                 </div>
               )}
               {aiError && (
@@ -195,30 +193,27 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
                 </div>
               )}
 
-              {/* Search */}
               <div className="px-4 pt-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     autoFocus
-                    placeholder="Search products..."
+                    placeholder={t("food.search_placeholder")}
                     value={query}
                     onChange={(e) => { setQuery(e.target.value); setTab("all"); }}
                     className="pl-9 rounded-full"
                   />
                 </div>
 
-                {/* Tabs */}
                 <div className="mt-3 flex items-center gap-2 overflow-x-auto pb-1">
-                  <TabBtn active={tab === "all"} onClick={() => setTab("all")}>All products</TabBtn>
+                  <TabBtn active={tab === "all"} onClick={() => setTab("all")}>{t("food.tab_all")}</TabBtn>
                   <TabBtn active={tab === "favorites"} onClick={() => setTab("favorites")}>
-                    <Heart className="size-3.5" /> Favorites
+                    <Heart className="size-3.5" /> {t("food.tab_favs")}
                   </TabBtn>
-                  <TabBtn active={tab === "custom"} onClick={() => setTab("custom")}>My foods</TabBtn>
+                  <TabBtn active={tab === "custom"} onClick={() => setTab("custom")}>{t("food.tab_custom")}</TabBtn>
                 </div>
               </div>
 
-              {/* List */}
               <div className="flex-1 overflow-y-auto px-4 py-3">
                 {loading && (
                   <div className="flex items-center justify-center py-8 text-muted-foreground">
@@ -226,10 +221,13 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
                   </div>
                 )}
                 {!loading && tab === "all" && query.trim().length < 2 && (
-                  <EmptyHint icon="search" text="Type at least 2 characters to search the food database" />
+                  <EmptyHint icon="search" text={t("food.hint_search")} />
                 )}
                 {!loading && listToShow.length === 0 && (tab !== "all" || query.trim().length >= 2) && (
-                  <EmptyHint icon="empty" text={tab === "favorites" ? "No favorites yet. Tap the heart on any food." : tab === "custom" ? "No custom foods yet." : "No products found."} />
+                  <EmptyHint
+                    icon="empty"
+                    text={tab === "favorites" ? t("food.hint_no_favs") : tab === "custom" ? t("food.hint_no_custom") : t("food.hint_no_results")}
+                  />
                 )}
                 <ul className="space-y-2">
                   {listToShow.map((f) => (
@@ -243,8 +241,8 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
                           <p className="truncate text-sm font-semibold">{f.name}</p>
                           {f.brand && <p className="truncate text-[11px] text-muted-foreground">{f.brand}</p>}
                           <p className="mt-0.5 text-[11px] text-muted-foreground">
-                            <span className="font-medium text-brand">{f.per100.kcal} kcal</span>
-                            <span> · per 100g</span>
+                            <span className="font-medium text-brand">{f.per100.kcal} {t("food.kcal")}</span>
+                            <span> · {t("food.per100").toLowerCase()}</span>
                           </p>
                         </div>
                         {isFavorite(f.id) && <Heart className="size-4 fill-brand text-brand" />}
@@ -252,7 +250,7 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
                           <button
                             onClick={(e) => { e.stopPropagation(); removeCustom(f.id); }}
                             className="grid size-8 place-items-center rounded-full text-muted-foreground hover:text-destructive"
-                            aria-label="Delete"
+                            aria-label={t("food.delete")}
                           >
                             <Trash2 className="size-3.5" />
                           </button>
@@ -263,14 +261,13 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
                 </ul>
               </div>
 
-              {/* Add custom CTA */}
               <div className="border-t border-border bg-background p-3">
                 <Button
                   variant="outline"
                   className="w-full rounded-full"
                   onClick={() => setCustomOpen(true)}
                 >
-                  <Plus className="size-4" /> Add custom food
+                  <Plus className="size-4" /> {t("food.add_custom")}
                 </Button>
               </div>
             </>
@@ -287,7 +284,6 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
   );
 }
 
-/* ---------------- Detail screen ---------------- */
 function FoodDetail({
   food, onBack, onFav, isFav, onLog, defaultMealType,
 }: {
@@ -298,6 +294,7 @@ function FoodDetail({
   defaultMealType: MealType;
   onLog: (entry: { kcal: number; protein: number; carbs: number; fat: number; food: FoodItem; servingCount: number; serving: FoodServing; mealType: MealType }) => void;
 }) {
+  const { t } = useI18n();
   const [servingIdx, setServingIdx] = useState(0);
   const [count, setCount] = useState("1");
   const [mealType, setMealType] = useState<MealType>(defaultMealType);
@@ -310,9 +307,9 @@ function FoodDetail({
   return (
     <div className="flex h-full max-h-[90vh] flex-col">
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <button onClick={onBack} aria-label="Back"><ChevronLeft className="size-5" /></button>
+        <button onClick={onBack} aria-label={t("food.back")}><ChevronLeft className="size-5" /></button>
         <h2 className="truncate font-display text-sm font-semibold">{food.name}</h2>
-        <button onClick={onFav} aria-label="Favorite">
+        <button onClick={onFav} aria-label={t("food.fav")}>
           <Heart className={`size-5 ${isFav ? "fill-brand text-brand" : "text-muted-foreground"}`} />
         </button>
       </div>
@@ -325,29 +322,27 @@ function FoodDetail({
             {food.brand && <p className="text-xs text-muted-foreground">{food.brand}</p>}
             {food.verified && (
               <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold text-brand">
-                ✓ Verified
+                ✓ {t("food.verified")}
               </span>
             )}
           </div>
         </div>
 
-        {/* Totals */}
         <div className="mt-4 grid grid-cols-4 gap-2">
-          <Stat label="Cal" value={`${totals.kcal}`} accent />
-          <Stat label="Carbs" value={`${totals.carbs}g`} />
-          <Stat label="Protein" value={`${totals.protein}g`} />
-          <Stat label="Fat" value={`${totals.fat}g`} />
+          <Stat label={t("food.cal")} value={`${totals.kcal}`} accent />
+          <Stat label={t("food.carbs")} value={`${totals.carbs}g`} />
+          <Stat label={t("food.protein")} value={`${totals.protein}g`} />
+          <Stat label={t("food.fat")} value={`${totals.fat}g`} />
         </div>
 
-        {/* Portion */}
         <div className="mt-5 space-y-3">
           <div>
-            <Label className="text-xs">Amount</Label>
+            <Label className="text-xs">{t("food.amount")}</Label>
             <div className="mt-1 flex items-center gap-2">
               <button
                 onClick={() => setCount((c) => String(Math.max(0.25, (Number(c) || 0) - 0.5)))}
                 className="grid size-10 place-items-center rounded-full border border-border"
-                aria-label="Decrease"
+                aria-label={t("food.dec")}
               >
                 <Minus className="size-4" />
               </button>
@@ -362,7 +357,7 @@ function FoodDetail({
               <button
                 onClick={() => setCount((c) => String((Number(c) || 0) + 0.5))}
                 className="grid size-10 place-items-center rounded-full border border-border"
-                aria-label="Increase"
+                aria-label={t("food.inc")}
               >
                 <Plus className="size-4" />
               </button>
@@ -370,7 +365,7 @@ function FoodDetail({
           </div>
 
           <div>
-            <Label className="text-xs">Serving</Label>
+            <Label className="text-xs">{t("food.serving")}</Label>
             <Select value={String(servingIdx)} onValueChange={(v) => setServingIdx(Number(v))}>
               <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -380,31 +375,30 @@ function FoodDetail({
               </SelectContent>
             </Select>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              = {Math.round(grams)} g total
+              {t("food.serving_total", { g: Math.round(grams) })}
             </p>
           </div>
 
           <div>
-            <Label className="text-xs">Meal</Label>
+            <Label className="text-xs">{t("food.meal")}</Label>
             <Select value={mealType} onValueChange={(v) => setMealType(v as MealType)}>
               <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {MEAL_TYPES.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>{m.emoji} {m.label}</SelectItem>
+                  <SelectItem key={m.id} value={m.id}>{m.emoji} {t(`meal.${m.id}`)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
         </div>
 
-        {/* Nutrition info */}
         <div className="mt-5 rounded-2xl border border-border p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Per 100g</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("food.per100")}</p>
           <div className="mt-2 grid grid-cols-4 gap-2 text-center text-[11px]">
-            <div><p className="font-semibold">{food.per100.kcal}</p><p className="text-muted-foreground">kcal</p></div>
-            <div><p className="font-semibold">{food.per100.carbs}g</p><p className="text-muted-foreground">carbs</p></div>
-            <div><p className="font-semibold">{food.per100.protein}g</p><p className="text-muted-foreground">protein</p></div>
-            <div><p className="font-semibold">{food.per100.fat}g</p><p className="text-muted-foreground">fat</p></div>
+            <div><p className="font-semibold">{food.per100.kcal}</p><p className="text-muted-foreground">{t("food.kcal")}</p></div>
+            <div><p className="font-semibold">{food.per100.carbs}g</p><p className="text-muted-foreground">{t("food.carbs").toLowerCase()}</p></div>
+            <div><p className="font-semibold">{food.per100.protein}g</p><p className="text-muted-foreground">{t("food.protein").toLowerCase()}</p></div>
+            <div><p className="font-semibold">{food.per100.fat}g</p><p className="text-muted-foreground">{t("food.fat").toLowerCase()}</p></div>
           </div>
         </div>
       </div>
@@ -415,20 +409,20 @@ function FoodDetail({
           disabled={n <= 0}
           onClick={() => onLog({ ...totals, food, servingCount: n, serving, mealType })}
         >
-          <Plus className="size-4" /> Add {totals.kcal} kcal
+          <Plus className="size-4" /> {t("food.add_btn", { n: totals.kcal })}
         </Button>
       </div>
     </div>
   );
 }
 
-/* ---------------- Custom food form ---------------- */
 function CustomFoodForm({
   onBack, onSave,
 }: {
   onBack: () => void;
   onSave: (food: Omit<FoodItem, "id" | "source">) => void;
 }) {
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
   const [kcal, setKcal] = useState("");
@@ -442,21 +436,21 @@ function CustomFoodForm({
   return (
     <div className="flex max-h-[90vh] flex-col">
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
-        <button onClick={onBack}><ChevronLeft className="size-5" /></button>
-        <h2 className="font-display text-sm font-semibold">Add custom food</h2>
+        <button onClick={onBack} aria-label={t("food.back")}><ChevronLeft className="size-5" /></button>
+        <h2 className="font-display text-sm font-semibold">{t("food.custom_title")}</h2>
         <div className="size-5" />
       </div>
       <div className="flex-1 overflow-y-auto space-y-3 p-4">
-        <Field label="Name" value={name} onChange={setName} placeholder="e.g. Mom's lasagna" />
-        <Field label="Brand (optional)" value={brand} onChange={setBrand} />
-        <p className="pt-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Per 100g</p>
+        <Field label={t("food.f_name")} value={name} onChange={setName} placeholder={t("food.f_name_ph")} />
+        <Field label={t("food.f_brand")} value={brand} onChange={setBrand} />
+        <p className="pt-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{t("food.per100")}</p>
         <div className="grid grid-cols-2 gap-2">
-          <Field label="Calories" value={kcal} onChange={setKcal} type="number" />
-          <Field label="Protein (g)" value={protein} onChange={setProtein} type="number" />
-          <Field label="Carbs (g)" value={carbs} onChange={setCarbs} type="number" />
-          <Field label="Fat (g)" value={fat} onChange={setFat} type="number" />
+          <Field label={t("food.f_cal")} value={kcal} onChange={setKcal} type="number" />
+          <Field label={t("food.f_protein")} value={protein} onChange={setProtein} type="number" />
+          <Field label={t("food.f_carbs")} value={carbs} onChange={setCarbs} type="number" />
+          <Field label={t("food.f_fat")} value={fat} onChange={setFat} type="number" />
         </div>
-        <Field label="1 serving = (g)" value={servingG} onChange={setServingG} type="number" />
+        <Field label={t("food.f_serving")} value={servingG} onChange={setServingG} type="number" />
       </div>
       <div className="border-t border-border p-3">
         <Button
@@ -472,20 +466,19 @@ function CustomFoodForm({
               fat: Number(fat) || 0,
             },
             servings: [
-              { label: `1 serving (${Number(servingG) || 100} g)`, grams: Number(servingG) || 100 },
-              { label: "100 g", grams: 100 },
-              { label: "1 g", grams: 1 },
+              { label: t("food.serving_default", { g: Number(servingG) || 100 }), grams: Number(servingG) || 100 },
+              { label: t("food.serving_100"), grams: 100 },
+              { label: t("food.serving_1"), grams: 1 },
             ],
           })}
         >
-          Save food
+          {t("food.save")}
         </Button>
       </div>
     </div>
   );
 }
 
-/* ---------------- bits ---------------- */
 function TabBtn({ active, children, onClick }: { active: boolean; children: React.ReactNode; onClick: () => void }) {
   return (
     <button
@@ -555,11 +548,9 @@ function Field({ label, value, onChange, type = "text", placeholder }: { label: 
   );
 }
 
-/* ---------------- helpers ---------------- */
 async function downscaleToDataUrl(file: File, maxDim = 1024, quality = 0.85): Promise<string> {
   const bitmap = await createImageBitmap(file).catch(() => null);
   if (!bitmap) {
-    // Fallback: just read as data URL
     return await new Promise((resolve, reject) => {
       const r = new FileReader();
       r.onload = () => resolve(String(r.result));
