@@ -379,9 +379,7 @@ export function ChatScreen({
       }
       const activeThreadId = await ensureThread();
       const parts = attached ? await toFileParts([attached]) : undefined;
-      const assistantCountBefore = messagesRef.current.filter(
-        (m) => m.role === "assistant",
-      ).length;
+      const assistantCountBefore = messagesRef.current.filter((m) => m.role === "assistant").length;
       setInput("");
       setFile(null);
       setDisplayMessages((current) => [
