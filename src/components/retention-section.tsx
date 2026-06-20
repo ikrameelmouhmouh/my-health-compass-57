@@ -4,15 +4,18 @@ import { BADGES, useRetention } from "@/lib/retention";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { enablePush, disablePush, pushStatus, pushSupported } from "@/lib/push";
+import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export function RetentionSection() {
+  const t = useT();
   const { user } = useAuth();
   const { loading, stats, weekDays, earnedBadgeIds } = useRetention(user?.id);
   const [perm, setPerm] = useState<"granted" | "denied" | "default" | "unsupported">("default");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => { pushStatus().then(setPerm); }, []);
+
 
   if (!user || loading || !stats) {
     return (
