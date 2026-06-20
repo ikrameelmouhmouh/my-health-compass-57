@@ -12,9 +12,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/lib/i18n";
 
+import { SocialPage } from "./social";
+
 export const Route = createFileRoute("/_authenticated/weight")({
-  component: ProgressPage,
+  component: ProgressShell,
 });
+
+function ProgressShell() {
+  const { t } = useI18n();
+  const [tab, setTab] = useState<"stats" | "social">("stats");
+  return (
+    <>
+      <div className="mx-auto w-full max-w-md px-4 pt-6">
+        <div className="grid grid-cols-2 gap-1 rounded-2xl border border-border bg-card/50 p-1">
+          <button
+            onClick={() => setTab("stats")}
+            className={`rounded-xl px-3 py-2 text-sm font-medium transition ${tab === "stats" ? "bg-brand text-brand-foreground shadow" : "text-muted-foreground"}`}
+          >
+            {t("progress.tabStats")}
+          </button>
+          <button
+            onClick={() => setTab("social")}
+            className={`rounded-xl px-3 py-2 text-sm font-medium transition ${tab === "social" ? "bg-brand text-brand-foreground shadow" : "text-muted-foreground"}`}
+          >
+            {t("progress.tabSocial")}
+          </button>
+        </div>
+      </div>
+      {tab === "stats" ? <ProgressPage /> : <SocialPage />}
+    </>
+  );
+}
 
 // ---------- helpers ----------
 const fmtDate = (iso: string, lang: string) => new Date(iso).toLocaleDateString(lang, { month: "short", day: "numeric" });
