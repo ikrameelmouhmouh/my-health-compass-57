@@ -25,6 +25,8 @@ type Props = {
 };
 
 export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
+  const t = useT();
+  const DAYS = DAY_KEYS.map((k) => t(`tpl.days.${k}`));
   const [name, setName] = useState(initial.name);
   const [day, setDay] = useState(initial.day ?? "");
   const [focus, setFocus] = useState(initial.focus ?? "");
@@ -44,10 +46,11 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
 
   const handlePhoto = (file: File | null | undefined) => {
     if (!file) return;
-    toast.info("Foto ontvangen", { description: "Automatische foto-herkenning komt binnenkort. Gebruik intussen Zoek oefeningen of Beschrijf routine." });
+    toast.info(t("tpl.photo_received"), { description: t("tpl.photo_desc") });
   };
 
-  const title = name.trim() || "Nieuwe Training";
+  const title = name.trim() || t("tpl.new_workout");
+
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
