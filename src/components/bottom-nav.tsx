@@ -37,8 +37,6 @@ export function BottomNav() {
                 <Icon
                   className="size-[26px]"
                   strokeWidth={active ? 2.2 : 1.7}
-                  fill={active ? "currentColor" : "none"}
-                  fillOpacity={active ? 0.12 : 0}
                 />
                 <span
                   className={`text-[10px] leading-none tracking-tight ${
