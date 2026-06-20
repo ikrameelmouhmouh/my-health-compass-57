@@ -73,6 +73,14 @@ function getDisplayName(
   return "";
 }
 
+function getMessageText(message: UIMessage) {
+  return message.parts.map((part) => (part.type === "text" ? part.text : "")).join("").trim();
+}
+
+function assistantTextCount(messages: UIMessage[]) {
+  return messages.filter((message) => message.role === "assistant" && getMessageText(message)).length;
+}
+
 function VitaAvatar({ size = 64 }: { size?: number }) {
   return (
     <div
@@ -337,9 +345,9 @@ export function ChatScreen({
   useEffect(() => {
     messagesRef.current = messages;
     setDisplayMessages((current) => {
-      const currentAssistantCount = current.filter((m) => m.role === "assistant").length;
-      const nextAssistantCount = messages.filter((m) => m.role === "assistant").length;
-      if (messages.length >= current.length || nextAssistantCount >= currentAssistantCount) {
+      const currentAssistantCount = assistantTextCount(current);
+      const nextAssistantCount = assistantTextCount(messages);
+      if (nextAssistantCount >= currentAssistantCount && messages.length >= current.length) {
         return messages;
       }
       return current;
@@ -386,7 +394,7 @@ export function ChatScreen({
       }
       const activeThreadId = await ensureThread();
       const parts = attached ? await toFileParts([attached]) : undefined;
-      const assistantCountBefore = messagesRef.current.filter((m) => m.role === "assistant").length;
+      const assistantCountBefore = assistantTextCount(messagesRef.current);
       setInput("");
       setFile(null);
       setDisplayMessages((current) => [
@@ -399,9 +407,7 @@ export function ChatScreen({
       ]);
       await sendMessage({ text, files: parts });
       window.setTimeout(() => {
-        const assistantCountAfter = messagesRef.current.filter(
-          (m) => m.role === "assistant",
-        ).length;
+        const assistantCountAfter = assistantTextCount(messagesRef.current);
         if (assistantCountAfter <= assistantCountBefore) void syncThreadMessages(activeThreadId);
       }, 150);
     } catch (e) {
