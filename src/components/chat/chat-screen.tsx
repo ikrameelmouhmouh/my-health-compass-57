@@ -43,7 +43,11 @@ import { useAuth } from "@/lib/auth-context";
 import { useT, useI18n } from "@/lib/i18n";
 import { createThread } from "@/lib/chat.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { setPendingMessage, takePendingMessage } from "@/lib/chat-pending";
+import {
+  requeuePendingMessage,
+  setPendingMessage,
+  takePendingMessage,
+} from "@/lib/chat-pending";
 import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
 
 type QuickAction = {
