@@ -255,7 +255,7 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
         <ExerciseLibraryDialog
           open={libOpen}
           onClose={() => setLibOpen(false)}
-          pickLabel="Aan training toevoegen"
+          pickLabel={t("tpl.add_to_workout")}
           onPick={(ex) =>
             setExercises((c) => [
               ...c,
