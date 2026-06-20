@@ -1,20 +1,8 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import {
-  Camera,
-  Menu,
-  Plus,
-  Send,
-  Square,
-} from "lucide-react";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type FormEvent,
-} from "react";
+import { Camera, Menu, Plus, Send, Square } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
@@ -53,14 +41,27 @@ type QuickAction = {
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { key: "scan", labelKey: "chat.quick.scan", promptKey: "chat.image_caption", icon: "📷", scan: true },
-  { key: "workout", labelKey: "chat.quick.workout", promptKey: "chat.quick.workout.prompt", icon: "🏋️" },
+  {
+    key: "scan",
+    labelKey: "chat.quick.scan",
+    promptKey: "chat.image_caption",
+    icon: "📷",
+    scan: true,
+  },
+  {
+    key: "workout",
+    labelKey: "chat.quick.workout",
+    promptKey: "chat.quick.workout.prompt",
+    icon: "🏋️",
+  },
   { key: "meals", labelKey: "chat.quick.meals", promptKey: "chat.quick.meals.prompt", icon: "🥗" },
   { key: "tip", labelKey: "chat.quick.tip", promptKey: "chat.quick.tip.prompt", icon: "⚡" },
   { key: "week", labelKey: "chat.quick.week", promptKey: "chat.quick.week.prompt", icon: "📊" },
 ];
 
-function getDisplayName(user: { user_metadata?: Record<string, unknown>; email?: string | null } | null) {
+function getDisplayName(
+  user: { user_metadata?: Record<string, unknown>; email?: string | null } | null,
+) {
   const dn = (user?.user_metadata?.["display_name"] as string | undefined) ?? "";
   const trimmed = dn.trim();
   if (trimmed) return trimmed.split(" ")[0];
