@@ -7,11 +7,11 @@ import {
   Settings, Sliders,
   Apple, Timer, Dumbbell, LineChart, Droplet, Footprints, Flame,
   Plus, Minus, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
-  CheckCircle2, Circle, PlayCircle, Scale, UtensilsCrossed, ArrowUpRight,
+  CheckCircle2, Circle, Scale, ArrowUpRight,
 } from "lucide-react";
-import { useT } from "@/lib/i18n";
+import { useT, useI18n } from "@/lib/i18n";
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription, SheetFooter,
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
 } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import {
   useDashboardPrefs, useDayLog, useWeightLog, useTodayWorkout, useFasting,
   useCaloriePrefs, calcCalorieBudget,
-  CARD_LABELS, type DashCardId, type CalorieBudget, type CalorieMode,
+  type DashCardId, type CalorieBudget, type CalorieMode,
 } from "@/lib/dashboard-prefs";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
@@ -36,6 +36,7 @@ const STEP_GOAL = 10000;
 
 function Profile() {
   const t = useT();
+  const { lang } = useI18n();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -47,7 +48,6 @@ function Profile() {
   const { prefs: caloriePrefs, toggleMode: toggleCalorieMode } = useCaloriePrefs();
   const { logMeal } = useMeals();
 
-  // dialog state
   const [openSheet, setOpenSheet] = useState<null | "water" | "weight" | "food" | "workout" | "customize">(null);
 
   const { data, isLoading } = useQuery({
@@ -68,11 +68,8 @@ function Profile() {
     }
   }, [isLoading, data, navigate]);
 
-  // Fasting derived (must run on every render — hooks order)
   const fastInfo = useMemo(() => {
-    if (!fasting.startedAt) {
-      return { active: false, hoursElapsed: 0, hoursLeft: 0, pct: 0 };
-    }
+    if (!fasting.startedAt) return { active: false, hoursElapsed: 0, hoursLeft: 0, pct: 0 };
     const elapsedMs = Date.now() - new Date(fasting.startedAt).getTime();
     const elapsedH = elapsedMs / 3_600_000;
     return {
@@ -102,7 +99,6 @@ function Profile() {
   const sub = data.subscription;
   const isPremium = !!sub && ["active", "trialing", "past_due"].includes(sub.status) && (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
 
-  // Derived stats
   const calorieTarget = p.daily_calories ?? 0;
   const proteinTarget = p.protein_g ?? 0;
   const carbsTarget = p.carbs_g ?? 0;
@@ -134,11 +130,10 @@ function Profile() {
     ? Math.max(0, Math.min(100, ((startWeight - currentWeight) / (startWeight - goalWeight)) * 100))
     : 0;
 
-  const greeting = greetingFor(new Date());
+  const greeting = greetingFor(new Date(), t);
 
   const visibleCards = prefs.order.filter((c) => !prefs.hidden.includes(c));
 
-  // Group adjacent visible cards into side-by-side pairs.
   const PAIRS: Array<[DashCardId, DashCardId]> = [
     ["water", "steps"],
     ["activity", "weight"],
@@ -266,7 +261,6 @@ function Profile() {
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-4 pb-32 pt-4">
-      {/* iOS large title header */}
       <header className="flex items-start justify-between gap-3 px-1">
         <div className="min-w-0 flex-1">
           <p className="text-[13px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -276,16 +270,16 @@ function Profile() {
             {p.display_name || "—"}
           </h1>
           <p className="mt-1 text-[13px] font-medium text-muted-foreground">
-            {formatToday()}
+            {formatToday(lang)}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <IconBtn aria-label="Customize dashboard" onClick={() => setOpenSheet("customize")}>
+          <IconBtn aria-label={t("today.customize")} onClick={() => setOpenSheet("customize")}>
             <Sliders className="size-[18px]" strokeWidth={2} />
           </IconBtn>
           <Link
             to="/settings"
-            aria-label="Settings"
+            aria-label={t("today.settings")}
             className="ios-press inline-flex size-9 items-center justify-center rounded-full bg-secondary text-foreground"
           >
             <Settings className="size-[18px]" strokeWidth={2} />
@@ -293,7 +287,6 @@ function Profile() {
         </div>
       </header>
 
-      {/* Plan chip */}
       <div className="mt-3 flex items-center px-1">
         <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1">
           <span className={`size-1.5 rounded-full ${isPremium ? "bg-brand" : "bg-muted-foreground"}`} />
@@ -303,8 +296,6 @@ function Profile() {
         </div>
       </div>
 
-
-      {/* Cards */}
       <section className="mt-5 space-y-3">
         {rows.map((row, i) =>
           row.length === 2 ? (
@@ -318,22 +309,18 @@ function Profile() {
         )}
         {visibleCards.length === 0 && (
           <div className="rounded-3xl border border-dashed border-border bg-card/50 p-8 text-center">
-            <p className="text-sm text-muted-foreground">All cards are hidden.</p>
+            <p className="text-sm text-muted-foreground">{t("today.empty.hidden")}</p>
             <Button variant="outline" size="sm" className="mt-3" onClick={() => setOpenSheet("customize")}>
-              Customize dashboard
+              {t("today.customize")}
             </Button>
           </div>
         )}
       </section>
 
-      {/* Retention: streaks, week overview, badges, push */}
       <div className="mt-5">
         <RetentionSection />
       </div>
 
-
-
-      {/* --- Sheets / Dialogs --- */}
       <CustomizeSheet
         open={openSheet === "customize"}
         onOpenChange={(o) => !o && setOpenSheet(null)}
@@ -381,20 +368,6 @@ function IconBtn({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonEl
       className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-card transition hover:bg-accent"
     >
       {children}
-    </button>
-  );
-}
-
-function QuickAction({ icon: Icon, label, onClick }: { icon: React.ElementType; label: string; onClick: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      className="group flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card px-2 py-3 transition active:scale-[0.98] hover:bg-accent"
-    >
-      <span className="grid size-9 place-items-center rounded-full bg-brand/12">
-        <Icon className="size-4 text-brand" />
-      </span>
-      <span className="font-display text-[11px] font-semibold">{label}</span>
     </button>
   );
 }
@@ -449,30 +422,31 @@ function Ring({ pct: p, size = 76, label, sub }: { pct: number; size?: number; l
 }
 
 /* --------------------------------- Cards --------------------------------- */
-function NutritionCard({ budget, meals, mode, onToggleMode, onLogFood, protein, carbs, fat }: {
+function NutritionCard({ budget, mode, onToggleMode, onLogFood, protein, carbs, fat }: {
   budget: CalorieBudget; meals: number; mode: CalorieMode; onToggleMode: () => void; onLogFood: () => void;
   protein: { have: number; goal: number };
   carbs: { have: number; goal: number };
   fat: { have: number; goal: number };
 }) {
+  const t = useT();
   const consumedPct = Math.min(100, pct(budget.eaten, budget.allowance));
   const remaining = Math.max(0, budget.remaining);
   const over = budget.remaining < 0;
   const headline = over
-    ? `${Math.abs(budget.remaining).toLocaleString()} calories over`
-    : `You can still eat ${remaining.toLocaleString()} calories`;
+    ? t("today.cal.over", { n: Math.abs(budget.remaining).toLocaleString() })
+    : t("today.cal.left", { n: remaining.toLocaleString() });
   return (
-    <CardShell title="Calories" icon={Apple} action={
+    <CardShell title={t("today.cal.title")} icon={Apple} action={
       <div className="flex items-center gap-1.5">
         <button
           onClick={onToggleMode}
-          title={mode === "smart" ? "Smart Adjustment Mode" : "Standard Mode"}
+          title={mode === "smart" ? t("today.cal.mode_smart") : t("today.cal.mode_standard")}
           className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider border ${mode === "smart" ? "border-brand/60 bg-brand/10 text-brand" : "border-border bg-background text-muted-foreground"}`}
         >
-          {mode === "smart" ? "Smart" : "Standard"}
+          {mode === "smart" ? t("today.cal.smart") : t("today.cal.standard")}
         </button>
         <button onClick={onLogFood} className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-[11px] font-semibold text-brand-foreground">
-          <Plus className="size-3" /> Log
+          <Plus className="size-3" /> {t("today.cal.log")}
         </button>
       </div>
     }>
@@ -482,13 +456,13 @@ function NutritionCard({ budget, meals, mode, onToggleMode, onLogFood, protein, 
             {headline}
           </h3>
           <div className="shrink-0 text-right">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Goal</div>
+            <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{t("today.cal.goal")}</div>
             <div className="font-display text-sm font-semibold tabular-nums text-muted-foreground">
               {budget.allowance.toLocaleString()}
             </div>
             {mode === "smart" && budget.earned > 0 && (
               <div className="mt-0.5 text-[10px] font-medium tabular-nums text-brand">
-                +{budget.earned.toLocaleString()} earned
+                {t("today.cal.earned", { n: budget.earned.toLocaleString() })}
               </div>
             )}
           </div>
@@ -506,46 +480,44 @@ function NutritionCard({ budget, meals, mode, onToggleMode, onLogFood, protein, 
             <span className="font-display text-lg font-semibold tabular-nums text-foreground">
               {budget.eaten.toLocaleString()}
             </span>
-            <span className="text-xs text-muted-foreground">eaten</span>
+            <span className="text-xs text-muted-foreground">{t("today.cal.eaten")}</span>
           </div>
           {budget.totalBurn > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-medium text-brand">
               <Flame className="size-3" />
-              +{budget.totalBurn.toLocaleString()} burned
+              {t("today.cal.burned", { n: budget.totalBurn.toLocaleString() })}
             </span>
           )}
         </div>
 
         {mode === "smart" && budget.totalBurn > 0 && (
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Activity added <span className="font-semibold text-foreground">+{budget.earned.toLocaleString()} kcal</span> to today's goal.
+            {t("today.cal.smart_note", { n: budget.earned.toLocaleString() })}
           </p>
         )}
-
       </div>
 
       <div className="mt-5 grid grid-cols-3 gap-2 border-t border-border/60 pt-4">
-        <MacroBlock label="Protein" {...protein} />
-        <MacroBlock label="Carbs" {...carbs} />
-        <MacroBlock label="Fat" {...fat} />
+        <MacroBlock label={t("today.macro.protein")} {...protein} />
+        <MacroBlock label={t("today.macro.carbs")} {...carbs} />
+        <MacroBlock label={t("today.macro.fat")} {...fat} />
       </div>
     </CardShell>
   );
 }
-
-
 
 function MacroCard({ protein, carbs, fat }: {
   protein: { have: number; goal: number };
   carbs: { have: number; goal: number };
   fat: { have: number; goal: number };
 }) {
+  const t = useT();
   return (
-    <CardShell title="Macros today" icon={LineChart}>
+    <CardShell title={t("today.macro.title")} icon={LineChart}>
       <div className="grid grid-cols-3 gap-3">
-        <MacroBlock label="Protein" {...protein} />
-        <MacroBlock label="Carbs" {...carbs} />
-        <MacroBlock label="Fat" {...fat} />
+        <MacroBlock label={t("today.macro.protein")} {...protein} />
+        <MacroBlock label={t("today.macro.carbs")} {...carbs} />
+        <MacroBlock label={t("today.macro.fat")} {...fat} />
       </div>
     </CardShell>
   );
@@ -565,16 +537,17 @@ function MacroBlock({ label, have, goal }: { label: string; have: number; goal: 
 }
 
 function WaterCard({ ml, goal, onAdd, onOpen, compact }: { ml: number; goal: number; onAdd: (n: number) => void; onOpen: () => void; compact?: boolean }) {
+  const t = useT();
   return (
-    <CardShell title="Hydration" icon={Droplet} compact={compact} action={
+    <CardShell title={t("today.water.title")} icon={Droplet} compact={compact} action={
       !compact && (
-        <button onClick={onOpen} className="text-[11px] font-medium text-muted-foreground hover:text-foreground">Details</button>
+        <button onClick={onOpen} className="text-[11px] font-medium text-muted-foreground hover:text-foreground">{t("today.water.details")}</button>
       )
     }>
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
           <div className={`font-display font-semibold tabular-nums leading-none ${compact ? "text-2xl" : "text-3xl"}`}>{(ml / 1000).toFixed(2)}<span className="text-base">L</span></div>
-          <div className="mt-1 text-[10px] text-muted-foreground">of {(goal / 1000).toFixed(1)}L · {Math.round(pct(ml, goal))}%</div>
+          <div className="mt-1 text-[10px] text-muted-foreground">{t("today.water.of", { goal: (goal / 1000).toFixed(1), pct: Math.round(pct(ml, goal)) })}</div>
         </div>
         <div className="flex shrink-0 gap-1">
           <button onClick={() => onAdd(-250)} className={`grid place-items-center rounded-full border border-border bg-background hover:bg-accent ${compact ? "size-7" : "size-9"}`}><Minus className={compact ? "size-3" : "size-4"} /></button>
@@ -596,23 +569,24 @@ function WaterCard({ ml, goal, onAdd, onOpen, compact }: { ml: number; goal: num
 }
 
 function StepsCard({ steps, goal, compact }: { steps: number; goal: number; onChange?: (s: number) => void; compact?: boolean }) {
+  const t = useT();
   return (
-    <CardShell title="Steps" icon={Footprints} compact={compact}>
+    <CardShell title={t("today.steps.title")} icon={Footprints} compact={compact}>
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
           <div className={`font-display font-semibold tabular-nums leading-none ${compact ? "text-2xl" : "text-3xl"}`}>{steps.toLocaleString()}</div>
-          <div className="mt-1 text-[10px] text-muted-foreground">of {goal.toLocaleString()} · {Math.round(pct(steps, goal))}%</div>
+          <div className="mt-1 text-[10px] text-muted-foreground">{t("today.steps.of", { goal: goal.toLocaleString(), pct: Math.round(pct(steps, goal)) })}</div>
         </div>
         {!compact && (
           <div className="text-right text-[11px] text-muted-foreground">
             <div>{Math.max(0, goal - steps).toLocaleString()}</div>
-            <div className="text-[10px] uppercase tracking-wider">to go</div>
+            <div className="text-[10px] uppercase tracking-wider">{t("today.steps.togo")}</div>
           </div>
         )}
       </div>
       <Bar pct={pct(steps, goal)} className={compact ? "mt-3" : "mt-4"} />
       <div className={`${compact ? "mt-2" : "mt-3"} text-[10px] text-muted-foreground`}>
-        Auto-sync with Apple Health coming soon
+        {t("today.steps.sync")}
       </div>
     </CardShell>
   );
@@ -622,29 +596,30 @@ function FastingCard({ active, elapsed, remaining, windowHours, pct: p, streak, 
   active: boolean; elapsed: number; remaining: number; windowHours: number; pct: number; streak: number;
   onStart: () => void; onStop: () => void;
 }) {
+  const t = useT();
   return (
-    <CardShell title="Fasting" icon={Timer} action={
+    <CardShell title={t("today.fast.title")} icon={Timer} action={
       <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent-foreground">
-        {streak}🔥 streak
+        {t("today.fast.streak", { n: streak })}
       </span>
     }>
       <div className="flex items-center gap-5">
         <Ring
           pct={active ? p : 0}
           label={active ? formatHours(elapsed) : "—"}
-          sub={active ? "elapsed" : "Not fasting"}
+          sub={active ? t("today.fast.elapsed") : t("today.fast.not_fasting")}
         />
         <div className="flex-1 space-y-1.5">
-          <StatRow label="Status" value={active ? "Fasting" : "Eating window"} accent />
-          <StatRow label="Window" value={`${windowHours}:${24 - windowHours}`} />
-          <StatRow label={active ? "Until done" : "Last streak"} value={active ? formatHours(remaining) : `${streak} days`} muted />
+          <StatRow label={t("today.fast.status")} value={active ? t("today.fast.fasting") : t("today.fast.eating")} accent />
+          <StatRow label={t("today.fast.window")} value={`${windowHours}:${24 - windowHours}`} />
+          <StatRow label={active ? t("today.fast.until_done") : t("today.fast.last_streak")} value={active ? formatHours(remaining) : t("today.fast.days", { n: streak })} muted />
           <Button
             size="sm"
             variant={active ? "outline" : "default"}
             className="mt-2 h-8 w-full"
             onClick={active ? onStop : onStart}
           >
-            {active ? "End fast" : "Start fast"}
+            {active ? t("today.fast.end") : t("today.fast.start")}
           </Button>
         </div>
       </div>
@@ -655,11 +630,12 @@ function FastingCard({ active, elapsed, remaining, windowHours, pct: p, streak, 
 function WeightCard({ current, delta, goal, progress, onLog, compact }: {
   current: number; delta: number; goal: number; progress: number; onLog: () => void; compact?: boolean;
 }) {
+  const t = useT();
   const deltaColor = delta < 0 ? "text-brand" : delta > 0 ? "text-destructive" : "text-muted-foreground";
   return (
-    <CardShell title="Weight" icon={Scale} compact={compact} action={
+    <CardShell title={t("today.weight.title")} icon={Scale} compact={compact} action={
       <button onClick={onLog} className={`inline-flex items-center gap-1 rounded-full bg-brand font-semibold text-brand-foreground ${compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]"}`}>
-        <Plus className="size-3" /> Log
+        <Plus className="size-3" /> {t("today.weight.log")}
       </button>
     }>
       {compact ? (
@@ -669,11 +645,11 @@ function WeightCard({ current, delta, goal, progress, onLog, compact }: {
           </div>
           <div className={`mt-1 inline-flex items-center gap-1 text-[10px] font-semibold ${deltaColor}`}>
             <ArrowUpRight className={`size-3 ${delta < 0 ? "rotate-180" : ""}`} />
-            {delta === 0 ? "No change" : `${delta > 0 ? "+" : ""}${delta.toFixed(1)} kg`}
+            {delta === 0 ? t("today.weight.no_change") : `${delta > 0 ? "+" : ""}${delta.toFixed(1)} kg`}
           </div>
           <Bar pct={progress} className="mt-3" />
           <div className="mt-1.5 flex items-baseline justify-between text-[10px] text-muted-foreground">
-            <span>{Math.round(progress)}% to goal</span>
+            <span>{t("today.weight.pct_compact", { pct: Math.round(progress) })}</span>
             <span className="font-display font-semibold tabular-nums text-foreground">{goal.toFixed(1)} kg</span>
           </div>
         </>
@@ -684,16 +660,16 @@ function WeightCard({ current, delta, goal, progress, onLog, compact }: {
               <div className="font-display text-3xl font-semibold tabular-nums leading-none">{current.toFixed(1)}<span className="ml-1 text-sm text-muted-foreground">kg</span></div>
               <div className={`mt-1 inline-flex items-center gap-1 text-[11px] font-semibold ${deltaColor}`}>
                 <ArrowUpRight className={`size-3 ${delta < 0 ? "rotate-180" : ""}`} />
-                {delta === 0 ? "No change" : `${delta > 0 ? "+" : ""}${delta.toFixed(1)} kg`}
+                {delta === 0 ? t("today.weight.no_change") : `${delta > 0 ? "+" : ""}${delta.toFixed(1)} kg`}
               </div>
             </div>
             <div className="text-right">
-              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Goal</div>
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t("today.weight.goal")}</div>
               <div className="font-display text-lg font-semibold tabular-nums">{goal.toFixed(1)} kg</div>
             </div>
           </div>
           <Bar pct={progress} className="mt-4" />
-          <div className="mt-2 text-[11px] text-muted-foreground">{Math.round(progress)}% toward goal</div>
+          <div className="mt-2 text-[11px] text-muted-foreground">{t("today.weight.pct", { pct: Math.round(progress) })}</div>
         </>
       )}
     </CardShell>
@@ -701,10 +677,11 @@ function WeightCard({ current, delta, goal, progress, onLog, compact }: {
 }
 
 function ActivityCard({ burned, activeMin, onChange, compact }: { burned: number; activeMin: number; onChange: (b: number, m: number) => void; compact?: boolean }) {
+  const t = useT();
   const goalKcal = 500;
   const p = pct(burned, goalKcal);
   return (
-    <CardShell title="Activity" icon={Flame} compact={compact}>
+    <CardShell title={t("today.activity.title")} icon={Flame} compact={compact}>
       {compact ? (
         <>
           <div className="flex items-baseline gap-1">
@@ -714,7 +691,7 @@ function ActivityCard({ burned, activeMin, onChange, compact }: { burned: number
               onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0), activeMin)}
               className="w-14 bg-transparent font-display text-2xl font-semibold tabular-nums leading-none outline-none"
             />
-            <span className="text-[11px] text-muted-foreground">kcal</span>
+            <span className="text-[11px] text-muted-foreground">{t("today.activity.kcal")}</span>
           </div>
           <div className="mt-1 text-[10px] text-muted-foreground">
             <input
@@ -723,15 +700,15 @@ function ActivityCard({ burned, activeMin, onChange, compact }: { burned: number
               onChange={(e) => onChange(burned, Math.max(0, Number(e.target.value) || 0))}
               className="w-8 bg-transparent text-[10px] font-semibold tabular-nums text-foreground outline-none"
             />
-            <span> active min</span>
+            <span> {t("today.activity.active_min")}</span>
           </div>
           <Bar pct={p} className="mt-3" />
-          <div className="mt-1.5 text-[10px] text-muted-foreground">{Math.round(p)}% of {goalKcal} kcal</div>
+          <div className="mt-1.5 text-[10px] text-muted-foreground">{t("today.activity.pct_of", { pct: Math.round(p), goal: goalKcal })}</div>
         </>
       ) : (
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Burned</div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t("today.activity.burned")}</div>
             <div className="mt-1 flex items-baseline gap-1">
               <input
                 type="number"
@@ -739,11 +716,11 @@ function ActivityCard({ burned, activeMin, onChange, compact }: { burned: number
                 onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0), activeMin)}
                 className="w-16 bg-transparent font-display text-xl font-semibold tabular-nums outline-none"
               />
-              <span className="text-[10px] text-muted-foreground">kcal</span>
+              <span className="text-[10px] text-muted-foreground">{t("today.activity.kcal")}</span>
             </div>
           </div>
           <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Active</div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{t("today.activity.active")}</div>
             <div className="mt-1 flex items-baseline gap-1">
               <input
                 type="number"
@@ -751,7 +728,7 @@ function ActivityCard({ burned, activeMin, onChange, compact }: { burned: number
                 onChange={(e) => onChange(burned, Math.max(0, Number(e.target.value) || 0))}
                 className="w-16 bg-transparent font-display text-xl font-semibold tabular-nums outline-none"
               />
-              <span className="text-[10px] text-muted-foreground">min</span>
+              <span className="text-[10px] text-muted-foreground">{t("today.activity.min")}</span>
             </div>
           </div>
         </div>
@@ -764,10 +741,11 @@ function WorkoutCard({ workout, completed, onCreate, onStart, onClear }: {
   workout: { name: string; type: string; time?: string; durationMin: number } | null;
   completed: boolean; onCreate: () => void; onStart: () => void; onClear: () => void;
 }) {
+  const t = useT();
   return (
-    <CardShell title="Today's workout" icon={Dumbbell} action={
+    <CardShell title={t("today.workout.title")} icon={Dumbbell} action={
       workout ? (
-        <button onClick={onClear} className="text-[11px] font-medium text-muted-foreground hover:text-foreground">Clear</button>
+        <button onClick={onClear} className="text-[11px] font-medium text-muted-foreground hover:text-foreground">{t("today.workout.clear")}</button>
       ) : null
     }>
       {workout ? (
@@ -775,23 +753,23 @@ function WorkoutCard({ workout, completed, onCreate, onStart, onClear }: {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="font-display text-lg font-semibold leading-tight">{workout.name}</div>
-              <div className="mt-0.5 text-[11px] text-muted-foreground">{workout.type} · {workout.durationMin} min{workout.time ? ` · ${workout.time}` : ""}</div>
+              <div className="mt-0.5 text-[11px] text-muted-foreground">{workout.type} · {workout.durationMin} {t("today.activity.min")}{workout.time ? ` · ${workout.time}` : ""}</div>
             </div>
-            {completed && <span className="inline-flex items-center gap-1 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold text-brand"><CheckCircle2 className="size-3" /> Done</span>}
+            {completed && <span className="inline-flex items-center gap-1 rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-semibold text-brand"><CheckCircle2 className="size-3" /> {t("today.workout.done")}</span>}
           </div>
           <Button
             size="sm" className="mt-4 h-9 w-full"
             disabled={completed}
             onClick={onStart}
           >
-            {completed ? "Completed" : "Start workout"}
+            {completed ? t("today.workout.completed") : t("today.workout.start")}
           </Button>
         </div>
       ) : (
         <div className="text-center">
-          <p className="text-[13px] text-muted-foreground">No workout scheduled today</p>
+          <p className="text-[13px] text-muted-foreground">{t("today.workout.none")}</p>
           <Button size="sm" variant="outline" className="mt-3 h-9 w-full" onClick={onCreate}>
-            <Plus className="size-3.5" /> Create workout
+            <Plus className="size-3.5" /> {t("today.workout.create")}
           </Button>
         </div>
       )}
@@ -802,15 +780,16 @@ function WorkoutCard({ workout, completed, onCreate, onStart, onClear }: {
 function GoalsCard({ nutrition, water, steps, workout, overall }: {
   nutrition: number; water: number; steps: number; workout: number; overall: number;
 }) {
+  const t = useT();
   return (
-    <CardShell title="Daily goals" icon={CheckCircle2}>
+    <CardShell title={t("today.goals.title")} icon={CheckCircle2}>
       <div className="flex items-center gap-5">
-        <Ring pct={overall} label={`${overall}%`} sub="overall" />
+        <Ring pct={overall} label={`${overall}%`} sub={t("today.goals.overall")} />
         <div className="flex-1 space-y-2.5">
-          <GoalRow label="Nutrition" pct={nutrition} />
-          <GoalRow label="Water" pct={water} />
-          <GoalRow label="Steps" pct={steps} />
-          <GoalRow label="Workout" pct={workout} done={workout >= 100} />
+          <GoalRow label={t("today.goals.nutrition")} pct={nutrition} />
+          <GoalRow label={t("today.goals.water")} pct={water} />
+          <GoalRow label={t("today.goals.steps")} pct={steps} />
+          <GoalRow label={t("today.goals.workout")} pct={workout} done={workout >= 100} />
         </div>
       </div>
     </CardShell>
@@ -845,12 +824,13 @@ function CustomizeSheet({ open, onOpenChange, order, hidden, onMove, onToggle, o
   onToggle: (id: DashCardId) => void;
   onReset: () => void;
 }) {
+  const t = useT();
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="rounded-t-3xl">
         <SheetHeader>
-          <SheetTitle className="font-display">Customize dashboard</SheetTitle>
-          <SheetDescription>Reorder, hide or show cards.</SheetDescription>
+          <SheetTitle className="font-display">{t("today.customize.title")}</SheetTitle>
+          <SheetDescription>{t("today.customize.desc")}</SheetDescription>
         </SheetHeader>
         <div className="mt-4 space-y-2">
           {order.map((id, i) => {
@@ -859,7 +839,7 @@ function CustomizeSheet({ open, onOpenChange, order, hidden, onMove, onToggle, o
               <div key={id} className="flex items-center gap-2 rounded-2xl border border-border bg-card px-3 py-2">
                 <GripVertical className="size-4 text-muted-foreground" />
                 <span className={`flex-1 font-display text-sm font-semibold ${isHidden ? "text-muted-foreground line-through" : ""}`}>
-                  {CARD_LABELS[id]}
+                  {t(`cards.${id}`)}
                 </span>
                 <button onClick={() => onMove(id, -1)} disabled={i === 0} className="grid size-7 place-items-center rounded-md border border-border disabled:opacity-30">
                   <ChevronUp className="size-3.5" />
@@ -875,7 +855,7 @@ function CustomizeSheet({ open, onOpenChange, order, hidden, onMove, onToggle, o
           })}
         </div>
         <SheetFooter className="mt-4">
-          <Button variant="ghost" size="sm" onClick={onReset}>Reset to default</Button>
+          <Button variant="ghost" size="sm" onClick={onReset}>{t("today.customize.reset")}</Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>
@@ -886,12 +866,13 @@ function CustomizeSheet({ open, onOpenChange, order, hidden, onMove, onToggle, o
 function WaterDialog({ open, onOpenChange, ml, goal, onAdd }: {
   open: boolean; onOpenChange: (o: boolean) => void; ml: number; goal: number; onAdd: (n: number) => void;
 }) {
+  const t = useT();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-display">Add water</DialogTitle>
-          <DialogDescription>{(ml / 1000).toFixed(2)}L of {(goal / 1000).toFixed(1)}L goal</DialogDescription>
+          <DialogTitle className="font-display">{t("today.water.add")}</DialogTitle>
+          <DialogDescription>{t("today.water.of_dialog", { ml: (ml / 1000).toFixed(2), goal: (goal / 1000).toFixed(1) })}</DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-3 gap-2">
           {[100, 250, 330, 500, 750, 1000].map((n) => (
@@ -906,50 +887,22 @@ function WaterDialog({ open, onOpenChange, ml, goal, onAdd }: {
 function WeightDialog({ open, onOpenChange, current, onSubmit }: {
   open: boolean; onOpenChange: (o: boolean) => void; current: number; onSubmit: (kg: number) => void;
 }) {
+  const t = useT();
   const [val, setVal] = useState(String(current.toFixed(1)));
   useEffect(() => { if (open) setVal(String(current.toFixed(1))); }, [open, current]);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-display">Log weight</DialogTitle>
-          <DialogDescription>Current: {current.toFixed(1)} kg</DialogDescription>
+          <DialogTitle className="font-display">{t("today.weight.log_dialog")}</DialogTitle>
+          <DialogDescription>{t("today.weight.current", { kg: current.toFixed(1) })}</DialogDescription>
         </DialogHeader>
         <div className="space-y-2">
-          <Label htmlFor="w">Weight (kg)</Label>
+          <Label htmlFor="w">{t("today.weight.field")}</Label>
           <Input id="w" type="number" inputMode="decimal" step="0.1" value={val} onChange={(e) => setVal(e.target.value)} />
         </div>
         <DialogFooter>
-          <Button onClick={() => { const n = parseFloat(val); if (!isNaN(n) && n > 0) onSubmit(n); }}>Save</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function FoodDialog({ open, onOpenChange, onSubmit }: {
-  open: boolean; onOpenChange: (o: boolean) => void; onSubmit: (m: { kcal: number; protein: number; carbs: number; fat: number }) => void;
-}) {
-  const [k, setK] = useState("400");
-  const [p, setP] = useState("25");
-  const [c, setC] = useState("45");
-  const [f, setF] = useState("15");
-  useEffect(() => { if (open) { setK("400"); setP("25"); setC("45"); setF("15"); } }, [open]);
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="font-display">Log meal</DialogTitle>
-          <DialogDescription>Quick entry. A full food database is coming soon.</DialogDescription>
-        </DialogHeader>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Calories (kcal)" value={k} onChange={setK} />
-          <Field label="Protein (g)" value={p} onChange={setP} />
-          <Field label="Carbs (g)" value={c} onChange={setC} />
-          <Field label="Fat (g)" value={f} onChange={setF} />
-        </div>
-        <DialogFooter>
-          <Button onClick={() => onSubmit({ kcal: +k || 0, protein: +p || 0, carbs: +c || 0, fat: +f || 0 })}>Add meal</Button>
+          <Button onClick={() => { const n = parseFloat(val); if (!isNaN(n) && n > 0) onSubmit(n); }}>{t("today.weight.save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -961,35 +914,39 @@ function WorkoutDialog({ open, onOpenChange, initial, onSubmit }: {
   initial: { name: string; type: string; time?: string; durationMin: number } | null;
   onSubmit: (w: { name: string; type: string; time?: string; durationMin: number }) => void;
 }) {
-  const [name, setName] = useState(initial?.name ?? "Full body strength");
-  const [type, setType] = useState(initial?.type ?? "Strength");
+  const t = useT();
+  const defaultName = t("today.workout.default_name");
+  const defaultType = t("today.workout.default_type");
+  const [name, setName] = useState(initial?.name ?? defaultName);
+  const [type, setType] = useState(initial?.type ?? defaultType);
   const [time, setTime] = useState(initial?.time ?? "");
   const [duration, setDuration] = useState(String(initial?.durationMin ?? 45));
   useEffect(() => {
     if (open) {
-      setName(initial?.name ?? "Full body strength");
-      setType(initial?.type ?? "Strength");
+      setName(initial?.name ?? defaultName);
+      setType(initial?.type ?? defaultType);
       setTime(initial?.time ?? "");
       setDuration(String(initial?.durationMin ?? 45));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initial]);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-display">Schedule workout</DialogTitle>
-          <DialogDescription>Plan today's session.</DialogDescription>
+          <DialogTitle className="font-display">{t("today.workout.schedule")}</DialogTitle>
+          <DialogDescription>{t("today.workout.plan_desc")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
-          <Field label="Name" value={name} onChange={setName} type="text" />
-          <Field label="Type" value={type} onChange={setType} type="text" />
+          <Field label={t("today.workout.name")} value={name} onChange={setName} type="text" />
+          <Field label={t("today.workout.type")} value={type} onChange={setType} type="text" />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Time" value={time} onChange={setTime} type="time" />
-            <Field label="Duration (min)" value={duration} onChange={setDuration} />
+            <Field label={t("today.workout.time")} value={time} onChange={setTime} type="time" />
+            <Field label={t("today.workout.duration")} value={duration} onChange={setDuration} />
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={() => onSubmit({ name, type, time: time || undefined, durationMin: +duration || 30 })}>Save</Button>
+          <Button onClick={() => onSubmit({ name, type, time: time || undefined, durationMin: +duration || 30 })}>{t("today.workout.save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -1017,15 +974,19 @@ function formatHours(h: number) {
   return `${hrs}h ${mins}m`;
 }
 
-function greetingFor(d: Date) {
+function greetingFor(d: Date, t: (k: string) => string) {
   const h = d.getHours();
-  if (h < 5) return "Still up,";
-  if (h < 12) return "Good morning,";
-  if (h < 17) return "Good afternoon,";
-  if (h < 22) return "Good evening,";
-  return "Good night,";
+  if (h < 5) return t("today.greet.late_night");
+  if (h < 12) return t("today.greet.morning");
+  if (h < 17) return t("today.greet.afternoon");
+  if (h < 22) return t("today.greet.evening");
+  return t("today.greet.night");
 }
 
-function formatToday() {
-  return new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+const LOCALE_MAP: Record<string, string> = {
+  en: "en-US", nl: "nl-NL", ar: "ar", fr: "fr-FR", de: "de-DE", es: "es-ES",
+};
+
+function formatToday(lang: string) {
+  return new Date().toLocaleDateString(LOCALE_MAP[lang] ?? undefined, { weekday: "long", month: "long", day: "numeric" });
 }
