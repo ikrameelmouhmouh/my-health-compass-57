@@ -376,12 +376,13 @@ export function ChatScreen({
       }
       const activeThreadId = await ensureThread();
       const parts = attached ? await toFileParts([attached]) : undefined;
+      const assistantCountBefore = messagesRef.current.filter((m) => m.role === "assistant").length;
       setInput("");
       setFile(null);
       await sendMessage({ text, files: parts });
       window.setTimeout(() => {
-        const hasAssistant = messagesRef.current.some((m) => m.role === "assistant");
-        if (!hasAssistant) void syncThreadMessages(activeThreadId);
+        const assistantCountAfter = messagesRef.current.filter((m) => m.role === "assistant").length;
+        if (assistantCountAfter <= assistantCountBefore) void syncThreadMessages(activeThreadId);
       }, 150);
     } catch (e) {
       console.error("[ai-coach] send failed", e);
