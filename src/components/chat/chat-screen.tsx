@@ -271,7 +271,6 @@ function ChatHeader({
 /* ────────────────────────────────────────────── DRAFT ───────── */
 export function DraftChatScreen() {
   const t = useT();
-  const { lang } = useI18n();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [input, setInput] = useState("");
