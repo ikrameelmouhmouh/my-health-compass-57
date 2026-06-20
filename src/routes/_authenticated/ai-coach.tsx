@@ -1,20 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Sparkles, Camera, ChefHat, Dumbbell, Apple, LineChart, MessageCircle } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/ai-coach")({
   component: AiCoachPage,
 });
 
-const capabilities = [
-  { icon: Camera, title: "Food photo analysis", desc: "Snap a meal and get an instant breakdown." },
-  { icon: Apple, title: "Calorie estimation", desc: "Estimate calories from a single photo." },
-  { icon: ChefHat, title: "Meal & recipe ideas", desc: "Personalized recipes that fit your plan." },
-  { icon: Dumbbell, title: "Workout recommendations", desc: "Routines tailored to your goal and level." },
-  { icon: LineChart, title: "Progress analysis", desc: "Insights from your nutrition, fasting and weight." },
-  { icon: MessageCircle, title: "Personalized advice", desc: "Ask anything about your health journey." },
-];
-
 function AiCoachPage() {
+  const { t } = useI18n();
+  const capabilities = [
+    { icon: Camera, title: t("coach.cap.photo"), desc: t("coach.cap.photo_desc") },
+    { icon: Apple, title: t("coach.cap.cal"), desc: t("coach.cap.cal_desc") },
+    { icon: ChefHat, title: t("coach.cap.meal"), desc: t("coach.cap.meal_desc") },
+    { icon: Dumbbell, title: t("coach.cap.workout"), desc: t("coach.cap.workout_desc") },
+    { icon: LineChart, title: t("coach.cap.progress"), desc: t("coach.cap.progress_desc") },
+    { icon: MessageCircle, title: t("coach.cap.advice"), desc: t("coach.cap.advice_desc") },
+  ];
+
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
       <div className="flex items-center gap-3">
@@ -22,15 +24,12 @@ function AiCoachPage() {
           <Sparkles className="size-6" />
         </div>
         <div className="min-w-0">
-          <h1 className="truncate font-display text-2xl font-semibold tracking-tight">AI Coach</h1>
-          <p className="text-[12px] text-muted-foreground">Your personal health assistant</p>
+          <h1 className="truncate font-display text-2xl font-semibold tracking-tight">{t("coach.title")}</h1>
+          <p className="text-[12px] text-muted-foreground">{t("coach.subtitle")}</p>
         </div>
       </div>
 
-      <p className="mt-5 text-sm text-muted-foreground">
-        Get expert guidance whenever you need it. The AI Coach helps you with photos, recipes, workouts and progress —
-        without replacing the quick logging in your modules.
-      </p>
+      <p className="mt-5 text-sm text-muted-foreground">{t("coach.intro")}</p>
 
       <section className="mt-6 grid grid-cols-1 gap-2.5">
         {capabilities.map(({ icon: Icon, title, desc }) => (
@@ -52,7 +51,7 @@ function AiCoachPage() {
         className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-sm font-semibold text-brand-foreground opacity-70"
       >
         <MessageCircle className="size-4" />
-        Chat with your coach — coming soon
+        {t("coach.cta")}
       </button>
     </main>
   );
