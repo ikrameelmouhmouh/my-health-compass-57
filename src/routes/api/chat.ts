@@ -6,7 +6,7 @@ import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
 
 type Body = {
   messages: UIMessage[];
-  threadId: string;
+  threadId?: string | null;
   lang?: string;
 };
 
@@ -42,17 +42,27 @@ export const Route = createFileRoute("/api/chat")({
         const userId = claimsData.claims.sub;
 
         const body = (await request.json()) as Body;
-        if (!body?.threadId || !Array.isArray(body.messages)) {
+        if (!body || !Array.isArray(body.messages)) {
           return new Response("Bad request", { status: 400 });
         }
 
-        // Verify thread ownership
-        const { data: thread } = await supabase
-          .from("chat_threads")
-          .select("id")
-          .eq("id", body.threadId)
-          .maybeSingle();
-        if (!thread) return new Response("Thread not found", { status: 404 });
+        let threadId = body.threadId ?? null;
+        if (threadId) {
+          const { data: thread } = await supabase
+            .from("chat_threads")
+            .select("id")
+            .eq("id", threadId)
+            .maybeSingle();
+          if (!thread) return new Response("Thread not found", { status: 404 });
+        } else {
+          const { data: thread, error } = await supabase
+            .from("chat_threads")
+            .insert({ user_id: userId, title: "New chat" })
+            .select("id")
+            .single();
+          if (error || !thread) return new Response("Failed to create thread", { status: 500 });
+          threadId = thread.id;
+        }
 
         // Persist the latest user message
         const last = body.messages[body.messages.length - 1];
@@ -62,14 +72,10 @@ export const Route = createFileRoute("/api/chat")({
             .join("")
             .trim();
           const hasImage = last.parts.some((p) => p.type === "file");
-          const stored = hasImage
-            ? userText
-              ? `📷 ${userText}`
-              : "📷"
-            : userText;
+          const stored = hasImage ? (userText ? `📷 ${userText}` : "📷") : userText;
           if (stored) {
             await supabase.from("chat_messages").insert({
-              thread_id: body.threadId,
+              thread_id: threadId,
               user_id: userId,
               role: "user",
               content: stored,
@@ -78,12 +84,12 @@ export const Route = createFileRoute("/api/chat")({
             const { data: t } = await supabase
               .from("chat_threads")
               .select("title")
-              .eq("id", body.threadId)
+              .eq("id", threadId)
               .maybeSingle();
             const defaultTitles = ["New chat", "", "Nieuw gesprek"];
             if (t && defaultTitles.includes(t.title)) {
               const title = (userText || "📷 Foto").slice(0, 60);
-              await supabase.from("chat_threads").update({ title }).eq("id", body.threadId);
+              await supabase.from("chat_threads").update({ title }).eq("id", threadId);
             }
           }
         }
@@ -135,6 +141,7 @@ ${profileBlock}`;
         });
 
         return result.toUIMessageStreamResponse({
+          headers: { "x-thread-id": threadId },
           originalMessages: body.messages,
           onFinish: async ({ messages }) => {
             const assistant = messages[messages.length - 1];
@@ -145,7 +152,7 @@ ${profileBlock}`;
                 .trim();
               if (text) {
                 await supabase.from("chat_messages").insert({
-                  thread_id: body.threadId,
+                  thread_id: threadId,
                   user_id: userId,
                   role: "assistant",
                   content: text,
@@ -153,7 +160,7 @@ ${profileBlock}`;
                 await supabase
                   .from("chat_threads")
                   .update({ last_message_at: new Date().toISOString() })
-                  .eq("id", body.threadId);
+                  .eq("id", threadId);
               }
             }
           },

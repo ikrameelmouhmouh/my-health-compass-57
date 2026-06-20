@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
 import { useT, useI18n } from "@/lib/i18n";
-import { createThread, getThreadMessages } from "@/lib/chat.functions";
+import { getThreadMessages } from "@/lib/chat.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
 
@@ -406,14 +406,13 @@ export function ChatScreen({
 
   async function ensureThread(): Promise<string> {
     if (threadIdRef.current) return threadIdRef.current;
-    const th = await createThread({ data: {} });
-    threadIdRef.current = th.id;
-    setThreadId(th.id);
-    // Silently update URL so refresh / share works, no remount.
-    if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", `/ai-coach/${th.id}`);
-    }
-    return th.id;
+    return "";
+  }
+
+  function setActiveThread(id: string | null) {
+    if (!id) return;
+    threadIdRef.current = id;
+    setThreadId(id);
   }
 
   async function syncThreadMessages(id: string) {
@@ -448,9 +447,12 @@ export function ChatScreen({
         },
       ]);
       await sendMessage({ text, files: parts });
+      const finalThreadId = threadIdRef.current || activeThreadId;
       window.setTimeout(() => {
         const assistantCountAfter = assistantTextCount(messagesRef.current);
-        if (assistantCountAfter <= assistantCountBefore) void syncThreadMessages(activeThreadId);
+        if (finalThreadId && assistantCountAfter <= assistantCountBefore) {
+          void syncThreadMessages(finalThreadId);
+        }
       }, 150);
     } catch (e) {
       console.error("[ai-coach] send failed", e);
@@ -487,12 +489,14 @@ export function ChatScreen({
           Authorization: tokenRef.current ? `Bearer ${tokenRef.current}` : "",
         },
         body: JSON.stringify({
-          threadId: activeThreadId,
+          threadId: activeThreadId || null,
           lang: langRef.current,
           messages: [userMessage],
         }),
       });
       if (!response.ok) throw new Error(await response.text());
+      const responseThreadId = response.headers.get("x-thread-id") || activeThreadId;
+      setActiveThread(responseThreadId);
       await readStreamText(response, (assistantText) => {
         setDisplayMessages((current) =>
           current.map((message) =>
@@ -502,7 +506,7 @@ export function ChatScreen({
           ),
         );
       });
-      await syncThreadMessages(activeThreadId);
+      if (responseThreadId) await syncThreadMessages(responseThreadId);
     } catch (e) {
       console.error("[ai-coach] quick send failed", e);
       toast.error(t("chat.error.generic"));
