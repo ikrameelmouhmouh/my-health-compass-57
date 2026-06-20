@@ -145,6 +145,7 @@ ${profileBlock}`;
         });
 
         return result.toUIMessageStreamResponse({
+          headers: { "x-thread-id": threadId },
           originalMessages: body.messages,
           onFinish: async ({ messages }) => {
             const assistant = messages[messages.length - 1];
