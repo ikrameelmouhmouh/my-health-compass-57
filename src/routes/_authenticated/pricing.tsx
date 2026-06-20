@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadStripe, type Stripe as StripeJs } from "@stripe/stripe-js";
 import { useServerFn } from "@tanstack/react-start";
@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useSubscription, useCustomerCountry } from "@/lib/subscription";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { createCheckoutSession, createPortalSession } from "@/utils/payments.functions";
+import { useI18n, useT } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/pricing")({
@@ -22,14 +23,7 @@ function stripeJs() {
   return _stripePromise;
 }
 
-const FEATURES = [
-  "Onbeperkt workouts & maaltijden loggen",
-  "AI Coach: persoonlijke chat + foto-analyse",
-  "Geavanceerde analytics & weektrends",
-  "Sociale features: vrienden, feed & challenges",
-  "Barcode scanner & uitgebreide voedingsdatabase",
-  "Push reminders & herinneringen",
-];
+
 
 function PricingPage() {
   const navigate = useNavigate();
