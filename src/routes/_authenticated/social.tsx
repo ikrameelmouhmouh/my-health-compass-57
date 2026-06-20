@@ -176,7 +176,7 @@ function PostCard({
           <p className="truncate text-sm font-semibold">{displayName(author)}</p>
           <p className="text-[11px] text-muted-foreground">
             {author?.username && <span>@{author.username} · </span>}
-            {relativeTime(post.created_at, lang)}
+            {relativeTime(post.created_at)}
             <span> · </span>
             {post.visibility === "public" ? <Globe className="inline size-3" /> : <Lock className="inline size-3" />}
           </p>
@@ -769,7 +769,7 @@ function CommentsDialog({ post, onClose }: { post: Post | null; onClose: () => v
                   <li key={c.id} className="flex gap-2">
                     <Avatar profile={p} size={32} />
                     <div className="min-w-0 flex-1 rounded-2xl bg-muted/40 px-3 py-2">
-                      <p className="text-[11px] font-semibold">{c.user_id === user?.id ? t("soc.comments.you") : displayName(p)} <span className="ml-1 font-normal text-muted-foreground">{relativeTime(c.created_at, lang)}</span></p>
+                      <p className="text-[11px] font-semibold">{c.user_id === user?.id ? t("soc.comments.you") : displayName(p)} <span className="ml-1 font-normal text-muted-foreground">{relativeTime(c.created_at)}</span></p>
                       <p className="text-sm">{c.body}</p>
                     </div>
                   </li>
