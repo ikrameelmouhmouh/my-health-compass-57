@@ -409,11 +409,13 @@ export function ChatScreen({
     const th = await createThread({ data: {} });
     threadIdRef.current = th.id;
     setThreadId(th.id);
-    // Silently update URL so refresh / share works, no remount.
-    if (typeof window !== "undefined") {
-      window.history.replaceState(null, "", `/ai-coach/${th.id}`);
-    }
     return th.id;
+  }
+
+  function replaceUrlWithThread(id: string) {
+    if (typeof window !== "undefined" && window.location.pathname !== `/ai-coach/${id}`) {
+      window.history.replaceState(null, "", `/ai-coach/${id}`);
+    }
   }
 
   async function syncThreadMessages(id: string) {
@@ -448,6 +450,7 @@ export function ChatScreen({
         },
       ]);
       await sendMessage({ text, files: parts });
+      replaceUrlWithThread(activeThreadId);
       window.setTimeout(() => {
         const assistantCountAfter = assistantTextCount(messagesRef.current);
         if (assistantCountAfter <= assistantCountBefore) void syncThreadMessages(activeThreadId);
@@ -503,6 +506,7 @@ export function ChatScreen({
         );
       });
       await syncThreadMessages(activeThreadId);
+      replaceUrlWithThread(activeThreadId);
     } catch (e) {
       console.error("[ai-coach] quick send failed", e);
       toast.error(t("chat.error.generic"));
