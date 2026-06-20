@@ -1,36 +1,43 @@
-## Doel
 
-De 26 oefeningen in `src/assets/exercises/` (bench press, squat, hip thrust, deadlift, etc.) krijgen:
-1. **Nieuwe neutrale afbeeldingen** — één androgyn 3D-poppetje in sportondergoed (donkere shorts + crop top), grijze huid, geen duidelijk geslacht. Per oefening 2 frames (start + eind) zoals nu.
-2. **Correcte afbeeldingen per oefening** — elke afbeelding wordt apart geprompt op de juiste houding (bv. barbell hip thrust = rug tegen bankje, heupen omhoog met barbell).
-3. **Vertalingen** — de oefeningnamen en stappen worden vertaald naar alle 6 talen (en, nl, ar, fr, de, es).
+# Plan: AI Coach chat toevoegen
 
-## Wat er verandert
+De groene "Chat met je coach — binnenkort" knop wordt een werkende AI-chat. Je kunt meerdere aparte gesprekken voeren met de coach, en alles wordt opgeslagen in je account zodat het op al je apparaten beschikbaar is.
 
-### Afbeeldingen (26 oefeningen × 2 frames = 52 nieuwe afbeeldingen)
-Wide Leg Press, Barbell Back Squat, Romanian Deadlift, Leg Extension, Lying Leg Curl, Barbell Hip Thrust, Standing Calf Raise, Barbell Bench Press, Incline Dumbbell Press, Cable Chest Fly, Push Up, Lat Pulldown, Barbell Bent Over Row, Seated Cable Row, Pull Up, Conventional Deadlift, Overhead Press, Dumbbell Lateral Raise, Face Pull, Barbell Curl, Hammer Curl, Triceps Pushdown, Skull Crusher, Plank, Hanging Leg Raise, Cable Crunch.
+## Wat je krijgt
 
-- Oude `*-male-*.jpg` en `*-female-*.jpg` bestanden worden vervangen door `*-0.jpg` en `*-1.jpg` (neutraal).
-- Elke afbeelding krijgt een specifieke prompt die de juiste oefeningshouding beschrijft, zodat hip thrust er ook echt uitziet als hip thrust.
+- **Nieuw chatscherm** op `/ai-coach/:threadId` met een rustige iOS-stijl, passend bij de rest van de app.
+- **Threadlijst** op `/ai-coach` met al je gesprekken (titel, laatste bericht, datum). Knop "Nieuw gesprek" bovenin.
+- **Streaming antwoorden** van de coach (woorden verschijnen terwijl ze gegenereerd worden), met markdown-ondersteuning.
+- **AI-coach persoonlijkheid**: kent je profiel (doel, gewicht, calorie-target, taal) en geeft daarop afgestemd advies over voeding, vasten en workouts.
+- **6 talen** (en/nl/ar/fr/de/es) — de coach antwoordt in jouw ingestelde taal en de UI-strings worden direct vertaald.
+- **Bottom nav + AiFab** blijven werken; de "binnenkort"-knop op het profielscherm linkt straks naar `/ai-coach`.
 
-### Code (`src/lib/exercise-library.ts`)
-- `ExerciseVariants` type + `variants()` helper + `male/female` splitsing wordt verwijderd.
-- `FALLBACK_BY_MUSCLE` blijft, maar verwijst naar neutrale frames.
-- `getExerciseFrames()` en `hasGenderVariants()` worden vereenvoudigd (geen `gender` parameter meer).
-- Aanroepen elders in de app die `gender` doorgeven worden aangepast.
+## Technisch (voor de volledigheid)
 
-### Vertalingen (`src/lib/i18n.tsx`)
-- Per oefening: vertaalkey voor `name` + per stap een vertaalkey.
-- Oefeningnamen worden via i18n opgehaald in plaats van hardcoded Engels.
-- Alle 6 talen krijgen complete vertalingen (en, nl, ar, fr, de, es).
+### Database (migratie)
+- `chat_threads` (user_id, title, last_message_at) — RLS per user.
+- `chat_messages` (thread_id, role: user/assistant, content, created_at) — RLS via thread-eigenaar.
+- Beide met GRANTs voor `authenticated` + `service_role`.
 
-## Wat er NIET verandert
-- De ~470 andere catalogus-oefeningen (via `mk()`) blijven Engels met placeholder-icoon + fallback per spiergroep. Die kunnen we later in een tweede ronde doen.
-- Geen wijzigingen aan workout-tracking, sets, reps, etc.
+### Backend
+- Streaming chat: `src/routes/api/chat.ts` (TanStack server route) → Lovable AI Gateway met `google/gemini-3-flash-preview` via AI SDK (`streamText` + `toUIMessageStreamResponse`).
+- Auth via bearer-token (Supabase user), thread-eigendom gevalideerd in de handler.
+- `onFinish`: assistant-bericht opslaan in `chat_messages` voor die thread.
+- Server functions (`src/lib/chat.functions.ts`) voor: `listThreads`, `createThread`, `getThreadMessages`, `deleteThread`, `renameThread` — allemaal achter `requireSupabaseAuth`.
 
-## Volgorde van uitvoering
-1. Eerst **1 test-afbeelding** genereren (bv. barbell hip thrust) zodat je de stijl kunt goedkeuren vóór de andere 51.
-2. Na akkoord: rest van de afbeeldingen + code-wijzigingen + vertalingen in één keer.
+### Frontend
+- AI Elements installeren: `conversation`, `message`, `prompt-input`, `shimmer`.
+- `src/routes/_authenticated/ai-coach.tsx` → threadlijst + "Nieuw gesprek" knop.
+- `src/routes/_authenticated/ai-coach.$threadId.tsx` → chat-window met `useChat` (AI SDK), gekeyed op `threadId`.
+- System prompt bevat profielcontext (taal, doel, dagelijkse cal-target).
+- Foutmeldingen voor rate limit (429) en credits op (402).
 
-## Credits-waarschuwing
-Je hebt nu **176 credits** over. 52 afbeeldingen genereren + code + vertalingen kan flink wegnemen. Als het halverwege te veel wordt, kunnen we pauzeren.
+### i18n
+- Nieuwe keys (titel, placeholder, "Nieuw gesprek", "Verwijderen", lege-staat, error-toasts) toegevoegd voor alle 6 talen tegelijk.
+
+## Wat blijft hetzelfde
+- Bottom nav, profielpagina, AiFab — geen visuele wijzigingen.
+- Geen veranderingen aan voeding/vasten/workouts.
+
+## Kosten
+- Elke chat-vraag gebruikt een paar Lovable AI credits (Gemini Flash is goedkoop). Je hebt nog ~176 credits.
