@@ -173,14 +173,6 @@ function Profile() {
             fat={{ have: day.fat, goal: fatTarget }}
           />
         );
-      case "activitySummary":
-        return (
-          <ActivitySummaryCard
-            key={id}
-            steps={day.steps}
-            budget={budget}
-          />
-        );
       case "macros":
         return (
           <MacroCard
@@ -541,28 +533,6 @@ function NutritionCard({ budget, meals, mode, onToggleMode, onLogFood, protein, 
   );
 }
 
-function ActivitySummaryCard({ steps, budget }: { steps: number; budget: CalorieBudget }) {
-  return (
-    <CardShell title="Activity summary" icon={Flame}>
-      <div className="grid grid-cols-2 gap-2">
-        <SummaryTile label="Steps" value={steps.toLocaleString()} />
-        <SummaryTile label="Walking" value={`${budget.walkingBurn} kcal`} />
-        <SummaryTile label="Workout" value={`${budget.workoutBurn} kcal`} />
-        <SummaryTile label="Total burned" value={`${budget.totalBurn} kcal`} accent />
-      </div>
-      <div className="mt-3 rounded-2xl border border-border/60 bg-background/40 p-3">
-        <div className="flex items-baseline justify-between">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Net intake</span>
-          <span className="font-display text-base font-semibold tabular-nums">{budget.net.toLocaleString()} kcal</span>
-        </div>
-        <div className="mt-1 text-[10px] text-muted-foreground">
-          Eaten {budget.eaten.toLocaleString()} − Burned {budget.totalBurn.toLocaleString()}
-          {budget.mode === "smart" && ` · Allowance ${budget.allowance.toLocaleString()}`}
-        </div>
-      </div>
-    </CardShell>
-  );
-}
 
 function SummaryTile({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
