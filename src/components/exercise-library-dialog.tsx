@@ -300,6 +300,7 @@ function AnimatedFrames({
 }
 
 function Lightbox({ frames, title, onClose }: { frames: string[]; title: string; onClose: () => void }) {
+  const t = useT();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -310,10 +311,10 @@ function Lightbox({ frames, title, onClose }: { frames: string[]; title: string;
     };
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur" role="dialog" aria-label={`${title} voorbeeld`}>
+    <div className="fixed inset-0 z-[100] flex flex-col bg-black/95 backdrop-blur" role="dialog" aria-label={`${title} ${t("lib.preview")}`}>
       <div className="flex items-center justify-between px-4 py-3 text-white">
         <p className="truncate text-sm font-medium">{title}</p>
-        <button onClick={onClose} className="grid size-9 place-items-center rounded-full bg-white/10 hover:bg-white/20" aria-label="Sluit">
+        <button onClick={onClose} className="grid size-9 place-items-center rounded-full bg-white/10 hover:bg-white/20" aria-label={t("lib.close")}>
           <X className="size-5" />
         </button>
       </div>
@@ -322,10 +323,11 @@ function Lightbox({ frames, title, onClose }: { frames: string[]; title: string;
           <AnimatedFrames frames={frames} alt={title} className="aspect-square w-full object-contain bg-black" intervalMs={550} />
         </div>
       </div>
-      <p className="pb-4 text-center text-xs text-white/60">Tik buiten of druk Esc om te sluiten</p>
+      <p className="pb-4 text-center text-xs text-white/60">{t("lib.dismiss_hint")}</p>
     </div>
   );
 }
+
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
