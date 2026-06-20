@@ -1,26 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import {
-  Camera,
-  Menu,
-  Plus,
-  Send,
-  Square,
-} from "lucide-react";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type FormEvent,
-} from "react";
+import { Camera, Menu, Plus, Send, Square } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
 import { useT, useI18n } from "@/lib/i18n";
-import { createThread } from "@/lib/chat.functions";
+import { createThread, getThreadMessages } from "@/lib/chat.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
 
@@ -44,6 +32,38 @@ async function toFileParts(files: File[]) {
   );
 }
 
+async function readStreamText(response: Response, onText: (text: string) => void) {
+  const reader = response.body?.getReader();
+  if (!reader) return;
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+
+  function processChunk(chunk: string) {
+    for (const rawLine of chunk.split("\n")) {
+      const line = rawLine.trim();
+      if (!line.startsWith("data:")) continue;
+      const data = line.slice(5).trim();
+      if (!data || data === "[DONE]") continue;
+      const parsed = JSON.parse(data) as { type?: string; delta?: string };
+      if (parsed.type === "text-delta" && parsed.delta) {
+        text += parsed.delta;
+        onText(text);
+      }
+    }
+  }
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() ?? "";
+    chunks.forEach(processChunk);
+  }
+  processChunk(buffer + decoder.decode());
+}
+
 type QuickAction = {
   key: string;
   labelKey: string;
@@ -53,14 +73,27 @@ type QuickAction = {
 };
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { key: "scan", labelKey: "chat.quick.scan", promptKey: "chat.image_caption", icon: "📷", scan: true },
-  { key: "workout", labelKey: "chat.quick.workout", promptKey: "chat.quick.workout.prompt", icon: "🏋️" },
+  {
+    key: "scan",
+    labelKey: "chat.quick.scan",
+    promptKey: "chat.image_caption",
+    icon: "📷",
+    scan: true,
+  },
+  {
+    key: "workout",
+    labelKey: "chat.quick.workout",
+    promptKey: "chat.quick.workout.prompt",
+    icon: "🏋️",
+  },
   { key: "meals", labelKey: "chat.quick.meals", promptKey: "chat.quick.meals.prompt", icon: "🥗" },
   { key: "tip", labelKey: "chat.quick.tip", promptKey: "chat.quick.tip.prompt", icon: "⚡" },
   { key: "week", labelKey: "chat.quick.week", promptKey: "chat.quick.week.prompt", icon: "📊" },
 ];
 
-function getDisplayName(user: { user_metadata?: Record<string, unknown>; email?: string | null } | null) {
+function getDisplayName(
+  user: { user_metadata?: Record<string, unknown>; email?: string | null } | null,
+) {
   const dn = (user?.user_metadata?.["display_name"] as string | undefined) ?? "";
   const trimmed = dn.trim();
   if (trimmed) return trimmed.split(" ")[0];
@@ -70,6 +103,18 @@ function getDisplayName(user: { user_metadata?: Record<string, unknown>; email?:
     return part.charAt(0).toUpperCase() + part.slice(1);
   }
   return "";
+}
+
+function getMessageText(message: UIMessage) {
+  return message.parts
+    .map((part) => (part.type === "text" ? part.text : ""))
+    .join("")
+    .trim();
+}
+
+function assistantTextCount(messages: UIMessage[]) {
+  return messages.filter((message) => message.role === "assistant" && getMessageText(message))
+    .length;
 }
 
 function VitaAvatar({ size = 64 }: { size?: number }) {
@@ -242,9 +287,7 @@ function ChatHeader({
             </button>
           }
         />
-        <div className="min-w-0 flex-1 text-center font-display text-sm font-semibold">
-          Vita
-        </div>
+        <div className="min-w-0 flex-1 text-center font-display text-sm font-semibold">Vita</div>
         {showNewLink ? (
           <button
             type="button"
@@ -276,6 +319,7 @@ export function ChatScreen({
   const { user } = useAuth();
   const [input, setInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [quickBusy, setQuickBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // threadId state — null when this is a brand-new draft chat.
@@ -288,7 +332,8 @@ export function ChatScreen({
   // Stable chat id — never changes for the lifetime of this mount.
   // useChat keeps a single message buffer keyed by this id.
   const chatIdRef = useRef<string>(
-    initialThreadId ?? (typeof crypto !== "undefined" ? crypto.randomUUID() : `draft-${Date.now()}`),
+    initialThreadId ??
+      (typeof crypto !== "undefined" ? crypto.randomUUID() : `draft-${Date.now()}`),
   );
 
   // Token — fetched once, kept in a ref so the transport always sees the latest.
@@ -319,7 +364,7 @@ export function ChatScreen({
     [],
   );
 
-  const { messages, sendMessage, status, stop } = useChat({
+  const { messages, setMessages, sendMessage, status, stop } = useChat({
     id: chatIdRef.current,
     messages: initialMessages,
     transport,
@@ -332,13 +377,32 @@ export function ChatScreen({
     },
   });
 
-  const isBusy = status === "submitted" || status === "streaming";
+  const [displayMessages, setDisplayMessages] = useState<UIMessage[]>(initialMessages);
+  const messagesRef = useRef<UIMessage[]>(initialMessages);
+  const displayMessagesRef = useRef<UIMessage[]>(initialMessages);
+  useEffect(() => {
+    messagesRef.current = messages;
+    setDisplayMessages((current) => {
+      const currentAssistantCount = assistantTextCount(current);
+      const nextAssistantCount = assistantTextCount(messages);
+      if (nextAssistantCount >= currentAssistantCount && messages.length >= current.length) {
+        return messages;
+      }
+      return current;
+    });
+  }, [messages]);
+
+  useEffect(() => {
+    displayMessagesRef.current = displayMessages;
+  }, [displayMessages]);
+
+  const isBusy = quickBusy || status === "submitted" || status === "streaming";
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, status]);
+  }, [displayMessages, status]);
 
   async function ensureThread(): Promise<string> {
     if (threadIdRef.current) return threadIdRef.current;
@@ -352,20 +416,98 @@ export function ChatScreen({
     return th.id;
   }
 
+  async function syncThreadMessages(id: string) {
+    const rows = await getThreadMessages({ data: { threadId: id } });
+    const mapped: UIMessage[] = rows.map((r) => ({
+      id: r.id,
+      role: r.role === "assistant" ? "assistant" : "user",
+      parts: [{ type: "text", text: r.content }],
+    }));
+    messagesRef.current = mapped;
+    setDisplayMessages(mapped);
+    setMessages(mapped);
+  }
+
   async function sendNow(text: string, attached?: File | null) {
     try {
       // Make sure token is loaded before the transport fires.
       if (!tokenRef.current && tokenReadyRef.current) {
         await tokenReadyRef.current;
       }
-      await ensureThread();
+      const activeThreadId = await ensureThread();
       const parts = attached ? await toFileParts([attached]) : undefined;
+      const assistantCountBefore = assistantTextCount(messagesRef.current);
       setInput("");
       setFile(null);
+      setDisplayMessages((current) => [
+        ...current,
+        {
+          id: `local-${Date.now()}`,
+          role: "user",
+          parts: [{ type: "text", text }],
+        },
+      ]);
       await sendMessage({ text, files: parts });
+      window.setTimeout(() => {
+        const assistantCountAfter = assistantTextCount(messagesRef.current);
+        if (assistantCountAfter <= assistantCountBefore) void syncThreadMessages(activeThreadId);
+      }, 150);
     } catch (e) {
       console.error("[ai-coach] send failed", e);
       toast.error(t("chat.error.generic"));
+    }
+  }
+
+  async function sendQuick(text: string) {
+    if (quickBusy) return;
+    setQuickBusy(true);
+    try {
+      if (!tokenRef.current && tokenReadyRef.current) {
+        await tokenReadyRef.current;
+      }
+      const activeThreadId = await ensureThread();
+      const userMessage: UIMessage = {
+        id: `quick-user-${Date.now()}`,
+        role: "user",
+        parts: [{ type: "text", text }],
+      };
+      const assistantMessage: UIMessage = {
+        id: `quick-assistant-${Date.now()}`,
+        role: "assistant",
+        parts: [{ type: "text", text: "" }],
+      };
+      const nextMessages = [...displayMessagesRef.current, userMessage, assistantMessage];
+      messagesRef.current = nextMessages;
+      setDisplayMessages(nextMessages);
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: tokenRef.current ? `Bearer ${tokenRef.current}` : "",
+        },
+        body: JSON.stringify({
+          threadId: activeThreadId,
+          lang: langRef.current,
+          messages: [userMessage],
+        }),
+      });
+      if (!response.ok) throw new Error(await response.text());
+      await readStreamText(response, (assistantText) => {
+        setDisplayMessages((current) =>
+          current.map((message) =>
+            message.id === assistantMessage.id
+              ? { ...message, parts: [{ type: "text", text: assistantText }] }
+              : message,
+          ),
+        );
+      });
+      await syncThreadMessages(activeThreadId);
+    } catch (e) {
+      console.error("[ai-coach] quick send failed", e);
+      toast.error(t("chat.error.generic"));
+    } finally {
+      setQuickBusy(false);
     }
   }
 
@@ -379,7 +521,7 @@ export function ChatScreen({
 
   function handlePick(_label: string, prompt: string) {
     if (isBusy) return;
-    void sendNow(prompt, null);
+    void sendQuick(prompt);
   }
 
   function handlePickPhoto() {
@@ -393,11 +535,15 @@ export function ChatScreen({
   }
 
   const name = getDisplayName(user);
-  const isEmpty = messages.length === 0;
+  const isEmpty = displayMessages.length === 0;
 
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background">
-      <ChatHeader showNewLink={!!threadId || !isEmpty} t={t} activeThreadId={threadId ?? undefined} />
+      <ChatHeader
+        showNewLink={!!threadId || !isEmpty}
+        t={t}
+        activeThreadId={threadId ?? undefined}
+      />
       <input
         ref={fileInputRef}
         type="file"
@@ -419,19 +565,14 @@ export function ChatScreen({
           </>
         ) : (
           <div className="space-y-3">
-            {messages.map((m) => {
-              const text = m.parts
-                .map((p) => (p.type === "text" ? p.text : ""))
-                .join("");
+            {displayMessages.map((m) => {
+              const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
               const imageParts = m.parts.filter(
                 (p) => p.type === "file" && typeof (p as { url?: string }).url === "string",
               ) as Array<{ url: string; mediaType?: string }>;
               const isUser = m.role === "user";
               return (
-                <div
-                  key={m.id}
-                  className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-                >
+                <div key={m.id} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
                   {isUser ? (
                     <div className="flex max-w-[85%] flex-col items-end gap-1.5">
                       {imageParts.map((p, i) => (
