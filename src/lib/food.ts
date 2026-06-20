@@ -106,15 +106,38 @@ function mapOFFProduct(p: any): FoodItem | null {
   };
 }
 
-const OFF_FIELDS =
-  "code,product_name,product_name_nl,generic_name,generic_name_nl,brands,image_small_url,image_thumb_url,image_url,nutriments,serving_size,serving_quantity";
+// Map app language → OFF country subdomain (improves local product ranking).
+// Falls back to "world" for languages without an obvious single country.
+const LANG_TO_CC: Record<string, string> = {
+  nl: "nl", fr: "fr", de: "de", es: "es", it: "it", pt: "pt",
+  pl: "pl", sv: "se", da: "dk", fi: "fi", no: "no", cs: "cz",
+  ja: "jp", zh: "cn", ko: "kr", ru: "ru", tr: "tr",
+};
 
-function preferNl(p: any) {
-  if (p && (p.product_name_nl || p.generic_name_nl)) {
+function getUserLang(): string {
+  if (typeof window === "undefined") return "en";
+  try {
+    const stored = localStorage.getItem("vita.lang");
+    if (stored) return stored;
+  } catch {}
+  const nav = (typeof navigator !== "undefined" && navigator.language) || "en";
+  return nav.slice(0, 2).toLowerCase();
+}
+
+function offFields(lc: string) {
+  // Include localized name fields for the active language so users see names in their language when available.
+  return `code,product_name,product_name_${lc},generic_name,generic_name_${lc},brands,image_small_url,image_thumb_url,image_url,nutriments,serving_size,serving_quantity`;
+}
+
+function preferLocale(p: any, lc: string) {
+  if (!p) return p;
+  const localName = p[`product_name_${lc}`];
+  const localGeneric = p[`generic_name_${lc}`];
+  if (localName || localGeneric) {
     return {
       ...p,
-      product_name: p.product_name_nl || p.product_name,
-      generic_name: p.generic_name_nl || p.generic_name,
+      product_name: localName || p.product_name,
+      generic_name: localGeneric || p.generic_name,
     };
   }
   return p;
@@ -123,13 +146,20 @@ function preferNl(p: any) {
 export async function searchFoods(query: string, signal?: AbortSignal): Promise<FoodItem[]> {
   const q = query.trim();
   if (!q) return [];
-  // Search Dutch index first (NL products, Albert Heijn / Jumbo / etc.), then fall back to world.
-  const nlUrl = `https://nl.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
-    q
-  )}&search_simple=1&action=process&json=1&page_size=25&lc=nl&cc=nl&fields=${OFF_FIELDS}`;
+  const lc = getUserLang();
+  const cc = LANG_TO_CC[lc];
+  const fields = offFields(lc);
+
+  // Always query the worldwide index so the app works for any country.
+  // If we know the user's likely country, query that too and merge it first for better local relevance.
   const worldUrl = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
     q
-  )}&search_simple=1&action=process&json=1&page_size=15&lc=nl&fields=${OFF_FIELDS}`;
+  )}&search_simple=1&action=process&json=1&page_size=25&lc=${lc}&fields=${fields}`;
+  const localUrl = cc
+    ? `https://${cc}.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(
+        q
+      )}&search_simple=1&action=process&json=1&page_size=20&lc=${lc}&cc=${cc}&fields=${fields}`
+    : null;
 
   const fetchList = async (url: string) => {
     try {
@@ -137,17 +167,20 @@ export async function searchFoods(query: string, signal?: AbortSignal): Promise<
       if (!res.ok) return [] as FoodItem[];
       const data = await res.json();
       return ((data.products ?? []) as any[])
-        .map((p) => mapOFFProduct(preferNl(p)))
+        .map((p) => mapOFFProduct(preferLocale(p, lc)))
         .filter(Boolean) as FoodItem[];
     } catch {
       return [] as FoodItem[];
     }
   };
 
-  const [nl, world] = await Promise.all([fetchList(nlUrl), fetchList(worldUrl)]);
+  const [local, world] = await Promise.all([
+    localUrl ? fetchList(localUrl) : Promise.resolve([] as FoodItem[]),
+    fetchList(worldUrl),
+  ]);
   const seen = new Set<string>();
   const merged: FoodItem[] = [];
-  for (const item of [...nl, ...world]) {
+  for (const item of [...local, ...world]) {
     const key = item.barcode || item.id;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -159,16 +192,22 @@ export async function searchFoods(query: string, signal?: AbortSignal): Promise<
 export async function lookupBarcode(code: string): Promise<FoodItem | null> {
   const c = code.replace(/\D/g, "");
   if (!c) return null;
+  const lc = getUserLang();
+  const cc = LANG_TO_CC[lc];
+  const fields = offFields(lc);
+
+  // Try local country index first (when available), then the worldwide index as fallback.
   const urls = [
-    `https://nl.openfoodfacts.org/api/v2/product/${c}.json?lc=nl&cc=nl&fields=${OFF_FIELDS}`,
-    `https://world.openfoodfacts.org/api/v2/product/${c}.json?lc=nl&fields=${OFF_FIELDS}`,
-  ];
+    cc ? `https://${cc}.openfoodfacts.org/api/v2/product/${c}.json?lc=${lc}&cc=${cc}&fields=${fields}` : null,
+    `https://world.openfoodfacts.org/api/v2/product/${c}.json?lc=${lc}&fields=${fields}`,
+  ].filter(Boolean) as string[];
+
   for (const url of urls) {
     try {
       const res = await fetch(url);
       if (!res.ok) continue;
       const data = await res.json();
-      if (data.status === 1) return mapOFFProduct(preferNl(data.product));
+      if (data.status === 1) return mapOFFProduct(preferLocale(data.product, lc));
     } catch {}
   }
   return null;
