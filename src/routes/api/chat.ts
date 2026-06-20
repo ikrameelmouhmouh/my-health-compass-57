@@ -94,14 +94,14 @@ export const Route = createFileRoute("/api/chat")({
           ? `User profile:
 - Name: ${profile.display_name ?? "—"}
 - Goal: ${profile.goal ?? "—"}
-- Current weight: ${profile.weight_kg ?? "—"} kg
+- Current weight: ${profile.current_weight_kg ?? "—"} kg
 - Goal weight: ${profile.goal_weight_kg ?? "—"} kg
 - Height: ${profile.height_cm ?? "—"} cm
 - Age: ${profile.age ?? "—"}
 - Activity: ${profile.activity_level ?? "—"}
-- Workouts/week: ${profile.training_per_week ?? "—"}
-- Daily calorie target: ${profile.calorie_target ?? "—"} kcal
-- Macros (P/C/F): ${profile.protein_g ?? "—"}/${profile.carb_g ?? "—"}/${profile.fat_g ?? "—"} g`
+- Workouts/week: ${profile.workout_frequency ?? "—"}
+- Daily calorie target: ${profile.daily_calories ?? "—"} kcal
+- Macros (P/C/F): ${profile.protein_g ?? "—"}/${profile.carbs_g ?? "—"}/${profile.fat_g ?? "—"} g`
           : "User profile not available.";
 
         const system = `You are Vita, a calm, encouraging personal health & nutrition coach inside the user's health app. You help with nutrition, intermittent fasting, workouts, and progress.
@@ -124,7 +124,7 @@ ${profileBlock}`;
         const result = streamText({
           model: gateway("google/gemini-3-flash-preview"),
           system,
-          messages: convertToModelMessages(body.messages),
+          messages: await convertToModelMessages(body.messages),
         });
 
         return result.toUIMessageStreamResponse({
