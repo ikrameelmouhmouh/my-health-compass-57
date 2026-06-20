@@ -24,11 +24,11 @@ export function ModulePage({
           {subtitle}
         </p>
       </div>
-      <h1 className="mt-1 px-1 text-[34px] font-bold leading-tight tracking-tight">
+      <h1 className="mt-1 px-1 text-[34px] font-extrabold leading-tight tracking-tight">
         {title}
       </h1>
 
-      <div className="mt-6 rounded-2xl bg-card p-6 text-center shadow-sm">
+      <div className="mt-6 rounded-[14px] bg-card p-6 text-center shadow-sm">
         <p className="text-[15px] text-muted-foreground">{description}</p>
       </div>
     </main>
