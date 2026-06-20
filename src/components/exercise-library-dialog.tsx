@@ -269,7 +269,7 @@ function DetailView({
       )}
 
       {zoom && (
-        <Lightbox frames={frames} title={ex.name} onClose={() => setZoom(false)} />
+        <Lightbox frames={frames} title={tr.name} onClose={() => setZoom(false)} />
       )}
     </div>
   );
