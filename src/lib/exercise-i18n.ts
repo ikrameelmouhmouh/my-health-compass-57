@@ -1288,8 +1288,8 @@ const PACKS: Record<Language, Pack> = { en, nl, ar, fr, de, es };
  * without translations (the ~470 catalog-only entries).
  */
 export function useExerciseT() {
-  const lang = useLang();
-  const pack = PACKS[lang] ?? en;
+  const { lang } = useI18n();
+  const pack = PACKS[lang as Language] ?? en;
   return (id: string, fallbackName: string, fallbackSteps: string[]) => {
     const entry = pack[id] ?? en[id];
     return {
