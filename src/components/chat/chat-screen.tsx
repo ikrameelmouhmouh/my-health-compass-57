@@ -287,6 +287,7 @@ export function ChatScreen({
   const { user } = useAuth();
   const [input, setInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [quickBusy, setQuickBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // threadId state — null when this is a brand-new draft chat.
@@ -346,6 +347,7 @@ export function ChatScreen({
 
   const [displayMessages, setDisplayMessages] = useState<UIMessage[]>(initialMessages);
   const messagesRef = useRef<UIMessage[]>(initialMessages);
+  const displayMessagesRef = useRef<UIMessage[]>(initialMessages);
   useEffect(() => {
     messagesRef.current = messages;
     setDisplayMessages((current) => {
@@ -358,7 +360,11 @@ export function ChatScreen({
     });
   }, [messages]);
 
-  const isBusy = status === "submitted" || status === "streaming";
+  useEffect(() => {
+    displayMessagesRef.current = displayMessages;
+  }, [displayMessages]);
+
+  const isBusy = quickBusy || status === "submitted" || status === "streaming";
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
