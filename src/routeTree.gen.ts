@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IntroRouteImport } from './routes/intro'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedWeightRouteImport } from './routes/_authenticated/weight'
 import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated/social'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -55,6 +56,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedWeightRoute = AuthenticatedWeightRouteImport.update({
@@ -136,6 +142,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
+  '/api/chat': typeof ApiChatRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
+  '/api/chat': typeof ApiChatRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -176,6 +184,7 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/social': typeof AuthenticatedSocialRoute
   '/_authenticated/weight': typeof AuthenticatedWeightRoute
+  '/api/chat': typeof ApiChatRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/social'
     | '/weight'
+    | '/api/chat'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/social'
     | '/weight'
+    | '/api/chat'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
   id:
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/social'
     | '/_authenticated/weight'
+    | '/api/chat'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   WelcomeRoute: typeof WelcomeRoute
+  ApiChatRoute: typeof ApiChatRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -293,6 +306,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/weight': {
@@ -419,6 +439,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   WelcomeRoute: WelcomeRoute,
+  ApiChatRoute: ApiChatRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
