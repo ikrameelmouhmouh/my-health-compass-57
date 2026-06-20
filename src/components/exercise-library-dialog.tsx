@@ -199,7 +199,7 @@ function DetailView({
           className="group relative mt-4 block w-full overflow-hidden rounded-2xl border border-border bg-muted/40"
           aria-label={t("lib.zoom_aria")}
         >
-          <AnimatedFrames frames={frames} alt={ex.name} className="aspect-square w-full object-cover" />
+          <AnimatedFrames frames={frames} alt={tr.name} className="aspect-square w-full object-cover" />
           <span className="pointer-events-none absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">
             <Play className="size-3 fill-white" /> {t("lib.demo")}
           </span>
