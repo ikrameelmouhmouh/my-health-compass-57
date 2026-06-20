@@ -8,13 +8,11 @@ export type DashCardId =
   | "fasting"
   | "weight"
   | "activity"
-  | "activitySummary"
   | "workout"
   | "goals";
 
 export const DEFAULT_ORDER: DashCardId[] = [
   "nutrition",
-  "activitySummary",
   "fasting",
   "workout",
   "water",
@@ -35,7 +33,6 @@ export const CARD_LABELS: Record<DashCardId, string> = {
   fasting: "Fasting",
   weight: "Weight",
   activity: "Activity",
-  activitySummary: "Activity summary",
   workout: "Today's workout",
   goals: "Daily goals",
 };
