@@ -243,9 +243,7 @@ function ChatHeader({
             </button>
           }
         />
-        <div className="min-w-0 flex-1 text-center font-display text-sm font-semibold">
-          Vita
-        </div>
+        <div className="min-w-0 flex-1 text-center font-display text-sm font-semibold">Vita</div>
         {showNewLink ? (
           <button
             type="button"
@@ -289,7 +287,8 @@ export function ChatScreen({
   // Stable chat id — never changes for the lifetime of this mount.
   // useChat keeps a single message buffer keyed by this id.
   const chatIdRef = useRef<string>(
-    initialThreadId ?? (typeof crypto !== "undefined" ? crypto.randomUUID() : `draft-${Date.now()}`),
+    initialThreadId ??
+      (typeof crypto !== "undefined" ? crypto.randomUUID() : `draft-${Date.now()}`),
   );
 
   // Token — fetched once, kept in a ref so the transport always sees the latest.
@@ -382,7 +381,9 @@ export function ChatScreen({
       setFile(null);
       await sendMessage({ text, files: parts });
       window.setTimeout(() => {
-        const assistantCountAfter = messagesRef.current.filter((m) => m.role === "assistant").length;
+        const assistantCountAfter = messagesRef.current.filter(
+          (m) => m.role === "assistant",
+        ).length;
         if (assistantCountAfter <= assistantCountBefore) void syncThreadMessages(activeThreadId);
       }, 150);
     } catch (e) {
