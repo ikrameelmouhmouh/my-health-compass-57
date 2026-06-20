@@ -87,28 +87,30 @@ function ListView({
   onSelect: (ex: LibraryExercise) => void;
   onClose: () => void;
 }) {
+  const t = useT();
   const gender = useGender();
   return (
     <>
       <div className="border-b border-border px-5 pb-3 pt-5">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl font-semibold tracking-tight">Oefeningen</h2>
-          <button onClick={onClose} className="grid size-8 place-items-center rounded-full hover:bg-muted" aria-label="Sluit">
+          <h2 className="font-display text-xl font-semibold tracking-tight">{t("lib.title")}</h2>
+          <button onClick={onClose} className="grid size-8 place-items-center rounded-full hover:bg-muted" aria-label={t("lib.close")}>
             <X className="size-4" />
           </button>
         </div>
         <div className="relative mt-3">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Zoek oefening..." className="pl-9" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("lib.search")} className="pl-9" />
         </div>
 
-        <FilterRow label="Spier" items={MUSCLE_FILTERS} value={mu} onChange={setMu} />
-        <FilterRow label="Materiaal" items={EQUIPMENT_FILTERS} value={eq} onChange={setEq} />
+        <FilterRow label={t("lib.muscle")} items={MUSCLE_FILTERS} value={mu} onChange={setMu} />
+        <FilterRow label={t("lib.equipment")} items={EQUIPMENT_FILTERS} value={eq} onChange={setEq} />
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 py-4">
         {items.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Geen oefeningen gevonden.</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">{t("lib.none_found")}</p>
+
         ) : (
           <div className="space-y-2">
             {items.map((ex) => {
