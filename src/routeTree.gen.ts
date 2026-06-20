@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as IntroRouteImport } from './routes/intro'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedWeightRouteImport } from './routes/_authenticated/weight'
 import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated/social'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -25,6 +26,7 @@ import { Route as AuthenticatedNutritionRouteImport } from './routes/_authentica
 import { Route as AuthenticatedFitnessRouteImport } from './routes/_authenticated/fitness'
 import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticated/fasting'
 import { Route as AuthenticatedAiCoachRouteImport } from './routes/_authenticated/ai-coach'
+import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 
@@ -55,6 +57,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedWeightRoute = AuthenticatedWeightRouteImport.update({
@@ -107,6 +114,12 @@ const AuthenticatedAiCoachRoute = AuthenticatedAiCoachRouteImport.update({
   path: '/ai-coach',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAiCoachThreadIdRoute =
+  AuthenticatedAiCoachThreadIdRouteImport.update({
+    id: '/$threadId',
+    path: '/$threadId',
+    getParentRoute: () => AuthenticatedAiCoachRoute,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -126,7 +139,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
-  '/ai-coach': typeof AuthenticatedAiCoachRoute
+  '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/fasting': typeof AuthenticatedFastingRoute
   '/fitness': typeof AuthenticatedFitnessRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
@@ -136,6 +149,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
+  '/api/chat': typeof ApiChatRoute
+  '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -145,7 +160,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
-  '/ai-coach': typeof AuthenticatedAiCoachRoute
+  '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/fasting': typeof AuthenticatedFastingRoute
   '/fitness': typeof AuthenticatedFitnessRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
@@ -155,6 +170,8 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
+  '/api/chat': typeof ApiChatRoute
+  '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -166,7 +183,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
-  '/_authenticated/ai-coach': typeof AuthenticatedAiCoachRoute
+  '/_authenticated/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/_authenticated/fasting': typeof AuthenticatedFastingRoute
   '/_authenticated/fitness': typeof AuthenticatedFitnessRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
@@ -176,6 +193,8 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/social': typeof AuthenticatedSocialRoute
   '/_authenticated/weight': typeof AuthenticatedWeightRoute
+  '/api/chat': typeof ApiChatRoute
+  '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -197,6 +216,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/social'
     | '/weight'
+    | '/api/chat'
+    | '/ai-coach/$threadId'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -216,6 +237,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/social'
     | '/weight'
+    | '/api/chat'
+    | '/ai-coach/$threadId'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
   id:
@@ -236,6 +259,8 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/social'
     | '/_authenticated/weight'
+    | '/api/chat'
+    | '/_authenticated/ai-coach/$threadId'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -247,6 +272,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   WelcomeRoute: typeof WelcomeRoute
+  ApiChatRoute: typeof ApiChatRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -293,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/weight': {
@@ -365,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiCoachRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/ai-coach/$threadId': {
+      id: '/_authenticated/ai-coach/$threadId'
+      path: '/$threadId'
+      fullPath: '/ai-coach/$threadId'
+      preLoaderRoute: typeof AuthenticatedAiCoachThreadIdRouteImport
+      parentRoute: typeof AuthenticatedAiCoachRoute
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -382,8 +422,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAiCoachRouteChildren {
+  AuthenticatedAiCoachThreadIdRoute: typeof AuthenticatedAiCoachThreadIdRoute
+}
+
+const AuthenticatedAiCoachRouteChildren: AuthenticatedAiCoachRouteChildren = {
+  AuthenticatedAiCoachThreadIdRoute: AuthenticatedAiCoachThreadIdRoute,
+}
+
+const AuthenticatedAiCoachRouteWithChildren =
+  AuthenticatedAiCoachRoute._addFileChildren(AuthenticatedAiCoachRouteChildren)
+
 interface AuthenticatedRouteChildren {
-  AuthenticatedAiCoachRoute: typeof AuthenticatedAiCoachRoute
+  AuthenticatedAiCoachRoute: typeof AuthenticatedAiCoachRouteWithChildren
   AuthenticatedFastingRoute: typeof AuthenticatedFastingRoute
   AuthenticatedFitnessRoute: typeof AuthenticatedFitnessRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
@@ -396,7 +447,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAiCoachRoute: AuthenticatedAiCoachRoute,
+  AuthenticatedAiCoachRoute: AuthenticatedAiCoachRouteWithChildren,
   AuthenticatedFastingRoute: AuthenticatedFastingRoute,
   AuthenticatedFitnessRoute: AuthenticatedFitnessRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
@@ -419,19 +470,10 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   WelcomeRoute: WelcomeRoute,
+  ApiChatRoute: ApiChatRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
