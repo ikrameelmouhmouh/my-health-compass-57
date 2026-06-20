@@ -8,7 +8,7 @@ import {
   EQUIPMENT_FILTERS,
   MUSCLE_FILTERS,
   getExerciseFrames,
-  hasGenderVariants,
+  
   type LibraryExercise,
   type Equipment,
   type MuscleGroup,
