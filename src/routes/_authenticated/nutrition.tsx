@@ -12,6 +12,7 @@ import {
   type MealType, type LoggedMeal,
 } from "@/lib/food";
 import { useDayLog } from "@/lib/dashboard-prefs";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/nutrition")({
   head: () => ({ meta: [{ title: "Nutrition — Vita" }] }),
@@ -20,11 +21,12 @@ export const Route = createFileRoute("/_authenticated/nutrition")({
 
 function Nutrition() {
   const { user } = useAuth();
+  const { t, lang } = useI18n();
   const { removeMeal, logMeal, mealsOn } = useMeals();
   const { day, addMeal } = useDayLog();
   const [open, setOpen] = useState(false);
   const [defaultMealType, setDefaultMealType] = useState<MealType | undefined>();
-  const [dateOffset, setDateOffset] = useState(0); // 0=today, -1=yesterday
+  const [dateOffset, setDateOffset] = useState(0);
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -65,41 +67,39 @@ function Nutrition() {
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
-      {/* Header / date picker */}
       <header className="flex items-center justify-between">
         <button
           onClick={() => setDateOffset((d) => d - 1)}
           className="grid size-9 place-items-center rounded-full border border-border"
-          aria-label="Previous day"
+          aria-label={t("nutr.prev")}
         >
           <ChevronLeft className="size-4" />
         </button>
         <div className="text-center">
           <h1 className="font-display text-xl font-semibold tracking-tight">
-            {isToday ? "Today" : formatDate(viewDate)}
+            {isToday ? t("today.title") || "Today" : formatDate(viewDate, lang)}
           </h1>
-          <p className="text-[11px] text-muted-foreground">Nutrition</p>
+          <p className="text-[11px] text-muted-foreground">{t("nutr.title")}</p>
         </div>
         <button
           onClick={() => setDateOffset((d) => Math.min(0, d + 1))}
           className="grid size-9 place-items-center rounded-full border border-border disabled:opacity-40"
-          aria-label="Next day"
+          aria-label={t("nutr.next")}
           disabled={dateOffset >= 0}
         >
           <ChevronRight className="size-4" />
         </button>
       </header>
 
-      {/* Hero card */}
       <section className="mt-5 rounded-3xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Calories remaining
+              {t("nutr.cal_remaining")}
             </p>
             <p className="mt-1 font-display text-3xl font-bold tabular-nums">
               {remaining.toLocaleString()}
-              <span className="ml-1 text-sm text-muted-foreground">kcal</span>
+              <span className="ml-1 text-sm text-muted-foreground">{t("food.kcal")}</span>
             </p>
           </div>
           <div className="relative grid size-20 place-items-center">
@@ -118,56 +118,57 @@ function Nutrition() {
         </div>
         <div className="mt-3 flex items-center justify-between text-[11px]">
           <span className="text-muted-foreground">
-            <span className="font-semibold text-foreground">{totals.kcal}</span> eaten
+            <span className="font-semibold text-foreground">{totals.kcal}</span> {t("nutr.eaten")}
           </span>
           <span className="text-muted-foreground">
-            Goal: <span className="font-semibold text-foreground">{calorieTarget}</span>
+            {t("nutr.goal")}: <span className="font-semibold text-foreground">{calorieTarget}</span>
           </span>
         </div>
 
-        {/* Macros */}
         <div className="mt-4 grid grid-cols-3 gap-2">
-          <MacroBlock label="Carbs" value={totals.carbs} goal={carbsTarget} color="text-pink-500" />
-          <MacroBlock label="Protein" value={totals.protein} goal={proteinTarget} color="text-blue-500" />
-          <MacroBlock label="Fat" value={totals.fat} goal={fatTarget} color="text-orange-500" />
+          <MacroBlock label={t("food.carbs")} value={totals.carbs} goal={carbsTarget} color="text-pink-500" />
+          <MacroBlock label={t("food.protein")} value={totals.protein} goal={proteinTarget} color="text-blue-500" />
+          <MacroBlock label={t("food.fat")} value={totals.fat} goal={fatTarget} color="text-orange-500" />
         </div>
       </section>
 
-      {/* Meals by type */}
       <section className="mt-5 space-y-3">
         {MEAL_TYPES.map((m) => (
           <MealSection
             key={m.id}
             type={m.id}
-            label={m.label}
+            label={t(`meal.${m.id}`)}
             emoji={m.emoji}
             meals={byType[m.id]}
             onAdd={() => openFor(m.id)}
             onRemove={removeMeal}
             disabled={!isToday}
+            tAddTo={t("nutr.add_to", { meal: t(`meal.${m.id}`) })}
+            tRemove={t("nutr.remove")}
+            tItem={t("nutr.item_one")}
+            tItems={t("nutr.item_other")}
+            tKcal={t("food.kcal")}
           />
         ))}
       </section>
 
-      {/* Empty state for whole day */}
       {dayMeals.length === 0 && (
         <div className="mt-6 rounded-3xl border border-dashed border-border bg-card/50 p-8 text-center">
           <div className="mx-auto mb-2 grid size-12 place-items-center rounded-full bg-brand/15 text-brand">
             <Flame className="size-5" />
           </div>
-          <p className="text-sm font-semibold">Nothing logged {isToday ? "today" : "this day"}</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Search the food database or scan a barcode to get started.
+          <p className="text-sm font-semibold">
+            {isToday ? t("nutr.empty_title_today") : t("nutr.empty_title_day")}
           </p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("nutr.empty_desc")}</p>
         </div>
       )}
 
-      {/* Floating FAB */}
       {isToday && (
         <button
           onClick={() => openFor(undefined)}
           className="fixed bottom-24 right-5 z-40 grid size-14 place-items-center rounded-full bg-brand text-brand-foreground shadow-lg shadow-brand/40 transition active:scale-95"
-          aria-label="Log food"
+          aria-label={t("nutr.fab")}
         >
           <Plus className="size-6" />
         </button>
@@ -179,7 +180,6 @@ function Nutrition() {
         defaultMealType={defaultMealType}
         onLogged={(entry) => {
           logMeal({ food: entry.food, serving: entry.serving, servingCount: entry.servingCount, mealType: entry.mealType });
-          // Keep the dashboard "today" total in sync.
           if (isToday) addMeal({ kcal: entry.kcal, protein: entry.protein, carbs: entry.carbs, fat: entry.fat });
           setOpen(false);
         }}
@@ -188,9 +188,9 @@ function Nutrition() {
   );
 }
 
-/* ---------- Meal section ---------- */
 function MealSection({
   type, label, emoji, meals, onAdd, onRemove, disabled,
+  tAddTo, tRemove, tItem, tItems, tKcal,
 }: {
   type: MealType;
   label: string;
@@ -199,6 +199,7 @@ function MealSection({
   onAdd: () => void;
   onRemove: (id: string) => void;
   disabled?: boolean;
+  tAddTo: string; tRemove: string; tItem: string; tItems: string; tKcal: string;
 }) {
   const totalKcal = meals.reduce((s, m) => s + m.kcal, 0);
   return (
@@ -209,7 +210,7 @@ function MealSection({
           <div>
             <h3 className="font-display text-sm font-semibold">{label}</h3>
             <p className="text-[11px] text-muted-foreground">
-              {totalKcal} kcal · {meals.length} item{meals.length === 1 ? "" : "s"}
+              {totalKcal} {tKcal} · {meals.length} {meals.length === 1 ? tItem : tItems}
             </p>
           </div>
         </div>
@@ -217,7 +218,7 @@ function MealSection({
           <button
             onClick={onAdd}
             className="grid size-8 place-items-center rounded-full bg-brand/15 text-brand"
-            aria-label={`Add to ${label}`}
+            aria-label={tAddTo}
           >
             <Plus className="size-4" />
           </button>
@@ -238,7 +239,7 @@ function MealSection({
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-bold tabular-nums text-brand">{m.kcal} kcal</p>
+                <p className="text-xs font-bold tabular-nums text-brand">{m.kcal} {tKcal}</p>
                 <p className="text-[10px] text-muted-foreground">
                   P{m.protein} · C{m.carbs} · F{m.fat}
                 </p>
@@ -247,7 +248,7 @@ function MealSection({
                 <button
                   onClick={() => onRemove(m.id)}
                   className="grid size-7 place-items-center text-muted-foreground hover:text-destructive"
-                  aria-label="Remove"
+                  aria-label={tRemove}
                 >
                   <Trash2 className="size-3.5" />
                 </button>
@@ -260,7 +261,6 @@ function MealSection({
   );
 }
 
-/* ---------- Macro ring ---------- */
 function MacroBlock({ label, value, goal, color }: { label: string; value: number; goal: number; color: string }) {
   const pct = clamp(goal > 0 ? (value / goal) * 100 : 0);
   const r = 22;
@@ -288,7 +288,6 @@ function MacroBlock({ label, value, goal, color }: { label: string; value: numbe
   );
 }
 
-/* ---------- helpers ---------- */
 function sum(meals: LoggedMeal[]) {
   return meals.reduce(
     (s, m) => ({
@@ -303,7 +302,11 @@ function sum(meals: LoggedMeal[]) {
 
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
 
-function formatDate(iso: string) {
+const LOCALE_MAP: Record<string, string> = {
+  en: "en-US", nl: "nl-NL", ar: "ar", fr: "fr-FR", de: "de-DE", es: "es-ES",
+};
+
+function formatDate(iso: string, lang: string) {
   const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+  return d.toLocaleDateString(LOCALE_MAP[lang] ?? undefined, { weekday: "short", day: "numeric", month: "short" });
 }
