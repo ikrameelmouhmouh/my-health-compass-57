@@ -437,7 +437,7 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm gap-0 p-0 sm:rounded-3xl">
+      <DialogContent hideClose className="max-w-sm gap-0 p-0 sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-border p-4">
           <h2 className="font-display font-semibold">{t("soc.invite.title")}</h2>
           <button onClick={onClose}><X className="size-5" /></button>
@@ -581,7 +581,7 @@ function CreateChallengeDialog({ open, onClose }: { open: boolean; onClose: () =
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm gap-0 p-0 sm:rounded-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent hideClose className="max-w-sm gap-0 p-0 sm:rounded-3xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between border-b border-border p-4">
           <h2 className="font-display font-semibold">{t("soc.ch.new.title")}</h2>
           <button onClick={onClose}><X className="size-5" /></button>
@@ -645,7 +645,7 @@ function LeaderboardDialog({ challenge, onClose }: { challenge: Challenge | null
   const lb = useChallengeLeaderboard(challenge);
   return (
     <Dialog open={!!challenge} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm gap-0 p-0 sm:rounded-3xl">
+      <DialogContent hideClose className="max-w-sm gap-0 p-0 sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-border p-4">
           <button onClick={onClose}><ChevronLeft className="size-5" /></button>
           <h2 className="truncate font-display font-semibold">{challenge?.title}</h2>
@@ -706,7 +706,7 @@ function ComposeDialog({ open, onClose }: { open: boolean; onClose: () => void }
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm gap-0 p-0 sm:rounded-3xl">
+      <DialogContent hideClose className="max-w-sm gap-0 p-0 sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-border p-4">
           <h2 className="font-display font-semibold">{t("soc.compose.title")}</h2>
           <button onClick={onClose}><X className="size-5" /></button>
@@ -752,7 +752,7 @@ function CommentsDialog({ post, onClose }: { post: Post | null; onClose: () => v
 
   return (
     <Dialog open={!!post} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-sm gap-0 p-0 sm:rounded-3xl max-h-[80vh] flex flex-col">
+      <DialogContent hideClose className="max-w-sm gap-0 p-0 sm:rounded-3xl max-h-[80vh] flex flex-col">
         <div className="flex items-center justify-between border-b border-border p-4">
           <button onClick={onClose}><ChevronLeft className="size-5" /></button>
           <h2 className="font-display font-semibold">{t("soc.comments.title")}</h2>

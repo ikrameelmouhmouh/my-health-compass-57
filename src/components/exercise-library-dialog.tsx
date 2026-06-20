@@ -50,7 +50,7 @@ export function ExerciseLibraryDialog({ open, onClose, onPick, pickLabel }: Prop
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && close()}>
-      <DialogContent className="flex h-[92dvh] max-w-md flex-col gap-0 overflow-hidden p-0">
+      <DialogContent hideClose className="flex h-[92dvh] max-w-md flex-col gap-0 overflow-hidden p-0">
         {selected ? (
           <DetailView
             ex={selected}

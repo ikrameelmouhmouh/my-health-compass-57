@@ -121,7 +121,7 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md gap-0 p-0 sm:rounded-3xl overflow-hidden max-h-[90vh] flex flex-col">
+        <DialogContent hideClose className="max-w-md gap-0 p-0 sm:rounded-3xl overflow-hidden max-h-[90vh] flex flex-col">
           {selected ? (
             <FoodDetail
               food={selected}
