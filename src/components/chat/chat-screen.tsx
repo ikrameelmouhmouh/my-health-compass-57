@@ -32,6 +32,34 @@ async function toFileParts(files: File[]) {
   );
 }
 
+async function readStreamText(response: Response, onText: (text: string) => void) {
+  const reader = response.body?.getReader();
+  if (!reader) return;
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() ?? "";
+    for (const chunk of chunks) {
+      const line = chunk
+        .split("\n")
+        .find((entry) => entry.startsWith("data: "))
+        ?.slice(6);
+      if (!line || line === "[DONE]") continue;
+      const parsed = JSON.parse(line) as { type?: string; delta?: string };
+      if (parsed.type === "text-delta" && parsed.delta) {
+        text += parsed.delta;
+        onText(text);
+      }
+    }
+  }
+}
+
 type QuickAction = {
   key: string;
   labelKey: string;
