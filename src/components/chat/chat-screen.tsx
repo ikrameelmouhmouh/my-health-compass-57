@@ -361,13 +361,14 @@ export function ChatScreen({
 
   async function syncThreadMessages(id: string) {
     const rows = await getThreadMessages({ data: { threadId: id } });
-    setMessages(
-      rows.map((r) => ({
+    const mapped: UIMessage[] = rows.map((r) => ({
         id: r.id,
         role: r.role === "assistant" ? "assistant" : "user",
         parts: [{ type: "text", text: r.content }],
-      })),
-    );
+      }));
+    messagesRef.current = mapped;
+    setDisplayMessages(mapped);
+    setMessages(mapped);
   }
 
   async function sendNow(text: string, attached?: File | null) {
@@ -381,6 +382,14 @@ export function ChatScreen({
       const assistantCountBefore = messagesRef.current.filter((m) => m.role === "assistant").length;
       setInput("");
       setFile(null);
+      setDisplayMessages((current) => [
+        ...current,
+        {
+          id: `local-${Date.now()}`,
+          role: "user",
+          parts: [{ type: "text", text }],
+        },
+      ]);
       await sendMessage({ text, files: parts });
       window.setTimeout(() => {
         const assistantCountAfter = messagesRef.current.filter(
