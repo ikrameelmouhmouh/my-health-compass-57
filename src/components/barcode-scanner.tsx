@@ -62,7 +62,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
         };
         tick();
       } catch (e: any) {
-        setError(e?.message ?? "Camera access denied");
+        setError(e?.message ?? t("scan.camera_denied"));
         setShowManual(true);
       }
     })();
