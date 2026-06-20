@@ -534,14 +534,6 @@ function NutritionCard({ budget, meals, mode, onToggleMode, onLogFood, protein, 
 }
 
 
-function SummaryTile({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
-  return (
-    <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className={`mt-1 font-display text-lg font-semibold tabular-nums ${accent ? "text-brand" : ""}`}>{value}</div>
-    </div>
-  );
-}
 
 function MacroCard({ protein, carbs, fat }: {
   protein: { have: number; goal: number };
