@@ -273,37 +273,39 @@ function Profile() {
   }
 
   return (
-    <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
-      {/* Header */}
-      <header className="flex items-start justify-between gap-3">
+    <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-4 pb-32 pt-4">
+      {/* iOS large title header */}
+      <header className="flex items-start justify-between gap-3 px-1">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-muted-foreground">{greeting}</p>
-          <h1 className="mt-1 truncate font-display text-[26px] font-semibold leading-tight tracking-tight">
+          <p className="text-[13px] font-medium uppercase tracking-wide text-muted-foreground">
+            {greeting}
+          </p>
+          <h1 className="mt-0.5 truncate text-[34px] font-bold leading-[1.05] tracking-tight">
             {p.display_name || "—"}
           </h1>
-          <p className="mt-1.5 text-[11px] font-medium text-muted-foreground">
+          <p className="mt-1 text-[13px] font-medium text-muted-foreground">
             {formatToday()}
           </p>
         </div>
-        <div className="flex shrink-0 gap-1.5">
+        <div className="flex shrink-0 items-center gap-1">
           <IconBtn aria-label="Customize dashboard" onClick={() => setOpenSheet("customize")}>
-            <Sliders className="size-4" />
+            <Sliders className="size-[18px]" strokeWidth={2} />
           </IconBtn>
           <Link
             to="/settings"
             aria-label="Settings"
-            className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-card transition hover:bg-accent"
+            className="ios-press inline-flex size-9 items-center justify-center rounded-full bg-secondary text-foreground"
           >
-            <Settings className="size-4" />
+            <Settings className="size-[18px]" strokeWidth={2} />
           </Link>
         </div>
       </header>
 
       {/* Plan chip */}
-      <div className="mt-4 flex items-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5">
+      <div className="mt-3 flex items-center px-1">
+        <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1">
           <span className={`size-1.5 rounded-full ${isPremium ? "bg-brand" : "bg-muted-foreground"}`} />
-          <span className="font-display text-[11px] font-medium uppercase tracking-wider">
+          <span className="text-[12px] font-semibold uppercase tracking-wider">
             {isPremium ? `Vita ${t("profile.plus")}` : t("profile.free")}
           </span>
         </div>
