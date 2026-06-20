@@ -60,7 +60,7 @@ export function ExerciseLibraryDialog({ open, onClose, onPick, pickLabel }: Prop
                 ? () => { onPick(selected); close(); }
                 : undefined
             }
-            pickLabel={pickLabel}
+            pickLabel={effectivePickLabel}
           />
         ) : (
           <ListView
