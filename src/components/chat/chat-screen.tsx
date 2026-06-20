@@ -10,7 +10,6 @@ import {
   Square,
 } from "lucide-react";
 import {
-  useCallback,
   useEffect,
   useMemo,
   useRef,
