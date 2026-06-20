@@ -117,6 +117,7 @@ function ListView({
           <div className="space-y-2">
             {items.map((ex) => {
               const thumb = getExerciseFrames(ex, gender)[0];
+              const tr = tex(ex.id, ex.name, ex.steps);
               return (
                 <button
                   key={ex.id}
@@ -124,10 +125,10 @@ function ListView({
                   className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card/50 p-2.5 text-left transition hover:bg-card"
                 >
                   <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-muted">
-                    <img src={thumb} alt={ex.name} loading="lazy" className="size-full object-cover" />
+                    <img src={thumb} alt={tr.name} loading="lazy" className="size-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{ex.name}</p>
+                    <p className="truncate font-medium">{tr.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
                       {ex.equipment} · {ex.primary.join(", ")}
                     </p>
