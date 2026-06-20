@@ -488,7 +488,10 @@ export function ThreadChatScreen({
   if (token === null) {
     return (
       <div className="grid min-h-[100dvh] place-items-center bg-background">
-        <div className="size-6 animate-spin rounded-full border-2 border-hairline border-t-brand" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="size-6 animate-spin rounded-full border-2 border-hairline border-t-brand" />
+          <p className="text-sm font-medium text-foreground">{t("chat.connecting")}</p>
+        </div>
       </div>
     );
   }
