@@ -1,9 +1,10 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 export function AiFab() {
+  const t = useT();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  // Hide on the AI Coach page itself and on auth routes
   if (pathname.startsWith("/ai-coach") || pathname.startsWith("/login") || pathname.startsWith("/auth")) {
     return null;
   }
@@ -11,7 +12,7 @@ export function AiFab() {
   return (
     <Link
       to="/ai-coach"
-      aria-label="Open AI Coach"
+      aria-label={t("fab.open_coach")}
       className="fixed z-50 right-4 bottom-[calc(env(safe-area-inset-bottom)+96px)] group"
     >
       <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-brand/40 blur-xl opacity-70 group-hover:opacity-100 transition-opacity" />
@@ -21,3 +22,4 @@ export function AiFab() {
     </Link>
   );
 }
+
