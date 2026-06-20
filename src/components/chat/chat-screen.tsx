@@ -21,6 +21,26 @@ import {
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function toFileParts(files: File[]) {
+  return Promise.all(
+    files.map(async (f) => ({
+      type: "file" as const,
+      mediaType: f.type || "image/jpeg",
+      filename: f.name,
+      url: await fileToDataUrl(f),
+    })),
+  );
+}
+
 import { useAuth } from "@/lib/auth-context";
 import { useT, useI18n } from "@/lib/i18n";
 import { createThread } from "@/lib/chat.functions";
