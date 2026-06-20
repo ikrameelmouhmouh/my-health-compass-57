@@ -5,8 +5,8 @@ import { useT } from "@/lib/i18n";
 const items = [
   { to: "/profile", key: "nav.home", icon: Home },
   { to: "/nutrition", key: "nav.eat", icon: UtensilsCrossed },
-  { to: "/fitness", key: "nav.workouts", icon: Dumbbell },
   { to: "/fasting", key: "nav.fasting", icon: Timer },
+  { to: "/fitness", key: "nav.workouts", icon: Dumbbell },
   { to: "/weight", key: "nav.progress", icon: TrendingUp },
 ] as const;
 
