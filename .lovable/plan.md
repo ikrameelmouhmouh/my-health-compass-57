@@ -1,33 +1,36 @@
-## Doel
-De gekozen richting **"Refined iOS — vital green"** doortrekken in de hele app. iOS 18-structuur blijft staan; alleen tokens, radii en het actieve tab-state veranderen.
+# Intermittent Fasting integreren onder 'Eten'
 
-## Wat verandert er visueel
-- **Accent / brand**: van zachte sage `#7d9b76` → diepere forest green `#2d5a27`. Wordt gebruikt voor primaire knoppen, geselecteerde state, actieve tab, brand-dot.
-- **Card radius**: van `rounded-3xl` (24px) → **14px** (`rounded-[14px]`). Strakker, native iOS 18.
-- **Card border**: hairline border vervangen door zachte `shadow-sm` op witte cards (zoals in het prototype). Geselecteerde card krijgt `ring-2` in brand-kleur i.p.v. checkmark-alleen.
-- **Titels**: large title 34px **extrabold** (was bold), iets strakker tracking.
-- **Subtitels**: 17px `text-muted-foreground` (slate-500-achtig), zonder uppercase.
-- **Primaire knop**: 14px radius, forest green, subtiele gekleurde shadow (`shadow-brand/20`).
-- **Tab bar**: blijft frosted, krijgt een **kleine punt-indicator** (1×1 dot) onder het actieve item + brand-kleur tint op icoon/label.
-- **Achtergrond**: `#f2f2f7` (ongewijzigd, past al).
-- **Dark mode**: dezelfde upgrades, accent licht iets op naar `#4a8042` voor leesbaarheid op `#000`.
+Doel: vasten logisch en zichtbaar maken zonder de bottom nav te veranderen. We houden de 5 tabs (Home, Eten, Workouts, Social, Vooruitgang) en geven vasten een prominente plek bovenaan `/nutrition`, met de bestaande snelkoppeling op het startscherm intact.
 
-## Technische wijzigingen
-1. `src/styles.css`
-   - `--brand` → `oklch`-equivalent van `#2d5a27` (light) en `#4a8042` (dark).
-   - `--radius` van 14px bevestigen; component-rondingen op `rounded-[14px]` / `rounded-2xl` voor secties.
-   - Bestaande `ios-chrome` / `ios-press` utilities ongewijzigd.
-2. `src/components/bottom-nav.tsx`
-   - Actieve item: brand-kleur icoon/label + 3px dot onder label.
-   - Inactive: huidige muted style.
-3. `src/components/module-page.tsx`
-   - Title `font-extrabold`, card wrapper `rounded-[14px]`.
-4. Card-componenten die nog `rounded-3xl` of `rounded-2xl` op content-cards gebruiken → `rounded-[14px]`. Sectie-containers blijven `rounded-2xl`.
-5. Geen wijzigingen aan business logic, data, routes of i18n.
+## Wat er verandert
 
-## Scope
-Visuele tokens en presentatielaag — geen feature-, data- of backend-werk.
+### 1. `src/routes/_authenticated/nutrition.tsx` — Fasting-sectie bovenaan
+Direct onder de dag-header, vóór de meals-lijst, een compacte Fasting-kaart:
+- **Als er een actief venster is**: live timer (uren:minuten), voortgangsring, "Stop vasten"-knop, gekozen protocol (16:8, 18:6, OMAD…).
+- **Als er geen actief venster is**: laatste status ("12u geleden gestopt"), primaire knop "Start vasten", secundaire link "Geschiedenis".
+- Volledige UI blijft op `/fasting` (geschiedenis, protocol kiezen, instellingen). De kaart linkt erheen via "Bekijk alles".
 
-## Verificatie
-- Build draait automatisch.
-- Daarna preview-screenshot van Start, AI Coach, Profile en Language-screen om te checken dat brand-kleur, radii en tab-indicator overal kloppen.
+### 2. `src/components/bottom-nav.tsx` — ongewijzigd
+5 tabs blijven exact zoals nu. Geen Fasting-tab, geen verschuiving van Vooruitgang.
+
+### 3. Startscherm (`/profile`) — bestaande Fasting-kaart blijft
+De huidige snelle toegang op het startscherm blijft staan; dat is nu de tweede ingang naast `/nutrition`.
+
+### 4. Route `/fasting` — blijft bestaan
+Bereikbaar via de kaart op `/nutrition` en de kaart op het startscherm. Niet meer via de bottom nav (was er ook niet).
+
+### 5. i18n
+Nieuwe keys voor de inline Fasting-kaart op nutrition (`nut.fastingTitle`, `nut.fastingActive`, `nut.fastingIdle`, `nut.startFast`, `nut.stopFast`, `nut.viewAll`) in alle 6 talen.
+
+## Waarom deze keuze (kort)
+
+- **Overzicht behouden**: 5 tabs is iOS-best-practice; 6 wordt visueel druk en labels worden krap.
+- **Mentaal model klopt**: vasten = wanneer je eet, dus thuis onder 'Eten'.
+- **Twee ingangen**: startscherm-kaart voor snelle toegang, nutrition-sectie voor context naast je maaltijden.
+- **Geen verlies**: 'Vooruitgang' (gewicht/trends) blijft een eigen tab — die data is te belangrijk om te verstoppen.
+
+## Niet in scope
+
+- Geen wijziging aan de bottom nav.
+- Geen verplaatsing van Vooruitgang.
+- Geen wijziging aan de fasting-logica/datamodel — alleen een nieuwe weergave-kaart die de bestaande state hergebruikt.

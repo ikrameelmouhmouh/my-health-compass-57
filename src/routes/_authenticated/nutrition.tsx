@@ -1,17 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Plus, Flame, Trash2, ChevronLeft, ChevronRight,
+  Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
 } from "lucide-react";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import {
   useMeals, MEAL_TYPES,
   type MealType, type LoggedMeal,
 } from "@/lib/food";
-import { useDayLog } from "@/lib/dashboard-prefs";
+import { useDayLog, useFasting, getProtocol } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/nutrition")({
@@ -131,6 +131,8 @@ function Nutrition() {
           <MacroBlock label={t("food.fat")} value={totals.fat} goal={fatTarget} color="text-orange-500" />
         </div>
       </section>
+
+      <FastingCard />
 
       <section className="mt-5 space-y-3">
         {MEAL_TYPES.map((m) => (
@@ -309,4 +311,91 @@ const LOCALE_MAP: Record<string, string> = {
 function formatDate(iso: string, lang: string) {
   const d = new Date(iso + "T00:00:00");
   return d.toLocaleDateString(LOCALE_MAP[lang] ?? undefined, { weekday: "short", day: "numeric", month: "short" });
+}
+
+function FastingCard() {
+  const { t } = useI18n();
+  const { state, start, stop } = useFasting();
+  const proto = getProtocol(state.protocol);
+  const targetMs = proto.fast * 3_600_000;
+
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!state.startedAt || state.pausedAt) return;
+    const id = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [state.startedAt, state.pausedAt]);
+
+  const live = useMemo(() => {
+    if (!state.startedAt) return { active: false, elapsedMs: 0, pct: 0 };
+    const now = Date.now();
+    let pausedMs = state.pausedTotalMs;
+    if (state.pausedAt) pausedMs += now - new Date(state.pausedAt).getTime();
+    const elapsedMs = Math.max(0, now - new Date(state.startedAt).getTime() - pausedMs);
+    return { active: true, elapsedMs, pct: Math.min(100, (elapsedMs / targetMs) * 100) };
+  }, [state.startedAt, state.pausedAt, state.pausedTotalMs, targetMs]);
+
+  const hh = Math.floor(live.elapsedMs / 3_600_000);
+  const mm = Math.floor((live.elapsedMs % 3_600_000) / 60_000);
+  const timeLabel = `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+
+  const size = 56, stroke = 5;
+  const r = (size - stroke) / 2;
+  const c = 2 * Math.PI * r;
+  const off = c - (live.pct / 100) * c;
+
+  return (
+    <section className="mt-5 rounded-3xl border border-border bg-card p-4">
+      <div className="flex items-center gap-3">
+        <div className="relative grid shrink-0 place-items-center" style={{ width: size, height: size }}>
+          <svg width={size} height={size} className="-rotate-90">
+            <circle cx={size/2} cy={size/2} r={r} stroke="currentColor" strokeOpacity={0.12} strokeWidth={stroke} fill="none" />
+            {live.active && (
+              <circle cx={size/2} cy={size/2} r={r} stroke="currentColor" className="text-brand"
+                strokeWidth={stroke} strokeLinecap="round" fill="none"
+                strokeDasharray={c} strokeDashoffset={off} />
+            )}
+          </svg>
+          <Timer className={`absolute size-5 ${live.active ? "text-brand" : "text-muted-foreground"}`} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="font-display text-sm font-semibold">{t("nut.fastingTitle")}</h3>
+            <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent-foreground">
+              {proto.label}
+            </span>
+          </div>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">
+            {live.active ? (
+              <span><span className="font-semibold text-foreground tabular-nums">{timeLabel}</span> · {t("nut.fastingActive")}</span>
+            ) : (
+              t("nut.fastingIdle")
+            )}
+          </p>
+        </div>
+        {live.active ? (
+          <button
+            onClick={stop}
+            className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1.5 text-[12px] font-semibold text-destructive ios-press"
+          >
+            <Square className="size-3.5" /> {t("nut.stopFast")}
+          </button>
+        ) : (
+          <button
+            onClick={start}
+            className="inline-flex items-center gap-1 rounded-full bg-brand px-3 py-1.5 text-[12px] font-semibold text-brand-foreground ios-press"
+          >
+            <Play className="size-3.5" /> {t("nut.startFast")}
+          </button>
+        )}
+      </div>
+      <Link
+        to="/fasting"
+        className="mt-3 flex items-center justify-between rounded-2xl bg-accent/40 px-3 py-2 text-[12px] font-medium text-foreground ios-press"
+      >
+        <span>{t("nut.viewAll")}</span>
+        <ChevRight className="size-4 text-muted-foreground rtl:rotate-180" />
+      </Link>
+    </section>
+  );
 }
