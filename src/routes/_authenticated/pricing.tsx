@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadStripe, type Stripe as StripeJs } from "@stripe/stripe-js";
 import { useServerFn } from "@tanstack/react-start";
@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { useSubscription, useCustomerCountry } from "@/lib/subscription";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { createCheckoutSession, createPortalSession } from "@/utils/payments.functions";
+import { useI18n, useT } from "@/lib/i18n";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/pricing")({
@@ -22,16 +23,11 @@ function stripeJs() {
   return _stripePromise;
 }
 
-const FEATURES = [
-  "Onbeperkt workouts & maaltijden loggen",
-  "AI Coach: persoonlijke chat + foto-analyse",
-  "Geavanceerde analytics & weektrends",
-  "Sociale features: vrienden, feed & challenges",
-  "Barcode scanner & uitgebreide voedingsdatabase",
-  "Push reminders & herinneringen",
-];
+
 
 function PricingPage() {
+  const t = useT();
+  const { lang } = useI18n();
   const navigate = useNavigate();
   const { isPro, isTrialing, subscription } = useSubscription();
   const country = useCustomerCountry();
@@ -43,15 +39,19 @@ function PricingPage() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const checkoutRef = useRef<HTMLDivElement>(null);
-  const [embedded, setEmbedded] = useState<any>(null);
+  const [, setEmbedded] = useState<any>(null);
 
   const priceId = interval === "monthly" ? "pro_monthly" : "pro_yearly";
+  const FEATURES = [t("price.f1"), t("price.f2"), t("price.f3"), t("price.f4"), t("price.f5"), t("price.f6")];
+  const localeMap: Record<string, string> = { en: "en-US", nl: "nl-NL", ar: "ar", fr: "fr-FR", de: "de-DE", es: "es-ES" };
+  const dateLocale = localeMap[lang] ?? "en-US";
 
   async function startCheckout() {
     if (!TOKEN) {
-      toast.error("Betalingen niet geconfigureerd.");
+      toast.error(t("price.not_configured"));
       return;
     }
+
     setLoading(true);
     try {
       const result = await createCheckout({
@@ -65,7 +65,7 @@ function PricingPage() {
       if ("error" in result) throw new Error(result.error);
       setClientSecret(result.clientSecret);
     } catch (e: any) {
-      toast.error(e.message ?? "Kon checkout niet starten");
+      toast.error(e.message ?? t("price.checkout_failed"));
     } finally {
       setLoading(false);
     }
@@ -112,14 +112,14 @@ function PricingPage() {
           <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/profile" })}>
             <ArrowLeft className="size-5" />
           </Button>
-          <h1 className="text-base font-semibold">Vita Pro</h1>
+          <h1 className="text-base font-semibold">{t("price.title")}</h1>
         </div>
       </header>
 
       <main className="px-4 pt-4 space-y-6 max-w-md mx-auto">
         {env === "sandbox" && (
           <div className="rounded-lg bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs px-3 py-2 border border-amber-500/20">
-            Testmodus actief — gebruik kaart <strong>4242 4242 4242 4242</strong>, willekeurige toekomst-datum & CVC.
+            {t("price.test_mode")}
           </div>
         )}
 
@@ -127,16 +127,16 @@ function PricingPage() {
           <Card className="p-6 space-y-4 border-brand/40 bg-gradient-to-br from-brand/10 to-transparent">
             <div className="flex items-center gap-2">
               <Crown className="size-5 text-brand" />
-              <h2 className="font-semibold">Je bent Pro {isTrialing && "(trial)"}</h2>
+              <h2 className="font-semibold">{t("price.youre_pro")} {isTrialing && t("price.trial")}</h2>
             </div>
             <p className="text-sm text-muted-foreground">
               {subscription?.current_period_end && (
-                <>Volgende verlenging: {new Date(subscription.current_period_end).toLocaleDateString("nl-NL")}</>
+                <>{t("price.next_renewal")} {new Date(subscription.current_period_end).toLocaleDateString(dateLocale)}</>
               )}
-              {subscription?.cancel_at_period_end && " — opgezegd, eindigt op die datum."}
+              {subscription?.cancel_at_period_end && ` ${t("price.cancelled")}`}
             </p>
             <Button onClick={manageSubscription} className="w-full" variant="outline">
-              Beheer abonnement
+              {t("price.manage")}
             </Button>
           </Card>
         ) : clientSecret ? (
@@ -148,10 +148,10 @@ function PricingPage() {
             <div className="text-center space-y-2">
               <div className="inline-flex items-center gap-1.5 text-xs font-medium bg-brand/10 text-brand px-3 py-1 rounded-full">
                 <Sparkles className="size-3" />
-                7 dagen gratis proberen
+                {t("price.try_free")}
               </div>
-              <h2 className="text-2xl font-bold leading-tight">Haal alles uit je reis</h2>
-              <p className="text-sm text-muted-foreground">Pro ontgrendelt AI Coach, onbeperkt loggen, sociaal & meer.</p>
+              <h2 className="text-2xl font-bold leading-tight">{t("price.headline")}</h2>
+              <p className="text-sm text-muted-foreground">{t("price.sub")}</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -161,9 +161,9 @@ function PricingPage() {
                   interval === "monthly" ? "border-brand ring-2 ring-brand/30" : "border-border"
                 }`}
               >
-                <div className="text-xs text-muted-foreground">Maandelijks</div>
+                <div className="text-xs text-muted-foreground">{t("price.monthly")}</div>
                 <div className="text-xl font-bold mt-1">{monthlyDisplay}</div>
-                <div className="text-xs text-muted-foreground">/maand</div>
+                <div className="text-xs text-muted-foreground">{t("price.per_month")}</div>
               </button>
               <button
                 onClick={() => setInterval("yearly")}
@@ -174,9 +174,9 @@ function PricingPage() {
                 <div className="absolute -top-2 right-2 text-[10px] font-semibold bg-brand text-brand-foreground px-2 py-0.5 rounded-full">
                   -33%
                 </div>
-                <div className="text-xs text-muted-foreground">Jaarlijks</div>
+                <div className="text-xs text-muted-foreground">{t("price.yearly")}</div>
                 <div className="text-xl font-bold mt-1">{yearlyDisplay}</div>
-                <div className="text-xs text-muted-foreground">{yearlyPerMonth}/maand</div>
+                <div className="text-xs text-muted-foreground">{yearlyPerMonth}{t("price.per_month")}</div>
               </button>
             </div>
 
@@ -190,11 +190,12 @@ function PricingPage() {
             </Card>
 
             <Button onClick={startCheckout} disabled={loading} className="w-full h-12 text-base" size="lg">
-              {loading ? <Loader2 className="size-4 animate-spin" /> : "Start 7 dagen gratis trial"}
+              {loading ? <Loader2 className="size-4 animate-spin" /> : t("price.start_trial")}
             </Button>
             <p className="text-[11px] text-center text-muted-foreground">
-              Geen kosten tijdens de trial. Eenvoudig opzegbaar via Beheer abonnement.
+              {t("price.legal")}
             </p>
+
           </>
         )}
       </main>
