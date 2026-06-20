@@ -427,7 +427,7 @@ export function ChatScreen({
   }
 
   const name = getDisplayName(user);
-  const isEmpty = messages.length === 0;
+  const isEmpty = displayMessages.length === 0;
 
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background">
@@ -457,7 +457,7 @@ export function ChatScreen({
           </>
         ) : (
           <div className="space-y-3">
-            {messages.map((m) => {
+            {displayMessages.map((m) => {
               const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
               const imageParts = m.parts.filter(
                 (p) => p.type === "file" && typeof (p as { url?: string }).url === "string",
