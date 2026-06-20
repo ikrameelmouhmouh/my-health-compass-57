@@ -651,6 +651,8 @@ const translations: Translations = {
     "chat.quick.tip.prompt": "Give me 1 concrete tip for today, based on my goal.",
     "chat.quick.week": "Analyze my week",
     "chat.quick.week.prompt": "How am I doing this week with my progress? What stands out?",
+    "chat.opening": "Opening Vita…",
+    "chat.connecting": "Connecting to Vita…",
 
     "coachs.intro": "Tell us where to focus. The coach will suggest exercises, sets, reps and weight.",
     "coachs.focus": "Focus / muscle group",
@@ -1416,6 +1418,8 @@ const translations: Translations = {
     "chat.quick.tip.prompt": "Geef me 1 concrete tip voor vandaag, gebaseerd op m'n doel.",
     "chat.quick.week": "Analyseer m'n week",
     "chat.quick.week.prompt": "Hoe gaat het deze week met m'n voortgang? Wat valt op?",
+    "chat.opening": "Vita wordt geopend…",
+    "chat.connecting": "Verbinden met Vita…",
 
     "coachs.intro": "Vertel waar je op wilt focussen. De coach stelt oefeningen, sets, reps en gewicht voor.",
     "coachs.focus": "Focus / spiergroep",
@@ -2181,6 +2185,8 @@ const translations: Translations = {
     "chat.quick.tip.prompt": "أعطني نصيحة عملية واحدة لليوم بناءً على هدفي.",
     "chat.quick.week": "حلّل أسبوعي",
     "chat.quick.week.prompt": "كيف يسير أسبوعي من حيث التقدّم؟ ما الذي يلفت الانتباه؟",
+    "chat.opening": "جارٍ فتح Vita…",
+    "chat.connecting": "جارٍ الاتصال بـ Vita…",
 
     "coachs.intro": "أخبرنا أين تريد التركيز. سيقترح المدرّب تمارين ومجموعات وتكرارات ووزنًا.",
     "coachs.focus": "التركيز / المجموعة العضلية",
@@ -2946,6 +2952,8 @@ const translations: Translations = {
     "chat.quick.tip.prompt": "Donne-moi 1 conseil concret pour aujourd'hui, basé sur mon objectif.",
     "chat.quick.week": "Analyser ma semaine",
     "chat.quick.week.prompt": "Comment se passe ma semaine côté progression ? Qu'est-ce qui ressort ?",
+    "chat.opening": "Ouverture de Vita…",
+    "chat.connecting": "Connexion à Vita…",
 
     "coachs.intro": "Dites-nous où vous concentrer. Le coach proposera exercices, séries, reps et poids.",
     "coachs.focus": "Focus / groupe musculaire",
@@ -3711,6 +3719,8 @@ const translations: Translations = {
     "chat.quick.tip.prompt": "Gib mir einen konkreten Tipp für heute, basierend auf meinem Ziel.",
     "chat.quick.week": "Meine Woche analysieren",
     "chat.quick.week.prompt": "Wie läuft meine Woche in Sachen Fortschritt? Was fällt auf?",
+    "chat.opening": "Vita wird geöffnet…",
+    "chat.connecting": "Verbinde mit Vita…",
 
     "coachs.intro": "Sag uns, worauf du dich konzentrieren willst. Der Coach schlägt Übungen, Sätze, Wdh. und Gewicht vor.",
     "coachs.focus": "Fokus / Muskelgruppe",
@@ -4476,6 +4486,8 @@ const translations: Translations = {
     "chat.quick.tip.prompt": "Dame 1 consejo concreto para hoy, basado en mi objetivo.",
     "chat.quick.week": "Analiza mi semana",
     "chat.quick.week.prompt": "¿Cómo va mi semana en cuanto a progreso? ¿Qué destaca?",
+    "chat.opening": "Abriendo Vita…",
+    "chat.connecting": "Conectando con Vita…",
 
     "coachs.intro": "Dinos en qué te quieres centrar. El coach propondrá ejercicios, series, reps y peso.",
     "coachs.focus": "Foco / grupo muscular",

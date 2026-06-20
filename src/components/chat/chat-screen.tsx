@@ -43,7 +43,11 @@ import { useAuth } from "@/lib/auth-context";
 import { useT, useI18n } from "@/lib/i18n";
 import { createThread } from "@/lib/chat.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { setPendingMessage, takePendingMessage } from "@/lib/chat-pending";
+import {
+  requeuePendingMessage,
+  setPendingMessage,
+  takePendingMessage,
+} from "@/lib/chat-pending";
 import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
 
 type QuickAction = {
@@ -333,8 +337,11 @@ export function DraftChatScreen() {
         </div>
       </div>
       {busy && (
-        <div className="pointer-events-none fixed inset-0 z-40 grid place-items-center bg-background/40">
-          <Loader2 className="size-6 animate-spin text-brand" />
+        <div className="pointer-events-none fixed inset-0 z-40 grid place-items-center bg-background/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="size-6 animate-spin text-brand" />
+            <p className="text-sm font-medium text-foreground">{t("chat.opening")}</p>
+          </div>
         </div>
       )}
       <Composer
@@ -417,7 +424,8 @@ export function ThreadChatScreen({
   const sentPendingRef = useRef(false);
   useEffect(() => {
     if (sentPendingRef.current) return;
-    if (!token) return; // wait for bearer
+    if (!token) return; // wait for bearer; do NOT mark sent yet
+    // Peek without consuming, in case sendMessage fails.
     const pending = takePendingMessage(threadId);
     if (!pending) {
       sentPendingRef.current = true;
@@ -425,11 +433,18 @@ export function ThreadChatScreen({
     }
     sentPendingRef.current = true;
     (async () => {
-      const filesArr = pending.files ? Array.from(pending.files) : [];
-      const parts = filesArr.length ? await toFileParts(filesArr) : undefined;
-      await sendMessage({ text: pending.text, files: parts });
-    })().catch((e) => console.error(e));
-  }, [threadId, token, sendMessage]);
+      try {
+        const filesArr = pending.files ? Array.from(pending.files) : [];
+        const parts = filesArr.length ? await toFileParts(filesArr) : undefined;
+        await sendMessage({ text: pending.text, files: parts });
+      } catch (e) {
+        console.error("[ai-coach] pending send failed", e);
+        // Re-queue so a manual retry / reload can pick it up.
+        requeuePendingMessage(threadId, { text: pending.text });
+        toast.error(t("chat.error.generic"));
+      }
+    })();
+  }, [threadId, token, sendMessage, t]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -473,7 +488,10 @@ export function ThreadChatScreen({
   if (token === null) {
     return (
       <div className="grid min-h-[100dvh] place-items-center bg-background">
-        <div className="size-6 animate-spin rounded-full border-2 border-hairline border-t-brand" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="size-6 animate-spin rounded-full border-2 border-hairline border-t-brand" />
+          <p className="text-sm font-medium text-foreground">{t("chat.connecting")}</p>
+        </div>
       </div>
     );
   }

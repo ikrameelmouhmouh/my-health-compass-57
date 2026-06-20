@@ -1,77 +1,54 @@
-# AI Coach: directe chat met snelacties
+## Kort antwoord op je vraag
 
-## Wat verandert er
+**Nee, je hoeft niets te wachten op Despia.** De AI-chat (Vita) draait via Lovable Cloud + Lovable AI en hoort **nu al** te werken in de webpreview én straks in de gepubliceerde app. Despia is alleen een "verpakking" rond je website om hem in de App Store / Play Store te zetten — het voegt geen functionaliteit toe. Als de chat niet werkt, is dat een bug in de huidige code, niet iets dat Despia oplost.
 
-Nu: je tikt op AI Coach → ziet eerst een lijst met gesprekken → moet "Nieuw gesprek" maken → komt pas dan in de chat. Te omslachtig.
+## Wat ik in je sessie zie
 
-Nieuw (zoals ChatGPT/Bevel): je tikt op AI Coach → komt direct in een chat-scherm met Vita-avatar, welkomstregel, **snelactie-chips** en de typebalk. Oude gesprekken blijven bewaard, maar zitten achter een menu-knop (☰) linksboven — niet meer als verplichte tussenstap.
+- Je typte op de chatpagina: *"Hoeveel calorieën zit er in karne…"* en klikte op verzenden.
+- In het netwerklog zie ik wél dat er een nieuwe thread werd aangemaakt (`createThread` → 200 OK, thread `d35e68b9-…`).
+- Ik zie **géén** vervolgrequest naar `/api/chat`. Dat betekent: na het aanmaken van de thread is je bericht nooit naar Vita verstuurd.
+- Vervolgens navigeerde je weg naar `/fitness` en `/profile`, dus mogelijk heb je niet gezien dat de thread-pagina blanco bleef.
 
-## Nieuwe layout van `/ai-coach`
+## Vermoedelijke oorzaak
 
-```text
-┌───────────────────────────────┐
-│ ☰  Vita            ✎ nieuw   │  ← header met geschiedenis-drawer + nieuw-chat
-│                               │
-│        (Vita avatar)          │  ← alleen als chat leeg is
-│      Goed je te zien, {naam}  │
-│                               │
-│                               │
-│  [📷 Scan maaltijd]           │  ← horizontaal scrollbare chips
-│  [🏋️ Maak workoutplan]        │
-│  [🥗 Maaltijdideeën]          │
-│  [⚡ Snelle tip]              │
-│  [📊 Analyseer m'n week]      │
-│                               │
-│  ┌─────────────────────────┐  │
-│  │ Vraag Vita iets…    ➤ │  │  ← typebalk altijd zichtbaar
-│  └─────────────────────────┘  │
-└───────────────────────────────┘
-```
+De stroom is nu: `DraftChatScreen` → maakt thread → zet bericht in een in-memory Map (`chat-pending.ts`) → navigeert naar `/ai-coach/$threadId`. Op de threadpagina wordt het bericht pas verstuurd nadat de Supabase-sessietoken is opgehaald via een aparte `useEffect`.
 
-Zodra je iets stuurt (chip of getypt) → chips en welkomstblok verdwijnen, gesprek begint te streamen op dezelfde pagina, en wordt automatisch opgeslagen als nieuwe thread.
+Twee zwakke plekken die dit precies kunnen verklaren:
+1. **Race condition**: als `takePendingMessage` één render eerder draait dan de token er is, valt de eerste effect-tak in de `if (!token) return;`-tak, maar **`sentPendingRef.current` blijft `false`**. Bij de volgende render mét token leest hij weer de Map — maar dat werkt alleen als de Map nog niet door iets anders is leeggemaakt. In ontwikkeling reloadt Vite-HMR de module soms, waardoor de Map leeg is en het bericht permanent verloren is.
+2. **`sendMessage` race**: bij snel navigeren kan `useChat` met `id={threadId}` nog een vorige interne staat hebben en de `sendMessage`-aanroep negeren voor de eerste mount.
 
-## Snelactie-chips (eerste set)
+## Plan: chat betrouwbaar laten verzenden
 
-Elke chip stuurt een vooraf-gevormde prompt naar Vita. Geen aparte schermen.
+### Stap 1 — Pending-bericht robuust maken
+- `chat-pending.ts`: ook in `sessionStorage` opslaan (key: `chat:pending:<threadId>`) zodat een HMR-reload of korte navigatie het bericht niet kwijtmaakt.
+- `takePendingMessage` leest eerst uit de Map, valt terug op `sessionStorage`, en wist beide bij succes.
 
-1. **📷 Scan maaltijd** → opent fotokiezer; foto wordt als bericht meegestuurd met prompt "Schat calorieën en macro's van deze maaltijd."
-2. **🏋️ Maak workoutplan** → "Maak een workoutplan voor mij voor deze week, passend bij m'n profiel."
-3. **🥗 Maaltijdideeën** → "Geef 3 maaltijdideeën die binnen m'n dagelijkse calorie- en macrodoel passen."
-4. **⚡ Snelle tip** → "Geef me 1 concrete tip voor vandaag, gebaseerd op m'n doel."
-5. **📊 Analyseer m'n week** → "Hoe gaat het deze week met m'n voortgang? Wat valt op?"
+### Stap 2 — Verzenden pas triggeren als alles klaar is
+In `ThreadChatScreen`:
+- `sentPendingRef.current = true` **pas zetten ná** een geslaagde `sendMessage`, niet bij de eerste render zonder token.
+- Het effect afhankelijk maken van `token` én van een korte `useChat`-readiness-check (`status === "ready"`).
+- Bij `sendMessage`-fout: toast tonen, bericht **terugzetten** in `sessionStorage` zodat een reload het opnieuw probeert.
 
-Tekst is per chip 1 woord + emoji; chips horizontaal scrollbaar zodat we er later makkelijk bij kunnen.
+### Stap 3 — Visuele feedback bij draft → thread overgang
+- Tijdens `busy` op draftscherm een duidelijke "Vita wordt geopend…" tonen in plaats van alleen een spinner, zodat duidelijk is dat je niet weg moet klikken.
+- Op de threadpagina, zolang `token === null`, niet stil laden maar "Verbinden met Vita…" tonen.
 
-## Geschiedenis-drawer
+### Stap 4 — Eenvoudiger alternatief overwegen (aanbevolen)
+De hele handoff via een aparte route + Map is fragiel. Cleaner:
+- **Eén route `/ai-coach`** die zelf de thread aanmaakt op het moment van verzenden (geen redirect).
+- Pas **na** de eerste assistant-respons (of in de URL via `router.navigate({ to: "/ai-coach/$threadId", replace: true })`) bookmark-bare URL bijwerken.
+- Voordelen: geen pending-map, geen race met token, geen lege threads in de database als de gebruiker wegklikt.
 
-Links-boven hamburger-icoon → side drawer met lijst van eerdere gesprekken (huidige threads-lijst, hergebruikt). Tikken laadt die thread in dezelfde chat-view. "Nieuw gesprek" knop bovenin de drawer en als pen-icoon rechtsboven in de header.
+Ik raad **Stap 4** aan als hoofdoplossing; Stap 1–3 zijn de minimaal-invasieve fallback als je het huidige routingmodel wil houden.
 
-## Foto-upload (scan maaltijd)
+### Stap 5 — Verifiëren
+- In de preview: typ een bericht → controleer in netwerk dat `POST /api/chat` 200 teruggeeft met een streamende body.
+- Test ook: foto-chip → bericht moet `📷` opslaan en Vita moet antwoorden.
+- Test: een snelle "Quick action"-chip op het draftscherm moet ook direct antwoord geven.
 
-- Verborgen `<input type="file" accept="image/*" capture="environment">` voor camera/galerij.
-- Foto wordt geüpload naar bestaande Supabase storage (of als data-URL meegestuurd voor de eerste versie als er nog geen bucket is — dan voeg ik een `chat-images` bucket toe met RLS per user).
-- Bericht naar Vita bevat de afbeelding (Gemini 3 Flash is multimodal — afbeeldingen worden ondersteund).
+## Bestanden die ik ga aanpassen
+- `src/components/chat/chat-screen.tsx` (Draft + Thread)
+- `src/lib/chat-pending.ts` (alleen bij keuze Stap 1–3)
+- Eventueel `src/routes/_authenticated/ai-coach.tsx` en `ai-coach.$threadId.tsx` (samenvoegen bij Stap 4)
 
-## Technische wijzigingen
-
-- `src/routes/_authenticated/ai-coach.tsx` → wordt de chat-pagina zelf (niet meer threadlijst).
-- `src/routes/_authenticated/ai-coach.$threadId.tsx` → blijft, voor het openen van een specifieke oude thread vanuit de drawer.
-- Bij landen op `/ai-coach` zonder threadId: lokaal "draft" thread tot eerste bericht — pas dan wordt er een thread aangemaakt in de database (geen lege threads meer).
-- Nieuwe component `ChatQuickActions` met de chip-rij.
-- Nieuwe component `ChatHistoryDrawer` (shadcn `Sheet`) met de bestaande `listThreads`/`deleteThread` server functions.
-- Server route `/api/chat` uitbreiden: accepteert optioneel een image part in het laatste user-bericht en geeft die mee aan het model.
-- (Optioneel) Storage bucket `chat-images` met RLS — alleen als we afbeeldingen willen bewaren voor terugkijken; anders sturen we de foto inline mee en bewaren we alleen de tekst.
-- i18n keys toegevoegd voor chips, drawer-titel, en welkomsttekst — direct in alle 6 talen (en, nl, ar, fr, de, es).
-
-## Wat blijft hetzelfde
-
-- Bottom nav, AiFab (verdwijnt al op /ai-coach), profiel.
-- Database (`chat_threads`, `chat_messages`) en bestaande RLS.
-- Model: `google/gemini-3-flash-preview` via Lovable AI Gateway.
-
-## Twee open keuzes
-
-1. **Foto's bewaren of niet?** Bewaren = je ziet ze terug in oude chats (kost wat opslag). Niet bewaren = lichter, foto verdwijnt na het gesprek.
-2. **Welkomsttekst**: "Goed je te zien, {voornaam}" (zoals Bevel) of iets neutraler zoals "Hoe kan ik je vandaag helpen?"
-
-Ik kan met optie "foto's niet bewaren" + Bevel-stijl welkomst starten als je niets anders kiest.
+Welke richting wil je: **Stap 4 (herontwerp, robuust)** of **Stap 1–3 (kleine patch op huidige opzet)**?
