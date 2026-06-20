@@ -332,9 +332,11 @@ export function ChatScreen({
     },
   });
 
-  const messagesRef = useRef(messages);
+  const [displayMessages, setDisplayMessages] = useState<UIMessage[]>(initialMessages);
+  const messagesRef = useRef<UIMessage[]>(initialMessages);
   useEffect(() => {
     messagesRef.current = messages;
+    setDisplayMessages(messages);
   }, [messages]);
 
   const isBusy = status === "submitted" || status === "streaming";
@@ -343,7 +345,7 @@ export function ChatScreen({
   useEffect(() => {
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, status]);
+  }, [displayMessages, status]);
 
   async function ensureThread(): Promise<string> {
     if (threadIdRef.current) return threadIdRef.current;
