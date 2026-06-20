@@ -89,6 +89,7 @@ function ListView({
   onClose: () => void;
 }) {
   const t = useT();
+  const tex = useExerciseT();
   const gender = useGender();
   return (
     <>
