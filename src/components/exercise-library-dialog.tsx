@@ -190,7 +190,7 @@ function DetailView({
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 pb-6">
-        <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight">{ex.name}</h2>
+        <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight">{tr.name}</h2>
         <p className="text-sm text-muted-foreground">{ex.equipment}</p>
 
         <button
