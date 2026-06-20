@@ -169,6 +169,7 @@ function FilterRow<T extends string>({
 function DetailView({
   ex, onBack, onPick, pickLabel,
 }: { ex: LibraryExercise; onBack: () => void; onPick?: () => void; pickLabel: string }) {
+  const t = useT();
   const [tab, setTab] = useState<"about" | "guide">("about");
   const [zoom, setZoom] = useState(false);
   const gender = useGender();
@@ -177,8 +178,8 @@ function DetailView({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between border-b border-border px-3 py-3">
-        <button onClick={onBack} className="grid size-9 place-items-center rounded-full hover:bg-muted" aria-label="Terug">
-          <ChevronLeft className="size-5" />
+        <button onClick={onBack} className="grid size-9 place-items-center rounded-full hover:bg-muted" aria-label={t("lib.back")}>
+          <ChevronLeft className="size-5 rtl:rotate-180" />
         </button>
         <p className="text-xs text-muted-foreground">{ex.equipment}</p>
         <div className="size-9" />
@@ -192,11 +193,11 @@ function DetailView({
           type="button"
           onClick={() => setZoom(true)}
           className="group relative mt-4 block w-full overflow-hidden rounded-2xl border border-border bg-muted/40"
-          aria-label="Vergroot voorbeeld"
+          aria-label={t("lib.zoom_aria")}
         >
           <AnimatedFrames frames={frames} alt={ex.name} className="aspect-square w-full object-cover" />
           <span className="pointer-events-none absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur">
-            <Play className="size-3 fill-white" /> {isAnatomy ? `Demo · ${gender === "female" ? "Vrouw" : "Man"}` : "Demo"}
+            <Play className="size-3 fill-white" /> {isAnatomy ? `${t("lib.demo")} · ${gender === "female" ? t("lib.female") : t("lib.male")}` : t("lib.demo")}
           </span>
           <span className="pointer-events-none absolute right-2 top-2 grid size-8 place-items-center rounded-full bg-black/55 text-white backdrop-blur">
             <Maximize2 className="size-4" />
@@ -204,31 +205,31 @@ function DetailView({
         </button>
 
         <div className="mt-5 grid grid-cols-2 border-b border-border">
-          {(["about", "guide"] as const).map((t) => (
+          {(["about", "guide"] as const).map((key) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={key}
+              onClick={() => setTab(key)}
               className={`pb-2 text-sm font-medium transition ${
-                tab === t ? "border-b-2 border-foreground text-foreground" : "text-muted-foreground"
+                tab === key ? "border-b-2 border-foreground text-foreground" : "text-muted-foreground"
               }`}
             >
-              {t === "about" ? "Over" : "Gids"}
+              {key === "about" ? t("lib.tab_about") : t("lib.tab_guide")}
             </button>
           ))}
         </div>
 
         {tab === "about" ? (
           <div className="mt-5 space-y-5">
-            <Section title="Uitrusting">
+            <Section title={t("lib.equipment_label")}>
               <Chip filled>{ex.equipment}</Chip>
             </Section>
-            <Section title="Primaire spieren">
+            <Section title={t("lib.primary")}>
               <div className="flex flex-wrap gap-2">
                 {ex.primary.map((m) => <Chip key={m} filled>{m}</Chip>)}
               </div>
             </Section>
             {ex.secondary.length > 0 && (
-              <Section title="Secundaire spieren">
+              <Section title={t("lib.secondary")}>
                 <div className="flex flex-wrap gap-2">
                   {ex.secondary.map((m) => <Chip key={m}>{m}</Chip>)}
                 </div>
@@ -238,7 +239,7 @@ function DetailView({
               onClick={() => setTab("guide")}
               className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-4 text-sm font-medium text-foreground"
             >
-              <Lightbulb className="size-4" /> Hoe te registreren
+              <Lightbulb className="size-4" /> {t("lib.how_to_log")}
             </button>
           </div>
         ) : (
@@ -269,6 +270,7 @@ function DetailView({
     </div>
   );
 }
+
 
 /** Cross-fades through a series of frames to mimic a short looping demo video. */
 function AnimatedFrames({
