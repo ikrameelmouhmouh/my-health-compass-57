@@ -337,8 +337,11 @@ export function DraftChatScreen() {
         </div>
       </div>
       {busy && (
-        <div className="pointer-events-none fixed inset-0 z-40 grid place-items-center bg-background/40">
-          <Loader2 className="size-6 animate-spin text-brand" />
+        <div className="pointer-events-none fixed inset-0 z-40 grid place-items-center bg-background/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="size-6 animate-spin text-brand" />
+            <p className="text-sm font-medium text-foreground">{t("chat.opening")}</p>
+          </div>
         </div>
       )}
       <Composer
