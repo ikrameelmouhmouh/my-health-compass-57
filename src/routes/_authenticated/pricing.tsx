@@ -65,7 +65,7 @@ function PricingPage() {
       if ("error" in result) throw new Error(result.error);
       setClientSecret(result.clientSecret);
     } catch (e: any) {
-      toast.error(e.message ?? "Kon checkout niet starten");
+      toast.error(e.message ?? t("price.checkout_failed"));
     } finally {
       setLoading(false);
     }
