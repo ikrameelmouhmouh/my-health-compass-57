@@ -57,13 +57,13 @@ function SettingsPage() {
       <header className="flex items-center gap-3">
         <button
           onClick={() => navigate({ to: "/profile" })}
-          aria-label="Back"
+          aria-label={t("set.back")}
           className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-card transition hover:bg-accent"
         >
-          <ChevronLeft className="size-4" />
+          <ChevronLeft className="size-4 rtl:rotate-180" />
         </button>
         <h1 className="font-display text-[22px] font-semibold tracking-tight">
-          Settings
+          {t("set.title")}
         </h1>
       </header>
 
@@ -79,12 +79,10 @@ function SettingsPage() {
                 </span>
               </div>
               <p className="mt-3 font-display text-lg font-semibold leading-tight tracking-tight">
-                {isPremium ? "You're on Pro" : "Upgrade to Vita Pro"}
+                {isPremium ? t("set.plan.title_pro") : t("set.plan.title_free")}
               </p>
               <p className="mt-1 text-[12px] text-muted-foreground">
-                {isPremium
-                  ? "Manage your subscription, billing and trial."
-                  : "Unlock AI Coach, unlimited logging, advanced analytics and social features."}
+                {isPremium ? t("set.plan.sub_pro") : t("set.plan.sub_free")}
               </p>
             </div>
             <Sparkles className="size-5 shrink-0 text-brand" />
@@ -93,17 +91,17 @@ function SettingsPage() {
             to="/pricing"
             className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-brand px-4 py-2.5 font-display text-sm font-semibold text-brand-foreground transition hover:opacity-90"
           >
-            {isPremium ? "Manage plan" : "See Pro plans"}
+            {isPremium ? t("set.plan.cta_pro") : t("set.plan.cta_free")}
           </Link>
         </div>
       </section>
 
       {/* Preferences */}
-      <SectionLabel>Preferences</SectionLabel>
+      <SectionLabel>{t("set.section.prefs")}</SectionLabel>
       <Group>
         <Row
           icon={theme === "dark" ? Sun : Moon}
-          label="Dark mode"
+          label={t("set.dark")}
           right={
             <button
               onClick={toggle}
@@ -125,12 +123,12 @@ function SettingsPage() {
             <button className="w-full">
               <Row
                 icon={Globe}
-                label="Language"
+                label={t("set.lang")}
                 right={
                   <span className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground">
                     <span>{currentLang?.flag}</span>
                     <span>{currentLang?.native}</span>
-                    <ChevronRight className="size-4" />
+                    <ChevronRight className="size-4 rtl:rotate-180" />
                   </span>
                 }
               />
@@ -153,18 +151,18 @@ function SettingsPage() {
       </Group>
 
       {/* Plan */}
-      <SectionLabel>Plan</SectionLabel>
+      <SectionLabel>{t("set.section.plan")}</SectionLabel>
       <Group>
         <LinkRow
           to="/onboarding"
           icon={RefreshCw}
-          label="Recalculate my plan"
-          sub="Re-run onboarding to update calories & macros"
+          label={t("set.recalc")}
+          sub={t("set.recalc_sub")}
         />
       </Group>
 
       {/* Account */}
-      <SectionLabel>Account</SectionLabel>
+      <SectionLabel>{t("set.section.account")}</SectionLabel>
       <Group>
         <button
           className="w-full"
@@ -173,12 +171,12 @@ function SettingsPage() {
             navigate({ to: "/" });
           }}
         >
-          <Row icon={LogOut} label="Sign out" destructive />
+          <Row icon={LogOut} label={t("set.signout")} destructive />
         </button>
       </Group>
 
       <p className="mt-8 text-center text-[10px] text-muted-foreground">
-        Vita · v1.0
+        {t("set.version")}
       </p>
     </main>
   );
