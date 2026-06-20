@@ -12,8 +12,10 @@ import type { Exercise } from "@/lib/workout.functions";
 import { type WorkoutTemplate } from "@/lib/workout-prefs";
 import { CoachSuggestDialog } from "./coach-suggest-dialog";
 import { ExerciseLibraryDialog } from "./exercise-library-dialog";
+import { useT } from "@/lib/i18n";
 
-const DAYS = ["Maandag", "Dinsdag", "Woensdag", "Donderdag", "Vrijdag", "Zaterdag", "Zondag"];
+const DAY_KEYS = ["mon","tue","wed","thu","fri","sat","sun"] as const;
+
 
 type Props = {
   open: boolean;
