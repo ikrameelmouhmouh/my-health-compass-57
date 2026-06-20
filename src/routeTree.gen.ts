@@ -26,6 +26,7 @@ import { Route as AuthenticatedNutritionRouteImport } from './routes/_authentica
 import { Route as AuthenticatedFitnessRouteImport } from './routes/_authenticated/fitness'
 import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticated/fasting'
 import { Route as AuthenticatedAiCoachRouteImport } from './routes/_authenticated/ai-coach'
+import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 
@@ -113,6 +114,12 @@ const AuthenticatedAiCoachRoute = AuthenticatedAiCoachRouteImport.update({
   path: '/ai-coach',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAiCoachThreadIdRoute =
+  AuthenticatedAiCoachThreadIdRouteImport.update({
+    id: '/$threadId',
+    path: '/$threadId',
+    getParentRoute: () => AuthenticatedAiCoachRoute,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -132,7 +139,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
-  '/ai-coach': typeof AuthenticatedAiCoachRoute
+  '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/fasting': typeof AuthenticatedFastingRoute
   '/fitness': typeof AuthenticatedFitnessRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
+  '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -152,7 +160,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
-  '/ai-coach': typeof AuthenticatedAiCoachRoute
+  '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/fasting': typeof AuthenticatedFastingRoute
   '/fitness': typeof AuthenticatedFitnessRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
@@ -163,6 +171,7 @@ export interface FileRoutesByTo {
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
+  '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -174,7 +183,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
-  '/_authenticated/ai-coach': typeof AuthenticatedAiCoachRoute
+  '/_authenticated/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/_authenticated/fasting': typeof AuthenticatedFastingRoute
   '/_authenticated/fitness': typeof AuthenticatedFitnessRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
@@ -185,6 +194,7 @@ export interface FileRoutesById {
   '/_authenticated/social': typeof AuthenticatedSocialRoute
   '/_authenticated/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
+  '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
 }
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/social'
     | '/weight'
     | '/api/chat'
+    | '/ai-coach/$threadId'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/social'
     | '/weight'
     | '/api/chat'
+    | '/ai-coach/$threadId'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
   id:
@@ -248,6 +260,7 @@ export interface FileRouteTypes {
     | '/_authenticated/social'
     | '/_authenticated/weight'
     | '/api/chat'
+    | '/_authenticated/ai-coach/$threadId'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
   fileRoutesById: FileRoutesById
@@ -385,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiCoachRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/ai-coach/$threadId': {
+      id: '/_authenticated/ai-coach/$threadId'
+      path: '/$threadId'
+      fullPath: '/ai-coach/$threadId'
+      preLoaderRoute: typeof AuthenticatedAiCoachThreadIdRouteImport
+      parentRoute: typeof AuthenticatedAiCoachRoute
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -402,8 +422,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAiCoachRouteChildren {
+  AuthenticatedAiCoachThreadIdRoute: typeof AuthenticatedAiCoachThreadIdRoute
+}
+
+const AuthenticatedAiCoachRouteChildren: AuthenticatedAiCoachRouteChildren = {
+  AuthenticatedAiCoachThreadIdRoute: AuthenticatedAiCoachThreadIdRoute,
+}
+
+const AuthenticatedAiCoachRouteWithChildren =
+  AuthenticatedAiCoachRoute._addFileChildren(AuthenticatedAiCoachRouteChildren)
+
 interface AuthenticatedRouteChildren {
-  AuthenticatedAiCoachRoute: typeof AuthenticatedAiCoachRoute
+  AuthenticatedAiCoachRoute: typeof AuthenticatedAiCoachRouteWithChildren
   AuthenticatedFastingRoute: typeof AuthenticatedFastingRoute
   AuthenticatedFitnessRoute: typeof AuthenticatedFitnessRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
@@ -416,7 +447,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAiCoachRoute: AuthenticatedAiCoachRoute,
+  AuthenticatedAiCoachRoute: AuthenticatedAiCoachRouteWithChildren,
   AuthenticatedFastingRoute: AuthenticatedFastingRoute,
   AuthenticatedFitnessRoute: AuthenticatedFitnessRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
