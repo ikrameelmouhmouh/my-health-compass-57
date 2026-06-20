@@ -420,7 +420,11 @@ export function ChatScreen({
 
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background">
-      <ChatHeader showNewLink={!!threadId || !isEmpty} t={t} activeThreadId={threadId ?? undefined} />
+      <ChatHeader
+        showNewLink={!!threadId || !isEmpty}
+        t={t}
+        activeThreadId={threadId ?? undefined}
+      />
       <input
         ref={fileInputRef}
         type="file"
@@ -443,18 +447,13 @@ export function ChatScreen({
         ) : (
           <div className="space-y-3">
             {messages.map((m) => {
-              const text = m.parts
-                .map((p) => (p.type === "text" ? p.text : ""))
-                .join("");
+              const text = m.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
               const imageParts = m.parts.filter(
                 (p) => p.type === "file" && typeof (p as { url?: string }).url === "string",
               ) as Array<{ url: string; mediaType?: string }>;
               const isUser = m.role === "user";
               return (
-                <div
-                  key={m.id}
-                  className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-                >
+                <div key={m.id} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
                   {isUser ? (
                     <div className="flex max-w-[85%] flex-col items-end gap-1.5">
                       {imageParts.map((p, i) => (
