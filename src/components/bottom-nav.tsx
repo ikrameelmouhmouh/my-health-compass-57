@@ -1,12 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, UtensilsCrossed, Dumbbell, TrendingUp, Users } from "lucide-react";
+import { useT } from "@/lib/i18n";
 
 const items = [
-  { to: "/profile", label: "Home", icon: Home },
-  { to: "/nutrition", label: "Eten", icon: UtensilsCrossed },
-  { to: "/fitness", label: "Workouts", icon: Dumbbell },
-  { to: "/social", label: "Sociaal", icon: Users },
-  { to: "/weight", label: "Progress", icon: TrendingUp },
+  { to: "/profile", key: "nav.home", icon: Home },
+  { to: "/nutrition", key: "nav.eat", icon: UtensilsCrossed },
+  { to: "/fitness", key: "nav.workouts", icon: Dumbbell },
+  { to: "/social", key: "nav.social", icon: Users },
+  { to: "/weight", key: "nav.progress", icon: TrendingUp },
 ] as const;
 
 /**
@@ -15,6 +16,7 @@ const items = [
  */
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const t = useT();
 
   return (
     <nav
@@ -25,6 +27,7 @@ export function BottomNav() {
         {items.map((it) => {
           const active = pathname === it.to;
           const Icon = it.icon;
+          const label = t(it.key);
           return (
             <li key={it.to} className="flex-1">
               <Link
@@ -43,7 +46,7 @@ export function BottomNav() {
                     active ? "font-semibold" : "font-medium"
                   }`}
                 >
-                  {it.label}
+                  {label}
                 </span>
                 {active && (
                   <span
