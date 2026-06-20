@@ -482,7 +482,11 @@ export function ChatScreen({
           "Content-Type": "application/json",
           Authorization: tokenRef.current ? `Bearer ${tokenRef.current}` : "",
         },
-        body: JSON.stringify({ threadId: activeThreadId, lang: langRef.current, messages: [userMessage] }),
+        body: JSON.stringify({
+          threadId: activeThreadId,
+          lang: langRef.current,
+          messages: [userMessage],
+        }),
       });
       if (!response.ok) throw new Error(await response.text());
       await readStreamText(response, (assistantText) => {
