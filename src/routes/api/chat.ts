@@ -61,12 +61,18 @@ export const Route = createFileRoute("/api/chat")({
             .map((p) => (p.type === "text" ? p.text : ""))
             .join("")
             .trim();
-          if (userText) {
+          const hasImage = last.parts.some((p) => p.type === "file");
+          const stored = hasImage
+            ? userText
+              ? `📷 ${userText}`
+              : "📷"
+            : userText;
+          if (stored) {
             await supabase.from("chat_messages").insert({
               thread_id: body.threadId,
               user_id: userId,
               role: "user",
-              content: userText,
+              content: stored,
             });
             // Auto-title from first user message if still default
             const { data: t } = await supabase
@@ -74,8 +80,9 @@ export const Route = createFileRoute("/api/chat")({
               .select("title")
               .eq("id", body.threadId)
               .maybeSingle();
-            if (t && (t.title === "New chat" || t.title === "" || t.title === "Nieuw gesprek")) {
-              const title = userText.slice(0, 60);
+            const defaultTitles = ["New chat", "", "Nieuw gesprek"];
+            if (t && defaultTitles.includes(t.title)) {
+              const title = (userText || "📷 Foto").slice(0, 60);
               await supabase.from("chat_threads").update({ title }).eq("id", body.threadId);
             }
           }
