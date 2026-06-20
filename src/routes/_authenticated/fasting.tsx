@@ -11,6 +11,7 @@ import {
   useFasting, FASTING_PROTOCOLS, getProtocol,
   requestNotificationPermission, type FastingProtocol, type FastEntry,
 } from "@/lib/dashboard-prefs";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/fasting")({
   head: () => ({ meta: [{ title: "Fasting — Vita" }] }),
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/fasting")({
 });
 
 function FastingPage() {
+  const { t, lang } = useI18n();
   const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry } = useFasting();
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
@@ -56,15 +58,15 @@ function FastingPage() {
     if (!live.active || live.paused) return;
     if (live.elapsedMs >= targetMs && live.elapsedMs - targetMs < 2000) {
       try { if ("Notification" in window && Notification.permission === "granted")
-        new Notification("Fasting goal reached!", { body: "Your eating window has opened." });
+        new Notification(t("fast.title"), { body: t("fast.status.eating") });
       } catch {}
     }
-  }, [live.active, live.paused, live.elapsedMs, targetMs]);
+  }, [live.active, live.paused, live.elapsedMs, targetMs, t]);
 
   // Stats
   const totalCompleted = state.history.filter((e) => e.completed).length;
-  const last7 = useMemo(() => bucketByDay(state.history, 7), [state.history]);
-  const last30 = useMemo(() => bucketByDay(state.history, 30), [state.history]);
+  const last7 = useMemo(() => bucketByDay(state.history, 7, lang), [state.history, lang]);
+  const last30 = useMemo(() => bucketByDay(state.history, 30, lang), [state.history, lang]);
   const weeklyHours = last7.reduce((a, b) => a + b.hours, 0);
   const monthlyHours = last30.reduce((a, b) => a + b.hours, 0);
   const consistency = Math.round((last7.filter((d) => d.hours > 0).length / 7) * 100);
@@ -87,15 +89,15 @@ function FastingPage() {
             <Timer className="size-6" />
           </div>
           <div>
-            <h1 className="font-display text-2xl font-semibold tracking-tight">Fasting</h1>
-            <p className="text-[12px] text-muted-foreground">Intermittent fasting timer & history</p>
+            <h1 className="font-display text-2xl font-semibold tracking-tight">{t("fast.title")}</h1>
+            <p className="text-[12px] text-muted-foreground">{t("fast.subtitle")}</p>
           </div>
         </div>
         {notifPerm !== "granted" && (
           <button
             onClick={askNotif}
             className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-card"
-            aria-label="Enable notifications"
+            aria-label={t("fast.enable_notif")}
           >
             <Bell className="size-4" />
           </button>
@@ -106,7 +108,7 @@ function FastingPage() {
       <section className="mt-6 rounded-3xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
           <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent-foreground">
-            {live.active ? (live.paused ? "Paused" : "Fasting") : "Eating window"}
+            {live.active ? (live.paused ? t("fast.status.paused") : t("fast.status.fasting")) : t("fast.status.eating")}
           </span>
           <span className="font-display text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             {proto.label}
@@ -114,26 +116,32 @@ function FastingPage() {
         </div>
 
         <div className="mt-5 grid place-items-center">
-          <BigRing pct={live.active ? live.pct : 0} label={live.active ? formatHMS(live.elapsedMs) : "00:00:00"} sub={live.active ? `${formatHM(live.leftMs)} until ${proto.eat}h window` : `Tap start • ${proto.fast}h goal`} />
+          <BigRing
+            pct={live.active ? live.pct : 0}
+            label={live.active ? formatHMS(live.elapsedMs) : "00:00:00"}
+            sub={live.active
+              ? t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
+              : t("fast.sub.tapStart", { n: proto.fast })}
+          />
         </div>
 
         <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-          <Mini label="Elapsed" value={live.active ? formatHM(live.elapsedMs) : "—"} />
-          <Mini label="Remaining" value={live.active ? formatHM(live.leftMs) : "—"} />
-          <Mini label="Goal" value={`${proto.fast}h`} />
+          <Mini label={t("fast.mini.elapsed")} value={live.active ? formatHM(live.elapsedMs) : "—"} />
+          <Mini label={t("fast.mini.remaining")} value={live.active ? formatHM(live.leftMs) : "—"} />
+          <Mini label={t("fast.mini.goal")} value={`${proto.fast}h`} />
         </div>
 
         <div className="mt-5 flex gap-2">
           {!live.active ? (
-            <Button className="h-11 flex-1" onClick={start}><Play className="mr-1.5 size-4" />Start fast</Button>
+            <Button className="h-11 flex-1" onClick={start}><Play className="mr-1.5 size-4" />{t("fast.action.start")}</Button>
           ) : (
             <>
               {live.paused ? (
-                <Button className="h-11 flex-1" onClick={resume}><Play className="mr-1.5 size-4" />Resume</Button>
+                <Button className="h-11 flex-1" onClick={resume}><Play className="mr-1.5 size-4" />{t("fast.action.resume")}</Button>
               ) : (
-                <Button variant="outline" className="h-11 flex-1" onClick={pause}><Pause className="mr-1.5 size-4" />Pause</Button>
+                <Button variant="outline" className="h-11 flex-1" onClick={pause}><Pause className="mr-1.5 size-4" />{t("fast.action.pause")}</Button>
               )}
-              <Button variant="destructive" className="h-11 flex-1" onClick={stop}><Square className="mr-1.5 size-4" />End</Button>
+              <Button variant="destructive" className="h-11 flex-1" onClick={stop}><Square className="mr-1.5 size-4" />{t("fast.action.end")}</Button>
             </>
           )}
         </div>
@@ -143,20 +151,23 @@ function FastingPage() {
             onClick={() => setEditStart(true)}
             className="mt-3 inline-flex w-full items-center justify-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground"
           >
-            <Pencil className="size-3" /> Started {new Date(state.startedAt!).toLocaleString([], { hour: "2-digit", minute: "2-digit", month: "short", day: "numeric" })} — edit
+            <Pencil className="size-3" /> {t("fast.started", { when: new Date(state.startedAt!).toLocaleString(lang, { hour: "2-digit", minute: "2-digit", month: "short", day: "numeric" }) })}
           </button>
         )}
 
         {eatStart && eatEnd && (
           <div className="mt-3 rounded-2xl bg-accent/40 p-3 text-center text-[11px] text-muted-foreground">
-            Eating window opens <span className="font-semibold text-foreground">{eatStart.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span> · closes <span className="font-semibold text-foreground">{eatEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+            {t("fast.window", {
+              start: eatStart.toLocaleTimeString(lang, { hour: "2-digit", minute: "2-digit" }),
+              end: eatEnd.toLocaleTimeString(lang, { hour: "2-digit", minute: "2-digit" }),
+            })}
           </div>
         )}
       </section>
 
       {/* Protocols */}
       <section className="mt-5">
-        <h2 className="mb-2 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">Protocol</h2>
+        <h2 className="mb-2 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">{t("fast.proto.title")}</h2>
         <div className="grid grid-cols-3 gap-2">
           {FASTING_PROTOCOLS.map((p) => (
             <button
@@ -179,16 +190,16 @@ function FastingPage() {
 
       {/* Stats */}
       <section className="mt-5 grid grid-cols-3 gap-2">
-        <StatTile icon={Flame} label="Streak" value={`${state.streak}d`} />
-        <StatTile icon={Trophy} label="Longest" value={`${state.longestStreak}d`} />
-        <StatTile icon={CalendarCheck} label="Total fasts" value={totalCompleted} />
+        <StatTile icon={Flame} label={t("fast.stats.streak")} value={`${state.streak}${t("fast.unit.day")}`} />
+        <StatTile icon={Trophy} label={t("fast.stats.longest")} value={`${state.longestStreak}${t("fast.unit.day")}`} />
+        <StatTile icon={CalendarCheck} label={t("fast.stats.total")} value={totalCompleted} />
       </section>
 
       {/* Weekly chart */}
       <section className="mt-5 rounded-3xl border border-border bg-card p-5">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-sm font-semibold">Last 7 days</h2>
-          <span className="text-[11px] text-muted-foreground">{weeklyHours.toFixed(1)}h · {consistency}% consistent</span>
+          <h2 className="font-display text-sm font-semibold">{t("fast.last7")}</h2>
+          <span className="text-[11px] text-muted-foreground">{t("fast.weeklySummary", { h: weeklyHours.toFixed(1), p: consistency })}</span>
         </div>
         <BarChart data={last7} targetH={proto.fast} className="mt-3 h-28" />
       </section>
@@ -196,24 +207,24 @@ function FastingPage() {
       {/* Monthly chart */}
       <section className="mt-3 rounded-3xl border border-border bg-card p-5">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-sm font-semibold">Last 30 days</h2>
-          <span className="text-[11px] text-muted-foreground">{monthlyHours.toFixed(0)}h total</span>
+          <h2 className="font-display text-sm font-semibold">{t("fast.last30")}</h2>
+          <span className="text-[11px] text-muted-foreground">{t("fast.monthlySummary", { h: monthlyHours.toFixed(0) })}</span>
         </div>
         <BarChart data={last30} targetH={proto.fast} className="mt-3 h-20" thin />
       </section>
 
       {/* Streak growth */}
       <section className="mt-3 rounded-3xl border border-border bg-card p-5">
-        <h2 className="font-display text-sm font-semibold">Streak growth</h2>
-        <StreakLine history={state.history} className="mt-3 h-20" />
+        <h2 className="font-display text-sm font-semibold">{t("fast.streakGrowth")}</h2>
+        <StreakLine history={state.history} className="mt-3 h-20" emptyLabel={t("fast.noStreak")} />
       </section>
 
       {/* History */}
       <section className="mt-5">
-        <h2 className="mb-2 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">History</h2>
+        <h2 className="mb-2 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">{t("fast.history")}</h2>
         {state.history.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted-foreground">
-            No fasts recorded yet. Start your first fast above.
+            {t("fast.noHistory")}
           </div>
         ) : (
           <ul className="space-y-2">
@@ -226,17 +237,17 @@ function FastingPage() {
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="truncate font-display text-sm font-semibold">{formatHM(e.durationMs)} · {e.protocol}</span>
                     <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      {e.completed ? "Done" : "Short"}
+                      {e.completed ? t("fast.done") : t("fast.short")}
                     </span>
                   </div>
                   <p className="truncate text-[11px] text-muted-foreground">
-                    {new Date(e.startedAt).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} → {new Date(e.endedAt).toLocaleString([], { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(e.startedAt).toLocaleString(lang, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} → {new Date(e.endedAt).toLocaleString(lang, { hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
-                <button onClick={() => setEditEntry(e)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label="Edit">
+                <button onClick={() => setEditEntry(e)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.edit")}>
                   <Pencil className="size-3.5" />
                 </button>
-                <button onClick={() => deleteEntry(e.id)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label="Delete">
+                <button onClick={() => deleteEntry(e.id)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.delete")}>
                   <Trash2 className="size-3.5" />
                 </button>
               </li>
@@ -325,8 +336,7 @@ function BarChart({ data, targetH, className, thin }: { data: { label: string; h
   );
 }
 
-function StreakLine({ history, className }: { history: FastEntry[]; className?: string }) {
-  // build streak-over-time series from history (oldest → newest), per completed day
+function StreakLine({ history, className, emptyLabel }: { history: FastEntry[]; className?: string; emptyLabel: string }) {
   const days: { date: string; streak: number }[] = [];
   const sorted = [...history].sort((a, b) => +new Date(a.endedAt) - +new Date(b.endedAt));
   let cur = 0; let last: string | null = null;
@@ -340,7 +350,7 @@ function StreakLine({ history, className }: { history: FastEntry[]; className?: 
     days.push({ date: d, streak: cur });
   }
   if (days.length === 0) {
-    return <div className={`grid place-items-center text-[11px] text-muted-foreground ${className ?? ""}`}>No streak data yet</div>;
+    return <div className={`grid place-items-center text-[11px] text-muted-foreground ${className ?? ""}`}>{emptyLabel}</div>;
   }
   const max = Math.max(...days.map((d) => d.streak), 1);
   const w = 100, h = 100;
@@ -358,20 +368,21 @@ function StreakLine({ history, className }: { history: FastEntry[]; className?: 
 
 /* ---------- Dialogs ---------- */
 function EditStartDialog({ open, onOpenChange, startedAt, onSave }: { open: boolean; onOpenChange: (b: boolean) => void; startedAt: string | null; onSave: (iso: string) => void }) {
+  const { t } = useI18n();
   const [val, setVal] = useState("");
   useEffect(() => { if (open && startedAt) setVal(toLocalInput(startedAt)); }, [open, startedAt]);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit fast start time</DialogTitle>
-          <DialogDescription>Adjust when your current fast began.</DialogDescription>
+          <DialogTitle>{t("fast.dlg.editStart.title")}</DialogTitle>
+          <DialogDescription>{t("fast.dlg.editStart.desc")}</DialogDescription>
         </DialogHeader>
-        <Label htmlFor="startedAt">Started at</Label>
+        <Label htmlFor="startedAt">{t("fast.dlg.startedAt")}</Label>
         <Input id="startedAt" type="datetime-local" value={val} onChange={(e) => setVal(e.target.value)} />
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={() => val && onSave(new Date(val).toISOString())}>Save</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t("common.cancel")}</Button>
+          <Button onClick={() => val && onSave(new Date(val).toISOString())}>{t("common.save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -379,6 +390,7 @@ function EditStartDialog({ open, onOpenChange, startedAt, onSave }: { open: bool
 }
 
 function EditEntryDialog({ entry, onClose, onSave }: { entry: FastEntry | null; onClose: () => void; onSave: (id: string, patch: { startedAt?: string; endedAt?: string }) => void }) {
+  const { t } = useI18n();
   const [s, setS] = useState("");
   const [e, setE] = useState("");
   useEffect(() => {
@@ -388,22 +400,22 @@ function EditEntryDialog({ entry, onClose, onSave }: { entry: FastEntry | null; 
     <Dialog open={!!entry} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit fast</DialogTitle>
-          <DialogDescription>Adjust start and end times.</DialogDescription>
+          <DialogTitle>{t("fast.dlg.edit.title")}</DialogTitle>
+          <DialogDescription>{t("fast.dlg.edit.desc")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <div>
-            <Label htmlFor="s">Started</Label>
+            <Label htmlFor="s">{t("fast.dlg.started")}</Label>
             <Input id="s" type="datetime-local" value={s} onChange={(ev) => setS(ev.target.value)} />
           </div>
           <div>
-            <Label htmlFor="e">Ended</Label>
+            <Label htmlFor="e">{t("fast.dlg.ended")}</Label>
             <Input id="e" type="datetime-local" value={e} onChange={(ev) => setE(ev.target.value)} />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={() => entry && onSave(entry.id, { startedAt: new Date(s).toISOString(), endedAt: new Date(e).toISOString() })}>Save</Button>
+          <Button variant="outline" onClick={onClose}>{t("common.cancel")}</Button>
+          <Button onClick={() => entry && onSave(entry.id, { startedAt: new Date(s).toISOString(), endedAt: new Date(e).toISOString() })}>{t("common.save")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -429,13 +441,13 @@ function toLocalInput(iso: string) {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-function bucketByDay(history: FastEntry[], days: number) {
+function bucketByDay(history: FastEntry[], days: number, lang: string) {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const out: { label: string; date: string; hours: number }[] = [];
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today.getTime() - i * 86_400_000);
     const key = d.toISOString().slice(0, 10);
-    const label = d.toLocaleDateString([], { weekday: "short" }).slice(0, 1);
+    const label = d.toLocaleDateString(lang, { weekday: "short" }).slice(0, 1);
     let hours = 0;
     for (const e of history) {
       const start = new Date(e.startedAt).getTime();

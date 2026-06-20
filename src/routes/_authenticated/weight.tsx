@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import {
-  TrendingUp, Scale, Target, Ruler, Camera, Flame, Activity, Footprints,
+  TrendingUp, Scale, Ruler, Camera, Flame, Activity, Footprints,
   Moon, Timer, Trophy, Plus, X,
 } from "lucide-react";
 import { useWeightLog, useFasting, useDayLog } from "@/lib/dashboard-prefs";
@@ -10,19 +10,20 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/weight")({
   component: ProgressPage,
 });
 
 // ---------- helpers ----------
-const fmtDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+const fmtDate = (iso: string, lang: string) => new Date(iso).toLocaleDateString(lang, { month: "short", day: "numeric" });
 
-function Sparkline({ values, height = 60, accent = "var(--brand)" }: { values: number[]; height?: number; accent?: string }) {
+function Sparkline({ values, height = 60, accent = "var(--brand)", emptyLabel }: { values: number[]; height?: number; accent?: string; emptyLabel: string }) {
   if (values.length < 2) {
     return (
       <div className="grid h-[60px] place-items-center text-[11px] text-muted-foreground">
-        Not enough data yet
+        {emptyLabel}
       </div>
     );
   }
@@ -96,6 +97,7 @@ function StatPill({ label, value, sub, tone = "default" }: { label: string; valu
 
 // ---------- page ----------
 function ProgressPage() {
+  const { t, lang } = useI18n();
   const { log: weights, addEntry: addWeight } = useWeightLog();
   const { state: fasting } = useFasting();
   const { day } = useDayLog();
@@ -121,7 +123,7 @@ function ProgressPage() {
     const labels: string[] = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(Date.now() - i * 86_400_000);
-      labels.push(d.toLocaleDateString(undefined, { weekday: "narrow" }));
+      labels.push(d.toLocaleDateString(lang, { weekday: "narrow" }));
       const key = d.toISOString().slice(0, 10);
       const sum = fasting.history
         .filter((e) => e.endedAt.slice(0, 10) === key)
@@ -129,8 +131,15 @@ function ProgressPage() {
       days[6 - i] = Math.round(sum * 10) / 10;
     }
     return { values: days, labels };
-  }, [fasting.history]);
+  }, [fasting.history, lang]);
   const completedFasts = fasting.history.filter((h) => h.completed).length;
+
+  const measureKeys = [
+    ["waist", t("prog.measure.waist")],
+    ["hips", t("prog.measure.hips")],
+    ["chest", t("prog.measure.chest")],
+    ["arms", t("prog.measure.arms")],
+  ] as const;
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-4 pb-32 pt-8">
@@ -140,8 +149,8 @@ function ProgressPage() {
           <TrendingUp className="size-6" />
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-2xl font-semibold tracking-tight">Progress</h1>
-          <p className="text-[12px] text-muted-foreground">Your complete health journey</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">{t("prog.title")}</h1>
+          <p className="text-[12px] text-muted-foreground">{t("prog.subtitle")}</p>
         </div>
       </div>
 
@@ -149,7 +158,7 @@ function ProgressPage() {
       <section className="mt-5 overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-br from-brand/15 via-card to-card p-5">
         <div className="flex items-end justify-between">
           <div>
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Total lost</div>
+            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("prog.totalLost")}</div>
             <div className="mt-1 flex items-baseline gap-1.5">
               <span className="font-display text-4xl font-semibold tabular-nums">
                 {lost > 0 ? lost.toFixed(1) : "0.0"}
@@ -157,11 +166,11 @@ function ProgressPage() {
               <span className="text-sm text-muted-foreground">kg</span>
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground">
-              {curW ? `${curW.toFixed(1)} kg today` : "Log your first weigh-in"}
+              {curW ? t("prog.todayWeight", { n: curW.toFixed(1) }) : t("prog.firstWeigh")}
             </div>
           </div>
           <div className="text-right">
-            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Goal</div>
+            <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("prog.goal")}</div>
             <div className="mt-1 text-2xl font-semibold tabular-nums">{goal || "—"}{goal ? " kg" : ""}</div>
             <GoalDialog value={goal} onSave={(v) => { setGoal(v); try { localStorage.setItem("vita.weight.goal", String(v)); } catch {} }} />
           </div>
@@ -170,25 +179,25 @@ function ProgressPage() {
           <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${goalProgress}%` }} />
         </div>
         <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
-          <span>{startW ? `${startW.toFixed(1)} kg start` : "Start"}</span>
+          <span>{startW ? t("prog.startK", { n: startW.toFixed(1) }) : t("prog.startLabel")}</span>
           <span>{goalProgress.toFixed(0)}%</span>
-          <span>{goal ? `${goal} kg goal` : "Set goal"}</span>
+          <span>{goal ? t("prog.goalK", { n: goal }) : t("prog.setGoal")}</span>
         </div>
       </section>
 
       <div className="mt-4 grid gap-3">
         {/* Weight chart */}
         <Card
-          title="Weight trend"
+          title={t("prog.card.weight")}
           icon={Scale}
           action={<WeightDialog onAdd={addWeight} />}
         >
-          <Sparkline values={weekVals} />
+          <Sparkline values={weekVals} emptyLabel={t("prog.sparkEmpty")} />
           <div className="mt-3 grid grid-cols-3 gap-2">
-            <StatPill label="Start" value={startW ? `${startW.toFixed(1)}` : "—"} sub="kg" />
-            <StatPill label="Current" value={curW ? `${curW.toFixed(1)}` : "—"} sub="kg" />
+            <StatPill label={t("prog.stat.start")} value={startW ? `${startW.toFixed(1)}` : "—"} sub="kg" />
+            <StatPill label={t("prog.stat.current")} value={curW ? `${curW.toFixed(1)}` : "—"} sub="kg" />
             <StatPill
-              label="Change"
+              label={t("prog.stat.change")}
               value={lost ? `${lost > 0 ? "−" : "+"}${Math.abs(lost).toFixed(1)}` : "0.0"}
               sub="kg"
               tone={lost > 0 ? "good" : "default"}
@@ -198,18 +207,18 @@ function ProgressPage() {
 
         {/* Body measurements */}
         <Card
-          title="Body measurements"
+          title={t("prog.card.measurements")}
           icon={Ruler}
           action={<MeasurementDialog onAdd={addMeasurement} latest={measurements.at(-1)} />}
         >
           <div className="grid grid-cols-2 gap-2">
-            {(["waist", "hips", "chest", "arms"] as const).map((k) => {
+            {measureKeys.map(([k, label]) => {
               const last = [...measurements].reverse().find((m) => m[k] != null);
               const first = measurements.find((m) => m[k] != null);
               const diff = last && first && last[k] != null && first[k] != null ? (last[k]! - first[k]!) : 0;
               return (
                 <div key={k} className="rounded-2xl border border-border/60 bg-background/60 p-3">
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground capitalize">{k}</div>
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
                   <div className="mt-0.5 flex items-baseline gap-1">
                     <span className="text-lg font-semibold tabular-nums">{last?.[k] ?? "—"}</span>
                     {last?.[k] != null && <span className="text-[10px] text-muted-foreground">cm</span>}
@@ -227,12 +236,12 @@ function ProgressPage() {
 
         {/* Progress photos */}
         <Card
-          title="Progress photos"
+          title={t("prog.card.photos")}
           icon={Camera}
           action={<PhotoUploader onAdd={(p) => addPhoto(p)} />}
         >
           {photos.length === 0 ? (
-            <p className="py-6 text-center text-[12px] text-muted-foreground">Add your first photo to track visual progress.</p>
+            <p className="py-6 text-center text-[12px] text-muted-foreground">{t("prog.noPhotos")}</p>
           ) : (
             <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
               {photos.map((p) => (
@@ -241,11 +250,11 @@ function ProgressPage() {
                   <button
                     onClick={() => removePhoto(p.id)}
                     className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-background/90 text-foreground shadow"
-                    aria-label="Remove photo"
+                    aria-label={t("prog.removePhoto")}
                   >
                     <X className="size-3" />
                   </button>
-                  <div className="mt-1 text-center text-[9px] text-muted-foreground">{fmtDate(p.date)}</div>
+                  <div className="mt-1 text-center text-[9px] text-muted-foreground">{fmtDate(p.date, lang)}</div>
                 </div>
               ))}
             </div>
@@ -253,44 +262,44 @@ function ProgressPage() {
         </Card>
 
         {/* Fasting stats */}
-        <Card title="Fasting" icon={Timer}>
+        <Card title={t("prog.card.fasting")} icon={Timer}>
           <Bars values={last7Fast.values} labels={last7Fast.labels} />
           <div className="mt-3 grid grid-cols-3 gap-2">
-            <StatPill label="Streak" value={`${fasting.streak}`} sub="days" tone={fasting.streak > 0 ? "good" : "default"} />
-            <StatPill label="Best" value={`${fasting.longestStreak}`} sub="days" />
-            <StatPill label="Done" value={`${completedFasts}`} sub="fasts" />
+            <StatPill label={t("prog.fast.streak")} value={`${fasting.streak}`} sub={t("prog.unit.days")} tone={fasting.streak > 0 ? "good" : "default"} />
+            <StatPill label={t("prog.fast.best")} value={`${fasting.longestStreak}`} sub={t("prog.unit.days")} />
+            <StatPill label={t("prog.fast.done")} value={`${completedFasts}`} sub={t("prog.unit.fasts")} />
           </div>
         </Card>
 
         {/* Activity trends */}
         <div className="grid grid-cols-2 gap-3">
-          <Card title="Calories" icon={Flame}>
+          <Card title={t("prog.card.calories")} icon={Flame}>
             <div className="text-2xl font-semibold tabular-nums">{day.caloriesIn}</div>
-            <div className="text-[10px] text-muted-foreground">eaten today</div>
+            <div className="text-[10px] text-muted-foreground">{t("prog.eatenToday")}</div>
             <Bars values={[day.caloriesIn]} accent="var(--brand)" />
           </Card>
-          <Card title="Activity" icon={Activity}>
+          <Card title={t("prog.card.activity")} icon={Activity}>
             <div className="text-2xl font-semibold tabular-nums">{day.activeMin}</div>
-            <div className="text-[10px] text-muted-foreground">active min</div>
+            <div className="text-[10px] text-muted-foreground">{t("prog.activeMin")}</div>
             <Bars values={[day.activeMin]} accent="oklch(0.7 0.15 160)" />
           </Card>
-          <Card title="Steps" icon={Footprints}>
-            <div className="text-2xl font-semibold tabular-nums">{day.steps.toLocaleString()}</div>
-            <div className="text-[10px] text-muted-foreground">today</div>
+          <Card title={t("prog.card.steps")} icon={Footprints}>
+            <div className="text-2xl font-semibold tabular-nums">{day.steps.toLocaleString(lang)}</div>
+            <div className="text-[10px] text-muted-foreground">{t("prog.stepsToday")}</div>
             <Bars values={[day.steps]} accent="oklch(0.72 0.14 220)" />
           </Card>
-          <Card title="Sleep" icon={Moon}>
+          <Card title={t("prog.card.sleep")} icon={Moon}>
             <div className="text-2xl font-semibold tabular-nums">—</div>
-            <div className="text-[10px] text-muted-foreground">connect a tracker</div>
+            <div className="text-[10px] text-muted-foreground">{t("prog.connectTracker")}</div>
             <div className="h-20" />
           </Card>
         </div>
 
         {/* Milestones */}
-        <Card title="Milestones" icon={Trophy}>
+        <Card title={t("prog.card.milestones")} icon={Trophy}>
           {milestones.length === 0 ? (
             <p className="py-4 text-center text-[12px] text-muted-foreground">
-              Achievements unlock as you hit weight, fasting and activity goals.
+              {t("prog.noMilestones")}
             </p>
           ) : (
             <ul className="space-y-2">
@@ -301,7 +310,7 @@ function ProgressPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-[13px] font-medium">{m.title}</div>
-                    <div className="text-[10px] text-muted-foreground">{fmtDate(m.achievedAt)}</div>
+                    <div className="text-[10px] text-muted-foreground">{fmtDate(m.achievedAt, lang)}</div>
                   </div>
                 </li>
               ))}
@@ -316,23 +325,24 @@ function ProgressPage() {
 // ---------- dialogs ----------
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const dateToISO = (d: string) => {
-  // Preserve current time-of-day so sorting between same-day entries stays stable
   const now = new Date();
   const [y, m, dd] = d.split("-").map(Number);
   const out = new Date(y, (m ?? 1) - 1, dd ?? 1, now.getHours(), now.getMinutes(), now.getSeconds());
   return out.toISOString();
 };
 
-function DateField({ value, onChange, label = "Date" }: { value: string; onChange: (v: string) => void; label?: string }) {
+function DateField({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
+  const { t } = useI18n();
   return (
     <div className="space-y-1">
-      <Label>{label}</Label>
+      <Label>{label ?? t("prog.dlg.date")}</Label>
       <Input type="date" max={todayISO()} value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }
 
 function WeightDialog({ onAdd }: { onAdd: (kg: number, date?: string) => void }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [v, setV] = useState("");
   const [date, setDate] = useState(todayISO());
@@ -340,14 +350,14 @@ function WeightDialog({ onAdd }: { onAdd: (kg: number, date?: string) => void })
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setDate(todayISO()); }}>
       <DialogTrigger asChild>
         <Button size="sm" variant="ghost" className="h-7 gap-1 rounded-full text-[11px]">
-          <Plus className="size-3.5" /> Log
+          <Plus className="size-3.5" /> {t("prog.btn.log")}
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Log weight</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{t("prog.dlg.logWeight")}</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label>Weight (kg)</Label>
+            <Label>{t("prog.dlg.weightKg")}</Label>
             <Input type="number" step="0.1" value={v} onChange={(e) => setV(e.target.value)} />
           </div>
           <DateField value={date} onChange={setDate} />
@@ -355,32 +365,34 @@ function WeightDialog({ onAdd }: { onAdd: (kg: number, date?: string) => void })
         <Button onClick={() => {
           const n = Number(v);
           if (n > 0) { onAdd(n, dateToISO(date)); setOpen(false); setV(""); }
-        }}>Save</Button>
+        }}>{t("common.save")}</Button>
       </DialogContent>
     </Dialog>
   );
 }
 
 function GoalDialog({ value, onSave }: { value: number; onSave: (v: number) => void }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [v, setV] = useState(String(value || ""));
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <button className="mt-1 text-[10px] text-brand underline-offset-2 hover:underline">
-          {value ? "Change" : "Set goal"}
+          {value ? t("prog.changeGoal") : t("prog.setGoal")}
         </button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Goal weight</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{t("prog.dlg.goalWeight")}</DialogTitle></DialogHeader>
         <Input type="number" step="0.1" value={v} onChange={(e) => setV(e.target.value)} />
-        <Button onClick={() => { onSave(Number(v) || 0); setOpen(false); }}>Save</Button>
+        <Button onClick={() => { onSave(Number(v) || 0); setOpen(false); }}>{t("common.save")}</Button>
       </DialogContent>
     </Dialog>
   );
 }
 
 function MeasurementDialog({ onAdd, latest }: { onAdd: (m: { date: string; waist?: number; hips?: number; chest?: number; arms?: number }) => void; latest?: { waist?: number; hips?: number; chest?: number; arms?: number } }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [waist, setWaist] = useState(String(latest?.waist ?? ""));
   const [hips, setHips] = useState(String(latest?.hips ?? ""));
@@ -390,16 +402,16 @@ function MeasurementDialog({ onAdd, latest }: { onAdd: (m: { date: string; waist
   return (
     <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (o) setDate(todayISO()); }}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="ghost" className="h-7 gap-1 rounded-full text-[11px]"><Plus className="size-3.5" /> Add</Button>
+        <Button size="sm" variant="ghost" className="h-7 gap-1 rounded-full text-[11px]"><Plus className="size-3.5" /> {t("prog.btn.add")}</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Body measurements (cm)</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>{t("prog.dlg.measurements")}</DialogTitle></DialogHeader>
         <div className="grid grid-cols-2 gap-3">
           {[
-            ["Waist", waist, setWaist],
-            ["Hips", hips, setHips],
-            ["Chest", chest, setChest],
-            ["Arms", arms, setArms],
+            [t("prog.measure.waist"), waist, setWaist],
+            [t("prog.measure.hips"), hips, setHips],
+            [t("prog.measure.chest"), chest, setChest],
+            [t("prog.measure.arms"), arms, setArms],
           ].map(([l, v, set]) => (
             <div key={l as string} className="space-y-1">
               <Label>{l as string}</Label>
@@ -417,13 +429,14 @@ function MeasurementDialog({ onAdd, latest }: { onAdd: (m: { date: string; waist
             arms: arms ? Number(arms) : undefined,
           });
           setOpen(false);
-        }}>Save</Button>
+        }}>{t("common.save")}</Button>
       </DialogContent>
     </Dialog>
   );
 }
 
 function PhotoUploader({ onAdd }: { onAdd: (p: { dataUrl: string; date: string }) => void }) {
+  const { t } = useI18n();
   const ref = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [dataUrl, setDataUrl] = useState<string | null>(null);
@@ -450,11 +463,11 @@ function PhotoUploader({ onAdd }: { onAdd: (p: { dataUrl: string; date: string }
         }}
       />
       <Button size="sm" variant="ghost" className="h-7 gap-1 rounded-full text-[11px]" onClick={() => ref.current?.click()}>
-        <Plus className="size-3.5" /> Photo
+        <Plus className="size-3.5" /> {t("prog.btn.photo")}
       </Button>
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setDataUrl(null); }}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Add progress photo</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("prog.dlg.addPhoto")}</DialogTitle></DialogHeader>
           {dataUrl && (
             <img src={dataUrl} alt="preview" className="mx-auto max-h-56 rounded-2xl object-cover" />
           )}
@@ -465,10 +478,9 @@ function PhotoUploader({ onAdd }: { onAdd: (p: { dataUrl: string; date: string }
               setOpen(false);
               setDataUrl(null);
             }
-          }}>Save</Button>
+          }}>{t("common.save")}</Button>
         </DialogContent>
       </Dialog>
     </>
   );
 }
-
