@@ -82,7 +82,7 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
       <button
         onClick={onClose}
         className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-white/15 text-white"
-        aria-label="Close scanner"
+        aria-label={t("scan.close")}
       >
         <X className="size-5" />
       </button>
@@ -103,47 +103,48 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
           </div>
           <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/80 to-transparent p-4 text-white">
             <p className="flex items-center gap-1.5 text-xs">
-              <ScanLine className="size-4" /> Point at barcode
+              <ScanLine className="size-4" /> {t("scan.point")}
             </p>
             <button
               className="flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 text-xs"
               onClick={() => setShowManual(true)}
             >
-              <Keyboard className="size-3.5" /> Type code
+              <Keyboard className="size-3.5" /> {t("scan.type_code")}
             </button>
           </div>
         </div>
       ) : (
         <div className="w-full max-w-sm rounded-3xl bg-card p-6">
-          <h3 className="font-display text-base font-semibold">Enter barcode</h3>
+          <h3 className="font-display text-base font-semibold">{t("scan.enter_title")}</h3>
           <p className="mt-1 text-xs text-muted-foreground">
             {error
               ? error
               : !supported
-              ? "Live scanning isn't available on this device. Enter the barcode number manually."
-              : "Type the barcode digits below."}
+              ? t("scan.unsupported")
+              : t("scan.type_below")}
           </p>
           <Input
             autoFocus
             inputMode="numeric"
-            placeholder="e.g. 8710398555012"
+            placeholder={t("scan.placeholder")}
             value={manual}
             onChange={(e) => setManual(e.target.value.replace(/\D/g, ""))}
             className="mt-4"
           />
           <div className="mt-4 flex gap-2">
             <Button variant="outline" className="flex-1" onClick={onClose}>
-              Cancel
+              {t("scan.cancel")}
             </Button>
             <Button
               className="flex-1"
               disabled={manual.length < 6}
               onClick={() => onDetected(manual)}
             >
-              Look up
+              {t("scan.lookup")}
             </Button>
           </div>
         </div>
+
       )}
     </div>
   );
