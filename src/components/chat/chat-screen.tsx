@@ -39,25 +39,29 @@ async function readStreamText(response: Response, onText: (text: string) => void
   let buffer = "";
   let text = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const chunks = buffer.split("\n\n");
-    buffer = chunks.pop() ?? "";
-    for (const chunk of chunks) {
-      const line = chunk
-        .split("\n")
-        .find((entry) => entry.startsWith("data: "))
-        ?.slice(6);
-      if (!line || line === "[DONE]") continue;
-      const parsed = JSON.parse(line) as { type?: string; delta?: string };
+  function processChunk(chunk: string) {
+    for (const rawLine of chunk.split("\n")) {
+      const line = rawLine.trim();
+      if (!line.startsWith("data:")) continue;
+      const data = line.slice(5).trim();
+      if (!data || data === "[DONE]") continue;
+      const parsed = JSON.parse(data) as { type?: string; delta?: string };
       if (parsed.type === "text-delta" && parsed.delta) {
         text += parsed.delta;
         onText(text);
       }
     }
   }
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() ?? "";
+    chunks.forEach(processChunk);
+  }
+  processChunk(buffer + decoder.decode());
 }
 
 type QuickAction = {
