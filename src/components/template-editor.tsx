@@ -62,7 +62,7 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
           <button
             onClick={onClose}
             className="grid size-9 place-items-center rounded-full bg-muted/70 text-foreground hover:bg-muted"
-            aria-label="Sluiten"
+            aria-label={t("tpl.close")}
           >
             <X className="size-4" />
           </button>
@@ -70,7 +70,7 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
             <PopoverTrigger asChild>
               <button
                 className="grid size-9 place-items-center rounded-full bg-muted/70 hover:bg-muted"
-                aria-label="Meer"
+                aria-label={t("tpl.more")}
               >
                 <MoreHorizontal className="size-4" />
               </button>
@@ -80,14 +80,14 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
                 onClick={() => setEditMeta((v) => !v)}
                 className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-muted"
               >
-                {editMeta ? "Verberg details" : "Bewerk naam & dag"}
+                {editMeta ? t("tpl.hide_details") : t("tpl.edit_meta")}
               </button>
               {exercises.length > 0 && (
                 <button
                   onClick={() => setExercises([])}
                   className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-destructive hover:bg-muted"
                 >
-                  <Trash2 className="size-4" /> Alle oefeningen wissen
+                  <Trash2 className="size-4" /> {t("tpl.clear_all")}
                 </button>
               )}
             </PopoverContent>
@@ -98,22 +98,22 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
         <div className="px-5 pt-3">
           <h1 className="font-display text-3xl font-semibold tracking-tight">{title}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {exercises.length} oefening{exercises.length === 1 ? "" : "en"}, {totalSets} set{totalSets === 1 ? "" : "s"}
+            {exercises.length} {exercises.length === 1 ? t("tpl.exercise") : t("tpl.exercises")}, {totalSets} {totalSets === 1 ? t("tpl.set") : t("tpl.sets")}
           </p>
         </div>
 
         {/* Optional meta editor */}
         {(editMeta || !initial.exercises.length) && (
           <div className="mx-5 mt-4 space-y-3 rounded-2xl border border-border bg-card/40 p-3">
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Naam (bijv. Maandag - Billen)" />
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("tpl.name_ph")} />
             <div className="grid grid-cols-2 gap-2">
               <Select value={day} onValueChange={setDay}>
-                <SelectTrigger><SelectValue placeholder="Kies dag" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("tpl.pick_day")} /></SelectTrigger>
                 <SelectContent>
                   {DAYS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <Input value={focus} onChange={(e) => setFocus(e.target.value)} placeholder="Focus (bijv. Billen)" />
+              <Input value={focus} onChange={(e) => setFocus(e.target.value)} placeholder={t("tpl.focus_ph")} />
             </div>
           </div>
         )}
@@ -134,7 +134,7 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
                 </div>
               ))}
               <p className="pt-4 text-center text-sm text-muted-foreground">
-                Tik op <span className="font-medium text-foreground">Voeg oefening toe</span> om te beginnen
+                {t("tpl.start_hint")} <span className="font-medium text-foreground">{t("tpl.add_exercise")}</span> {t("tpl.to_begin")}
               </p>
             </div>
           ) : (
@@ -145,28 +145,28 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
                     <Input
                       value={ex.name}
                       onChange={(e) => updateEx(i, { name: e.target.value })}
-                      placeholder="Oefening naam"
+                      placeholder={t("tpl.ex_name_ph")}
                       className="flex-1"
                     />
                     <button
                       onClick={() => removeEx(i)}
                       className="grid size-9 place-items-center rounded-md text-muted-foreground hover:text-destructive"
-                      aria-label="Verwijder"
+                      aria-label={t("tpl.remove")}
                     >
                       <Trash2 className="size-4" />
                     </button>
                   </div>
                   <div className="mt-2 grid grid-cols-4 gap-2">
-                    <Field label="Sets">
+                    <Field label={t("tpl.field_sets")}>
                       <Input type="number" min={1} value={ex.sets} onChange={(e) => updateEx(i, { sets: Number(e.target.value) || 1 })} />
                     </Field>
-                    <Field label="Reps">
+                    <Field label={t("tpl.field_reps")}>
                       <Input value={ex.reps} onChange={(e) => updateEx(i, { reps: e.target.value })} placeholder="10" />
                     </Field>
-                    <Field label="Kg">
+                    <Field label={t("tpl.field_kg")}>
                       <Input value={ex.suggestedWeight ?? ""} onChange={(e) => updateEx(i, { suggestedWeight: e.target.value })} placeholder="40" />
                     </Field>
-                    <Field label="Rust s">
+                    <Field label={t("tpl.field_rest")}>
                       <Input type="number" min={0} value={ex.restSec} onChange={(e) => updateEx(i, { restSec: Number(e.target.value) || 0 })} />
                     </Field>
                   </div>
@@ -185,28 +185,28 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
                   type="button"
                   className="flex-1 rounded-full bg-muted px-5 py-3.5 text-sm font-semibold text-foreground transition hover:bg-muted/80"
                 >
-                  Voeg oefening toe
+                  {t("tpl.add_exercise")}
                 </button>
               </PopoverTrigger>
               <PopoverContent side="top" align="start" sideOffset={10} className="w-72 rounded-2xl border-border/60 p-1 shadow-xl">
                 <AddOption
                   icon={<Search className="size-5" />}
-                  label="Zoek oefeningen"
+                  label={t("tpl.search_ex")}
                   onClick={() => { setAddOpen(false); setLibOpen(true); }}
                 />
                 <AddOption
                   icon={<Camera className="size-5" />}
-                  label="Registreer foto"
+                  label={t("tpl.take_photo")}
                   onClick={() => { setAddOpen(false); cameraRef.current?.click(); }}
                 />
                 <AddOption
                   icon={<ImagePlus className="size-5" />}
-                  label="Importeer foto"
+                  label={t("tpl.import_photo")}
                   onClick={() => { setAddOpen(false); galleryRef.current?.click(); }}
                 />
                 <AddOption
                   icon={<TextCursorInput className="size-5" />}
-                  label="Beschrijf routine"
+                  label={t("tpl.describe")}
                   onClick={() => { setAddOpen(false); setCoachOpen(true); }}
                 />
               </PopoverContent>
@@ -215,17 +215,18 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
               className="flex-1 rounded-full py-6 text-sm font-semibold"
               onClick={() => onSave({
                 ...initial,
-                name: name.trim() || "Nieuwe training",
+                name: name.trim() || t("tpl.new_workout"),
                 day: day || undefined,
                 focus: focus || undefined,
                 exercises,
               })}
               disabled={exercises.length === 0}
             >
-              Sla op
+              {t("tpl.save")}
             </Button>
           </div>
         </div>
+
 
         {/* Hidden file inputs for photo flows */}
         <input
