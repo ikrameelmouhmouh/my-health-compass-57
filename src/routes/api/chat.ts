@@ -72,11 +72,7 @@ export const Route = createFileRoute("/api/chat")({
             .join("")
             .trim();
           const hasImage = last.parts.some((p) => p.type === "file");
-          const stored = hasImage
-            ? userText
-              ? `📷 ${userText}`
-              : "📷"
-            : userText;
+          const stored = hasImage ? (userText ? `📷 ${userText}` : "📷") : userText;
           if (stored) {
             await supabase.from("chat_messages").insert({
               thread_id: threadId,
@@ -88,7 +84,7 @@ export const Route = createFileRoute("/api/chat")({
             const { data: t } = await supabase
               .from("chat_threads")
               .select("title")
-                .eq("id", threadId)
+              .eq("id", threadId)
               .maybeSingle();
             const defaultTitles = ["New chat", "", "Nieuw gesprek"];
             if (t && defaultTitles.includes(t.title)) {
