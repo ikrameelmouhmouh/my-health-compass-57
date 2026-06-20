@@ -1418,6 +1418,8 @@ const translations: Translations = {
     "chat.quick.tip.prompt": "Geef me 1 concrete tip voor vandaag, gebaseerd op m'n doel.",
     "chat.quick.week": "Analyseer m'n week",
     "chat.quick.week.prompt": "Hoe gaat het deze week met m'n voortgang? Wat valt op?",
+    "chat.opening": "Vita wordt geopend…",
+    "chat.connecting": "Verbinden met Vita…",
 
     "coachs.intro": "Vertel waar je op wilt focussen. De coach stelt oefeningen, sets, reps en gewicht voor.",
     "coachs.focus": "Focus / spiergroep",
