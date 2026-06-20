@@ -132,6 +132,8 @@ function Nutrition() {
         </div>
       </section>
 
+      <FastingCard />
+
       <section className="mt-5 space-y-3">
         {MEAL_TYPES.map((m) => (
           <MealSection
