@@ -30,7 +30,7 @@ export function BottomNav() {
               <Link
                 to={it.to}
                 aria-current={active ? "page" : undefined}
-                className={`flex flex-col items-center justify-center gap-0.5 py-1.5 ios-press ${
+                className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 ios-press ${
                   active ? "text-brand" : "text-muted-foreground"
                 }`}
               >
@@ -45,6 +45,12 @@ export function BottomNav() {
                 >
                   {it.label}
                 </span>
+                {active && (
+                  <span
+                    aria-hidden
+                    className="mt-0.5 size-1 rounded-full bg-brand"
+                  />
+                )}
               </Link>
             </li>
           );
