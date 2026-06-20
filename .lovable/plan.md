@@ -1,48 +1,36 @@
-
 ## Doel
-Vasten verdient een prominente plek in de bottom nav omdat het een kernfunctie is. Social is minder centraal en kan samengevoegd worden met Vooruitgang als tabs binnen één scherm.
 
-## Nieuwe navigatiestructuur (5 tabs)
+De 26 oefeningen in `src/assets/exercises/` (bench press, squat, hip thrust, deadlift, etc.) krijgen:
+1. **Nieuwe neutrale afbeeldingen** — één androgyn 3D-poppetje in sportondergoed (donkere shorts + crop top), grijze huid, geen duidelijk geslacht. Per oefening 2 frames (start + eind) zoals nu.
+2. **Correcte afbeeldingen per oefening** — elke afbeelding wordt apart geprompt op de juiste houding (bv. barbell hip thrust = rug tegen bankje, heupen omhoog met barbell).
+3. **Vertalingen** — de oefeningnamen en stappen worden vertaald naar alle 6 talen (en, nl, ar, fr, de, es).
 
-```text
-[ Home ] [ Eten ] [ Workouts ] [ Vasten ] [ Voortgang ]
-```
+## Wat er verandert
 
-- **Vasten** krijgt eigen tab → directe toegang tot `/fasting` (timer, protocol, geschiedenis).
-- **Voortgang** wordt een scherm met tabs bovenaan: `Statistieken | Social`.
-- Social-route blijft bestaan voor deeplinks, maar primaire toegang loopt via Voortgang-tab.
+### Afbeeldingen (26 oefeningen × 2 frames = 52 nieuwe afbeeldingen)
+Wide Leg Press, Barbell Back Squat, Romanian Deadlift, Leg Extension, Lying Leg Curl, Barbell Hip Thrust, Standing Calf Raise, Barbell Bench Press, Incline Dumbbell Press, Cable Chest Fly, Push Up, Lat Pulldown, Barbell Bent Over Row, Seated Cable Row, Pull Up, Conventional Deadlift, Overhead Press, Dumbbell Lateral Raise, Face Pull, Barbell Curl, Hammer Curl, Triceps Pushdown, Skull Crusher, Plank, Hanging Leg Raise, Cable Crunch.
 
-## Wijzigingen
+- Oude `*-male-*.jpg` en `*-female-*.jpg` bestanden worden vervangen door `*-0.jpg` en `*-1.jpg` (neutraal).
+- Elke afbeelding krijgt een specifieke prompt die de juiste oefeningshouding beschrijft, zodat hip thrust er ook echt uitziet als hip thrust.
 
-### 1. `src/components/bottom-nav.tsx`
-- Verwijder Social-item.
-- Voeg Vasten-item toe (icoon: `Timer`, route: `/fasting`).
-- Volgorde: Home, Eten, Workouts, Vasten, Voortgang.
+### Code (`src/lib/exercise-library.ts`)
+- `ExerciseVariants` type + `variants()` helper + `male/female` splitsing wordt verwijderd.
+- `FALLBACK_BY_MUSCLE` blijft, maar verwijst naar neutrale frames.
+- `getExerciseFrames()` en `hasGenderVariants()` worden vereenvoudigd (geen `gender` parameter meer).
+- Aanroepen elders in de app die `gender` doorgeven worden aangepast.
 
-### 2. `src/routes/_authenticated/progress.tsx`
-- Voeg een Tabs-component bovenaan toe: "Statistieken" (huidige inhoud) en "Social".
-- Social-tab rendert de bestaande Social-feed component (extraheren uit `social.tsx` indien nodig, of via dynamische import).
+### Vertalingen (`src/lib/i18n.tsx`)
+- Per oefening: vertaalkey voor `name` + per stap een vertaalkey.
+- Oefeningnamen worden via i18n opgehaald in plaats van hardcoded Engels.
+- Alle 6 talen krijgen complete vertalingen (en, nl, ar, fr, de, es).
 
-### 3. `src/routes/_authenticated/social.tsx`
-- Blijft bestaan voor backwards-compatibiliteit / deeplinks.
-- Optioneel: bovenaan een hint "Social is nu onderdeel van Voortgang" met link.
+## Wat er NIET verandert
+- De ~470 andere catalogus-oefeningen (via `mk()`) blijven Engels met placeholder-icoon + fallback per spiergroep. Die kunnen we later in een tweede ronde doen.
+- Geen wijzigingen aan workout-tracking, sets, reps, etc.
 
-### 4. `src/routes/_authenticated/nutrition.tsx`
-- De Fasting-kaart die vorige beurt is toegevoegd: **behouden** als snelle toegang vanuit Eten (logisch want vasten = eetvenster). Geen wijziging.
+## Volgorde van uitvoering
+1. Eerst **1 test-afbeelding** genereren (bv. barbell hip thrust) zodat je de stijl kunt goedkeuren vóór de andere 51.
+2. Na akkoord: rest van de afbeeldingen + code-wijzigingen + vertalingen in één keer.
 
-### 5. `src/routes/_authenticated/profile.tsx` (startscherm)
-- Bestaande Fasting-shortcut: behouden of verwijderen? Aanbeveling: **verwijderen** nu Vasten een eigen tab heeft, om duplicatie te voorkomen en het startscherm overzichtelijk te houden.
-
-### 6. `src/lib/i18n.tsx`
-- Nieuwe keys: `nav.fasting`, `progress.tabStats`, `progress.tabSocial` in alle 6 talen.
-
-## Overwegingen
-
-- **Voordeel**: Vasten staat altijd één tap weg; consistent met het feit dat het een dagelijkse routine is.
-- **Risico Social**: minder zichtbaar. Maar als de app primair fitness/nutrition is en Social secundair, is dat acceptabel.
-- **Voortgang + Social combinatie**: beide gaan over "jouw resultaten zien" — Stats toont eigen data, Social toont data van vrienden. Past thematisch.
-
-## Vraag voor jou
-Akkoord met:
-1. Fasting-shortcut op startscherm verwijderen (om duplicatie te voorkomen)?
-2. Social-tabs binnen Voortgang, of zou je Social liever volledig laten verdwijnen uit de hoofdnav (alleen via een knop op het profielscherm)?
+## Credits-waarschuwing
+Je hebt nu **176 credits** over. 52 afbeeldingen genereren + code + vertalingen kan flink wegnemen. Als het halverwege te veel wordt, kunnen we pauzeren.
