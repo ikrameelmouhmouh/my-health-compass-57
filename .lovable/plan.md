@@ -1,55 +1,73 @@
+# AI Workout → Auto-template schema
 
-## 1. "Create workout" op homepage werkt niet
-Op `src/routes/index.tsx` (Today's workout card) opent de knop nu een lokale dialog, maar maakt geen workout aan die zichtbaar is in Workouts. Aanpassen zodat de knop navigeert naar `/fitness` en daar direct de "New template" / wizard flow opent (via een `?action=new` query param die `fitness.tsx` afhandelt). Resultaat: één plek waar workouts beheerd worden.
+De huidige "AI workout" wizard genereert al een weekplan via Lovable AI, maar slaat het alleen op als losse plan-state. We breiden de wizard uit met een dag-keuze, koppelen het resultaat aan templates per trainingsdag en gaten Vita Plus.
 
-Op de homepage blijft de Today's workout card alleen tonen wat er voor vandaag gepland staat (gekoppeld aan een template met `day = today`). Als er niks gepland is → "Geen workout vandaag" + knop "Plan voor vandaag" die ook naar `/fitness` linkt.
+## Wat verandert er voor de gebruiker
 
-## 2. "Herbereken plan" in Settings doet niks
-In `src/routes/_authenticated/settings.tsx` is de knop `set.recalc` niet gekoppeld. Implementeren: opnieuw doorlopen van onboarding-berekening (gewicht, lengte, leeftijd, doel, activiteit) → nieuwe kcal/macro doelen opslaan in user-profile + toast bevestiging. Knop linkt naar `/onboarding?recalc=1` zodat de bestaande wizard hergebruikt wordt en bij submit het profiel updatet i.p.v. opnieuw door te sturen naar home.
+1. Op `/fitness` → "AI workout" stelt de wizard nu deze vragen:
+   - Doel (bestaand)
+   - Ervaring (bestaand)
+   - Locatie + apparatuur (bestaand)
+   - **Hoeveel dagen per week** (bestaand)
+   - **NIEUW: welke dagen van de week** (kies precies N dagen, matched met frequentie)
+   - Focus-spiergroepen (bestaand)
+   - Duur + blessures/voorkeuren (bestaand)
 
-## 3. "Gratis" badge boven homepage → premium lock
-Voorstel (mijn advies):
-- Verwijder de "Free" pill bovenaan de homepage.
-- Op premium-only features (AI Coach geavanceerde features, AI workout wizard, AI food scan/insight, Progress AI-analyse) een **slot-overlay** tonen voor free users: card blijft zichtbaar maar geblurred, met centraal een 🔒 icoon + "Premium" label + tap → naar `/pricing`.
-- Een kleine "Upgrade" knop in de header (alleen voor free users), subtieler dan een "Free" label.
+2. Na "Genereer schema":
+   - Het weekplan wordt opgeslagen zoals nu (zichtbaar in fitness-dashboard met dagoverzicht).
+   - **NIEUW:** Een dialog vraagt: *"Bestaande templates vervangen of toevoegen?"* (Vervang / Toevoegen / Annuleer).
+   - Per gekozen trainingsdag wordt automatisch een **WorkoutTemplate** aangemaakt met naam `{focus} — {dag}` (bv. "Push — Maandag"), met de oefeningen uit het AI-plan. Deze verschijnen direct onder "Mijn templates" op /fitness.
+   - Workouts die op een trainingsdag vallen, verschijnen al via het bestaande plan-systeem op de homepage "vandaag" en in het fitness-dashboard.
 
-Component `<PremiumLock>` wrapper bouwen die kinderen blurt en de overlay rendert op basis van `useEntitlement()`.
+3. **Premium-gate:** AI workout knop is alleen toegankelijk voor Vita Plus. Free users zien een slot + upgrade-CTA naar `/pricing` (consistent met andere premium-features die we eerder hebben afgesproken).
 
-## 4. Aura dagelijks advies ("Ik heb vandaag 8.000 stappen…")
-**Plek:** nieuwe card bovenaan de homepage (boven Nutrition), getiteld "Aura's advies vandaag".
+## Technische uitwerking
 
-**Realisatie:**
-- Server function `getAuraDailyInsight` (`src/lib/aura.functions.ts`) die de dag-gegevens verzamelt: stappen, vasten-uren, slaap (indien beschikbaar), kcal verbrand, kcal gegeten, gewicht.
-- Roept Lovable AI Gateway aan (`google/gemini-3-flash-preview`) met structured output: `{ summary, kcal_advice, tip }`.
-- Cache per gebruiker per dag (1 call/dag, opnieuw triggerbaar via refresh knop).
-- Card toont samenvatting in spreektaal + aanbevolen kcal + tip.
-- Premium-gated (zie punt 3) — free users zien blur + 🔒.
+### 1. `src/lib/workout.functions.ts`
+- Voeg `trainingDays: z.array(z.enum(["Monday",...,"Sunday"])).optional()` toe aan `WizardInput`.
+- In de system/user-prompt: instrueer model om non-rest dagen exact op deze dagen te plaatsen en andere op `rest:true, exercises:[]`.
 
-## 5. Nederlandse vertaling fitness
-`src/routes/_authenticated/fitness.tsx` bevat hardcoded Engelse strings (bv. "Start the wizard", "My templates", "View all gym exercises with form", "Build your own or let the AI Coach help", "Sets, reps & rest included", "Progressive overload built in", "509 exercises", "New", "Monday · 1 ex · 3 sets"). Alle strings vervangen door `t("fit....")` keys en voor alle 6 talen (en, nl, ar, fr, de, es) vertalingen toevoegen in `src/lib/i18n.tsx`. Per core memory: i18n direct in alle 6 talen.
+### 2. `src/components/workout-wizard.tsx`
+- `totalSteps` 7 → 8. Nieuwe stap 6 = dag-selectie (verschuif huidige focus naar 7, extras naar 8).
+- State `trainingDays: string[]`; toon 7 pills (ma-zo), beperk selectie tot `frequency` (extra disable + helper-text).
+- `canNext` voor nieuwe stap: `trainingDays.length === frequency`.
+- Geef `trainingDays` mee in `generate({data})`.
 
-Tegelijk een pass over fitness gerelateerde keys controleren (workout dialog, exercise library, template editor) of er nog Engelse strings/halfvertalingen overblijven.
+### 3. `src/lib/workout-prefs.ts`
+- Geen schemawijziging nodig. We hergebruiken `useTemplates().upsert` + `newTemplate`.
+- Helper toevoegen: `templatesFromPlan(plan): WorkoutTemplate[]` die per non-rest `WorkoutDay` een template aanmaakt (naam `${focus} — ${dayLocalized}`, `day`, `focus`, `exercises`).
 
-## 6. Food: AI chat FAB botst met "+" toevoegen
-In `src/routes/_authenticated/nutrition.tsx` staan de groene AI-sparkle FAB en de "+" FAB boven elkaar rechtsonder, waardoor de + onder de chat verdwijnt.
+### 4. `src/routes/_authenticated/fitness.tsx`
+- In `onComplete` van `WorkoutWizard`:
+  1. `save(w, p)` zoals nu.
+  2. Open `TemplateSyncDialog` (nieuw, klein): "Vervang bestaande templates" / "Voeg toe" / "Niet nu".
+  3. Vervang → `templates.forEach(remove)` dan upsert nieuwe. Toevoegen → upsert nieuwe naast bestaande.
+- Sluit wizard.
 
-Voorstel: één gecombineerde **SpeedDial FAB**:
-- Eén groene ronde knop rechtsonder met "+".
-- Tap → opent een mini-menu met 2 acties: "Maaltijd toevoegen" en "Vraag Aura" (sparkle).
-- Lost meteen ook overlap op andere pagina's op waar dezelfde stack voorkomt (Home steps card, etc.) — zelfde component hergebruiken.
+### 5. Premium gate
+- Importeer bestaande `useEntitlement()` (zelfde als gebruikt voor AI Coach).
+- Wrap "AI workout starten" knop in `EmptyState` en de "Herbereken" knop in dashboard: bij free user → toon `<PremiumLock>` overlay met `<Link to="/pricing">`.
 
-Alternatief: AI sparkle FAB verplaatsen naar linksonder. Mijn voorkeur: SpeedDial, schoner en consistent.
+### 6. i18n
+Nieuwe keys in `src/lib/i18n.tsx` (6 talen: en, nl, ar, fr, de, es):
+- `wiz.q5b.title` "Welke dagen wil je trainen?"
+- `wiz.q5b.sub` "Kies precies {n} dagen"
+- `wiz.q5b.day.Monday` … `Sunday`
+- `wiz.q5b.pick_n` "Nog {n} te kiezen"
+- `wiz.sync.title` "Wat doen we met je bestaande templates?"
+- `wiz.sync.replace` / `wiz.sync.add` / `wiz.sync.skip`
+- `wiz.sync.done_replace` / `wiz.sync.done_add` (toast)
+- `wiz.premium.locked` "AI workout is onderdeel van Vita Plus"
+- `wiz.premium.upgrade` "Upgrade"
 
----
+## Bestanden die wijzigen
+- `src/lib/workout.functions.ts` — schema + prompt
+- `src/components/workout-wizard.tsx` — dag-stap + state
+- `src/lib/workout-prefs.ts` — `templatesFromPlan` helper
+- `src/routes/_authenticated/fitness.tsx` — onComplete dialog + premium gate
+- `src/components/template-sync-dialog.tsx` — **nieuw**, kleine modal
+- `src/lib/i18n.tsx` — nieuwe keys × 6 talen
 
-### Technische details
-- Geen schemawijzigingen nodig behalve evt. tabel `aura_daily_insights (user_id, date, payload jsonb, created_at)` met RLS + grants voor caching.
-- Nieuwe i18n keys: ~15 voor fitness, ~6 voor aura card, ~3 voor premium lock.
-- Nieuwe componenten: `PremiumLock`, `SpeedDialFab`, `AuraInsightCard`.
-- Nieuwe server fn: `getAuraDailyInsight` (Lovable AI, structured output via `Output.object` + Zod).
-- Workout flow: `/fitness?action=new` en `/fitness?action=schedule` query handling in fitness route.
-
-### Vragen voor je goedkeurt
-- Akkoord met SpeedDial-aanpak voor Food FAB?
-- Akkoord met blur+slot premium lock i.p.v. "Free" badge?
-- Aura card bovenaan home (boven Nutrition) — of liever onderaan?
+## Buiten scope (in deze stap niet)
+- Geen migratie naar Supabase (templates blijven localStorage zoals nu).
+- Geen kalender-koppeling met agenda; "vandaag"-detectie loopt via bestaande plan.days[].day matching.
