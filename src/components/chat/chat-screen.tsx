@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { Camera, Menu, Plus, Send, Square } from "lucide-react";
+import { Camera, Dumbbell, Loader2, Menu, Plus, Send, Square } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ import { useT, useI18n } from "@/lib/i18n";
 import { getThreadMessages } from "@/lib/chat.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
+import { extractWorkoutTemplates } from "@/lib/coach-extract.functions";
+import { useTemplates, newTemplate } from "@/lib/workout-prefs";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
