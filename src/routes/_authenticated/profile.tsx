@@ -321,6 +321,14 @@ function Profile() {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          <IconBtn aria-label={t("notif.open")} onClick={() => setOpenSheet("notifications")} className="relative">
+            <Bell className="size-[18px]" strokeWidth={2} />
+            {unreadCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 grid min-w-[16px] h-[16px] place-items-center rounded-full bg-brand px-1 text-[9px] font-bold leading-none text-brand-foreground">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </IconBtn>
           <IconBtn aria-label={t("today.customize")} onClick={() => setOpenSheet("customize")}>
             <Sliders className="size-[18px]" strokeWidth={2} />
           </IconBtn>
@@ -359,17 +367,9 @@ function Profile() {
         </div>
       )}
 
-      <AuraInsightCard
-        steps={day.steps}
-        stepGoal={STEP_GOAL}
-        caloriesIn={day.caloriesIn}
-        caloriesOut={day.caloriesOut}
-        calorieTarget={calorieTarget}
-        waterMl={day.waterMl}
-        waterGoal={WATER_GOAL_ML}
-        fastingActive={fastInfo.active}
-        fastingHours={fastInfo.hoursElapsed}
-      />
+      <AuraTipStrip tip={aura.tip} onOpen={() => setOpenSheet("notifications")} />
+
+
 
 
       <section className="mt-5 space-y-3">
