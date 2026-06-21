@@ -27,6 +27,7 @@ import { Route as AuthenticatedFitnessRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticated/fasting'
 import { Route as AuthenticatedAiCoachRouteImport } from './routes/_authenticated/ai-coach'
 import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
+import { Route as ApiPublicWidgetAuraRouteImport } from './routes/api/public/widget/aura'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 
@@ -120,6 +121,11 @@ const AuthenticatedAiCoachThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedAiCoachRoute,
   } as any)
+const ApiPublicWidgetAuraRoute = ApiPublicWidgetAuraRouteImport.update({
+  id: '/api/public/widget/aura',
+  path: '/api/public/widget/aura',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/widget/aura': typeof ApiPublicWidgetAuraRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/widget/aura': typeof ApiPublicWidgetAuraRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
+  '/api/public/widget/aura': typeof ApiPublicWidgetAuraRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/ai-coach/$threadId'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
+    | '/api/public/widget/aura'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/ai-coach/$threadId'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
+    | '/api/public/widget/aura'
   id:
     | '__root__'
     | '/'
@@ -263,6 +274,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ai-coach/$threadId'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
+    | '/api/public/widget/aura'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
+  ApiPublicWidgetAuraRoute: typeof ApiPublicWidgetAuraRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -405,6 +418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiCoachThreadIdRouteImport
       parentRoute: typeof AuthenticatedAiCoachRoute
     }
+    '/api/public/widget/aura': {
+      id: '/api/public/widget/aura'
+      path: '/api/public/widget/aura'
+      fullPath: '/api/public/widget/aura'
+      preLoaderRoute: typeof ApiPublicWidgetAuraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -473,6 +493,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
+  ApiPublicWidgetAuraRoute: ApiPublicWidgetAuraRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
