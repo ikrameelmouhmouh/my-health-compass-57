@@ -139,6 +139,46 @@ function Profile() {
 
   const greeting = greetingFor(new Date(), t);
 
+  // Compute Aura insight strings from today's data (same logic as the old card).
+  const aura = useMemo(() => {
+    const steps = day.steps;
+    const stepGoal = STEP_GOAL;
+    const caloriesIn = day.caloriesIn;
+    const caloriesOut = day.caloriesOut;
+    const waterMl = day.waterMl;
+    const waterGoal = WATER_GOAL_ML;
+    const stepsLow = steps < stepGoal * 0.5;
+    const stepsOk = steps >= stepGoal * 0.8;
+    const waterLow = waterMl < waterGoal * 0.5;
+    const remaining = Math.max(0, calorieTarget - caloriesIn + Math.round(caloriesOut * 0.5));
+    const recommended = Math.max(0, Math.round(calorieTarget + caloriesOut * 0.5));
+    const facts: string[] = [];
+    if (steps > 0) facts.push(t("today.aura.fact_steps", { n: steps.toLocaleString() }));
+    if (fastInfo.active) facts.push(t("today.aura.fact_fast", { n: Math.floor(fastInfo.hoursElapsed) }));
+    if (caloriesOut > 0) facts.push(t("today.aura.fact_burn", { n: caloriesOut }));
+    if (caloriesIn > 0) facts.push(t("today.aura.fact_eaten", { n: caloriesIn }));
+    const summary = facts.length === 0
+      ? t("today.aura.empty")
+      : t("today.aura.summary", { facts: facts.join(" · ") });
+    let tip = t("today.aura.tip_default");
+    if (stepsLow) tip = t("today.aura.tip_steps");
+    else if (waterLow) tip = t("today.aura.tip_water");
+    else if (stepsOk && remaining < calorieTarget * 0.2) tip = t("today.aura.tip_lowcal");
+    const advice = `${t("today.aura.advice_kcal", { n: recommended.toLocaleString() })} ${tip}`;
+    return { title: t("today.aura.title"), body: summary, advice, tip };
+  }, [day.steps, day.caloriesIn, day.caloriesOut, day.waterMl, calorieTarget, fastInfo.active, fastInfo.hoursElapsed, t]);
+
+  // Ensure today's Aura insight is stored as a notification (once per day per user).
+  const ensuredRef = useRef<string | null>(null);
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    if (ensuredRef.current === today) return;
+    ensuredRef.current = today;
+    ensureAuraFn({ data: { title: aura.title, body: aura.body, advice: aura.advice } }).catch(() => {
+      ensuredRef.current = null;
+    });
+  }, [aura.title, aura.body, aura.advice, ensureAuraFn]);
+
   const visibleCards = prefs.order.filter((c) => !prefs.hidden.includes(c));
 
   const PAIRS: Array<[DashCardId, DashCardId]> = [
