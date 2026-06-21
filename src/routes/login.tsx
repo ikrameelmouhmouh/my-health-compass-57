@@ -45,7 +45,8 @@ function Login() {
     const { error } = await supabase.auth.signInWithPassword(result.data);
     setLoading(false);
     if (error) { toast.error(error.message); return; }
-    navigate({ to: "/profile" });
+    try { localStorage.setItem("vita.has_account", "1"); } catch {}
+    navigate({ to: "/profile", replace: true });
   }
 
   return (
