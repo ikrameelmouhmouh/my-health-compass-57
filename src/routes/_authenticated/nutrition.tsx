@@ -27,6 +27,7 @@ function Nutrition() {
   const { day, addMeal } = useDayLog();
   const [open, setOpen] = useState(false);
   const [defaultMealType, setDefaultMealType] = useState<MealType | undefined>();
+  const [autoOpenScan, setAutoOpenScan] = useState(false);
   const [dateOffset, setDateOffset] = useState(0);
 
   const { data: profile } = useQuery({
