@@ -154,15 +154,41 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
           )}
           {step === 5 && (
             <Section title={t("wiz.q5.title")} subtitle={t("wiz.q5.sub")}>
-              <Grid>{FREQ.map((n) => <Pill key={n} active={frequency === n} onClick={() => setFrequency(n)}>{n} {n === 1 ? t("wiz.q5.day") : t("wiz.q5.days")}</Pill>)}</Grid>
+              <Grid>{FREQ.map((n) => <Pill key={n} active={frequency === n} onClick={() => { setFrequency(n); if (trainingDays.length > n) setTrainingDays(trainingDays.slice(0, n)); }}>{n} {n === 1 ? t("wiz.q5.day") : t("wiz.q5.days")}</Pill>)}</Grid>
             </Section>
           )}
           {step === 6 && (
+            <Section title={t("wiz.q5b.title")} subtitle={t("wiz.q5b.sub", { n: frequency })}>
+              <Grid>
+                {WEEK_DAYS.map((d) => {
+                  const active = trainingDays.includes(d);
+                  const full = trainingDays.length >= frequency && !active;
+                  return (
+                    <Pill
+                      key={d}
+                      active={active}
+                      multi
+                      onClick={() => {
+                        if (active) setTrainingDays(trainingDays.filter((x) => x !== d));
+                        else if (!full) setTrainingDays([...trainingDays, d]);
+                      }}
+                    >
+                      <span className={full ? "opacity-40" : ""}>{t(`day.${d}`)}</span>
+                    </Pill>
+                  );
+                })}
+              </Grid>
+              <p className="mt-3 text-xs text-muted-foreground">
+                {t("wiz.q5b.pick_n", { n: Math.max(0, frequency - trainingDays.length) })}
+              </p>
+            </Section>
+          )}
+          {step === 7 && (
             <Section title={t("wiz.q6.title")} subtitle={t("wiz.q6.sub")}>
               <Grid>{FOCUS.map((g) => <Pill key={g} active={focusAreas.includes(g)} onClick={() => toggle(focusAreas, g, setFocusAreas)} multi>{t(`wiz.focus.${g}`)}</Pill>)}</Grid>
             </Section>
           )}
-          {step === 7 && (
+          {step === 8 && (
             <Section title={t("wiz.q7.title")} subtitle={t("wiz.q7.sub")}>
               <div className="space-y-3">
                 <div>
