@@ -7,10 +7,31 @@ export type Notification = {
   type: string;
   title: string;
   body: string;
-  meta: Record<string, unknown>;
+  advice: string | null;
   read: boolean;
   created_at: string;
 };
+
+function mapRow(r: {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  meta: unknown;
+  read: boolean;
+  created_at: string;
+}): Notification {
+  const meta = (r.meta ?? {}) as { advice?: unknown };
+  return {
+    id: r.id,
+    type: r.type,
+    title: r.title,
+    body: r.body,
+    advice: typeof meta.advice === "string" ? meta.advice : null,
+    read: r.read,
+    created_at: r.created_at,
+  };
+}
 
 export const listNotifications = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -21,7 +42,7 @@ export const listNotifications = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(50);
     if (error) throw new Error(error.message);
-    return (data ?? []) as Notification[];
+    return (data ?? []).map(mapRow);
   });
 
 export const markRead = createServerFn({ method: "POST" })
