@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { Camera, Menu, Plus, Send, Square } from "lucide-react";
+import { Camera, Dumbbell, Loader2, Menu, Plus, Send, Square } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ import { useT, useI18n } from "@/lib/i18n";
 import { getThreadMessages } from "@/lib/chat.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
+import { extractWorkoutTemplates } from "@/lib/coach-extract.functions";
+import { useTemplates, newTemplate } from "@/lib/workout-prefs";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -115,6 +117,79 @@ function getMessageText(message: UIMessage) {
 function assistantTextCount(messages: UIMessage[]) {
   return messages.filter((message) => message.role === "assistant" && getMessageText(message))
     .length;
+}
+
+function looksLikeWorkout(text: string): boolean {
+  if (!text || text.length < 60) return false;
+  const lower = text.toLowerCase();
+  const exerciseHits = [
+    "squat", "push-up", "pushup", "push up", "lunge", "deadlift", "row", "press",
+    "plank", "glute bridge", "curl", "pull-up", "pullup", "leg raise", "burpee",
+    "shoulder press", "bench", "kettlebell",
+  ].filter((k) => lower.includes(k)).length;
+  const structureHit = /\b(sets?|reps?|herhalingen|series|wiederholungen|répétitions|repeticiones|تكرار)\b/i.test(text);
+  return exerciseHits >= 2 && structureHit;
+}
+
+function AddWorkoutButton({
+  text,
+  t,
+  onAdded,
+}: {
+  text: string;
+  t: (k: string) => string;
+  onAdded: () => void;
+}) {
+  const navigate = useNavigate();
+  const { upsert } = useTemplates();
+  const [busy, setBusy] = useState(false);
+
+  async function handleClick() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await extractWorkoutTemplates({ data: { text } });
+      const templates = res.templates ?? [];
+      if (templates.length === 0) {
+        toast.error(t("chat.addworkout.none"));
+        return;
+      }
+      for (const tpl of templates) {
+        upsert(
+          newTemplate({
+            name: tpl.name,
+            day: tpl.day,
+            focus: tpl.focus,
+            exercises: tpl.exercises ?? [],
+          }),
+        );
+      }
+      toast.success(
+        templates.length === 1
+          ? t("chat.addworkout.success_one")
+          : t("chat.addworkout.success_many").replace("{n}", String(templates.length)),
+      );
+      onAdded();
+      navigate({ to: "/fitness" });
+    } catch (e) {
+      console.error("[ai-coach] extract failed", e);
+      toast.error(t("chat.addworkout.error"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={busy}
+      className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/10 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-brand/20 disabled:opacity-60"
+    >
+      {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Dumbbell className="size-3.5" />}
+      {t("chat.addworkout.cta")}
+    </button>
+  );
 }
 
 function VitaAvatar({ size = 64 }: { size?: number }) {
@@ -594,8 +669,13 @@ export function ChatScreen({
                       )}
                     </div>
                   ) : (
-                    <div className="prose prose-sm dark:prose-invert max-w-[90%] text-foreground prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-headings:my-2">
-                      <ReactMarkdown>{text || " "}</ReactMarkdown>
+                    <div className="flex max-w-[90%] flex-col items-start">
+                      <div className="prose prose-sm dark:prose-invert text-foreground prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-headings:my-2">
+                        <ReactMarkdown>{text || " "}</ReactMarkdown>
+                      </div>
+                      {looksLikeWorkout(text) && (
+                        <AddWorkoutButton text={text} t={t} onAdded={() => {}} />
+                      )}
                     </div>
                   )}
                 </div>
