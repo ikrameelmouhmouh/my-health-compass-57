@@ -30,11 +30,12 @@ type Props = {
     food: FoodItem; servingCount: number; serving: FoodServing; mealType: MealType;
   }) => void;
   defaultMealType?: MealType;
+  autoOpenScan?: boolean;
 };
 
 type Tab = "all" | "favorites" | "custom";
 
-export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }: Props) {
+export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType, autoOpenScan }: Props) {
   const { t } = useI18n();
   const [tab, setTab] = useState<Tab>("all");
   const [query, setQuery] = useState("");
@@ -57,8 +58,11 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType }:
       setResults([]);
       setTab("all");
       setCustomOpen(false);
+    } else if (autoOpenScan) {
+      setScanOpen(true);
     }
-  }, [open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, autoOpenScan]);
 
   useEffect(() => {
     if (tab !== "all") return;

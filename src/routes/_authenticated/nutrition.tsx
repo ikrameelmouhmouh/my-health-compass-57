@@ -7,6 +7,7 @@ import {
   Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
 } from "lucide-react";
 import { FoodLogDialog } from "@/components/food-log-dialog";
+import { NutritionSpeedDial } from "@/components/nutrition-speed-dial";
 import {
   useMeals, MEAL_TYPES,
   type MealType, type LoggedMeal,
@@ -26,6 +27,7 @@ function Nutrition() {
   const { day, addMeal } = useDayLog();
   const [open, setOpen] = useState(false);
   const [defaultMealType, setDefaultMealType] = useState<MealType | undefined>();
+  const [autoOpenScan, setAutoOpenScan] = useState(false);
   const [dateOffset, setDateOffset] = useState(0);
 
   const { data: profile } = useQuery({
@@ -62,8 +64,16 @@ function Nutrition() {
 
   function openFor(mt?: MealType) {
     setDefaultMealType(mt);
+    setAutoOpenScan(false);
     setOpen(true);
   }
+
+  function openScan() {
+    setDefaultMealType(undefined);
+    setAutoOpenScan(true);
+    setOpen(true);
+  }
+
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
@@ -167,19 +177,14 @@ function Nutrition() {
       )}
 
       {isToday && (
-        <button
-          onClick={() => openFor(undefined)}
-          className="fixed bottom-24 right-5 z-40 grid size-14 place-items-center rounded-full bg-brand text-brand-foreground shadow-lg shadow-brand/40 transition active:scale-95"
-          aria-label={t("nutr.fab")}
-        >
-          <Plus className="size-6" />
-        </button>
+        <NutritionSpeedDial onAddMeal={() => openFor(undefined)} onScan={openScan} />
       )}
 
       <FoodLogDialog
         open={open}
         onOpenChange={setOpen}
         defaultMealType={defaultMealType}
+        autoOpenScan={autoOpenScan}
         onLogged={(entry) => {
           logMeal({ food: entry.food, serving: entry.serving, servingCount: entry.servingCount, mealType: entry.mealType });
           if (isToday) addMeal({ kcal: entry.kcal, protein: entry.protein, carbs: entry.carbs, fat: entry.fat });
