@@ -2,12 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Settings, Sliders,
   Apple, Timer, Dumbbell, LineChart, Droplet, Footprints, Flame,
   Plus, Minus, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
-  CheckCircle2, Circle, Scale, ArrowUpRight,
+  CheckCircle2, Circle, Scale, ArrowUpRight, Bell,
 } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
 import {
@@ -25,6 +25,10 @@ import {
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
 import { RetentionSection } from "@/components/retention-section";
+import { NotificationsSheet, useNotifications } from "@/components/notifications-sheet";
+import { AuraTipStrip } from "@/components/aura-tip-strip";
+import { useServerFn } from "@tanstack/react-start";
+import { ensureTodayAura } from "@/lib/notifications.functions";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({ meta: [{ title: "Today — Vita" }] }),
@@ -48,7 +52,10 @@ function Profile() {
   const { prefs: caloriePrefs, toggleMode: toggleCalorieMode } = useCaloriePrefs();
   const { logMeal } = useMeals();
 
-  const [openSheet, setOpenSheet] = useState<null | "water" | "weight" | "food" | "workout" | "customize">(null);
+  const [openSheet, setOpenSheet] = useState<null | "water" | "weight" | "food" | "workout" | "customize" | "notifications">(null);
+  const { data: notifications = [] } = useNotifications();
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const ensureAuraFn = useServerFn(ensureTodayAura);
 
   const { data, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
@@ -131,6 +138,46 @@ function Profile() {
     : 0;
 
   const greeting = greetingFor(new Date(), t);
+
+  // Compute Aura insight strings from today's data (same logic as the old card).
+  const aura = useMemo(() => {
+    const steps = day.steps;
+    const stepGoal = STEP_GOAL;
+    const caloriesIn = day.caloriesIn;
+    const caloriesOut = day.caloriesOut;
+    const waterMl = day.waterMl;
+    const waterGoal = WATER_GOAL_ML;
+    const stepsLow = steps < stepGoal * 0.5;
+    const stepsOk = steps >= stepGoal * 0.8;
+    const waterLow = waterMl < waterGoal * 0.5;
+    const remaining = Math.max(0, calorieTarget - caloriesIn + Math.round(caloriesOut * 0.5));
+    const recommended = Math.max(0, Math.round(calorieTarget + caloriesOut * 0.5));
+    const facts: string[] = [];
+    if (steps > 0) facts.push(t("today.aura.fact_steps", { n: steps.toLocaleString() }));
+    if (fastInfo.active) facts.push(t("today.aura.fact_fast", { n: Math.floor(fastInfo.hoursElapsed) }));
+    if (caloriesOut > 0) facts.push(t("today.aura.fact_burn", { n: caloriesOut }));
+    if (caloriesIn > 0) facts.push(t("today.aura.fact_eaten", { n: caloriesIn }));
+    const summary = facts.length === 0
+      ? t("today.aura.empty")
+      : t("today.aura.summary", { facts: facts.join(" · ") });
+    let tip = t("today.aura.tip_default");
+    if (stepsLow) tip = t("today.aura.tip_steps");
+    else if (waterLow) tip = t("today.aura.tip_water");
+    else if (stepsOk && remaining < calorieTarget * 0.2) tip = t("today.aura.tip_lowcal");
+    const advice = `${t("today.aura.advice_kcal", { n: recommended.toLocaleString() })} ${tip}`;
+    return { title: t("today.aura.title"), body: summary, advice, tip };
+  }, [day.steps, day.caloriesIn, day.caloriesOut, day.waterMl, calorieTarget, fastInfo.active, fastInfo.hoursElapsed, t]);
+
+  // Ensure today's Aura insight is stored as a notification (once per day per user).
+  const ensuredRef = useRef<string | null>(null);
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    if (ensuredRef.current === today) return;
+    ensuredRef.current = today;
+    ensureAuraFn({ data: { title: aura.title, body: aura.body, advice: aura.advice } }).catch(() => {
+      ensuredRef.current = null;
+    });
+  }, [aura.title, aura.body, aura.advice, ensureAuraFn]);
 
   const visibleCards = prefs.order.filter((c) => !prefs.hidden.includes(c));
 
@@ -274,6 +321,14 @@ function Profile() {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          <IconBtn aria-label={t("notif.open")} onClick={() => setOpenSheet("notifications")} className="relative">
+            <Bell className="size-[18px]" strokeWidth={2} />
+            {unreadCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 grid min-w-[16px] h-[16px] place-items-center rounded-full bg-brand px-1 text-[9px] font-bold leading-none text-brand-foreground">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </IconBtn>
           <IconBtn aria-label={t("today.customize")} onClick={() => setOpenSheet("customize")}>
             <Sliders className="size-[18px]" strokeWidth={2} />
           </IconBtn>
@@ -312,17 +367,9 @@ function Profile() {
         </div>
       )}
 
-      <AuraInsightCard
-        steps={day.steps}
-        stepGoal={STEP_GOAL}
-        caloriesIn={day.caloriesIn}
-        caloriesOut={day.caloriesOut}
-        calorieTarget={calorieTarget}
-        waterMl={day.waterMl}
-        waterGoal={WATER_GOAL_ML}
-        fastingActive={fastInfo.active}
-        fastingHours={fastInfo.hoursElapsed}
-      />
+      <AuraTipStrip tip={aura.tip} onOpen={() => setOpenSheet("notifications")} />
+
+
 
 
       <section className="mt-5 space-y-3">
@@ -385,16 +432,21 @@ function Profile() {
         initial={workout}
         onSubmit={(w) => { saveWorkout(w); setOpenSheet(null); }}
       />
+
+      <NotificationsSheet
+        open={openSheet === "notifications"}
+        onOpenChange={(o) => !o && setOpenSheet(null)}
+      />
     </main>
   );
 }
 
 /* ------------------------------- UI Helpers ------------------------------- */
-function IconBtn({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+function IconBtn({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       {...props}
-      className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-card transition hover:bg-accent"
+      className={`inline-flex size-9 items-center justify-center rounded-full border border-border bg-card transition hover:bg-accent ${className ?? ""}`}
     >
       {children}
     </button>
@@ -806,56 +858,6 @@ function WorkoutCard({ workout, completed, onCreate, onStart, onClear }: {
   );
 }
 
-function AuraInsightCard({
-  steps, stepGoal, caloriesIn, caloriesOut, calorieTarget, waterMl, waterGoal, fastingActive, fastingHours,
-}: {
-  steps: number; stepGoal: number; caloriesIn: number; caloriesOut: number; calorieTarget: number;
-  waterMl: number; waterGoal: number; fastingActive: boolean; fastingHours: number;
-}) {
-  const t = useT();
-  const stepsLow = steps < stepGoal * 0.5;
-  const stepsOk = steps >= stepGoal * 0.8;
-  const waterLow = waterMl < waterGoal * 0.5;
-  const remaining = Math.max(0, calorieTarget - caloriesIn + Math.round(caloriesOut * 0.5));
-  const recommended = Math.max(0, Math.round(calorieTarget + caloriesOut * 0.5));
-
-  // Build a friendly Aura summary from today's data.
-  const facts: string[] = [];
-  if (steps > 0) facts.push(t("today.aura.fact_steps", { n: steps.toLocaleString() }));
-  if (fastingActive) facts.push(t("today.aura.fact_fast", { n: Math.floor(fastingHours) }));
-  if (caloriesOut > 0) facts.push(t("today.aura.fact_burn", { n: caloriesOut }));
-  if (caloriesIn > 0) facts.push(t("today.aura.fact_eaten", { n: caloriesIn }));
-
-  const summary = facts.length === 0
-    ? t("today.aura.empty")
-    : t("today.aura.summary", { facts: facts.join(" · ") });
-
-  let tip = t("today.aura.tip_default");
-  if (stepsLow) tip = t("today.aura.tip_steps");
-  else if (waterLow) tip = t("today.aura.tip_water");
-  else if (stepsOk && remaining < calorieTarget * 0.2) tip = t("today.aura.tip_lowcal");
-
-  return (
-    <section className="mt-4 overflow-hidden rounded-3xl border border-brand/25 bg-gradient-to-br from-brand/10 via-card to-card p-4">
-      <div className="flex items-start gap-3">
-        <div className="grid size-9 shrink-0 place-items-center rounded-2xl bg-brand/20 text-brand">
-          <span className="text-base">✨</span>
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="font-display text-sm font-semibold tracking-tight">{t("today.aura.title")}</h3>
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("today.aura.badge")}</span>
-          </div>
-          <p className="mt-1 text-[12.5px] leading-snug text-foreground/90">{summary}</p>
-          <p className="mt-2 text-[12px] leading-snug text-muted-foreground">
-            <span className="font-semibold text-foreground">{t("today.aura.advice")}: </span>
-            {t("today.aura.advice_kcal", { n: recommended.toLocaleString() })} {tip}
-          </p>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 
 function GoalsCard({ nutrition, water, steps, workout, overall }: {
