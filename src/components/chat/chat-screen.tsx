@@ -119,6 +119,79 @@ function assistantTextCount(messages: UIMessage[]) {
     .length;
 }
 
+function looksLikeWorkout(text: string): boolean {
+  if (!text || text.length < 60) return false;
+  const lower = text.toLowerCase();
+  const exerciseHits = [
+    "squat", "push-up", "pushup", "push up", "lunge", "deadlift", "row", "press",
+    "plank", "glute bridge", "curl", "pull-up", "pullup", "leg raise", "burpee",
+    "shoulder press", "bench", "kettlebell",
+  ].filter((k) => lower.includes(k)).length;
+  const structureHit = /\b(sets?|reps?|herhalingen|series|wiederholungen|répétitions|repeticiones|تكرار)\b/i.test(text);
+  return exerciseHits >= 2 && structureHit;
+}
+
+function AddWorkoutButton({
+  text,
+  t,
+  onAdded,
+}: {
+  text: string;
+  t: (k: string) => string;
+  onAdded: () => void;
+}) {
+  const navigate = useNavigate();
+  const { upsert } = useTemplates();
+  const [busy, setBusy] = useState(false);
+
+  async function handleClick() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const res = await extractWorkoutTemplates({ data: { text } });
+      const templates = res.templates ?? [];
+      if (templates.length === 0) {
+        toast.error(t("chat.addworkout.none"));
+        return;
+      }
+      for (const tpl of templates) {
+        upsert(
+          newTemplate({
+            name: tpl.name,
+            day: tpl.day,
+            focus: tpl.focus,
+            exercises: tpl.exercises ?? [],
+          }),
+        );
+      }
+      toast.success(
+        templates.length === 1
+          ? t("chat.addworkout.success_one")
+          : t("chat.addworkout.success_many").replace("{n}", String(templates.length)),
+      );
+      onAdded();
+      navigate({ to: "/fitness" });
+    } catch (e) {
+      console.error("[ai-coach] extract failed", e);
+      toast.error(t("chat.addworkout.error"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={busy}
+      className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/10 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-brand/20 disabled:opacity-60"
+    >
+      {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Dumbbell className="size-3.5" />}
+      {t("chat.addworkout.cta")}
+    </button>
+  );
+}
+
 function VitaAvatar({ size = 64 }: { size?: number }) {
   return (
     <div
