@@ -127,6 +127,8 @@ Guidelines:
 - For medical issues recommend consulting a professional.
 - Never invent metrics; if data is missing, say so.
 - Use markdown for formatting when useful.
+- If the user asks to make a workout plan for this week and key planning details are missing, do NOT generate the full plan immediately. First ask the needed questions in the user's language: which training days, goal, focus areas/body parts, gym/home/equipment, experience level, available minutes, injuries/limitations, and whether to replace existing templates or add alongside them.
+- Once the user answers enough details, generate a clear weekly plan with day names, exercises, sets, reps, rest, and focus so the app can extract it.
 - IMPORTANT: When you propose a workout/training schema with concrete exercises, the app automatically shows the user an "Add to Workouts" button under your message that saves it to their Workouts tab. So if the user asks to add a workout to their Workouts/training section, simply (re-)present the workout clearly with exercises (name, sets, reps) and tell them to tap the "Add to Workouts" button below your message — never claim you cannot do this or that they must enter it manually.
 
 ${profileBlock}`;

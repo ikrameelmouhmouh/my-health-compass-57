@@ -97,22 +97,14 @@ function Profile() {
     return () => clearInterval(id);
   }, [fasting.startedAt]);
 
-  if (isLoading || !data?.profile?.onboarding_completed) {
-    return (
-      <div className="grid min-h-[100dvh] place-items-center bg-background">
-        <div className="size-6 animate-spin rounded-full border-2 border-border border-t-brand" />
-      </div>
-    );
-  }
-
-  const p = data.profile;
-  const sub = data.subscription;
+  const p = data?.profile;
+  const sub = data?.subscription;
   const isPremium = !!sub && ["active", "trialing", "past_due"].includes(sub.status) && (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
 
-  const calorieTarget = p.daily_calories ?? 0;
-  const proteinTarget = p.protein_g ?? 0;
-  const carbsTarget = p.carbs_g ?? 0;
-  const fatTarget = p.fat_g ?? 0;
+  const calorieTarget = p?.daily_calories ?? 0;
+  const proteinTarget = p?.protein_g ?? 0;
+  const carbsTarget = p?.carbs_g ?? 0;
+  const fatTarget = p?.fat_g ?? 0;
 
   const budget = calcCalorieBudget({
     target: calorieTarget,
@@ -131,11 +123,11 @@ function Profile() {
     (Math.min(waterPct, 100) + Math.min(stepsPct, 100) + Math.min(nutritionPct, 100) + (day.workoutCompleted ? 100 : 0)) / 4
   );
 
-  const currentWeight = weights.at(-1)?.kg ?? Number(p.current_weight_kg ?? 0);
-  const previousWeight = weights.at(-2)?.kg ?? Number(p.current_weight_kg ?? currentWeight);
+  const currentWeight = weights.at(-1)?.kg ?? Number(p?.current_weight_kg ?? 0);
+  const previousWeight = weights.at(-2)?.kg ?? Number(p?.current_weight_kg ?? currentWeight);
   const weightDelta = +(currentWeight - previousWeight).toFixed(1);
-  const goalWeight = Number(p.goal_weight_kg ?? currentWeight);
-  const startWeight = Number(p.current_weight_kg ?? currentWeight);
+  const goalWeight = Number(p?.goal_weight_kg ?? currentWeight);
+  const startWeight = Number(p?.current_weight_kg ?? currentWeight);
   const goalProgress = goalWeight !== startWeight
     ? Math.max(0, Math.min(100, ((startWeight - currentWeight) / (startWeight - goalWeight)) * 100))
     : 0;
@@ -174,15 +166,24 @@ function Profile() {
   // Ensure today's Aura insight is stored as a notification (once per day per user).
   const ensuredRef = useRef<string | null>(null);
   useEffect(() => {
+    if (isLoading || !p?.onboarding_completed) return;
     const today = new Date().toISOString().slice(0, 10);
     if (ensuredRef.current === today) return;
     ensuredRef.current = today;
     ensureAuraFn({ data: { title: aura.title, body: aura.body, advice: aura.advice } }).catch(() => {
       ensuredRef.current = null;
     });
-  }, [aura.title, aura.body, aura.advice, ensureAuraFn]);
+  }, [isLoading, p?.onboarding_completed, aura.title, aura.body, aura.advice, ensureAuraFn]);
 
   const visibleCards = prefs.order.filter((c) => !prefs.hidden.includes(c));
+
+  if (isLoading || !p?.onboarding_completed) {
+    return (
+      <div className="grid min-h-[100dvh] place-items-center bg-background">
+        <div className="size-6 animate-spin rounded-full border-2 border-border border-t-brand" />
+      </div>
+    );
+  }
 
   const PAIRS: Array<[DashCardId, DashCardId]> = [
     ["water", "steps"],

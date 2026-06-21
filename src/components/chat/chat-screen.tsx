@@ -249,7 +249,7 @@ function ChipRow({
   onPickPhoto,
   t,
 }: {
-  onPick: (label: string, prompt: string) => void;
+  onPick: (key: string, prompt: string) => void;
   onPickPhoto: () => void;
   t: (k: string, v?: Record<string, string | number>) => string;
 }) {
@@ -262,7 +262,7 @@ function ChipRow({
             type="button"
             onClick={() => {
               if (q.scan) onPickPhoto();
-              else onPick(t(q.labelKey), t(q.promptKey));
+              else onPick(q.key, t(q.promptKey));
             }}
             className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-border bg-card px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
@@ -634,14 +634,9 @@ export function ChatScreen({
     void sendNow(final, file);
   }
 
-  const navigate = useNavigate();
-  function handlePick(label: string, prompt: string) {
+  function handlePick(_key: string, prompt: string) {
     if (isBusy) return;
-    // "Maak workoutplan" opens the guided wizard (vragen-flow) instead of streaming a flat plan.
-    if (label === t("chat.quick.workout")) {
-      navigate({ to: "/fitness", search: { wizard: 1 } as never });
-      return;
-    }
+    // Workout plans should stay in chat first, so the coach can ask the missing questions.
     void sendQuick(prompt);
   }
 
