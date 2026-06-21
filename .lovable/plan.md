@@ -1,42 +1,20 @@
-## 1. Featured workouts op Workouts-tab
+## Doel
+De drie featured workouts op het Workouts-scherm krijgen nieuwe, anatomisch correcte afbeeldingen, zodat ze er meteen professioneel uitzien.
 
-In `src/routes/_authenticated/fitness.tsx` (regel 388) `EXERCISES.slice(0, 6)` vervangen door een vaste, gecureerde lijst op basis van ID's, in deze volgorde:
+## Wat er mis is
+- **Leg Press (`wide-leg-press-0.jpg`)**: voeten raken het voetplaatform niet — drukken "tegen niks aan".
+- **Shoulder Press (`overhead-press-0.jpg`)**: gewichten ontbreken op de stang.
+- **Deadlift (`deadlift-0.jpg`)**: niet realistisch / klopt niet.
 
-1. `barbell-squat` (Squat)
-2. `barbell-bench-press` (Bench Press)
-3. `deadlift` (Deadlift)
-4. `lat-pulldown` (Lat Pulldown)
-5. `wide-leg-press` (Leg Press)
-6. `overhead-press` (Shoulder Press)
+## Aanpak
+Ik genereer 3 nieuwe afbeeldingen met `imagegen` (premium tier voor anatomische precisie) en vervang de bestaande bestanden op dezelfde paden — geen code-wijzigingen nodig, alle imports blijven werken.
 
-De overige featured oefeningen (Romanian Deadlift, Leg Extension, Lying Leg Curl, Barbell Hip Thrust, Calf Raise, Incline DB Press, …) blijven gewoon vindbaar in de volledige bibliotheek via de "All / 509 exercises"-knop. Er wordt niets uit `EXERCISES` verwijderd, alleen de preview-selectie verandert.
+Bestanden die vervangen worden:
+- `src/assets/exercises/wide-leg-press-0.jpg` — atleet zit in 45° leg press machine, beide voeten **stevig plat op het voetplaatform**, knieën in lijn met tenen, gewichtsplaten zichtbaar op de slede.
+- `src/assets/exercises/overhead-press-0.jpg` — staande barbell overhead press, **duidelijke gewichtsplaten aan beide kanten** van de stang, stang net boven het hoofd.
+- `src/assets/exercises/deadlift-0.jpg` — barbell deadlift vanaf de vloer, correcte vorm: rechte rug, heupen scharnierend, gewichtsplaten op de stang, stang dicht tegen scheenbenen.
 
-> Let op: in de screenshot staat "Leg Press" als #5. In de huidige featured-set bestaat geen kale "Leg Press" met 3D-frames; `wide-leg-press` is de meest passende leg-press variant met afbeeldingen. Als je liever een echte "Leg Press" tegel wilt, kan ik daar een nieuw featured-item met frames voor laten genereren — geef dat dan even aan.
+Stijl blijft consistent met de andere featured plaatjes (zelfde gym-sfeer / belichting / framing).
 
-## 2. Inlogscherm alleen na expliciet uitloggen
-
-Gewenste flow:
-- Eerste keer: taal → intro → welcome → register/login (zoals nu).
-- Na succesvol inloggen/registreren: app onthoudt dit en opent voortaan **direct het Home-scherm** (`/profile`, dat is de Home-tab in de bottom nav).
-- Sessie blijft bewaard (Supabase doet dat al via localStorage), dus er hoeft niets opnieuw ingevoerd te worden.
-- Alleen wanneer de gebruiker in **Instellingen → Uitloggen** drukt, komt het email/wachtwoord-scherm terug.
-
-Implementatie:
-- Nieuwe localStorage-vlag `vita.has_account` wordt gezet bij geslaagde `signInWithPassword` / `signUp` in `src/routes/login.tsx` en `src/routes/register.tsx`.
-- `src/routes/index.tsx`: als er een actieve Supabase-sessie is → direct naar `/profile`. Anders huidige logica (taalkeuze / intro / welcome).
-- `src/routes/welcome.tsx`: bij mount checken of er een sessie is → redirect naar `/profile`.
-- `src/routes/_authenticated.tsx`: als er geen sessie is, redirect naar `/login` alleen wanneer `vita.has_account` gezet is (sessie verlopen of expliciet uitgelogd). Anders naar `/welcome` (nieuwe gebruiker die per ongeluk een protected URL opent).
-- Sign-out in Instellingen (`src/routes/_authenticated/settings.tsx`): bij uitloggen `vita.has_account` behouden (zodat we naar `/login` gaan, niet `/welcome`) en navigeren naar `/login`. Na succesvolle `signOut()` direct `navigate({ to: "/login", replace: true })`.
-- Na login/register navigeren naar `/profile` in plaats van blijven hangen op auth-pagina (login doet dit al, register checken).
-
-Resultaat: de allereerste keer zien gebruikers eenmalig het inlogscherm; daarna opent de app altijd op het Home-scherm tot ze expliciet uitloggen via Instellingen.
-
-## Bestanden die gewijzigd worden
-
-- `src/routes/_authenticated/fitness.tsx` — featured selectie
-- `src/routes/index.tsx` — session-check + redirect naar `/profile`
-- `src/routes/welcome.tsx` — session-check + redirect naar `/profile`
-- `src/routes/_authenticated.tsx` — redirect-doel afhankelijk van `vita.has_account`
-- `src/routes/login.tsx` — `vita.has_account` flag zetten
-- `src/routes/register.tsx` — `vita.has_account` flag zetten + navigate
-- `src/routes/_authenticated/settings.tsx` — sign-out flow naar `/login`
+## Vraag voor jou
+Wil je dat ik ook de `-1.jpg` varianten (tweede afbeelding per oefening) vervang, of alleen de `-0.jpg` die als preview op het Workouts-scherm verschijnt?
