@@ -634,14 +634,9 @@ export function ChatScreen({
     void sendNow(final, file);
   }
 
-  const navigate = useNavigate();
-  function handlePick(label: string, prompt: string) {
+  function handlePick(key: string, prompt: string) {
     if (isBusy) return;
-    // "Maak workoutplan" opens the guided wizard (vragen-flow) instead of streaming a flat plan.
-    if (label === t("chat.quick.workout")) {
-      navigate({ to: "/fitness", search: { wizard: 1 } as never });
-      return;
-    }
+    // Workout plans should stay in chat first, so the coach can ask the missing questions.
     void sendQuick(prompt);
   }
 
