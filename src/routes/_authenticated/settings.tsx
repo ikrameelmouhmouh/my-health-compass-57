@@ -4,9 +4,11 @@ import { useTheme } from "@/lib/theme-context";
 import { LANGUAGES, useI18n, useT, type Language } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { getWidgetCredentials } from "@/lib/widget.functions";
 import {
   ChevronLeft, ChevronRight, Sun, Moon, Globe, LogOut, Check,
-  Sparkles, RefreshCw,
+  Sparkles, RefreshCw, LayoutGrid, Copy,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -160,6 +162,10 @@ function SettingsPage() {
           <Row icon={RefreshCw} label={t("set.recalc")} sub={t("set.recalc_sub")} />
         </button>
       </Group>
+
+      {/* Widget */}
+      <SectionLabel>{t("set.section.widget")}</SectionLabel>
+      <WidgetCard />
 
       {/* Account */}
       <SectionLabel>{t("set.section.account")}</SectionLabel>
