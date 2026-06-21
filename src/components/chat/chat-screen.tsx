@@ -428,10 +428,12 @@ export function ChatScreen({
   const t = useT();
   const { lang } = useI18n();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [quickBusy, setQuickBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   // threadId state — null when this is a brand-new draft chat.
   const [threadId, setThreadId] = useState<string | null>(initialThreadId ?? null);
@@ -634,11 +636,15 @@ export function ChatScreen({
     void sendNow(final, file);
   }
 
-  function handlePick(_key: string, prompt: string) {
+  function handlePick(key: string, prompt: string) {
     if (isBusy) return;
-    // Workout plans should stay in chat first, so the coach can ask the missing questions.
+    if (key === "workout") {
+      navigate({ to: "/fitness", search: { wizard: 1 } });
+      return;
+    }
     void sendQuick(prompt);
   }
+
 
   function handlePickPhoto() {
     fileInputRef.current?.click();
