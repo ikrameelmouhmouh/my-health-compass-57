@@ -64,8 +64,16 @@ function Nutrition() {
 
   function openFor(mt?: MealType) {
     setDefaultMealType(mt);
+    setAutoOpenScan(false);
     setOpen(true);
   }
+
+  function openScan() {
+    setDefaultMealType(undefined);
+    setAutoOpenScan(true);
+    setOpen(true);
+  }
+
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
