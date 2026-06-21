@@ -62,8 +62,9 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
       case 3: return !!location;
       case 4: return !showEquipStep || equipment.length > 0;
       case 5: return frequency > 0;
-      case 6: return true;
+      case 6: return trainingDays.length === frequency;
       case 7: return true;
+      case 8: return true;
       default: return false;
     }
   })();
