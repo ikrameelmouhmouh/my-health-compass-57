@@ -177,19 +177,14 @@ function Nutrition() {
       )}
 
       {isToday && (
-        <button
-          onClick={() => openFor(undefined)}
-          className="fixed bottom-24 right-5 z-40 grid size-14 place-items-center rounded-full bg-brand text-brand-foreground shadow-lg shadow-brand/40 transition active:scale-95"
-          aria-label={t("nutr.fab")}
-        >
-          <Plus className="size-6" />
-        </button>
+        <NutritionSpeedDial onAddMeal={() => openFor(undefined)} onScan={openScan} />
       )}
 
       <FoodLogDialog
         open={open}
         onOpenChange={setOpen}
         defaultMealType={defaultMealType}
+        autoOpenScan={autoOpenScan}
         onLogged={(entry) => {
           logMeal({ food: entry.food, serving: entry.serving, servingCount: entry.servingCount, mealType: entry.mealType });
           if (isToday) addMeal({ kcal: entry.kcal, protein: entry.protein, carbs: entry.carbs, fat: entry.fat });
