@@ -428,10 +428,12 @@ export function ChatScreen({
   const t = useT();
   const { lang } = useI18n();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [quickBusy, setQuickBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
 
   // threadId state — null when this is a brand-new draft chat.
   const [threadId, setThreadId] = useState<string | null>(initialThreadId ?? null);
