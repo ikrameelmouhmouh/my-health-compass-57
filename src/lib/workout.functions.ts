@@ -70,11 +70,15 @@ Include all 7 days (Monday-Sunday). Rest days have rest:true and exercises:[].
 Match the user's frequency exactly (number of non-rest days).
 Suggested weight: use bodyweight, RPE, or relative descriptors (e.g. "moderate, RPE 7", "bodyweight", "~60% 1RM").`;
 
+    const trainingDaysLine = data.trainingDays && data.trainingDays.length > 0
+      ? `Training days (use EXACTLY these as non-rest days, rest on all others): ${data.trainingDays.join(", ")}`
+      : `Training days per week: ${data.frequency} (choose sensible non-rest days)`;
+
     const user = `Goal: ${data.goal}
 Experience: ${data.experience}
 Location: ${data.location}
 Equipment: ${data.equipment.join(", ") || "n/a"}
-Training days per week: ${data.frequency}
+${trainingDaysLine}
 Focus areas (prioritize): ${data.focusAreas.join(", ") || "balanced"}
 Preferred session duration: ${data.duration ? `${data.duration} min` : "any"}
 Injuries/limitations: ${data.injuries || "none"}
