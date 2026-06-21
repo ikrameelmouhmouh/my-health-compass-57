@@ -25,9 +25,49 @@ const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
 
 function FitnessPage() {
   const { stored, loaded, save, clear, toggleCompleted } = useWorkoutPlan();
+  const { templates, upsert, remove } = useTemplates();
+  const { t } = useI18n();
+  const { user } = useAuth();
   const [showWizard, setShowWizard] = useState(false);
   const [openDay, setOpenDay] = useState<string | null>(null);
   const [view, setView] = useState<View>("gym");
+  const [pendingTemplates, setPendingTemplates] = useState<WorkoutTemplate[] | null>(null);
+
+  const { data: sub } = useQuery({
+    queryKey: ["subscription", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("subscriptions").select("*").eq("user_id", user!.id).maybeSingle();
+      return data;
+    },
+  });
+  const isPremium = !!sub && ["active", "trialing", "past_due"].includes(sub.status) &&
+    (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
+
+  const handleWizardComplete = (w: Parameters<typeof save>[0], p: Parameters<typeof save>[1]) => {
+    save(w, p);
+    setShowWizard(false);
+    const newTpls = templatesFromPlan(p);
+    if (newTpls.length > 0) setPendingTemplates(newTpls);
+  };
+
+  const handleSyncChoice = (mode: "replace" | "add" | "skip") => {
+    if (!pendingTemplates) return;
+    if (mode === "replace") {
+      templates.forEach((tpl) => remove(tpl.id));
+      pendingTemplates.forEach((tpl) => upsert(tpl));
+      toast.success(t("wiz.sync.done_replace"));
+    } else if (mode === "add") {
+      pendingTemplates.forEach((tpl) => upsert(tpl));
+      toast.success(t("wiz.sync.done_add"));
+    }
+    setPendingTemplates(null);
+  };
+
+  const openWizard = () => {
+    if (!isPremium) return;
+    setShowWizard(true);
+  };
 
   if (!loaded) return <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10" />;
 
@@ -48,7 +88,7 @@ function FitnessPage() {
         <ViewTabs view={view} setView={setView} />
         {!stored && !showWizard ? (
           <>
-            <EmptyState onStart={() => setShowWizard(true)} />
+            <EmptyState onStart={openWizard} isPremium={isPremium} />
             <LibrarySection />
             <TemplatesSection />
           </>
@@ -56,25 +96,30 @@ function FitnessPage() {
           <div className="mt-6">
             <WorkoutWizard
               initial={stored?.wizard}
-              onComplete={(w, p) => { save(w, p); setShowWizard(false); }}
+              onComplete={handleWizardComplete}
               onCancel={stored ? () => setShowWizard(false) : undefined}
             />
           </div>
         )}
+        <TemplateSyncDialog open={!!pendingTemplates} count={pendingTemplates?.length ?? 0} onChoose={handleSyncChoice} />
       </main>
     );
   }
 
-  return <Dashboard
-    stored={stored}
-    onRegenerate={() => setShowWizard(true)}
-    onClear={clear}
-    toggleCompleted={toggleCompleted}
-    openDay={openDay}
-    setOpenDay={setOpenDay}
-    view={view}
-    setView={setView}
-  />;
+  return <>
+    <Dashboard
+      stored={stored}
+      onRegenerate={openWizard}
+      isPremium={isPremium}
+      onClear={clear}
+      toggleCompleted={toggleCompleted}
+      openDay={openDay}
+      setOpenDay={setOpenDay}
+      view={view}
+      setView={setView}
+    />
+    <TemplateSyncDialog open={!!pendingTemplates} count={pendingTemplates?.length ?? 0} onChoose={handleSyncChoice} />
+  </>;
 }
 
 function ViewTabs({ view, setView }: { view: View; setView: (v: View) => void }) {
