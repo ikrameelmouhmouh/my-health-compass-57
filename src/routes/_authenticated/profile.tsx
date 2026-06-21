@@ -240,7 +240,7 @@ function Profile() {
             key={id}
             workout={workout}
             completed={day.workoutCompleted}
-            onCreate={() => setOpenSheet("workout")}
+            onCreate={() => navigate({ to: "/fitness" })}
             onStart={() => update({ workoutCompleted: true })}
             onClear={() => { saveWorkout(null); update({ workoutCompleted: false }); }}
           />
@@ -287,14 +287,43 @@ function Profile() {
         </div>
       </header>
 
-      <div className="mt-3 flex items-center px-1">
-        <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1">
-          <span className={`size-1.5 rounded-full ${isPremium ? "bg-brand" : "bg-muted-foreground"}`} />
-          <span className="text-[12px] font-semibold uppercase tracking-wider">
-            {isPremium ? `Vita ${t("profile.plus")}` : t("profile.free")}
-          </span>
+      {!isPremium ? (
+        <Link
+          to="/pricing"
+          className="mt-3 flex items-center justify-between rounded-2xl border border-brand/30 bg-gradient-to-r from-brand/10 to-brand/5 px-3.5 py-2.5 ios-press"
+        >
+          <div className="flex items-center gap-2">
+            <span className="grid size-7 place-items-center rounded-full bg-brand/15 text-brand">
+              <ArrowUpRight className="size-4" />
+            </span>
+            <div>
+              <div className="text-[12px] font-semibold leading-tight">{t("today.upgrade.title")}</div>
+              <div className="text-[10px] text-muted-foreground">{t("today.upgrade.sub")}</div>
+            </div>
+          </div>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-brand">{t("today.upgrade.cta")}</span>
+        </Link>
+      ) : (
+        <div className="mt-3 flex items-center px-1">
+          <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1">
+            <span className="size-1.5 rounded-full bg-brand" />
+            <span className="text-[12px] font-semibold uppercase tracking-wider">Vita {t("profile.plus")}</span>
+          </div>
         </div>
-      </div>
+      )}
+
+      <AuraInsightCard
+        steps={day.steps}
+        stepGoal={STEP_GOAL}
+        caloriesIn={day.caloriesIn}
+        caloriesOut={day.caloriesOut}
+        calorieTarget={calorieTarget}
+        waterMl={day.waterMl}
+        waterGoal={WATER_GOAL_ML}
+        fastingActive={fastInfo.active}
+        fastingHours={fastInfo.hoursElapsed}
+      />
+
 
       <section className="mt-5 space-y-3">
         {rows.map((row, i) =>
@@ -776,6 +805,58 @@ function WorkoutCard({ workout, completed, onCreate, onStart, onClear }: {
     </CardShell>
   );
 }
+
+function AuraInsightCard({
+  steps, stepGoal, caloriesIn, caloriesOut, calorieTarget, waterMl, waterGoal, fastingActive, fastingHours,
+}: {
+  steps: number; stepGoal: number; caloriesIn: number; caloriesOut: number; calorieTarget: number;
+  waterMl: number; waterGoal: number; fastingActive: boolean; fastingHours: number;
+}) {
+  const t = useT();
+  const stepsLow = steps < stepGoal * 0.5;
+  const stepsOk = steps >= stepGoal * 0.8;
+  const waterLow = waterMl < waterGoal * 0.5;
+  const remaining = Math.max(0, calorieTarget - caloriesIn + Math.round(caloriesOut * 0.5));
+  const recommended = Math.max(0, Math.round(calorieTarget + caloriesOut * 0.5));
+
+  // Build a friendly Aura summary from today's data.
+  const facts: string[] = [];
+  if (steps > 0) facts.push(t("today.aura.fact_steps", { n: steps.toLocaleString() }));
+  if (fastingActive) facts.push(t("today.aura.fact_fast", { n: Math.floor(fastingHours) }));
+  if (caloriesOut > 0) facts.push(t("today.aura.fact_burn", { n: caloriesOut }));
+  if (caloriesIn > 0) facts.push(t("today.aura.fact_eaten", { n: caloriesIn }));
+
+  const summary = facts.length === 0
+    ? t("today.aura.empty")
+    : t("today.aura.summary", { facts: facts.join(" · ") });
+
+  let tip = t("today.aura.tip_default");
+  if (stepsLow) tip = t("today.aura.tip_steps");
+  else if (waterLow) tip = t("today.aura.tip_water");
+  else if (stepsOk && remaining < calorieTarget * 0.2) tip = t("today.aura.tip_lowcal");
+
+  return (
+    <section className="mt-4 overflow-hidden rounded-3xl border border-brand/25 bg-gradient-to-br from-brand/10 via-card to-card p-4">
+      <div className="flex items-start gap-3">
+        <div className="grid size-9 shrink-0 place-items-center rounded-2xl bg-brand/20 text-brand">
+          <span className="text-base">✨</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="font-display text-sm font-semibold tracking-tight">{t("today.aura.title")}</h3>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t("today.aura.badge")}</span>
+          </div>
+          <p className="mt-1 text-[12.5px] leading-snug text-foreground/90">{summary}</p>
+          <p className="mt-2 text-[12px] leading-snug text-muted-foreground">
+            <span className="font-semibold text-foreground">{t("today.aura.advice")}: </span>
+            {t("today.aura.advice_kcal", { n: recommended.toLocaleString() })} {tip}
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 function GoalsCard({ nutrition, water, steps, workout, overall }: {
   nutrition: number; water: number; steps: number; workout: number; overall: number;

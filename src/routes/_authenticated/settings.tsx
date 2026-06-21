@@ -153,12 +153,12 @@ function SettingsPage() {
       {/* Plan */}
       <SectionLabel>{t("set.section.plan")}</SectionLabel>
       <Group>
-        <LinkRow
-          to="/onboarding"
-          icon={RefreshCw}
-          label={t("set.recalc")}
-          sub={t("set.recalc_sub")}
-        />
+        <button
+          className="w-full"
+          onClick={() => navigate({ to: "/onboarding", search: { recalc: 1 } })}
+        >
+          <Row icon={RefreshCw} label={t("set.recalc")} sub={t("set.recalc_sub")} />
+        </button>
       </Group>
 
       {/* Account */}

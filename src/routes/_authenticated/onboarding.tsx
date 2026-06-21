@@ -14,6 +14,9 @@ import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Build your plan — Vita" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    recalc: s.recalc === "1" || s.recalc === 1 || s.recalc === true ? 1 : undefined,
+  }),
   component: Onboarding,
 });
 
@@ -47,16 +50,34 @@ function Onboarding() {
   const t = useT();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { recalc } = Route.useSearch();
+  const isRecalc = recalc === 1;
   const [step, setStep] = useState(0);
   const [state, setState] = useState<State>(initialState);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("profiles").select("onboarding_completed").eq("id", user.id).maybeSingle().then(({ data }) => {
-      if (data?.onboarding_completed) navigate({ to: "/profile", replace: true });
+    supabase.from("profiles").select("*").eq("id", user.id).maybeSingle().then(({ data }) => {
+      if (!data) return;
+      if (isRecalc) {
+        // Pre-fill from existing profile so the user can tweak and recompute.
+        setState({
+          gender: (data.gender as Gender) ?? null,
+          age: data.age ?? initialState.age,
+          heightCm: Number(data.height_cm ?? initialState.heightCm),
+          currentWeightKg: Number(data.current_weight_kg ?? initialState.currentWeightKg),
+          goalWeightKg: Number(data.goal_weight_kg ?? initialState.goalWeightKg),
+          goal: (data.goal as Goal) ?? null,
+          weeklyChangeKg: Number(data.weekly_change_kg ?? initialState.weeklyChangeKg),
+          activityLevel: (data.activity_level as ActivityLevel) ?? null,
+          workoutFrequency: data.workout_frequency ?? initialState.workoutFrequency,
+        });
+        return;
+      }
+      if (data.onboarding_completed) navigate({ to: "/profile", replace: true });
     });
-  }, [user, navigate]);
+  }, [user, navigate, isRecalc]);
 
   const progress = ((step + 1) / TOTAL_STEPS) * 100;
 
@@ -112,7 +133,12 @@ function Onboarding() {
       .eq("id", user.id);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
-    navigate({ to: "/profile" });
+    if (isRecalc) {
+      toast.success(t("onb.recalc_done"));
+      navigate({ to: "/settings" });
+    } else {
+      navigate({ to: "/profile" });
+    }
   }
 
   return (
