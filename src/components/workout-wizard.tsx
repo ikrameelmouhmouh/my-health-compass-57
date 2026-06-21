@@ -192,10 +192,6 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
             <Section title={t("wiz.q7.title")} subtitle={t("wiz.q7.sub")}>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground">{t("wiz.q7.duration")}</label>
-                  <Input type="number" inputMode="numeric" placeholder={t("wiz.q7.duration_ph")} value={duration} onChange={(e) => setDuration(e.target.value)} className="mt-1" />
-                </div>
-                <div>
                   <label className="text-xs font-medium text-muted-foreground">{t("wiz.q7.injuries")}</label>
                   <Textarea rows={2} placeholder={t("wiz.q7.injuries_ph")} value={injuries} onChange={(e) => setInjuries(e.target.value)} className="mt-1" />
                 </div>
@@ -210,6 +206,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
               </div>
             </Section>
           )}
+
 
           {error && <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>}
 
