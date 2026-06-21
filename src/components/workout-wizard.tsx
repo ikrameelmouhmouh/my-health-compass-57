@@ -36,6 +36,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
   const [location, setLocation] = useState(initial?.location ?? "");
   const [equipment, setEquipment] = useState<string[]>(initial?.equipment ?? []);
   const [frequency, setFrequency] = useState<number>(initial?.frequency ?? 0);
+  const [trainingDays, setTrainingDays] = useState<string[]>(initial?.trainingDays ?? []);
   const [focusAreas, setFocusAreas] = useState<string[]>(initial?.focusAreas ?? []);
   const [duration, setDuration] = useState<string>(initial?.duration?.toString() ?? "");
   const [injuries, setInjuries] = useState(initial?.injuries ?? "");
@@ -46,7 +47,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
 
   const generate = useServerFn(generateWorkoutPlan);
 
-  const totalSteps = 7;
+  const totalSteps = 8;
 
   const toggle = (arr: string[], v: string, setter: (a: string[]) => void) => {
     setter(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
