@@ -385,7 +385,8 @@ function TemplatesSection() {
 function LibrarySection() {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
-  const preview = EXERCISES.slice(0, 6);
+  const FEATURED_IDS = ["barbell-squat", "barbell-bench-press", "deadlift", "lat-pulldown", "wide-leg-press", "overhead-press"] as const;
+  const preview = FEATURED_IDS.map((id) => EXERCISES.find((e) => e.id === id)).filter((e): e is (typeof EXERCISES)[number] => Boolean(e));
   return (
     <section className="mt-8">
       <div className="mb-3 flex items-center justify-between">
