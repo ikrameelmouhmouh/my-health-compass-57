@@ -52,7 +52,10 @@ function Profile() {
   const { prefs: caloriePrefs, toggleMode: toggleCalorieMode } = useCaloriePrefs();
   const { logMeal } = useMeals();
 
-  const [openSheet, setOpenSheet] = useState<null | "water" | "weight" | "food" | "workout" | "customize">(null);
+  const [openSheet, setOpenSheet] = useState<null | "water" | "weight" | "food" | "workout" | "customize" | "notifications">(null);
+  const { data: notifications = [] } = useNotifications();
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const ensureAuraFn = useServerFn(ensureTodayAura);
 
   const { data, isLoading } = useQuery({
     queryKey: ["profile", user?.id],
