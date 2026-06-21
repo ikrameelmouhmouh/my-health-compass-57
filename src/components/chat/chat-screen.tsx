@@ -634,8 +634,14 @@ export function ChatScreen({
     void sendNow(final, file);
   }
 
-  function handlePick(_label: string, prompt: string) {
+  const navigate = useNavigate();
+  function handlePick(label: string, prompt: string) {
     if (isBusy) return;
+    // "Maak workoutplan" opens the guided wizard (vragen-flow) instead of streaming a flat plan.
+    if (label === t("chat.quick.workout")) {
+      navigate({ to: "/fitness", search: { wizard: 1 } as never });
+      return;
+    }
     void sendQuick(prompt);
   }
 
