@@ -22,6 +22,7 @@ import {
   useCaloriePrefs, calcCalorieBudget,
   type DashCardId, type CalorieBudget, type CalorieMode,
 } from "@/lib/dashboard-prefs";
+import { useScheduledWorkoutForToday } from "@/lib/workout-today";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
 import { RetentionSection } from "@/components/retention-section";
@@ -48,6 +49,8 @@ function Profile() {
   const { day, update, addWater, addMeal } = useDayLog();
   const { log: weights, addEntry: addWeight } = useWeightLog();
   const { workout, save: saveWorkout } = useTodayWorkout();
+  const scheduledToday = useScheduledWorkoutForToday();
+  const effectiveWorkout = workout ?? scheduledToday;
   const { state: fasting, start: startFast, stop: stopFast } = useFasting();
   const { prefs: caloriePrefs, toggleMode: toggleCalorieMode } = useCaloriePrefs();
   const { logMeal } = useMeals();
@@ -122,7 +125,7 @@ function Profile() {
   const waterPct = pct(day.waterMl, WATER_GOAL_ML);
   const stepsPct = pct(day.steps, STEP_GOAL);
   const nutritionPct = pct(day.caloriesIn, budget.allowance);
-  const workoutDone = day.workoutCompleted ? 100 : workout ? 0 : 0;
+  const workoutDone = day.workoutCompleted ? 100 : effectiveWorkout ? 0 : 0;
 
   const overallPct = Math.round(
     (Math.min(waterPct, 100) + Math.min(stepsPct, 100) + Math.min(nutritionPct, 100) + (day.workoutCompleted ? 100 : 0)) / 4
@@ -285,7 +288,7 @@ function Profile() {
         return (
           <WorkoutCard
             key={id}
-            workout={workout}
+            workout={effectiveWorkout}
             completed={day.workoutCompleted}
             onCreate={() => navigate({ to: "/fitness" })}
             onStart={() => update({ workoutCompleted: true })}
