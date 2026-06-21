@@ -432,16 +432,21 @@ function Profile() {
         initial={workout}
         onSubmit={(w) => { saveWorkout(w); setOpenSheet(null); }}
       />
+
+      <NotificationsSheet
+        open={openSheet === "notifications"}
+        onOpenChange={(o) => !o && setOpenSheet(null)}
+      />
     </main>
   );
 }
 
 /* ------------------------------- UI Helpers ------------------------------- */
-function IconBtn({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+function IconBtn({ children, className, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       {...props}
-      className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-card transition hover:bg-accent"
+      className={`inline-flex size-9 items-center justify-center rounded-full border border-border bg-card transition hover:bg-accent ${className ?? ""}`}
     >
       {children}
     </button>
