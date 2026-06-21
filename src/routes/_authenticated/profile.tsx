@@ -367,7 +367,7 @@ function Profile() {
         </div>
       )}
 
-      <AuraTipStrip tip={aura.tip} onOpen={() => setOpenSheet("notifications")} />
+      
 
 
 
