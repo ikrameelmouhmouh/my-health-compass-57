@@ -194,10 +194,11 @@ function EmptyState({ onStart, isPremium }: { onStart: () => void; isPremium: bo
 }
 
 function Dashboard({
-  stored, onRegenerate, onClear, toggleCompleted, openDay, setOpenDay, view, setView,
+  stored, onRegenerate, isPremium, onClear, toggleCompleted, openDay, setOpenDay, view, setView,
 }: {
   stored: ReturnType<typeof useWorkoutPlan>["stored"];
   onRegenerate: () => void;
+  isPremium: boolean;
   onClear: () => void;
   toggleCompleted: (d: string) => void;
   openDay: string | null;
