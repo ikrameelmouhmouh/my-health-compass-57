@@ -26,7 +26,7 @@ import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
 import { RetentionSection } from "@/components/retention-section";
 import { NotificationsSheet, useNotifications } from "@/components/notifications-sheet";
-import { AuraTipStrip } from "@/components/aura-tip-strip";
+
 import { useServerFn } from "@tanstack/react-start";
 import { ensureTodayAura } from "@/lib/notifications.functions";
 
@@ -367,7 +367,7 @@ function Profile() {
         </div>
       )}
 
-      <AuraTipStrip tip={aura.tip} onOpen={() => setOpenSheet("notifications")} />
+      
 
 
 
