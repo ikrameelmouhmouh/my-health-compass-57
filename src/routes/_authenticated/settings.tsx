@@ -8,6 +8,7 @@ import {
   ChevronLeft, ChevronRight, Sun, Moon, Globe, LogOut, Check,
   Sparkles, RefreshCw,
 } from "lucide-react";
+import { PushToggle } from "@/components/push-toggle";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -148,6 +149,12 @@ function SettingsPage() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+      </Group>
+
+      {/* Notifications */}
+      <SectionLabel>{t("set.section.notif")}</SectionLabel>
+      <Group>
+        <PushToggle />
       </Group>
 
       {/* Plan */}
