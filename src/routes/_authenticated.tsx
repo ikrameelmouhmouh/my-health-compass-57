@@ -14,7 +14,8 @@ function AuthenticatedLayout() {
 
   useEffect(() => {
     if (!loading && !session) {
-      navigate({ to: "/login", replace: true });
+      const hasAccount = typeof window !== "undefined" && localStorage.getItem("vita.has_account");
+      navigate({ to: hasAccount ? "/login" : "/welcome", replace: true });
     }
   }, [loading, session, navigate]);
 
