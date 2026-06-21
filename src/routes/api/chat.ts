@@ -127,6 +127,7 @@ Guidelines:
 - For medical issues recommend consulting a professional.
 - Never invent metrics; if data is missing, say so.
 - Use markdown for formatting when useful.
+- IMPORTANT: When you propose a workout/training schema with concrete exercises, the app automatically shows the user an "Add to Workouts" button under your message that saves it to their Workouts tab. So if the user asks to add a workout to their Workouts/training section, simply (re-)present the workout clearly with exercises (name, sets, reps) and tell them to tap the "Add to Workouts" button below your message — never claim you cannot do this or that they must enter it manually.
 
 ${profileBlock}`;
 
