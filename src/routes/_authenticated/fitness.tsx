@@ -385,8 +385,20 @@ function TemplatesSection() {
 function LibrarySection() {
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
-  const FEATURED_IDS = ["barbell-squat", "barbell-bench-press", "deadlift", "lat-pulldown", "wide-leg-press", "overhead-press"] as const;
-  const preview = FEATURED_IDS.map((id) => EXERCISES.find((e) => e.id === id)).filter((e): e is (typeof EXERCISES)[number] => Boolean(e));
+  const FEATURED: ReadonlyArray<{ id: string; label: string }> = [
+    { id: "barbell-squat", label: "Squat" },
+    { id: "barbell-bench-press", label: "Bench Press" },
+    { id: "deadlift", label: "Deadlift" },
+    { id: "lat-pulldown", label: "Lat Pulldown" },
+    { id: "wide-leg-press", label: "Leg Press" },
+    { id: "overhead-press", label: "Shoulder Press" },
+  ];
+  const preview = FEATURED
+    .map((f) => {
+      const ex = EXERCISES.find((e) => e.id === f.id);
+      return ex ? { ...ex, name: f.label } : null;
+    })
+    .filter((e): e is (typeof EXERCISES)[number] => Boolean(e));
   return (
     <section className="mt-8">
       <div className="mb-3 flex items-center justify-between">
