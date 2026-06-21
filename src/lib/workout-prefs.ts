@@ -129,3 +129,19 @@ export function newTemplate(partial: Partial<WorkoutTemplate> = {}): WorkoutTemp
     createdAt: new Date().toISOString(),
   };
 }
+
+export function templatesFromPlan(plan: WorkoutPlan): WorkoutTemplate[] {
+  return plan.days
+    .filter((d) => !d.rest && d.exercises.length > 0)
+    .map((d) => newTemplate({
+      name: `${d.focus} — ${d.day}`,
+      day: d.day,
+      focus: d.focus,
+      exercises: d.exercises,
+    }));
+}
+
+export function clearAllTemplates() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(TKEY);
+}
