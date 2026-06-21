@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Check, ArrowRight } from "lucide-react";
 import { LANGUAGES, useI18n, type Language } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,10 +23,19 @@ function LanguagePicker() {
   // First-run routing: if user has already been through this, jump them ahead.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const introDone = localStorage.getItem("vita.intro_done");
-    const langSet = localStorage.getItem("vita.lang");
-    if (langSet && introDone) navigate({ to: "/welcome", replace: true });
-    else if (langSet) navigate({ to: "/intro", replace: true });
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (data.session) { navigate({ to: "/profile", replace: true }); return; }
+      const introDone = localStorage.getItem("vita.intro_done");
+      const langSet = localStorage.getItem("vita.lang");
+      const hasAccount = localStorage.getItem("vita.has_account");
+      if (hasAccount) { navigate({ to: "/login", replace: true }); return; }
+      if (langSet && introDone) navigate({ to: "/welcome", replace: true });
+      else if (langSet) navigate({ to: "/intro", replace: true });
+    })();
+    return () => { cancelled = true; };
   }, [navigate]);
 
   return (
