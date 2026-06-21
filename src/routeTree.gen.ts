@@ -30,6 +30,7 @@ import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_auth
 import { Route as ApiPublicWidgetAuraRouteImport } from './routes/api/public/widget/aura'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
+import { Route as ApiPublicHooksSendAuraTipsRouteImport } from './routes/api/public/hooks/send-aura-tips'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -138,6 +139,12 @@ const ApiPublicHooksSendRemindersRoute =
     path: '/api/public/hooks/send-reminders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksSendAuraTipsRoute =
+  ApiPublicHooksSendAuraTipsRouteImport.update({
+    id: '/api/public/hooks/send-aura-tips',
+    path: '/api/public/hooks/send-aura-tips',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
+  '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/widget/aura': typeof ApiPublicWidgetAuraRoute
@@ -179,6 +187,7 @@ export interface FileRoutesByTo {
   '/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
+  '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/widget/aura': typeof ApiPublicWidgetAuraRoute
@@ -203,6 +212,7 @@ export interface FileRoutesById {
   '/_authenticated/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
+  '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/widget/aura': typeof ApiPublicWidgetAuraRoute
@@ -227,6 +237,7 @@ export interface FileRouteTypes {
     | '/weight'
     | '/api/chat'
     | '/ai-coach/$threadId'
+    | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
     | '/api/public/widget/aura'
@@ -249,6 +260,7 @@ export interface FileRouteTypes {
     | '/weight'
     | '/api/chat'
     | '/ai-coach/$threadId'
+    | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
     | '/api/public/widget/aura'
@@ -272,6 +284,7 @@ export interface FileRouteTypes {
     | '/_authenticated/weight'
     | '/api/chat'
     | '/_authenticated/ai-coach/$threadId'
+    | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
     | '/api/public/widget/aura'
@@ -285,6 +298,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   WelcomeRoute: typeof WelcomeRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiPublicHooksSendAuraTipsRoute: typeof ApiPublicHooksSendAuraTipsRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicWidgetAuraRoute: typeof ApiPublicWidgetAuraRoute
@@ -439,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSendRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/send-aura-tips': {
+      id: '/api/public/hooks/send-aura-tips'
+      path: '/api/public/hooks/send-aura-tips'
+      fullPath: '/api/public/hooks/send-aura-tips'
+      preLoaderRoute: typeof ApiPublicHooksSendAuraTipsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -491,6 +512,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   WelcomeRoute: WelcomeRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiPublicHooksSendAuraTipsRoute: ApiPublicHooksSendAuraTipsRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicWidgetAuraRoute: ApiPublicWidgetAuraRoute,
