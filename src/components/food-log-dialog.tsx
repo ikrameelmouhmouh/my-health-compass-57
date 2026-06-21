@@ -150,9 +150,7 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType, a
           ) : (
             <>
               <div className="flex items-center justify-between border-b border-border px-4 py-3">
-                <button onClick={() => onOpenChange(false)} aria-label={t("food.close")}>
-                  <X className="size-5" />
-                </button>
+                <div className="w-[72px]" aria-hidden />
                 <h2 className="font-display text-base font-semibold">{t("food.title")}</h2>
                 <div className="flex items-center gap-2">
                   <button
