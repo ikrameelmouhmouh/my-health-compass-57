@@ -329,9 +329,17 @@ function Dashboard({
       )}
 
       <div className="mt-6 space-y-2">
-        <Button variant="outline" className="w-full" onClick={onRegenerate}>
-          <Sparkles className="mr-2 size-4" /> {t("fit.regenerate_cta")}
-        </Button>
+        {isPremium ? (
+          <Button variant="outline" className="w-full" onClick={onRegenerate}>
+            <Sparkles className="mr-2 size-4" /> {t("fit.regenerate_cta")}
+          </Button>
+        ) : (
+          <Link to="/pricing" className="block">
+            <Button variant="outline" className="w-full">
+              <Lock className="mr-2 size-4" /> {t("wiz.premium.locked")} · {t("wiz.premium.upgrade")}
+            </Button>
+          </Link>
+        )}
         <button onClick={() => { if (confirm(t("fit.clear_confirm"))) onClear(); }} className="w-full text-xs text-muted-foreground hover:text-destructive">
           {t("fit.clear")}
         </button>
