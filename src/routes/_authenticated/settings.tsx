@@ -4,11 +4,9 @@ import { useTheme } from "@/lib/theme-context";
 import { LANGUAGES, useI18n, useT, type Language } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { getWidgetCredentials } from "@/lib/widget.functions";
 import {
   ChevronLeft, ChevronRight, Sun, Moon, Globe, LogOut, Check,
-  Sparkles, RefreshCw, LayoutGrid, Copy,
+  Sparkles, RefreshCw,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -163,10 +161,6 @@ function SettingsPage() {
         </button>
       </Group>
 
-      {/* Widget */}
-      <SectionLabel>{t("set.section.widget")}</SectionLabel>
-      <WidgetCard />
-
       {/* Account */}
       <SectionLabel>{t("set.section.account")}</SectionLabel>
       <Group>
@@ -185,73 +179,6 @@ function SettingsPage() {
         {t("set.version")}
       </p>
     </main>
-  );
-}
-
-/* ---------- Widget Card ---------- */
-function WidgetCard() {
-  const t = useT();
-  const [copied, setCopied] = useState(false);
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["widget-credentials"],
-    queryFn: () => getWidgetCredentials(),
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const url = data
-    ? `${typeof window !== "undefined" ? window.location.origin : ""}/api/public/widget/aura?user=${data.userId}&token=${data.token}`
-    : "";
-
-  async function copy() {
-    if (!url) return;
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      /* noop */
-    }
-  }
-
-  return (
-    <div className="overflow-hidden rounded-3xl border border-border bg-card p-5">
-      <div className="flex items-start gap-3">
-        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand/12 text-brand">
-          <LayoutGrid className="size-4" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="font-display text-[14px] font-semibold tracking-tight">
-            {t("set.widget.title")}
-          </div>
-          <p className="mt-1 text-[12px] leading-relaxed text-muted-foreground">
-            {t("set.widget.desc")}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {t("set.widget.url_label")}
-        </div>
-        <div className="flex items-stretch gap-2">
-          <input
-            readOnly
-            value={isLoading ? "…" : error ? "" : url}
-            onFocus={(e) => e.currentTarget.select()}
-            className="min-w-0 flex-1 truncate rounded-xl border border-border bg-background px-3 py-2 font-mono text-[11px] text-muted-foreground"
-          />
-          <button
-            onClick={copy}
-            disabled={!url}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-brand px-3 py-2 font-display text-[12px] font-semibold text-brand-foreground transition hover:opacity-90 disabled:opacity-50"
-          >
-            {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-            {copied ? t("set.widget.copied") : t("set.widget.copy")}
-          </button>
-        </div>
-        <p className="mt-2 text-[11px] text-muted-foreground">{t("set.widget.warn")}</p>
-      </div>
-    </div>
   );
 }
 
