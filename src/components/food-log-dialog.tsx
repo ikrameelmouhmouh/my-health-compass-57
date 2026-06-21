@@ -61,7 +61,8 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType, a
     } else if (autoOpenScan) {
       setScanOpen(true);
     }
-  }, [open]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, autoOpenScan]);
 
   useEffect(() => {
     if (tab !== "all") return;
