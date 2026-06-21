@@ -133,7 +133,12 @@ function Onboarding() {
       .eq("id", user.id);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
-    navigate({ to: "/profile" });
+    if (isRecalc) {
+      toast.success(t("onb.recalc_done"));
+      navigate({ to: "/settings" });
+    } else {
+      navigate({ to: "/profile" });
+    }
   }
 
   return (
