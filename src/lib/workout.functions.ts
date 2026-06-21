@@ -1,12 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+
 const WizardInput = z.object({
   goal: z.string(),
   experience: z.string(),
   location: z.string(),
   equipment: z.array(z.string()),
   frequency: z.number().min(1).max(7),
+  trainingDays: z.array(z.enum(DAY_NAMES)).optional(),
   focusAreas: z.array(z.string()),
   duration: z.number().optional(),
   injuries: z.string().optional(),
