@@ -1,14 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity } from "lucide-react";
+import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Lock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { WorkoutWizard } from "@/components/workout-wizard";
 import { TemplateEditor } from "@/components/template-editor";
+import { TemplateSyncDialog } from "@/components/template-sync-dialog";
 import { ExerciseLibraryDialog } from "@/components/exercise-library-dialog";
-import { useWorkoutPlan, useTemplates, newTemplate, type WorkoutTemplate } from "@/lib/workout-prefs";
+import { useWorkoutPlan, useTemplates, newTemplate, templatesFromPlan, type WorkoutTemplate } from "@/lib/workout-prefs";
 import { EXERCISES } from "@/lib/exercise-library";
 import { useI18n } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
   component: FitnessPage,
