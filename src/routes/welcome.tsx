@@ -1,6 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { ArrowRight, Apple, Dumbbell, Timer, LineChart } from "lucide-react";
 import { useT } from "@/lib/i18n";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/welcome")({
   head: () => ({
@@ -14,6 +16,19 @@ export const Route = createFileRoute("/welcome")({
 
 function Welcome() {
   const t = useT();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (data.session) navigate({ to: "/profile", replace: true });
+      else if (localStorage.getItem("vita.has_account")) navigate({ to: "/login", replace: true });
+    })();
+    return () => { cancelled = true; };
+  }, [navigate]);
 
   const bullets = [
     { icon: Apple,     label: t("welcome.bullets.nutrition") },

@@ -58,6 +58,7 @@ function Register() {
     if (data.user) {
       await supabase.from("profiles").update({ language: lang }).eq("id", data.user.id);
     }
+    try { localStorage.setItem("vita.has_account", "1"); } catch {}
     setLoading(false);
     navigate({ to: "/onboarding" });
   }
