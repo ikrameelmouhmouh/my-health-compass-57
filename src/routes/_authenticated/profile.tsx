@@ -240,7 +240,7 @@ function Profile() {
             key={id}
             workout={workout}
             completed={day.workoutCompleted}
-            onCreate={() => setOpenSheet("workout")}
+            onCreate={() => navigate({ to: "/fitness" })}
             onStart={() => update({ workoutCompleted: true })}
             onClear={() => { saveWorkout(null); update({ workoutCompleted: false }); }}
           />
