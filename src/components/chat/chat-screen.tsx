@@ -12,7 +12,10 @@ import { getThreadMessages } from "@/lib/chat.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
 import { extractWorkoutTemplates } from "@/lib/coach-extract.functions";
-import { useTemplates, newTemplate } from "@/lib/workout-prefs";
+import { useTemplates, newTemplate, type WorkoutTemplate } from "@/lib/workout-prefs";
+import { TemplateSyncDialog } from "@/components/template-sync-dialog";
+import { normalizeDay, todayDayName } from "@/lib/workout-today";
+import { useTodayWorkout } from "@/lib/dashboard-prefs";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -141,36 +144,35 @@ function AddWorkoutButton({
   onAdded: () => void;
 }) {
   const navigate = useNavigate();
-  const { upsert } = useTemplates();
+  const { templates: existing, upsert, remove } = useTemplates();
+  const { save: saveTodayWorkout } = useTodayWorkout();
   const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState<WorkoutTemplate[] | null>(null);
 
   async function handleClick() {
     if (busy) return;
     setBusy(true);
     try {
       const res = await extractWorkoutTemplates({ data: { text } });
-      const templates = res.templates ?? [];
-      if (templates.length === 0) {
+      const extracted = res.templates ?? [];
+      if (extracted.length === 0) {
         toast.error(t("chat.addworkout.none"));
         return;
       }
-      for (const tpl of templates) {
-        upsert(
-          newTemplate({
-            name: tpl.name,
-            day: tpl.day,
-            focus: tpl.focus,
-            exercises: tpl.exercises ?? [],
-          }),
-        );
-      }
-      toast.success(
-        templates.length === 1
-          ? t("chat.addworkout.success_one")
-          : t("chat.addworkout.success_many").replace("{n}", String(templates.length)),
+      const built = extracted.map((tpl) =>
+        newTemplate({
+          name: tpl.name,
+          day: tpl.day,
+          focus: tpl.focus,
+          exercises: tpl.exercises ?? [],
+        }),
       );
-      onAdded();
-      navigate({ to: "/fitness" });
+      // If user already has templates, ask replace/add. Otherwise just add.
+      if (existing.length === 0) {
+        applyTemplates(built, "add");
+      } else {
+        setPending(built);
+      }
     } catch (e) {
       console.error("[ai-coach] extract failed", e);
       toast.error(t("chat.addworkout.error"));
@@ -179,16 +181,50 @@ function AddWorkoutButton({
     }
   }
 
+  function applyTemplates(tpls: WorkoutTemplate[], mode: "replace" | "add" | "skip") {
+    if (mode === "skip") {
+      setPending(null);
+      return;
+    }
+    if (mode === "replace") {
+      existing.forEach((tpl) => remove(tpl.id));
+    }
+    tpls.forEach((tpl) => upsert(tpl));
+    // Auto-schedule today if any new template targets today's weekday.
+    const today = todayDayName();
+    const todays = tpls.find((tpl) => normalizeDay(tpl.day) === today);
+    if (todays) {
+      const sets = todays.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0);
+      const durationMin = Math.max(15, Math.min(120, Math.round(sets * 3) || 30));
+      saveTodayWorkout({ name: todays.name, type: todays.focus || "Workout", durationMin });
+    }
+    toast.success(
+      tpls.length === 1
+        ? t("chat.addworkout.success_one")
+        : t("chat.addworkout.success_many").replace("{n}", String(tpls.length)),
+    );
+    setPending(null);
+    onAdded();
+    navigate({ to: "/fitness" });
+  }
+
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={busy}
-      className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/10 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-brand/20 disabled:opacity-60"
-    >
-      {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Dumbbell className="size-3.5" />}
-      {t("chat.addworkout.cta")}
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={busy}
+        className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand/10 px-3 py-1.5 text-xs font-medium text-foreground hover:bg-brand/20 disabled:opacity-60"
+      >
+        {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Dumbbell className="size-3.5" />}
+        {t("chat.addworkout.cta")}
+      </button>
+      <TemplateSyncDialog
+        open={!!pending}
+        count={pending?.length ?? 0}
+        onChoose={(mode) => pending && applyTemplates(pending, mode)}
+      />
+    </>
   );
 }
 
