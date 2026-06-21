@@ -669,8 +669,13 @@ export function ChatScreen({
                       )}
                     </div>
                   ) : (
-                    <div className="prose prose-sm dark:prose-invert max-w-[90%] text-foreground prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-headings:my-2">
-                      <ReactMarkdown>{text || " "}</ReactMarkdown>
+                    <div className="flex max-w-[90%] flex-col items-start">
+                      <div className="prose prose-sm dark:prose-invert text-foreground prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-headings:my-2">
+                        <ReactMarkdown>{text || " "}</ReactMarkdown>
+                      </div>
+                      {looksLikeWorkout(text) && (
+                        <AddWorkoutButton text={text} t={t} onAdded={() => {}} />
+                      )}
                     </div>
                   )}
                 </div>
