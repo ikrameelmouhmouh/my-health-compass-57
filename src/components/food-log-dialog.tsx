@@ -58,6 +58,8 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType, a
       setResults([]);
       setTab("all");
       setCustomOpen(false);
+    } else if (autoOpenScan) {
+      setScanOpen(true);
     }
   }, [open]);
 
