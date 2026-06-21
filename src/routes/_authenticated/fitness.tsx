@@ -161,7 +161,7 @@ function Header() {
   );
 }
 
-function EmptyState({ onStart }: { onStart: () => void }) {
+function EmptyState({ onStart, isPremium }: { onStart: () => void; isPremium: boolean }) {
   const { t } = useI18n();
   const bullets = [t("fit.empty.b1"), t("fit.empty.b2"), t("fit.empty.b3"), t("fit.empty.b4")];
   return (
@@ -178,9 +178,17 @@ function EmptyState({ onStart }: { onStart: () => void }) {
           <li key={b} className="flex items-center gap-2"><Check className="size-4 text-brand" />{b}</li>
         ))}
       </ul>
-      <Button size="lg" className="w-full" onClick={onStart}>
-        <Sparkles className="mr-2 size-4" /> {t("fit.empty.cta")}
-      </Button>
+      {isPremium ? (
+        <Button size="lg" className="w-full" onClick={onStart}>
+          <Sparkles className="mr-2 size-4" /> {t("fit.empty.cta")}
+        </Button>
+      ) : (
+        <Link to="/pricing" className="block">
+          <Button size="lg" variant="outline" className="w-full">
+            <Lock className="mr-2 size-4" /> {t("wiz.premium.locked")} · {t("wiz.premium.upgrade")}
+          </Button>
+        </Link>
+      )}
     </div>
   );
 }
