@@ -634,7 +634,7 @@ export function ChatScreen({
     void sendNow(final, file);
   }
 
-  function handlePick(key: string, prompt: string) {
+  function handlePick(_key: string, prompt: string) {
     if (isBusy) return;
     // Workout plans should stay in chat first, so the coach can ask the missing questions.
     void sendQuick(prompt);
