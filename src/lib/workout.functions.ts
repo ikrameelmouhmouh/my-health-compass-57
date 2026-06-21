@@ -1,12 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+
 const WizardInput = z.object({
   goal: z.string(),
   experience: z.string(),
   location: z.string(),
   equipment: z.array(z.string()),
   frequency: z.number().min(1).max(7),
+  trainingDays: z.array(z.enum(DAY_NAMES)).optional(),
   focusAreas: z.array(z.string()),
   duration: z.number().optional(),
   injuries: z.string().optional(),
@@ -67,11 +70,15 @@ Include all 7 days (Monday-Sunday). Rest days have rest:true and exercises:[].
 Match the user's frequency exactly (number of non-rest days).
 Suggested weight: use bodyweight, RPE, or relative descriptors (e.g. "moderate, RPE 7", "bodyweight", "~60% 1RM").`;
 
+    const trainingDaysLine = data.trainingDays && data.trainingDays.length > 0
+      ? `Training days (use EXACTLY these as non-rest days, rest on all others): ${data.trainingDays.join(", ")}`
+      : `Training days per week: ${data.frequency} (choose sensible non-rest days)`;
+
     const user = `Goal: ${data.goal}
 Experience: ${data.experience}
 Location: ${data.location}
 Equipment: ${data.equipment.join(", ") || "n/a"}
-Training days per week: ${data.frequency}
+${trainingDaysLine}
 Focus areas (prioritize): ${data.focusAreas.join(", ") || "balanced"}
 Preferred session duration: ${data.duration ? `${data.duration} min` : "any"}
 Injuries/limitations: ${data.injuries || "none"}

@@ -1,14 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity } from "lucide-react";
+import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Lock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { WorkoutWizard } from "@/components/workout-wizard";
 import { TemplateEditor } from "@/components/template-editor";
+import { TemplateSyncDialog } from "@/components/template-sync-dialog";
 import { ExerciseLibraryDialog } from "@/components/exercise-library-dialog";
-import { useWorkoutPlan, useTemplates, newTemplate, type WorkoutTemplate } from "@/lib/workout-prefs";
+import { useWorkoutPlan, useTemplates, newTemplate, templatesFromPlan, type WorkoutTemplate } from "@/lib/workout-prefs";
 import { EXERCISES } from "@/lib/exercise-library";
 import { useI18n } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
   component: FitnessPage,
@@ -20,9 +25,49 @@ const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satu
 
 function FitnessPage() {
   const { stored, loaded, save, clear, toggleCompleted } = useWorkoutPlan();
+  const { templates, upsert, remove } = useTemplates();
+  const { t } = useI18n();
+  const { user } = useAuth();
   const [showWizard, setShowWizard] = useState(false);
   const [openDay, setOpenDay] = useState<string | null>(null);
   const [view, setView] = useState<View>("gym");
+  const [pendingTemplates, setPendingTemplates] = useState<WorkoutTemplate[] | null>(null);
+
+  const { data: sub } = useQuery({
+    queryKey: ["subscription", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("subscriptions").select("*").eq("user_id", user!.id).maybeSingle();
+      return data;
+    },
+  });
+  const isPremium = !!sub && ["active", "trialing", "past_due"].includes(sub.status) &&
+    (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
+
+  const handleWizardComplete = (w: Parameters<typeof save>[0], p: Parameters<typeof save>[1]) => {
+    save(w, p);
+    setShowWizard(false);
+    const newTpls = templatesFromPlan(p);
+    if (newTpls.length > 0) setPendingTemplates(newTpls);
+  };
+
+  const handleSyncChoice = (mode: "replace" | "add" | "skip") => {
+    if (!pendingTemplates) return;
+    if (mode === "replace") {
+      templates.forEach((tpl) => remove(tpl.id));
+      pendingTemplates.forEach((tpl) => upsert(tpl));
+      toast.success(t("wiz.sync.done_replace"));
+    } else if (mode === "add") {
+      pendingTemplates.forEach((tpl) => upsert(tpl));
+      toast.success(t("wiz.sync.done_add"));
+    }
+    setPendingTemplates(null);
+  };
+
+  const openWizard = () => {
+    if (!isPremium) return;
+    setShowWizard(true);
+  };
 
   if (!loaded) return <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10" />;
 
@@ -43,7 +88,7 @@ function FitnessPage() {
         <ViewTabs view={view} setView={setView} />
         {!stored && !showWizard ? (
           <>
-            <EmptyState onStart={() => setShowWizard(true)} />
+            <EmptyState onStart={openWizard} isPremium={isPremium} />
             <LibrarySection />
             <TemplatesSection />
           </>
@@ -51,25 +96,30 @@ function FitnessPage() {
           <div className="mt-6">
             <WorkoutWizard
               initial={stored?.wizard}
-              onComplete={(w, p) => { save(w, p); setShowWizard(false); }}
+              onComplete={handleWizardComplete}
               onCancel={stored ? () => setShowWizard(false) : undefined}
             />
           </div>
         )}
+        <TemplateSyncDialog open={!!pendingTemplates} count={pendingTemplates?.length ?? 0} onChoose={handleSyncChoice} />
       </main>
     );
   }
 
-  return <Dashboard
-    stored={stored}
-    onRegenerate={() => setShowWizard(true)}
-    onClear={clear}
-    toggleCompleted={toggleCompleted}
-    openDay={openDay}
-    setOpenDay={setOpenDay}
-    view={view}
-    setView={setView}
-  />;
+  return <>
+    <Dashboard
+      stored={stored}
+      onRegenerate={openWizard}
+      isPremium={isPremium}
+      onClear={clear}
+      toggleCompleted={toggleCompleted}
+      openDay={openDay}
+      setOpenDay={setOpenDay}
+      view={view}
+      setView={setView}
+    />
+    <TemplateSyncDialog open={!!pendingTemplates} count={pendingTemplates?.length ?? 0} onChoose={handleSyncChoice} />
+  </>;
 }
 
 function ViewTabs({ view, setView }: { view: View; setView: (v: View) => void }) {
@@ -111,7 +161,7 @@ function Header() {
   );
 }
 
-function EmptyState({ onStart }: { onStart: () => void }) {
+function EmptyState({ onStart, isPremium }: { onStart: () => void; isPremium: boolean }) {
   const { t } = useI18n();
   const bullets = [t("fit.empty.b1"), t("fit.empty.b2"), t("fit.empty.b3"), t("fit.empty.b4")];
   return (
@@ -128,18 +178,27 @@ function EmptyState({ onStart }: { onStart: () => void }) {
           <li key={b} className="flex items-center gap-2"><Check className="size-4 text-brand" />{b}</li>
         ))}
       </ul>
-      <Button size="lg" className="w-full" onClick={onStart}>
-        <Sparkles className="mr-2 size-4" /> {t("fit.empty.cta")}
-      </Button>
+      {isPremium ? (
+        <Button size="lg" className="w-full" onClick={onStart}>
+          <Sparkles className="mr-2 size-4" /> {t("fit.empty.cta")}
+        </Button>
+      ) : (
+        <Link to="/pricing" className="block">
+          <Button size="lg" variant="outline" className="w-full">
+            <Lock className="mr-2 size-4" /> {t("wiz.premium.locked")} · {t("wiz.premium.upgrade")}
+          </Button>
+        </Link>
+      )}
     </div>
   );
 }
 
 function Dashboard({
-  stored, onRegenerate, onClear, toggleCompleted, openDay, setOpenDay, view, setView,
+  stored, onRegenerate, isPremium, onClear, toggleCompleted, openDay, setOpenDay, view, setView,
 }: {
   stored: ReturnType<typeof useWorkoutPlan>["stored"];
   onRegenerate: () => void;
+  isPremium: boolean;
   onClear: () => void;
   toggleCompleted: (d: string) => void;
   openDay: string | null;
@@ -270,9 +329,17 @@ function Dashboard({
       )}
 
       <div className="mt-6 space-y-2">
-        <Button variant="outline" className="w-full" onClick={onRegenerate}>
-          <Sparkles className="mr-2 size-4" /> {t("fit.regenerate_cta")}
-        </Button>
+        {isPremium ? (
+          <Button variant="outline" className="w-full" onClick={onRegenerate}>
+            <Sparkles className="mr-2 size-4" /> {t("fit.regenerate_cta")}
+          </Button>
+        ) : (
+          <Link to="/pricing" className="block">
+            <Button variant="outline" className="w-full">
+              <Lock className="mr-2 size-4" /> {t("wiz.premium.locked")} · {t("wiz.premium.upgrade")}
+            </Button>
+          </Link>
+        )}
         <button onClick={() => { if (confirm(t("fit.clear_confirm"))) onClear(); }} className="w-full text-xs text-muted-foreground hover:text-destructive">
           {t("fit.clear")}
         </button>

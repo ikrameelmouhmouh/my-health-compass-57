@@ -19,6 +19,7 @@ const EXPERIENCE = ["Beginner", "Intermediate", "Advanced"];
 const LOCATIONS = ["Gym", "Home", "Both"];
 const HOME_EQUIP = ["Dumbbells", "Resistance Bands", "Barbell", "Bench", "Pull Up Bar", "No Equipment"];
 const FREQ = [1, 2, 3, 4, 5, 6];
+const WEEK_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
 const FOCUS = ["Glutes", "Legs", "Back", "Chest", "Shoulders", "Arms", "Core"];
 
 type Props = {
@@ -35,6 +36,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
   const [location, setLocation] = useState(initial?.location ?? "");
   const [equipment, setEquipment] = useState<string[]>(initial?.equipment ?? []);
   const [frequency, setFrequency] = useState<number>(initial?.frequency ?? 0);
+  const [trainingDays, setTrainingDays] = useState<string[]>(initial?.trainingDays ?? []);
   const [focusAreas, setFocusAreas] = useState<string[]>(initial?.focusAreas ?? []);
   const [duration, setDuration] = useState<string>(initial?.duration?.toString() ?? "");
   const [injuries, setInjuries] = useState(initial?.injuries ?? "");
@@ -45,7 +47,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
 
   const generate = useServerFn(generateWorkoutPlan);
 
-  const totalSteps = 7;
+  const totalSteps = 8;
 
   const toggle = (arr: string[], v: string, setter: (a: string[]) => void) => {
     setter(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
@@ -60,8 +62,9 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
       case 3: return !!location;
       case 4: return !showEquipStep || equipment.length > 0;
       case 5: return frequency > 0;
-      case 6: return true;
+      case 6: return trainingDays.length === frequency;
       case 7: return true;
+      case 8: return true;
       default: return false;
     }
   })();
@@ -83,6 +86,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
         goal, experience, location,
         equipment: showEquipStep ? equipment : ["Full Gym Access"],
         frequency,
+        trainingDays: trainingDays.length === frequency ? (trainingDays as WizardInputT["trainingDays"]) : undefined,
         focusAreas,
         duration: duration ? parseInt(duration, 10) : undefined,
         injuries: injuries || undefined,
@@ -150,15 +154,41 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
           )}
           {step === 5 && (
             <Section title={t("wiz.q5.title")} subtitle={t("wiz.q5.sub")}>
-              <Grid>{FREQ.map((n) => <Pill key={n} active={frequency === n} onClick={() => setFrequency(n)}>{n} {n === 1 ? t("wiz.q5.day") : t("wiz.q5.days")}</Pill>)}</Grid>
+              <Grid>{FREQ.map((n) => <Pill key={n} active={frequency === n} onClick={() => { setFrequency(n); if (trainingDays.length > n) setTrainingDays(trainingDays.slice(0, n)); }}>{n} {n === 1 ? t("wiz.q5.day") : t("wiz.q5.days")}</Pill>)}</Grid>
             </Section>
           )}
           {step === 6 && (
+            <Section title={t("wiz.q5b.title")} subtitle={t("wiz.q5b.sub", { n: frequency })}>
+              <Grid>
+                {WEEK_DAYS.map((d) => {
+                  const active = trainingDays.includes(d);
+                  const full = trainingDays.length >= frequency && !active;
+                  return (
+                    <Pill
+                      key={d}
+                      active={active}
+                      multi
+                      onClick={() => {
+                        if (active) setTrainingDays(trainingDays.filter((x) => x !== d));
+                        else if (!full) setTrainingDays([...trainingDays, d]);
+                      }}
+                    >
+                      <span className={full ? "opacity-40" : ""}>{t(`day.${d}`)}</span>
+                    </Pill>
+                  );
+                })}
+              </Grid>
+              <p className="mt-3 text-xs text-muted-foreground">
+                {t("wiz.q5b.pick_n", { n: Math.max(0, frequency - trainingDays.length) })}
+              </p>
+            </Section>
+          )}
+          {step === 7 && (
             <Section title={t("wiz.q6.title")} subtitle={t("wiz.q6.sub")}>
               <Grid>{FOCUS.map((g) => <Pill key={g} active={focusAreas.includes(g)} onClick={() => toggle(focusAreas, g, setFocusAreas)} multi>{t(`wiz.focus.${g}`)}</Pill>)}</Grid>
             </Section>
           )}
-          {step === 7 && (
+          {step === 8 && (
             <Section title={t("wiz.q7.title")} subtitle={t("wiz.q7.sub")}>
               <div className="space-y-3">
                 <div>
