@@ -1,96 +1,29 @@
-# Plan: Aura-inzicht herplaatsen + PWA + widget-API
+Ik zie waar het misgaat: er bestaan al losse onderdelen voor workoutvragen, templates en “workout vandaag”, maar ze zijn niet goed aan elkaar gekoppeld. De chat maakt nu alleen tekst; de knop “Toevoegen aan Workouts” zet hooguit templates in de workout-tab, maar plant niets automatisch voor vandaag en start niet met de vragenflow.
 
-## Wat we bouwen
+Plan:
 
-1. Aura-kaart weghalen van home (`/profile`) — die verpest het overzicht.
-2. Klein **belletje-icoon** in de header van `/profile` met badge bij ongelezen meldingen.
-3. **Meldingen-inbox** (sheet) waar Aura's dagelijks inzicht binnenkomt, plus toekomstige meldingen.
-4. Compacte, inklapbare **"Aura tip van vandaag"-strip** op home (1 regel) zodat het inzicht niet verdwijnt maar geen ruimte opslokt.
-5. **PWA-installatie**: gebruikers kunnen de app als icoon op hun beginscherm zetten.
-6. **Publieke widget-API** voor toekomstige echte native iOS/Android widget.
+1. “Maak workoutplan” laat eerst vragen stellen
+- De quick action in de AI Coach moet niet meteen een volledig plan genereren.
+- Hij opent/gebruikt de bestaande workout-wizard met vragen zoals doel, dagen, locatie, ervaring, focus, blessures/voorkeuren.
+- De prompt in de chat wordt aangepast zodat Vita eerst aanvullende vragen stelt als informatie ontbreekt.
 
-````text
-Voor:                              Na:
-┌──────────────────────────┐       ┌──────────────────────────┐
-│ Nog wakker, Ikrame   ⚙️  │       │ Nog wakker, Ikrame 🔔③⚙️ │
-│ maandag 22 juni          │       │ maandag 22 juni          │
-│                          │       │                          │
-│ [Upgrade banner]         │       │ [Upgrade banner]         │
-│                          │       │                          │
-│ ┌──────────────────────┐ │       │ ✨ Houd het ritme · meer ▾│
-│ │ ✨ Aura's dagelijks   │ │       │                          │
-│ │ inzicht ...           │ │  →    │ [Calorieën card]         │
-│ │ Advies: ...           │ │       │ [Water/Steps]            │
-│ └──────────────────────┘ │       │ ...                      │
-│                          │       │                          │
-│ [Calorieën card]         │       │                          │
-└──────────────────────────┘       └──────────────────────────┘
-                                    Belletje opent meldingen-inbox
-                                    met het volledige Aura-inzicht
-````
+2. “Voeg workout toe” maakt echte templates
+- De knop onder een AI-workout blijft zichtbaar bij workout-antwoorden.
+- Bij klikken worden de oefeningen omgezet naar workout-templates.
+- Daarna krijgt de gebruiker de keuze: bestaande templates vervangen, erbij zetten, of overslaan.
 
-## Eerlijk over "widget"
+3. Geplande dag koppelen aan Startscherm
+- Als een template/AI-plan een dag heeft die overeenkomt met vandaag, wordt die workout automatisch zichtbaar in “Workout vandaag”.
+- De Startkaart toont dan de naam, focus/type en duur in plaats van “Geen workout gepland vandaag”.
+- Markeren als gedaan blijft werken op het Startscherm.
 
-Een echte iOS/Android home-screen widget (WidgetKit / Glance) kan **niet** in deze web-app stack. Daarvoor is later een native app-traject (Capacitor + Swift/Kotlin + App Store/Play Store) nodig.
+4. Dag-format fixen
+- Ik maak één gedeelde dag-normalisatie voor Monday/Tuesday en mon/tue/nederlandse labels, zodat templates uit AI, wizard en editor hetzelfde worden herkend.
+- Dit voorkomt dat een workout niet op vandaag verschijnt omdat de dag anders opgeslagen is.
 
-Wat we **nu** wel doen:
-- **PWA-installatie** → app-icoon op telefoon dat de app opent (geen echte widget, wel "app-gevoel").
-- **Publieke JSON-API** met het dagelijkse inzicht, zodat een latere native widget die direct kan ophalen.
+5. Vertalingen bijwerken
+- Nieuwe/gewijzigde UI-teksten voeg ik direct toe voor alle 6 talen: en, nl, ar, fr, de, es.
 
-## Bestanden en wijzigingen
-
-### Database (migratie)
-Nieuwe tabel `notifications`:
-- `id`, `user_id` (FK auth.users), `type`, `title`, `body`, `read`, `created_at`
-- GRANT op `authenticated` en `service_role`
-- RLS: gebruiker kan alleen eigen meldingen lezen/wijzigen
-
-### Home-pagina
-- `src/routes/_authenticated/profile.tsx`
-  - `<AuraInsightCard ...>` weghalen uit de layout (functie blijft als helper voor tekstgeneratie).
-  - Belletje-knop toevoegen in header met ongelezen-badge.
-  - `<AuraTipStrip />` toevoegen: 1 regel, klikt door naar inbox.
-
-### Nieuwe componenten
-- `src/components/notifications-sheet.tsx`: bottom sheet met meldingen, mark-as-read, lege staat.
-- `src/components/aura-tip-strip.tsx`: compacte strip met de adviesregel van vandaag.
-
-### Server functions
-- `src/lib/notifications.functions.ts`:
-  - `listNotifications()` — eigen meldingen van de gebruiker.
-  - `markRead({ id })` / `markAllRead()`.
-  - `ensureTodayAura({ snapshot })` — genereert/upsert dagelijks Aura-inzicht (één per dag per user).
-
-### PWA-installatie (manifest-only, geen service worker)
-- `public/manifest.webmanifest` met naam Vita, theme/background color uit huidige design tokens, `display: standalone`.
-- `public/icons/icon-192.png` en `icon-512.png` (gegenereerd uit huidig logo).
-- Tags in `src/routes/__root.tsx`: `<link rel="manifest" ...>`, `<meta name="theme-color" ...>`, `<link rel="apple-touch-icon" ...>`.
-
-### Widget-API (voorbereid voor later)
-- `src/routes/api/public/widget/aura.ts`:
-  - GET endpoint dat een korte token-parameter accepteert (`?token=...`) waarmee de gebruiker zichzelf identificeert.
-  - Token = HMAC van `user_id + WIDGET_SECRET`, gebruiker kan deze later in instellingen kopiëren naar de widget.
-  - Retourneert `{ title, body, advice, date, calorieTarget, steps, waterMl }` van het laatste Aura-inzicht.
-- Nieuwe secret: `WIDGET_SECRET` (zelf gegenereerd, server-side).
-
-### Vertalingen (alle 6 talen)
-Toevoegen aan `src/lib/i18n.tsx`:
-- `notif.title` — "Meldingen"
-- `notif.empty` — "Geen meldingen"
-- `notif.mark_all_read` — "Alles als gelezen markeren"
-- `today.aura.strip_more` — "meer"
-- `today.aura.open_inbox` — "Open meldingen"
-
-### Niet in scope nu
-- Echte iOS/Android home-screen widget (native traject — later).
-- Push-notificaties (apart traject met VAPID — er staat al een VAPID-secret, maar push-flow is een eigen verhaal).
-- Aura-inzicht regenereren op een server-cron (komt vanzelf bij eerste app-open van de dag; cron kan later).
-
-## Volgorde van uitvoering bij goedkeuring
-1. Migratie `notifications` tabel + RLS.
-2. Server functions voor notifications + `ensureTodayAura`.
-3. UI: belletje + meldingen-sheet + tip-strip; Aura-kaart verwijderen van home.
-4. Vertalingen voor alle 6 talen.
-5. PWA-manifest + iconen + head-tags.
-6. Widget-API endpoint + `WIDGET_SECRET`.
-7. Korte controle in preview.
+Technisch:
+- Aanpassen: `src/components/chat/chat-screen.tsx`, `src/lib/workout-prefs.ts`, `src/lib/dashboard-prefs.ts`, `src/routes/_authenticated/fitness.tsx`, `src/routes/_authenticated/profile.tsx`, mogelijk `src/lib/i18n.tsx`.
+- Geen databasewijziging nodig; dit blijft aansluiten op de bestaande lokale workout/template-opslag.

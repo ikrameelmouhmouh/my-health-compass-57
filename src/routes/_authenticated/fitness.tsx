@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Lock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,13 @@ import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTodayWorkout } from "@/lib/dashboard-prefs";
+import { normalizeDay, todayDayName } from "@/lib/workout-today";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    wizard: s.wizard === 1 || s.wizard === "1" ? 1 : undefined,
+  }),
   component: FitnessPage,
 });
 
@@ -28,10 +33,19 @@ function FitnessPage() {
   const { templates, upsert, remove } = useTemplates();
   const { t } = useI18n();
   const { user } = useAuth();
+  const search = Route.useSearch();
+  const navigate = useNavigate();
   const [showWizard, setShowWizard] = useState(false);
   const [openDay, setOpenDay] = useState<string | null>(null);
   const [view, setView] = useState<View>("gym");
   const [pendingTemplates, setPendingTemplates] = useState<WorkoutTemplate[] | null>(null);
+
+  useEffect(() => {
+    if (search.wizard === 1) {
+      setShowWizard(true);
+      navigate({ to: "/fitness", search: {}, replace: true });
+    }
+  }, [search.wizard, navigate]);
 
   const { data: sub } = useQuery({
     queryKey: ["subscription", user?.id],
@@ -51,14 +65,27 @@ function FitnessPage() {
     if (newTpls.length > 0) setPendingTemplates(newTpls);
   };
 
+  const { save: saveTodayWorkout } = useTodayWorkout();
+  const scheduleTodayFrom = (tpls: WorkoutTemplate[]) => {
+    const today = todayDayName();
+    const todays = tpls.find((tpl) => normalizeDay(tpl.day) === today);
+    if (todays) {
+      const sets = todays.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0);
+      const durationMin = Math.max(15, Math.min(120, Math.round(sets * 3) || 30));
+      saveTodayWorkout({ name: todays.name, type: todays.focus || "Workout", durationMin });
+    }
+  };
+
   const handleSyncChoice = (mode: "replace" | "add" | "skip") => {
     if (!pendingTemplates) return;
     if (mode === "replace") {
       templates.forEach((tpl) => remove(tpl.id));
       pendingTemplates.forEach((tpl) => upsert(tpl));
+      scheduleTodayFrom(pendingTemplates);
       toast.success(t("wiz.sync.done_replace"));
     } else if (mode === "add") {
       pendingTemplates.forEach((tpl) => upsert(tpl));
+      scheduleTodayFrom(pendingTemplates);
       toast.success(t("wiz.sync.done_add"));
     }
     setPendingTemplates(null);
