@@ -2,12 +2,12 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Settings, Sliders,
   Apple, Timer, Dumbbell, LineChart, Droplet, Footprints, Flame,
   Plus, Minus, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
-  CheckCircle2, Circle, Scale, ArrowUpRight,
+  CheckCircle2, Circle, Scale, ArrowUpRight, Bell,
 } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
 import {
@@ -25,6 +25,10 @@ import {
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
 import { RetentionSection } from "@/components/retention-section";
+import { NotificationsSheet, useNotifications } from "@/components/notifications-sheet";
+import { AuraTipStrip } from "@/components/aura-tip-strip";
+import { useServerFn } from "@tanstack/react-start";
+import { ensureTodayAura } from "@/lib/notifications.functions";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({ meta: [{ title: "Today — Vita" }] }),
