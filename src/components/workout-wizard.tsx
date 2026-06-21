@@ -86,6 +86,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
         goal, experience, location,
         equipment: showEquipStep ? equipment : ["Full Gym Access"],
         frequency,
+        trainingDays: trainingDays.length === frequency ? (trainingDays as WizardInputT["trainingDays"]) : undefined,
         focusAreas,
         duration: duration ? parseInt(duration, 10) : undefined,
         injuries: injuries || undefined,
