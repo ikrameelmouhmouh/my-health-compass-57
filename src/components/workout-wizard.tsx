@@ -19,6 +19,7 @@ const EXPERIENCE = ["Beginner", "Intermediate", "Advanced"];
 const LOCATIONS = ["Gym", "Home", "Both"];
 const HOME_EQUIP = ["Dumbbells", "Resistance Bands", "Barbell", "Bench", "Pull Up Bar", "No Equipment"];
 const FREQ = [1, 2, 3, 4, 5, 6];
+const WEEK_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
 const FOCUS = ["Glutes", "Legs", "Back", "Chest", "Shoulders", "Arms", "Core"];
 
 type Props = {
