@@ -14,6 +14,8 @@ import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useTodayWorkout } from "@/lib/dashboard-prefs";
+import { normalizeDay, todayDayName } from "@/lib/workout-today";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -63,14 +65,27 @@ function FitnessPage() {
     if (newTpls.length > 0) setPendingTemplates(newTpls);
   };
 
+  const { save: saveTodayWorkout } = useTodayWorkout();
+  const scheduleTodayFrom = (tpls: WorkoutTemplate[]) => {
+    const today = todayDayName();
+    const todays = tpls.find((tpl) => normalizeDay(tpl.day) === today);
+    if (todays) {
+      const sets = todays.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0);
+      const durationMin = Math.max(15, Math.min(120, Math.round(sets * 3) || 30));
+      saveTodayWorkout({ name: todays.name, type: todays.focus || "Workout", durationMin });
+    }
+  };
+
   const handleSyncChoice = (mode: "replace" | "add" | "skip") => {
     if (!pendingTemplates) return;
     if (mode === "replace") {
       templates.forEach((tpl) => remove(tpl.id));
       pendingTemplates.forEach((tpl) => upsert(tpl));
+      scheduleTodayFrom(pendingTemplates);
       toast.success(t("wiz.sync.done_replace"));
     } else if (mode === "add") {
       pendingTemplates.forEach((tpl) => upsert(tpl));
+      scheduleTodayFrom(pendingTemplates);
       toast.success(t("wiz.sync.done_add"));
     }
     setPendingTemplates(null);
