@@ -16,6 +16,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    wizard: s.wizard === 1 || s.wizard === "1" ? 1 : undefined,
+  }),
   component: FitnessPage,
 });
 
@@ -28,10 +31,19 @@ function FitnessPage() {
   const { templates, upsert, remove } = useTemplates();
   const { t } = useI18n();
   const { user } = useAuth();
+  const search = Route.useSearch();
+  const navigate = useNavigate();
   const [showWizard, setShowWizard] = useState(false);
   const [openDay, setOpenDay] = useState<string | null>(null);
   const [view, setView] = useState<View>("gym");
   const [pendingTemplates, setPendingTemplates] = useState<WorkoutTemplate[] | null>(null);
+
+  useEffect(() => {
+    if (search.wizard === 1) {
+      setShowWizard(true);
+      navigate({ to: "/fitness", search: {}, replace: true });
+    }
+  }, [search.wizard, navigate]);
 
   const { data: sub } = useQuery({
     queryKey: ["subscription", user?.id],
