@@ -287,14 +287,43 @@ function Profile() {
         </div>
       </header>
 
-      <div className="mt-3 flex items-center px-1">
-        <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1">
-          <span className={`size-1.5 rounded-full ${isPremium ? "bg-brand" : "bg-muted-foreground"}`} />
-          <span className="text-[12px] font-semibold uppercase tracking-wider">
-            {isPremium ? `Vita ${t("profile.plus")}` : t("profile.free")}
-          </span>
+      {!isPremium ? (
+        <Link
+          to="/pricing"
+          className="mt-3 flex items-center justify-between rounded-2xl border border-brand/30 bg-gradient-to-r from-brand/10 to-brand/5 px-3.5 py-2.5 ios-press"
+        >
+          <div className="flex items-center gap-2">
+            <span className="grid size-7 place-items-center rounded-full bg-brand/15 text-brand">
+              <ArrowUpRight className="size-4" />
+            </span>
+            <div>
+              <div className="text-[12px] font-semibold leading-tight">{t("today.upgrade.title")}</div>
+              <div className="text-[10px] text-muted-foreground">{t("today.upgrade.sub")}</div>
+            </div>
+          </div>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-brand">{t("today.upgrade.cta")}</span>
+        </Link>
+      ) : (
+        <div className="mt-3 flex items-center px-1">
+          <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1">
+            <span className="size-1.5 rounded-full bg-brand" />
+            <span className="text-[12px] font-semibold uppercase tracking-wider">Vita {t("profile.plus")}</span>
+          </div>
         </div>
-      </div>
+      )}
+
+      <AuraInsightCard
+        steps={day.steps}
+        stepGoal={STEP_GOAL}
+        caloriesIn={day.caloriesIn}
+        caloriesOut={day.caloriesOut}
+        calorieTarget={calorieTarget}
+        waterMl={day.waterMl}
+        waterGoal={WATER_GOAL_ML}
+        fastingActive={fastInfo.active}
+        fastingHours={fastInfo.hoursElapsed}
+      />
+
 
       <section className="mt-5 space-y-3">
         {rows.map((row, i) =>
