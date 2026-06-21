@@ -97,7 +97,7 @@ export const ensureTodayAura = createServerFn({ method: "POST" })
       .limit(1)
       .maybeSingle();
 
-    if (existing) return existing as Notification;
+    if (existing) return mapRow(existing);
 
     const { data: row, error } = await context.supabase
       .from("notifications")
@@ -111,5 +111,5 @@ export const ensureTodayAura = createServerFn({ method: "POST" })
       .select("id, type, title, body, meta, read, created_at")
       .single();
     if (error) throw new Error(error.message);
-    return row as Notification;
+    return mapRow(row);
   });
