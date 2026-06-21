@@ -16,6 +16,19 @@ export const Route = createFileRoute("/welcome")({
 
 function Welcome() {
   const t = useT();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (data.session) navigate({ to: "/profile", replace: true });
+      else if (localStorage.getItem("vita.has_account")) navigate({ to: "/login", replace: true });
+    })();
+    return () => { cancelled = true; };
+  }, [navigate]);
 
   const bullets = [
     { icon: Apple,     label: t("welcome.bullets.nutrition") },
