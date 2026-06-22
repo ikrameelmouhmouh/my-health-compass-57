@@ -73,8 +73,7 @@ function ActivitySessionPage() {
     if (!session) return;
     const acquire = async () => {
       try {
-        // @ts-expect-error wakeLock exists in modern browsers
-        wakeRef.current = await navigator.wakeLock?.request("screen");
+        wakeRef.current = await (navigator as Navigator & { wakeLock?: { request: (t: string) => Promise<WakeLockSentinel> } }).wakeLock?.request("screen") ?? null;
       } catch { /* ignore */ }
     };
     acquire();
