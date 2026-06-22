@@ -8,6 +8,7 @@ import { WorkoutWizard } from "@/components/workout-wizard";
 import { TemplateEditor } from "@/components/template-editor";
 import { TemplateSyncDialog } from "@/components/template-sync-dialog";
 import { ExerciseLibraryDialog } from "@/components/exercise-library-dialog";
+import { SessionStartSheet } from "@/components/workout/session-start-sheet";
 import { useWorkoutPlan, useTemplates, newTemplate, templatesFromPlan, type WorkoutTemplate } from "@/lib/workout-prefs";
 import { EXERCISES } from "@/lib/exercise-library";
 import { useI18n } from "@/lib/i18n";
@@ -389,7 +390,7 @@ function TemplatesSection() {
   const { t } = useI18n();
   const { templates, loaded, upsert, remove } = useTemplates();
   const [editing, setEditing] = useState<WorkoutTemplate | null>(null);
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [starting, setStarting] = useState<WorkoutTemplate | null>(null);
 
   if (!loaded) return null;
 
@@ -415,12 +416,11 @@ function TemplatesSection() {
       ) : (
         <div className="space-y-2">
           {templates.map((tpl) => {
-            const open = expanded === tpl.id;
             const sets = tpl.exercises.reduce((s, e) => s + e.sets, 0);
             const dayLabel = tpl.day ? t(`day.${tpl.day}`) : "";
             return (
               <div key={tpl.id} className="rounded-2xl border border-border bg-card/50 p-3">
-                <button onClick={() => setExpanded(open ? null : tpl.id)} className="flex w-full items-start justify-between gap-2 text-left">
+                <button onClick={() => setStarting(tpl)} className="flex w-full items-start justify-between gap-2 text-left">
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{tpl.name}</p>
                     <p className="text-xs text-muted-foreground">
@@ -445,24 +445,18 @@ function TemplatesSection() {
                     </button>
                   </div>
                 </button>
-                {open && (
-                  <div className="mt-3 space-y-2 border-t border-border pt-3">
-                    {tpl.exercises.map((ex, i) => (
-                      <div key={i} className="rounded-lg bg-background/60 p-2 text-sm">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="font-medium">{ex.name}</p>
-                          <p className="text-xs text-muted-foreground">{ex.suggestedWeight}</p>
-                        </div>
-                        <p className="text-xs text-muted-foreground">{ex.sets} × {ex.reps} · {t("fit.rest_short")} {ex.restSec}s</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             );
           })}
         </div>
       )}
+
+      <SessionStartSheet
+        template={starting}
+        open={!!starting}
+        onClose={() => setStarting(null)}
+        onEdit={(tpl) => { setStarting(null); setEditing(tpl); }}
+      />
 
       {editing && (
         <TemplateEditor
