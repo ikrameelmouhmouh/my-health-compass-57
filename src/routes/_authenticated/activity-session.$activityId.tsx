@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Pause, Play, Square, Flame, Heart, Ruler, Activity } from "lucide-react";
+import { ArrowLeft, Pause, Play, Square, Flame, Heart, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
@@ -9,10 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ACTIVITIES } from "@/routes/_authenticated/fitness";
 import {
   computeElapsedSec,
-  estimateKcal,
   formatTimer,
   useActiveActivitySession,
-  type ActivityIntensity,
   type FinishedActivitySession,
 } from "@/lib/activity-session";
 import { primeAudio } from "@/lib/workout-session";
