@@ -88,3 +88,39 @@ export const renameThread = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+export const appendWorkoutFlowMessages = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        threadId: z.string().uuid().nullable().optional(),
+        userText: z.string().min(1).max(2000),
+        assistantText: z.string().min(1).max(8000),
+        title: z.string().min(1).max(120).optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }): Promise<{ threadId: string }> => {
+    let threadId = data.threadId ?? null;
+    if (!threadId) {
+      const { data: row, error } = await context.supabase
+        .from("chat_threads")
+        .insert({ user_id: context.userId, title: data.title ?? "Workoutplan" })
+        .select("id")
+        .single();
+      if (error || !row) throw new Error(error?.message ?? "Failed to create thread");
+      threadId = row.id;
+    }
+    const { error: insErr } = await context.supabase.from("chat_messages").insert([
+      { thread_id: threadId, user_id: context.userId, role: "user", content: data.userText },
+      { thread_id: threadId, user_id: context.userId, role: "assistant", content: data.assistantText },
+    ]);
+    if (insErr) throw new Error(insErr.message);
+    await context.supabase
+      .from("chat_threads")
+      .update({ last_message_at: new Date().toISOString() })
+      .eq("id", threadId);
+    return { threadId };
+  });
+
