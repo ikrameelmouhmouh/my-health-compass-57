@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_sessions: {
+        Row: {
+          activity_id: string
+          activity_name: string
+          created_at: string
+          distance_m: number | null
+          duration_seconds: number
+          ended_at: string
+          heart_rate_avg: number | null
+          heart_rate_max: number | null
+          id: string
+          kcal: number | null
+          notes: string | null
+          paused_seconds: number
+          source: string
+          started_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_id: string
+          activity_name: string
+          created_at?: string
+          distance_m?: number | null
+          duration_seconds: number
+          ended_at: string
+          heart_rate_avg?: number | null
+          heart_rate_max?: number | null
+          id?: string
+          kcal?: number | null
+          notes?: string | null
+          paused_seconds?: number
+          source?: string
+          started_at: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_id?: string
+          activity_name?: string
+          created_at?: string
+          distance_m?: number | null
+          duration_seconds?: number
+          ended_at?: string
+          heart_rate_avg?: number | null
+          heart_rate_max?: number | null
+          id?: string
+          kcal?: number | null
+          notes?: string | null
+          paused_seconds?: number
+          source?: string
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       challenge_participants: {
         Row: {
           challenge_id: string

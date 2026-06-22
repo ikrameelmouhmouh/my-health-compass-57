@@ -1,4 +1,31 @@
 import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+async function pushActivityToCloud(s: FinishedActivitySession) {
+  try {
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id;
+    if (!uid) return;
+    await supabase.from("activity_sessions").insert({
+      id: s.id,
+      user_id: uid,
+      activity_id: s.activityId,
+      activity_name: s.activityName,
+      started_at: s.startedAt,
+      ended_at: s.endedAt,
+      duration_seconds: s.durationSec,
+      paused_seconds: s.pausedSec,
+      kcal: s.kcal || null,
+      heart_rate_avg: s.heartRateAvg,
+      heart_rate_max: s.heartRateMax,
+      distance_m: s.distanceM,
+      source: s.source,
+      notes: s.note ?? null,
+    });
+  } catch {
+    /* offline — blijft in localStorage */
+  }
+}
 
 const ACTIVE_KEY = "fitness.activity-session.active.v1";
 const HISTORY_KEY = "fitness.activity-sessions.v1";
@@ -179,6 +206,7 @@ export function useActiveActivitySession() {
     writeHistory(hist);
     writeActive(null);
     setSession(null);
+    void pushActivityToCloud(finished);
     return finished;
   }, []);
 
@@ -195,8 +223,38 @@ export function updateActivitySession(id: string, patch: Partial<FinishedActivit
   if (idx === -1) return;
   hist[idx] = { ...hist[idx], ...patch };
   writeHistory(hist);
+  void (async () => {
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth.user?.id;
+      if (!uid) return;
+      const dbPatch: {
+        notes?: string | null;
+        kcal?: number | null;
+        heart_rate_avg?: number | null;
+        heart_rate_max?: number | null;
+        distance_m?: number | null;
+      } = {};
+      if (patch.note !== undefined) dbPatch.notes = patch.note ?? null;
+      if (patch.kcal !== undefined) dbPatch.kcal = patch.kcal;
+      if (patch.heartRateAvg !== undefined) dbPatch.heart_rate_avg = patch.heartRateAvg;
+      if (patch.heartRateMax !== undefined) dbPatch.heart_rate_max = patch.heartRateMax;
+      if (patch.distanceM !== undefined) dbPatch.distance_m = patch.distanceM;
+      if (Object.keys(dbPatch).length === 0) return;
+      await supabase.from("activity_sessions").update(dbPatch).eq("id", id).eq("user_id", uid);
+    } catch { /* ignore */ }
+  })();
 }
 
 export function deleteActivitySession(id: string) {
   writeHistory(readHistory().filter((s) => s.id !== id));
+  void (async () => {
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth.user?.id;
+      if (!uid) return;
+      await supabase.from("activity_sessions").delete().eq("id", id).eq("user_id", uid);
+    } catch { /* ignore */ }
+  })();
 }
+
