@@ -90,6 +90,7 @@ function SessionPage() {
   }
 
   function toggleSet(exIdx: number, setIdx: number) {
+    primeAudio(); // unlock iOS audio while inside a user gesture
     let willComplete = false;
     update((s) => ({
       ...s,
