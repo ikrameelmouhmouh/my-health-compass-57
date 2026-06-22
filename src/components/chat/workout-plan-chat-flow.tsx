@@ -66,7 +66,14 @@ function labelFor(value: string | number, t: (k: string, v?: Record<string, stri
   return value;
 }
 
-export function WorkoutPlanChatFlow() {
+export function WorkoutPlanChatFlow({
+  threadId,
+  onPersisted,
+}: {
+  threadId: string | null;
+  onPersisted: (threadId: string) => void;
+}) {
+
   const { t } = useI18n();
   const generate = useServerFn(generateWorkoutPlan);
   const [step, setStep] = useState<FlowStep>("goal");
