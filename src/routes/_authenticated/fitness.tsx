@@ -521,15 +521,15 @@ function LibrarySection() {
   );
 }
 
-type ActivityCategory = "Cardio" | "Outdoor" | "Sport" | "Wellness";
-type ActivityItem = {
+export type ActivityCategory = "Cardio" | "Outdoor" | "Sport" | "Wellness";
+export type ActivityItem = {
   id: string;
   icon: typeof Activity;
   kcalPerHour: number;
   category: ActivityCategory;
 };
 
-const ACTIVITIES: ActivityItem[] = [
+export const ACTIVITIES: ActivityItem[] = [
   { id: "swim", icon: Waves, kcalPerHour: 500, category: "Cardio" },
   { id: "bike", icon: Bike, kcalPerHour: 450, category: "Outdoor" },
   { id: "run-outdoor", icon: Footprints, kcalPerHour: 600, category: "Outdoor" },
