@@ -107,7 +107,6 @@ function ActivitySessionPage() {
 
   // Pre-start screen
   if (!session || session.activityId !== activity.id) {
-    const intensities: ActivityIntensity[] = ["easy", "normal", "intense"];
     return (
       <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-6">
         <button onClick={() => navigate({ to: "/fitness" })} className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -120,38 +119,17 @@ function ActivitySessionPage() {
           </div>
           <h1 className="mt-4 font-display text-3xl font-semibold leading-tight">{t(`act.${activity.id}.name`)}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{t(`act.${activity.id}.desc`)}</p>
-          <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">
-            {t("fit.act.kcal_per_h", { n: activity.kcalPerHour })}
-          </p>
-        </div>
-
-        <div className="mt-8">
-          <p className="mb-2 text-sm font-semibold">{t("activity.intensity")}</p>
-          <div className="grid grid-cols-3 gap-2">
-            {intensities.map((i) => (
-              <button
-                key={i}
-                onClick={() => setIntensity(i)}
-                className={`rounded-2xl border p-3 text-sm font-medium transition ${
-                  intensity === i ? "border-brand bg-brand/10 text-brand" : "border-border bg-card/50"
-                }`}
-              >
-                {t(`act.intensity.${i}`)}
-              </button>
-            ))}
-          </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">{t("activity.intensity_hint")}</p>
         </div>
 
         <Button
-          className="mt-8 h-14 w-full text-base"
+          className="mt-10 h-14 w-full text-base"
           onClick={() => {
             primeAudio();
             start({
               activityId: activity.id,
               activityName: t(`act.${activity.id}.name`),
               kcalPerHour: activity.kcalPerHour,
-              intensity,
+              intensity: "normal",
               weightKg,
             });
           }}
