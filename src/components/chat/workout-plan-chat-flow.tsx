@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Check, Dumbbell, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -9,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useTodayWorkout } from "@/lib/dashboard-prefs";
 import { generateWorkoutPlan, type WizardInputT, type WorkoutPlan } from "@/lib/workout.functions";
+import { appendWorkoutFlowMessages } from "@/lib/chat.functions";
 import { templatesFromPlan, useTemplates, type WorkoutTemplate } from "@/lib/workout-prefs";
 import { normalizeDay, todayDayName } from "@/lib/workout-today";
+
 
 const GOALS: { id: string; key: string }[] = [
   { id: "Lose Weight", key: "wiz.goal.lose" },
