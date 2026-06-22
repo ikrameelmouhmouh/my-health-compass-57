@@ -1,12 +1,26 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Check, MoreHorizontal, Play, Plus, X, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Pause,
+  Play,
+  Plus,
+  StickyNote,
+  Timer,
+  TrendingUp,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import {
+  computeElapsedSec,
   formatDuration,
+  playRestEndCue,
   previousBestFor,
   useActiveSession,
+  vibrateShort,
   type FinishedSession,
 } from "@/lib/workout-session";
 import { SessionSummary } from "@/components/workout/session-summary";
@@ -15,30 +29,40 @@ export const Route = createFileRoute("/_authenticated/workout-session/$templateI
   component: SessionPage,
 });
 
+const REST_PRESETS = [30, 60, 90, 120, 180];
+
 function SessionPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const { session, loaded, update, finish, cancel } = useActiveSession();
+  const { session, loaded, update, pause, resume, finish, cancel } = useActiveSession();
   const [now, setNow] = useState(() => Date.now());
   const [summary, setSummary] = useState<FinishedSession | null>(null);
+
+  // Rest timer state
+  const [restEndAt, setRestEndAt] = useState<number | null>(null);
+  const [restDuration, setRestDuration] = useState<number>(90);
+  const restFiredRef = useRef(false);
+  const [notesOpen, setNotesOpen] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
   }, []);
 
-  const elapsed = useMemo(() => {
-    if (!session) return 0;
-    return Math.max(0, Math.round((now - new Date(session.startedAt).getTime()) / 1000));
-  }, [session, now]);
+  // Fire cue once when rest timer hits zero.
+  useEffect(() => {
+    if (restEndAt == null) return;
+    if (now >= restEndAt && !restFiredRef.current) {
+      restFiredRef.current = true;
+      playRestEndCue();
+    }
+  }, [now, restEndAt]);
+
+  const elapsed = useMemo(() => (session ? computeElapsedSec(session, now) : 0), [session, now]);
+  const isPaused = !!session?.pausedAt;
 
   if (summary) {
-    return (
-      <SessionSummary
-        session={summary}
-        onClose={() => navigate({ to: "/fitness" })}
-      />
-    );
+    return <SessionSummary session={summary} onClose={() => navigate({ to: "/fitness" })} />;
   }
 
   if (!loaded) return <main className="min-h-[100dvh] bg-background" />;
@@ -53,7 +77,19 @@ function SessionPage() {
     );
   }
 
+  function startRest(seconds: number) {
+    restFiredRef.current = false;
+    setRestDuration(seconds);
+    setRestEndAt(Date.now() + seconds * 1000);
+  }
+
+  function clearRest() {
+    restFiredRef.current = false;
+    setRestEndAt(null);
+  }
+
   function toggleSet(exIdx: number, setIdx: number) {
+    let willComplete = false;
     update((s) => ({
       ...s,
       exercises: s.exercises.map((e, i) =>
@@ -61,14 +97,23 @@ function SessionPage() {
           ? e
           : {
               ...e,
-              sets: e.sets.map((st, j) =>
-                j !== setIdx
-                  ? st
-                  : { ...st, done: !st.done, completedAt: !st.done ? new Date().toISOString() : undefined },
-              ),
+              sets: e.sets.map((st, j) => {
+                if (j !== setIdx) return st;
+                willComplete = !st.done;
+                return {
+                  ...st,
+                  done: !st.done,
+                  completedAt: !st.done ? new Date().toISOString() : undefined,
+                };
+              }),
             },
       ),
     }));
+    if (willComplete) {
+      const rest = session?.exercises[exIdx]?.restSec ?? 90;
+      vibrateShort();
+      if (rest > 0) startRest(rest);
+    }
   }
 
   function updateField(exIdx: number, setIdx: number, field: "weight" | "reps", value: number) {
@@ -96,6 +141,27 @@ function SessionPage() {
     }));
   }
 
+  function setExerciseRest(exIdx: number, sec: number) {
+    update((s) => ({
+      ...s,
+      exercises: s.exercises.map((e, i) => (i !== exIdx ? e : { ...e, restSec: sec })),
+    }));
+  }
+
+  function setExerciseNotes(exIdx: number, notes: string) {
+    update((s) => ({
+      ...s,
+      exercises: s.exercises.map((e, i) => (i !== exIdx ? e : { ...e, notes })),
+    }));
+  }
+
+  function setExerciseRPE(exIdx: number, rpe: number) {
+    update((s) => ({
+      ...s,
+      exercises: s.exercises.map((e, i) => (i !== exIdx ? e : { ...e, rpe })),
+    }));
+  }
+
   function handleFinish() {
     if (!confirm(t("session.finish_confirm"))) return;
     const f = finish();
@@ -109,9 +175,22 @@ function SessionPage() {
     navigate({ to: "/fitness" });
   }
 
+  function togglePause() {
+    if (isPaused) resume();
+    else {
+      pause();
+      vibrateShort();
+    }
+  }
+
+  const restRemaining = restEndAt ? Math.max(0, Math.round((restEndAt - now) / 1000)) : 0;
+  const restProgress = restEndAt && restDuration > 0
+    ? Math.min(1, Math.max(0, 1 - restRemaining / restDuration))
+    : 0;
+
   return (
-    <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-6">
-      <div className="sticky top-0 z-20 -mx-5 flex items-center justify-between gap-3 border-b border-border bg-background/95 px-5 py-3 backdrop-blur">
+    <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-40 pt-6">
+      <div className="sticky top-0 z-20 -mx-5 flex items-center justify-between gap-2 border-b border-border bg-background/95 px-5 py-3 backdrop-blur">
         <button
           onClick={handleCancel}
           aria-label={t("common.close")}
@@ -119,18 +198,64 @@ function SessionPage() {
         >
           <X className="size-4" />
         </button>
-        <div className="min-w-0 text-center">
-          <p className="font-display text-xl font-semibold tabular-nums leading-none">{formatDuration(elapsed)}</p>
-          <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{session.templateName}</p>
+        <div className="min-w-0 flex-1 text-center">
+          <p className={`font-display text-xl font-semibold tabular-nums leading-none ${isPaused ? "text-muted-foreground" : ""}`}>
+            {formatDuration(elapsed)}
+          </p>
+          <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+            {isPaused ? t("session.paused") : session.templateName}
+          </p>
         </div>
+        <button
+          onClick={togglePause}
+          aria-label={isPaused ? t("session.resume") : t("session.pause")}
+          className={`grid size-9 place-items-center rounded-full ${isPaused ? "bg-brand text-brand-foreground" : "bg-card text-muted-foreground"}`}
+        >
+          {isPaused ? <Play className="size-4 fill-current" /> : <Pause className="size-4" />}
+        </button>
         <Button size="sm" onClick={handleFinish} className="bg-brand text-brand-foreground">
           {t("session.finish")}
         </Button>
       </div>
 
+      {restEndAt !== null && (
+        <div className="sticky top-[57px] z-10 -mx-5 border-b border-border bg-card/95 px-5 py-2.5 backdrop-blur">
+          <div className="flex items-center gap-3">
+            <Timer className="size-4 text-brand" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline justify-between">
+                <p className="text-xs text-muted-foreground">{t("session.rest")}</p>
+                <p className="font-display text-base font-semibold tabular-nums">{formatDuration(restRemaining)}</p>
+              </div>
+              <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-border">
+                <div
+                  className="h-full bg-brand transition-all"
+                  style={{ width: `${restProgress * 100}%` }}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setRestEndAt((v) => (v ? v + 15_000 : v))}
+                className="rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground"
+              >
+                +15s
+              </button>
+              <button
+                onClick={clearRest}
+                className="rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground"
+              >
+                {t("session.skip_rest")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mt-5 space-y-5">
         {session.exercises.map((ex, exIdx) => {
           const prev = previousBestFor(ex.name, session.id);
+          const open = !!notesOpen[exIdx];
           return (
             <div key={exIdx} className="rounded-2xl border border-border bg-card/60 p-3">
               <div className="flex items-center gap-3">
@@ -143,9 +268,6 @@ function SessionPage() {
                     {ex.equipment ?? "—"} · {ex.sets.length} {t("fit.tpl.sets_short")}
                   </p>
                 </div>
-                <button className="grid size-8 place-items-center rounded-full text-muted-foreground" aria-label="more">
-                  <MoreHorizontal className="size-4" />
-                </button>
               </div>
 
               {prev && (
@@ -192,10 +314,78 @@ function SessionPage() {
               >
                 <Plus className="size-3.5" /> {t("session.add_set")}
               </button>
+
+              <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/60 pt-2.5">
+                <div className="flex items-center gap-1.5">
+                  <Timer className="size-3.5 text-muted-foreground" />
+                  <span className="text-[11px] text-muted-foreground">{t("session.rest")}</span>
+                  <div className="ml-1 flex flex-wrap gap-1">
+                    {REST_PRESETS.map((sec) => {
+                      const active = (ex.restSec ?? 90) === sec;
+                      return (
+                        <button
+                          key={sec}
+                          onClick={() => setExerciseRest(exIdx, sec)}
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${active ? "bg-brand text-brand-foreground" : "bg-background text-muted-foreground"}`}
+                        >
+                          {sec}s
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setNotesOpen((o) => ({ ...o, [exIdx]: !o[exIdx] }))}
+                  className="flex items-center gap-1 text-[11px] text-muted-foreground"
+                >
+                  <StickyNote className="size-3.5" />
+                  {t("session.notes")}
+                  {open ? <ChevronUp className="size-3" /> : <ChevronDown className="size-3" />}
+                </button>
+              </div>
+
+              {open && (
+                <div className="mt-2 space-y-2 rounded-xl bg-background/60 p-2">
+                  <textarea
+                    value={ex.notes ?? ""}
+                    onChange={(e) => setExerciseNotes(exIdx, e.target.value)}
+                    placeholder={t("session.notes_placeholder")}
+                    rows={2}
+                    className="w-full resize-none rounded-lg border border-border bg-background px-2 py-1.5 text-xs outline-none"
+                  />
+                  <div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-[11px] text-muted-foreground">{t("session.rpe")}</span>
+                      <span className="font-display text-sm font-semibold tabular-nums">{ex.rpe ?? "—"}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={1}
+                      max={10}
+                      step={1}
+                      value={ex.rpe ?? 5}
+                      onChange={(e) => setExerciseRPE(exIdx, Number(e.target.value))}
+                      className="mt-1 w-full accent-[var(--brand)]"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
       </div>
+
+      {isPaused && (
+        <div className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-md p-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur">
+            <Pause className="size-4 text-brand" />
+            <p className="flex-1 text-sm">{t("session.paused_hint")}</p>
+            <Button size="sm" onClick={togglePause} className="bg-brand text-brand-foreground">
+              {t("session.resume")}
+            </Button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

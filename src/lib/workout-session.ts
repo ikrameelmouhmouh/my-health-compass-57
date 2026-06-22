@@ -5,6 +5,7 @@ import { EXERCISES } from "./exercise-library";
 
 const ACTIVE_KEY = "fitness.session.active.v1";
 const HISTORY_KEY = "fitness.sessions.v1";
+const PR_KEY = "fitness.prs.v1";
 
 export type SessionSet = {
   weight: number;
@@ -19,6 +20,9 @@ export type SessionExercise = {
   equipment?: string;
   image?: string;
   sets: SessionSet[];
+  restSec?: number;
+  notes?: string;
+  rpe?: number;
 };
 
 export type ActiveSession = {
@@ -29,6 +33,10 @@ export type ActiveSession = {
   startedAt: string;
   endedAt?: string;
   exercises: SessionExercise[];
+  /** ISO time when paused; undefined when running. */
+  pausedAt?: string;
+  /** Accumulated paused seconds (excluding the current pause window). */
+  totalPausedSec: number;
 };
 
 export type FinishedSession = ActiveSession & {
@@ -37,6 +45,15 @@ export type FinishedSession = ActiveSession & {
   totalVolume: number;
   totalReps: number;
   totalSets: number;
+};
+
+export type PRRecord = {
+  exerciseName: string;
+  weight: number;
+  reps: number;
+  volume: number;
+  achievedAt: string;
+  sessionId: string;
 };
 
 function parseFirstInt(s: string | undefined, fallback = 0): number {
@@ -63,6 +80,7 @@ export function buildSessionFromTemplate(tpl: WorkoutTemplate): ActiveSession {
       equipment: lib?.equipment,
       image: lib?.image,
       sets: Array.from({ length: setCount }, () => ({ weight, reps, done: false })),
+      restSec: 90,
     };
   });
   return {
@@ -72,6 +90,7 @@ export function buildSessionFromTemplate(tpl: WorkoutTemplate): ActiveSession {
     focus: tpl.focus,
     startedAt: new Date().toISOString(),
     exercises,
+    totalPausedSec: 0,
   };
 }
 
@@ -79,7 +98,10 @@ function readActive(): ActiveSession | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem(ACTIVE_KEY);
-    return raw ? (JSON.parse(raw) as ActiveSession) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as ActiveSession;
+    if (typeof parsed.totalPausedSec !== "number") parsed.totalPausedSec = 0;
+    return parsed;
   } catch {
     return null;
   }
@@ -102,6 +124,30 @@ function readHistory(): FinishedSession[] {
 function writeHistory(v: FinishedSession[]) {
   if (typeof window === "undefined") return;
   localStorage.setItem(HISTORY_KEY, JSON.stringify(v));
+}
+
+function readPRs(): Record<string, PRRecord> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = localStorage.getItem(PR_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, PRRecord>) : {};
+  } catch {
+    return {};
+  }
+}
+function writePRs(v: Record<string, PRRecord>) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(PR_KEY, JSON.stringify(v));
+}
+
+/** Compute elapsed seconds excluding paused time. */
+export function computeElapsedSec(session: ActiveSession, now: number = Date.now()): number {
+  const started = new Date(session.startedAt).getTime();
+  let paused = session.totalPausedSec || 0;
+  if (session.pausedAt) {
+    paused += Math.max(0, Math.round((now - new Date(session.pausedAt).getTime()) / 1000));
+  }
+  return Math.max(0, Math.round((now - started) / 1000) - paused);
 }
 
 export function useActiveSession() {
@@ -127,6 +173,32 @@ export function useActiveSession() {
     });
   }, []);
 
+  const pause = useCallback(() => {
+    setSession((cur) => {
+      if (!cur || cur.pausedAt) return cur;
+      const next = { ...cur, pausedAt: new Date().toISOString() };
+      writeActive(next);
+      return next;
+    });
+  }, []);
+
+  const resume = useCallback(() => {
+    setSession((cur) => {
+      if (!cur || !cur.pausedAt) return cur;
+      const addedSec = Math.max(
+        0,
+        Math.round((Date.now() - new Date(cur.pausedAt).getTime()) / 1000),
+      );
+      const next = {
+        ...cur,
+        pausedAt: undefined,
+        totalPausedSec: (cur.totalPausedSec || 0) + addedSec,
+      };
+      writeActive(next);
+      return next;
+    });
+  }, []);
+
   const cancel = useCallback(() => {
     writeActive(null);
     setSession(null);
@@ -135,11 +207,20 @@ export function useActiveSession() {
   const finish = useCallback((): FinishedSession | null => {
     const cur = readActive();
     if (!cur) return null;
+    // If still paused at finish time, fold the open pause into totalPausedSec.
+    let totalPausedSec = cur.totalPausedSec || 0;
+    if (cur.pausedAt) {
+      totalPausedSec += Math.max(
+        0,
+        Math.round((Date.now() - new Date(cur.pausedAt).getTime()) / 1000),
+      );
+    }
     const endedAt = new Date().toISOString();
-    const durationSec = Math.max(
+    const rawDuration = Math.max(
       0,
       Math.round((new Date(endedAt).getTime() - new Date(cur.startedAt).getTime()) / 1000),
     );
+    const durationSec = Math.max(0, rawDuration - totalPausedSec);
     let totalVolume = 0;
     let totalReps = 0;
     let totalSets = 0;
@@ -154,6 +235,8 @@ export function useActiveSession() {
     );
     const finished: FinishedSession = {
       ...cur,
+      pausedAt: undefined,
+      totalPausedSec,
       endedAt,
       durationSec,
       totalVolume,
@@ -162,12 +245,13 @@ export function useActiveSession() {
     };
     const history = readHistory();
     writeHistory([finished, ...history].slice(0, 200));
+    recordPRsFromSession(finished);
     writeActive(null);
     setSession(null);
     return finished;
   }, []);
 
-  return { session, loaded, start, update, cancel, finish };
+  return { session, loaded, start, update, pause, resume, cancel, finish };
 }
 
 export function useSessionHistory() {
@@ -200,10 +284,81 @@ export function previousBestFor(name: string, beforeSessionId?: string): { weigh
   return best ? { weight: best.weight, reps: best.reps } : null;
 }
 
+export function getPR(name: string): PRRecord | null {
+  const map = readPRs();
+  return map[name.toLowerCase()] ?? null;
+}
+
+function recordPRsFromSession(finished: FinishedSession) {
+  const map = readPRs();
+  let changed = false;
+  for (const ex of finished.exercises) {
+    const key = ex.name.toLowerCase();
+    const current = map[key];
+    for (const s of ex.sets) {
+      if (!s.done) continue;
+      const volume = s.weight * s.reps;
+      if (!current || volume > current.volume) {
+        map[key] = {
+          exerciseName: ex.name,
+          weight: s.weight,
+          reps: s.reps,
+          volume,
+          achievedAt: finished.endedAt,
+          sessionId: finished.id,
+        };
+        changed = true;
+      }
+    }
+  }
+  if (changed) writePRs(map);
+}
+
 export function formatDuration(sec: number): string {
   const h = Math.floor(sec / 3600);
   const m = Math.floor((sec % 3600) / 60);
   const s = sec % 60;
   if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+/** Short beep + optional vibration. Safe on browsers that don't support either. */
+export function playRestEndCue() {
+  if (typeof window === "undefined") return;
+  try {
+    const AC: typeof AudioContext | undefined =
+      (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext })
+        .AudioContext
+      ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (AC) {
+      const ctx = new AC();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = 880;
+      g.gain.value = 0.0001;
+      o.connect(g).connect(ctx.destination);
+      const now = ctx.currentTime;
+      g.gain.exponentialRampToValueAtTime(0.2, now + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+      o.start(now);
+      o.stop(now + 0.4);
+      setTimeout(() => ctx.close().catch(() => {}), 600);
+    }
+  } catch {
+    /* ignore */
+  }
+  try {
+    navigator.vibrate?.([120, 60, 120]);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function vibrateShort() {
+  try {
+    if (typeof navigator !== "undefined") navigator.vibrate?.(40);
+  } catch {
+    /* ignore */
+  }
 }
