@@ -19,6 +19,7 @@ import {
   formatDuration,
   playRestEndCue,
   previousBestFor,
+  primeAudio,
   useActiveSession,
   vibrateShort,
   type FinishedSession,
