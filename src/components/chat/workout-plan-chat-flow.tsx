@@ -244,12 +244,19 @@ export function WorkoutPlanChatFlow({
             ))}
           </div>
           <p className="mt-3 text-sm text-muted-foreground">{plan.progressionNotes}</p>
-          <AddGeneratedTemplatesButton templates={templates} />
+          <AddGeneratedTemplatesButton
+            templates={templates}
+            plan={plan}
+            summaries={summaries}
+            threadId={threadId}
+            onPersisted={onPersisted}
+          />
         </Question>
       )}
     </div>
   );
 }
+
 
 function Question({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
