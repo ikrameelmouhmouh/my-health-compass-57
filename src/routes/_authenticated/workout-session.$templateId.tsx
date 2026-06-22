@@ -11,7 +11,7 @@ import {
 } from "@/lib/workout-session";
 import { SessionSummary } from "@/components/workout/session-summary";
 
-export const Route = createFileRoute("/_authenticated/fitness/session/$templateId")({
+export const Route = createFileRoute("/_authenticated/workout-session/$templateId")({
   component: SessionPage,
 });
 
