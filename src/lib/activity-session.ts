@@ -1,4 +1,31 @@
 import { useCallback, useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+async function pushActivityToCloud(s: FinishedActivitySession) {
+  try {
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id;
+    if (!uid) return;
+    await supabase.from("activity_sessions").insert({
+      id: s.id,
+      user_id: uid,
+      activity_id: s.activityId,
+      activity_name: s.activityName,
+      started_at: s.startedAt,
+      ended_at: s.endedAt,
+      duration_seconds: s.durationSec,
+      paused_seconds: s.pausedSec,
+      kcal: s.kcal || null,
+      heart_rate_avg: s.heartRateAvg,
+      heart_rate_max: s.heartRateMax,
+      distance_m: s.distanceM,
+      source: s.source,
+      notes: s.note ?? null,
+    });
+  } catch {
+    /* offline — blijft in localStorage */
+  }
+}
 
 const ACTIVE_KEY = "fitness.activity-session.active.v1";
 const HISTORY_KEY = "fitness.activity-sessions.v1";
