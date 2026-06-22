@@ -26,12 +26,12 @@ import { Route as AuthenticatedNutritionRouteImport } from './routes/_authentica
 import { Route as AuthenticatedFitnessRouteImport } from './routes/_authenticated/fitness'
 import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticated/fasting'
 import { Route as AuthenticatedAiCoachRouteImport } from './routes/_authenticated/ai-coach'
+import { Route as AuthenticatedWorkoutSessionTemplateIdRouteImport } from './routes/_authenticated/workout-session.$templateId'
 import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
 import { Route as ApiPublicWidgetAuraRouteImport } from './routes/api/public/widget/aura'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 import { Route as ApiPublicHooksSendAuraTipsRouteImport } from './routes/api/public/hooks/send-aura-tips'
-import { Route as AuthenticatedFitnessSessionTemplateIdRouteImport } from './routes/_authenticated/fitness.session.$templateId'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -117,6 +117,12 @@ const AuthenticatedAiCoachRoute = AuthenticatedAiCoachRouteImport.update({
   path: '/ai-coach',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedWorkoutSessionTemplateIdRoute =
+  AuthenticatedWorkoutSessionTemplateIdRouteImport.update({
+    id: '/workout-session/$templateId',
+    path: '/workout-session/$templateId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAiCoachThreadIdRoute =
   AuthenticatedAiCoachThreadIdRouteImport.update({
     id: '/$threadId',
@@ -146,12 +152,6 @@ const ApiPublicHooksSendAuraTipsRoute =
     path: '/api/public/hooks/send-aura-tips',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AuthenticatedFitnessSessionTemplateIdRoute =
-  AuthenticatedFitnessSessionTemplateIdRouteImport.update({
-    id: '/session/$templateId',
-    path: '/session/$templateId',
-    getParentRoute: () => AuthenticatedFitnessRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -161,7 +161,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/fasting': typeof AuthenticatedFastingRoute
-  '/fitness': typeof AuthenticatedFitnessRouteWithChildren
+  '/fitness': typeof AuthenticatedFitnessRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/pricing': typeof AuthenticatedPricingRoute
@@ -171,7 +171,7 @@ export interface FileRoutesByFullPath {
   '/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
-  '/fitness/session/$templateId': typeof AuthenticatedFitnessSessionTemplateIdRoute
+  '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -185,7 +185,7 @@ export interface FileRoutesByTo {
   '/welcome': typeof WelcomeRoute
   '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/fasting': typeof AuthenticatedFastingRoute
-  '/fitness': typeof AuthenticatedFitnessRouteWithChildren
+  '/fitness': typeof AuthenticatedFitnessRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/pricing': typeof AuthenticatedPricingRoute
@@ -195,7 +195,7 @@ export interface FileRoutesByTo {
   '/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
-  '/fitness/session/$templateId': typeof AuthenticatedFitnessSessionTemplateIdRoute
+  '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -211,7 +211,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/_authenticated/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/_authenticated/fasting': typeof AuthenticatedFastingRoute
-  '/_authenticated/fitness': typeof AuthenticatedFitnessRouteWithChildren
+  '/_authenticated/fitness': typeof AuthenticatedFitnessRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/pricing': typeof AuthenticatedPricingRoute
@@ -221,7 +221,7 @@ export interface FileRoutesById {
   '/_authenticated/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
-  '/_authenticated/fitness/session/$templateId': typeof AuthenticatedFitnessSessionTemplateIdRoute
+  '/_authenticated/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -247,7 +247,7 @@ export interface FileRouteTypes {
     | '/weight'
     | '/api/chat'
     | '/ai-coach/$threadId'
-    | '/fitness/session/$templateId'
+    | '/workout-session/$templateId'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
@@ -271,7 +271,7 @@ export interface FileRouteTypes {
     | '/weight'
     | '/api/chat'
     | '/ai-coach/$threadId'
-    | '/fitness/session/$templateId'
+    | '/workout-session/$templateId'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
@@ -296,7 +296,7 @@ export interface FileRouteTypes {
     | '/_authenticated/weight'
     | '/api/chat'
     | '/_authenticated/ai-coach/$threadId'
-    | '/_authenticated/fitness/session/$templateId'
+    | '/_authenticated/workout-session/$templateId'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
@@ -438,6 +438,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiCoachRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/workout-session/$templateId': {
+      id: '/_authenticated/workout-session/$templateId'
+      path: '/workout-session/$templateId'
+      fullPath: '/workout-session/$templateId'
+      preLoaderRoute: typeof AuthenticatedWorkoutSessionTemplateIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/ai-coach/$threadId': {
       id: '/_authenticated/ai-coach/$threadId'
       path: '/$threadId'
@@ -473,13 +480,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSendAuraTipsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/fitness/session/$templateId': {
-      id: '/_authenticated/fitness/session/$templateId'
-      path: '/session/$templateId'
-      fullPath: '/fitness/session/$templateId'
-      preLoaderRoute: typeof AuthenticatedFitnessSessionTemplateIdRouteImport
-      parentRoute: typeof AuthenticatedFitnessRoute
-    }
   }
 }
 
@@ -494,22 +494,10 @@ const AuthenticatedAiCoachRouteChildren: AuthenticatedAiCoachRouteChildren = {
 const AuthenticatedAiCoachRouteWithChildren =
   AuthenticatedAiCoachRoute._addFileChildren(AuthenticatedAiCoachRouteChildren)
 
-interface AuthenticatedFitnessRouteChildren {
-  AuthenticatedFitnessSessionTemplateIdRoute: typeof AuthenticatedFitnessSessionTemplateIdRoute
-}
-
-const AuthenticatedFitnessRouteChildren: AuthenticatedFitnessRouteChildren = {
-  AuthenticatedFitnessSessionTemplateIdRoute:
-    AuthenticatedFitnessSessionTemplateIdRoute,
-}
-
-const AuthenticatedFitnessRouteWithChildren =
-  AuthenticatedFitnessRoute._addFileChildren(AuthenticatedFitnessRouteChildren)
-
 interface AuthenticatedRouteChildren {
   AuthenticatedAiCoachRoute: typeof AuthenticatedAiCoachRouteWithChildren
   AuthenticatedFastingRoute: typeof AuthenticatedFastingRoute
-  AuthenticatedFitnessRoute: typeof AuthenticatedFitnessRouteWithChildren
+  AuthenticatedFitnessRoute: typeof AuthenticatedFitnessRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedPricingRoute: typeof AuthenticatedPricingRoute
@@ -517,12 +505,13 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSocialRoute: typeof AuthenticatedSocialRoute
   AuthenticatedWeightRoute: typeof AuthenticatedWeightRoute
+  AuthenticatedWorkoutSessionTemplateIdRoute: typeof AuthenticatedWorkoutSessionTemplateIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAiCoachRoute: AuthenticatedAiCoachRouteWithChildren,
   AuthenticatedFastingRoute: AuthenticatedFastingRoute,
-  AuthenticatedFitnessRoute: AuthenticatedFitnessRouteWithChildren,
+  AuthenticatedFitnessRoute: AuthenticatedFitnessRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedPricingRoute: AuthenticatedPricingRoute,
@@ -530,6 +519,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSocialRoute: AuthenticatedSocialRoute,
   AuthenticatedWeightRoute: AuthenticatedWeightRoute,
+  AuthenticatedWorkoutSessionTemplateIdRoute:
+    AuthenticatedWorkoutSessionTemplateIdRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
