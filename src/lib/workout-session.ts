@@ -2,10 +2,68 @@ import { useCallback, useEffect, useState } from "react";
 import type { Exercise } from "./workout.functions";
 import type { WorkoutTemplate } from "./workout-prefs";
 import { EXERCISES } from "./exercise-library";
+import { supabase } from "@/integrations/supabase/client";
 
 const ACTIVE_KEY = "fitness.session.active.v1";
 const HISTORY_KEY = "fitness.sessions.v1";
 const PR_KEY = "fitness.prs.v1";
+
+async function pushWorkoutToCloud(s: FinishedSession) {
+  try {
+    const { data: auth } = await supabase.auth.getUser();
+    const uid = auth.user?.id;
+    if (!uid) return;
+    const { data: inserted, error } = await supabase
+      .from("workout_sessions")
+      .insert({
+        user_id: uid,
+        template_id: s.templateId,
+        name: s.templateName,
+        started_at: s.startedAt,
+        ended_at: s.endedAt,
+        duration_seconds: s.durationSec,
+        active_seconds: s.durationSec,
+        total_volume_kg: s.totalVolume,
+        total_reps: s.totalReps,
+      })
+      .select("id")
+      .single();
+    if (error || !inserted) return;
+    const sessionId = inserted.id;
+    const rows: Array<{
+      user_id: string;
+      session_id: string;
+      exercise_key: string;
+      exercise_name: string;
+      set_index: number;
+      weight_kg: number;
+      reps: number;
+      completed_at: string;
+      is_warmup: boolean;
+    }> = [];
+    s.exercises.forEach((ex) => {
+      ex.sets.forEach((set, idx) => {
+        if (!set.done) return;
+        rows.push({
+          user_id: uid,
+          session_id: sessionId,
+          exercise_key: (ex.libraryId ?? ex.name).toLowerCase(),
+          exercise_name: ex.name,
+          set_index: idx,
+          weight_kg: set.weight,
+          reps: set.reps,
+          completed_at: set.completedAt ?? s.endedAt,
+          is_warmup: false,
+        });
+      });
+    });
+    if (rows.length > 0) {
+      await supabase.from("workout_sets").insert(rows);
+    }
+  } catch {
+    /* offline — blijft in localStorage */
+  }
+}
 
 export type SessionSet = {
   weight: number;
