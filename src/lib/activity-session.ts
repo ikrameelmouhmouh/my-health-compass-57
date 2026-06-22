@@ -206,11 +206,6 @@ export function useActiveActivitySession() {
     writeHistory(hist);
     writeActive(null);
     setSession(null);
-    const hist = readHistory();
-    hist.unshift(finished);
-    writeHistory(hist);
-    writeActive(null);
-    setSession(null);
     void pushActivityToCloud(finished);
     return finished;
   }, []);
@@ -233,8 +228,14 @@ export function updateActivitySession(id: string, patch: Partial<FinishedActivit
       const { data: auth } = await supabase.auth.getUser();
       const uid = auth.user?.id;
       if (!uid) return;
-      const dbPatch: Record<string, unknown> = {};
-      if (patch.note !== undefined) dbPatch.notes = patch.note;
+      const dbPatch: {
+        notes?: string | null;
+        kcal?: number | null;
+        heart_rate_avg?: number | null;
+        heart_rate_max?: number | null;
+        distance_m?: number | null;
+      } = {};
+      if (patch.note !== undefined) dbPatch.notes = patch.note ?? null;
       if (patch.kcal !== undefined) dbPatch.kcal = patch.kcal;
       if (patch.heartRateAvg !== undefined) dbPatch.heart_rate_avg = patch.heartRateAvg;
       if (patch.heartRateMax !== undefined) dbPatch.heart_rate_max = patch.heartRateMax;
@@ -257,18 +258,3 @@ export function deleteActivitySession(id: string) {
   })();
 }
 
-export function listActivitySessions(): FinishedActivitySession[] {
-  return readHistory();
-}
-
-export function updateActivitySession(id: string, patch: Partial<FinishedActivitySession>) {
-  const hist = readHistory();
-  const idx = hist.findIndex((s) => s.id === id);
-  if (idx === -1) return;
-  hist[idx] = { ...hist[idx], ...patch };
-  writeHistory(hist);
-}
-
-export function deleteActivitySession(id: string) {
-  writeHistory(readHistory().filter((s) => s.id !== id));
-}
