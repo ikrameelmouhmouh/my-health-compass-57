@@ -320,7 +320,7 @@ function AddGeneratedTemplatesButton({
       tpls.forEach((tpl) => upsert(tpl));
       scheduleTodayFrom(tpls, saveTodayWorkout);
 
-      const userText = `${t("chat.chip.workout")}\n\n${summaries.join(" · ")}`;
+      const userText = `${t("chat.quick.workout")}\n\n${summaries.join(" · ")}`;
       const assistantLines = [
         `**${plan.name}** — ${plan.split}`,
         ...tpls.map((tpl) => `• ${tpl.name} (${tpl.exercises.length} ${t("fit.tpl.ex_short")})`),
