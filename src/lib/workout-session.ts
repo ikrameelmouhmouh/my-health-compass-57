@@ -306,6 +306,7 @@ export function useActiveSession() {
     recordPRsFromSession(finished);
     writeActive(null);
     setSession(null);
+    void pushWorkoutToCloud(finished);
     return finished;
   }, []);
 
