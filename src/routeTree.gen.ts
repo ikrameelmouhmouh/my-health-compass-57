@@ -28,6 +28,7 @@ import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAiCoachRouteImport } from './routes/_authenticated/ai-coach'
 import { Route as AuthenticatedWorkoutSessionTemplateIdRouteImport } from './routes/_authenticated/workout-session.$templateId'
 import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
+import { Route as AuthenticatedActivitySessionActivityIdRouteImport } from './routes/_authenticated/activity-session.$activityId'
 import { Route as ApiPublicWidgetAuraRouteImport } from './routes/api/public/widget/aura'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
@@ -129,6 +130,12 @@ const AuthenticatedAiCoachThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedAiCoachRoute,
   } as any)
+const AuthenticatedActivitySessionActivityIdRoute =
+  AuthenticatedActivitySessionActivityIdRouteImport.update({
+    id: '/activity-session/$activityId',
+    path: '/activity-session/$activityId',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const ApiPublicWidgetAuraRoute = ApiPublicWidgetAuraRouteImport.update({
   id: '/api/public/widget/aura',
   path: '/api/public/widget/aura',
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
+  '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
@@ -194,6 +202,7 @@ export interface FileRoutesByTo {
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
+  '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
@@ -220,6 +229,7 @@ export interface FileRoutesById {
   '/_authenticated/social': typeof AuthenticatedSocialRoute
   '/_authenticated/weight': typeof AuthenticatedWeightRoute
   '/api/chat': typeof ApiChatRoute
+  '/_authenticated/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/_authenticated/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/social'
     | '/weight'
     | '/api/chat'
+    | '/activity-session/$activityId'
     | '/ai-coach/$threadId'
     | '/workout-session/$templateId'
     | '/api/public/hooks/send-aura-tips'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/social'
     | '/weight'
     | '/api/chat'
+    | '/activity-session/$activityId'
     | '/ai-coach/$threadId'
     | '/workout-session/$templateId'
     | '/api/public/hooks/send-aura-tips'
@@ -295,6 +307,7 @@ export interface FileRouteTypes {
     | '/_authenticated/social'
     | '/_authenticated/weight'
     | '/api/chat'
+    | '/_authenticated/activity-session/$activityId'
     | '/_authenticated/ai-coach/$threadId'
     | '/_authenticated/workout-session/$templateId'
     | '/api/public/hooks/send-aura-tips'
@@ -452,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiCoachThreadIdRouteImport
       parentRoute: typeof AuthenticatedAiCoachRoute
     }
+    '/_authenticated/activity-session/$activityId': {
+      id: '/_authenticated/activity-session/$activityId'
+      path: '/activity-session/$activityId'
+      fullPath: '/activity-session/$activityId'
+      preLoaderRoute: typeof AuthenticatedActivitySessionActivityIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/api/public/widget/aura': {
       id: '/api/public/widget/aura'
       path: '/api/public/widget/aura'
@@ -505,6 +525,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSocialRoute: typeof AuthenticatedSocialRoute
   AuthenticatedWeightRoute: typeof AuthenticatedWeightRoute
+  AuthenticatedActivitySessionActivityIdRoute: typeof AuthenticatedActivitySessionActivityIdRoute
   AuthenticatedWorkoutSessionTemplateIdRoute: typeof AuthenticatedWorkoutSessionTemplateIdRoute
 }
 
@@ -519,6 +540,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSocialRoute: AuthenticatedSocialRoute,
   AuthenticatedWeightRoute: AuthenticatedWeightRoute,
+  AuthenticatedActivitySessionActivityIdRoute:
+    AuthenticatedActivitySessionActivityIdRoute,
   AuthenticatedWorkoutSessionTemplateIdRoute:
     AuthenticatedWorkoutSessionTemplateIdRoute,
 }
@@ -543,13 +566,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

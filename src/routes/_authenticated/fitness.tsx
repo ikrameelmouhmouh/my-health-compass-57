@@ -521,15 +521,15 @@ function LibrarySection() {
   );
 }
 
-type ActivityCategory = "Cardio" | "Outdoor" | "Sport" | "Wellness";
-type ActivityItem = {
+export type ActivityCategory = "Cardio" | "Outdoor" | "Sport" | "Wellness";
+export type ActivityItem = {
   id: string;
   icon: typeof Activity;
   kcalPerHour: number;
   category: ActivityCategory;
 };
 
-const ACTIVITIES: ActivityItem[] = [
+export const ACTIVITIES: ActivityItem[] = [
   { id: "swim", icon: Waves, kcalPerHour: 500, category: "Cardio" },
   { id: "bike", icon: Bike, kcalPerHour: 450, category: "Outdoor" },
   { id: "run-outdoor", icon: Footprints, kcalPerHour: 600, category: "Outdoor" },
@@ -561,8 +561,10 @@ function ActivitiesSection() {
             <h3 className="mb-2 text-sm font-semibold">{t(`cat.${cat}`)}</h3>
             <div className="grid grid-cols-2 gap-2">
               {items.map((a) => (
-                <button
+                <Link
                   key={a.id}
+                  to="/activity-session/$activityId"
+                  params={{ activityId: a.id }}
                   className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-card/50 p-3 text-left transition hover:bg-card"
                 >
                   <div className="grid size-10 place-items-center rounded-xl bg-brand/15 text-brand">
@@ -573,7 +575,7 @@ function ActivitiesSection() {
                     <p className="line-clamp-2 text-[11px] text-muted-foreground">{t(`act.${a.id}.desc`)}</p>
                     <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">{t("fit.act.kcal_per_h", { n: a.kcalPerHour })}</p>
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           </div>
