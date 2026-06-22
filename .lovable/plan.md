@@ -1,98 +1,55 @@
+## Probleem
 
-## Wat ik begrepen heb
+Je workouts en activiteiten worden nu **alleen lokaal opgeslagen** in de browser (localStorage), niet in je account. Daarom verdwijnen ze als je:
+- in een andere browser of incognito-tab opent
+- je cache wist
+- naar een ander apparaat (telefoon ↔ laptop) gaat
+- de preview-URL ververst na een nieuwe build
 
-Je wilt dat de activiteiten op het **Activiteiten**-tabblad (zwemmen, fietsen, hardlopen, hiken, voetbal, yoga, HIIT…) net als de gym-workouts gestart kunnen worden — maar zonder sets/reps. In plaats daarvan:
+De database-tabel `workout_sessions` bestaat al, maar de app schrijft er nooit naartoe — alles gaat naar `localStorage.fitness.sessions.v1` en `localStorage.fitness.activity-sessions.v1`.
 
-- **Live timer** (mm:ss, telt op vanaf 0)
-- **Live kalorieën-teller** die meeloopt op basis van duur × kcal/uur × gewicht
-- **Pauze / hervat** knop (timer en kcal pauzeren)
-- **Stop** knop → opent een **afsluitscherm** zoals bij gym, maar afgestemd op cardio
-- Later koppelbaar aan **Apple HealthKit / Apple Watch** zodat kcal & hartslag automatisch ingelezen worden i.p.v. berekend
+## Oplossing
 
-Apple Watch companion-app komt later — dit scherm wordt zo ontworpen dat HealthKit-data straks gewoon de geschatte waarden vervángt zonder UI-herontwerp.
+Alle afgeronde sessies opslaan in je account (Lovable Cloud), zodat ze overal beschikbaar zijn en niet meer verdwijnen.
 
----
+### 1. Gym-workouts (kracht/sets) → bestaande tabel `workout_sessions` + `workout_sets`
+- Bij "Finish workout": insert in `workout_sessions` (naam, duur, volume, reps, notes) + per set een rij in `workout_sets`.
+- PRs blijven via `exercise_prs` (al aanwezig).
+- localStorage blijft als snelle cache + offline-buffer; bij volgende login wordt er gemerged vanuit de cloud.
 
-## Wat ik ga bouwen
-
-### 1. Nieuw scherm: `/activity-session/$activityId`
-Naar dit scherm navigeer je vanuit een tap op een activiteit-kaartje (Zwemmen, Fietsen, etc.).
-
-**Layout (van boven naar onder):**
+### 2. Cardio/sport-activiteiten (zwemmen, fietsen, …) → nieuwe tabel `activity_sessions`
+Cardio heeft andere velden dan kracht (geen sets, wel duur/kcal/hartslag/afstand), dus aparte tabel:
 
 ```text
-┌─────────────────────────────┐
-│  ← Terug          Zwemmen   │
-│                             │
-│        ╭───────────╮        │
-│        │   24:13   │  ← grote timer (mm:ss)
-│        ╰───────────╯        │
-│                             │
-│   🔥 187 kcal               │  ← live geschatte kcal
-│   ❤️  — bpm  (HealthKit)    │  ← placeholder tot HealthKit
-│   📏 ~2,1 km  (HealthKit)   │  ← placeholder voor afstand
-│                             │
-│   [  Pauze  ]   [  Stop  ]  │
-│                             │
-│   Bron: schatting           │  ← later: "Apple Watch"
-└─────────────────────────────┘
+activity_sessions
+- id, user_id
+- activity_id (text, bv. 'swimming')
+- activity_name (text)
+- started_at, ended_at, duration_seconds, paused_seconds
+- kcal (numeric, nullable — komt later van Apple Watch)
+- heart_rate_avg, heart_rate_max (nullable)
+- distance_m (nullable)
+- source ('manual' | 'healthkit')
+- notes
 ```
+Met RLS: alleen eigen rijen lezen/schrijven.
 
-**Gedrag:**
-- Timer start automatisch bij openen, telt elke seconde op
-- Pauze → timer & kcal bevriezen, knop wordt "Hervat"
-- Stop → opent afsluitscherm (zie §3)
-- Terug-knop tijdens actieve sessie → bevestigingsdialoog ("Workout afbreken?")
-- Scherm blijft aan via `navigator.wakeLock` (zoals een Apple Watch workout)
+### 3. Lijsten lezen uit de cloud
+- Geschiedenis-/profielschermen die nu `readHistory()` uit localStorage lezen, omschakelen naar Supabase-queries (gefilterd op `user_id`, met fallback naar localStorage als offline).
 
-### 2. Kalorieën-berekening (tussenoplossing tot HealthKit)
-```text
-kcal = (kcalPerHour × gewicht_kg/70) × (verstreken_seconden / 3600)
-```
-- `kcalPerHour` per activiteit komt uit de bestaande `ACTIVITIES`-lijst (zwemmen 500, fietsen 450, etc.)
-- `gewicht_kg` uit profiel; valt terug op 70 kg als onbekend
-- Afgerond naar hele kcal, update elke seconde
-- Velden voor **hartslag** en **afstand** worden alvast getoond als `—` met label "HealthKit" zodat je straks alleen de databron hoeft te vervangen
+### 4. Migratie van bestaande lokale data
+Bij eerstvolgende login: alle nog niet-gesynchroniseerde sessies uit localStorage één keer uploaden, dan markeren als `synced`.
 
-### 3. Afsluitscherm (na Stop)
-Zelfde stijl als het gym `session-summary` scherm, maar cardio-velden:
+## Wat er niet verandert
+- UI van workout- en activiteitenscherm blijft hetzelfde.
+- Timer/pauze/finish-flow blijft hetzelfde.
+- Apple Watch / HealthKit-velden blijven leeg tot die integratie er is.
 
-- Activiteit + datum
-- **Duur** (totale tijd minus pauze)
-- **Kcal verbrand**
-- **Gem. hartslag** / **Max hartslag** (leeg tot HealthKit)
-- **Afstand** (leeg tot HealthKit)
-- Optioneel notitieveld ("Hoe voelde het?")
-- Knoppen: **Opslaan** / **Verwijderen**
+## Technische details
+- Nieuwe migratie: tabel `activity_sessions` + GRANTs + RLS (`auth.uid() = user_id`).
+- `src/lib/workout-session.ts`: in `finish()` ook `supabase.from('workout_sessions').insert(...)` en `workout_sets` bulk-insert.
+- `src/lib/activity-session.ts`: in `finish()` ook `supabase.from('activity_sessions').insert(...)`.
+- Sync-helper `src/lib/session-sync.ts` die bij login openstaande lokale sessies pusht.
+- Foutafhandeling: bij netwerkfout sessie lokaal markeren als `pendingSync: true` en later opnieuw proberen.
 
-Opslaan slaat de sessie op in dezelfde `workout_sessions`-tabel als gym, met een `kind: "activity"` markering plus `activity_id`, `duration_sec`, `kcal`, `paused_sec`, `source: "estimate" | "healthkit"`. Hierdoor verschijnen activiteiten in dezelfde geschiedenis/voortgang als gym-workouts.
-
-### 4. HealthKit-voorbereiding (geen Apple-code nu)
-- Datastructuur heeft al velden voor `heart_rate_avg`, `heart_rate_max`, `distance_m`, `source`
-- Eén `getLiveMetrics()` hook in de sessie-pagina; nu retourneert die `{ kcal: estimated, hr: null, distance: null, source: "estimate" }`. Wanneer de Apple Watch-app er is, vervangt die functie haar return-waarden door echte HealthKit-data — UI verandert niet.
-
-### 5. Extra aanbevelingen voor het sessie-scherm
-Naast pauze/timer/kcal raad ik aan om standaard mee te nemen:
-- **Wake-lock** zodat het scherm niet uitvalt
-- **Lap / ronde-knop** (handig bij zwemmen baantjes of hardlopen)
-- **Audio-cue elke 5 min** ("10 minuten, 95 kcal") — zelfde audio-helper als rest-beep
-- **Intensiteits-keuze vóór start** (rustig / normaal / intens) → past `kcalPerHour` aan met ×0.8 / ×1.0 / ×1.25
-- **Achtergrond-haptiek** bij pauze/hervat/stop
-
-Laat me weten welke je wilt; standaard zet ik wake-lock + intensiteit aan, lap-knop en audio-cues als optioneel later.
-
-### 6. Vertalingen
-Alle nieuwe UI-strings worden direct toegevoegd in en/nl/ar/fr/de/es in `src/lib/i18n.tsx`.
-
----
-
-## Bestanden
-
-- **Nieuw:** `src/routes/_authenticated/activity-session.$activityId.tsx` — het sessie-scherm
-- **Nieuw:** `src/components/workout/activity-summary.tsx` — afsluitscherm (gemodelleerd naar `session-summary.tsx`)
-- **Nieuw:** `src/lib/activity-session.ts` — timer/pauze/kcal-logica + `getLiveMetrics()` hook (HealthKit-ready)
-- **Bewerken:** `src/routes/_authenticated/fitness.tsx` — activity-kaartjes worden `<Link>` naar de nieuwe route
-- **Bewerken:** `src/lib/i18n.tsx` — nieuwe keys in 6 talen
-- **Migratie:** kleine kolommen-uitbreiding op `workout_sessions` (`kind`, `activity_id`, `duration_sec`, `kcal`, `paused_sec`, `heart_rate_avg`, `heart_rate_max`, `distance_m`, `source`) of een aparte `activity_sessions`-tabel — kies ik op basis van de huidige schema-vorm tijdens implementatie
-
-Klopt dit met wat je voor je zag? Dan bouw ik het zo.
+Akkoord? Dan zet ik dit om.
