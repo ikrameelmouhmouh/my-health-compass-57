@@ -53,7 +53,6 @@ function ActivitySessionPage() {
   const weightKg = Number(profile?.current_weight_kg) || 70;
 
   const { session, loaded, start, pause, resume, finish, cancel } = useActiveActivitySession();
-  const [intensity, setIntensity] = useState<ActivityIntensity>("normal");
   const [summary, setSummary] = useState<FinishedActivitySession | null>(null);
   const [confirmExit, setConfirmExit] = useState(false);
   const [now, setNow] = useState(Date.now());
