@@ -83,6 +83,10 @@ function Onboarding() {
 
   function next() { setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1)); }
   function back() { setStep((s) => Math.max(s - 1, 0)); }
+  function advance() { setTimeout(() => next(), 150); }
+
+  const OPTION_STEPS = new Set([0, 5, 6, 7]);
+  const isOptionStep = OPTION_STEPS.has(step);
 
   const canContinue = useMemo(() => {
     switch (step) {
@@ -98,6 +102,7 @@ function Onboarding() {
       default: return true;
     }
   }, [step, state]);
+
 
   async function finish() {
     if (!user) return;
