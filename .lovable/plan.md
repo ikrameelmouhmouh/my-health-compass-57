@@ -1,29 +1,59 @@
-Ik zie waar het misgaat: er bestaan al losse onderdelen voor workoutvragen, templates en “workout vandaag”, maar ze zijn niet goed aan elkaar gekoppeld. De chat maakt nu alleen tekst; de knop “Toevoegen aan Workouts” zet hooguit templates in de workout-tab, maar plant niets automatisch voor vandaag en start niet met de vragenflow.
+# Workout sessie (Bevel-stijl) + redirect na toevoegen
 
-Plan:
+## 1. Na "Workout toevoegen" → naar fitness
+Na succesvol toevoegen in de chat-flow navigeert de app automatisch naar `/fitness` (na bevestiging Replace/Add), zodat je de nieuwe templates direct ziet. De chat-conversatie blijft bewaard in geschiedenis.
 
-1. “Maak workoutplan” laat eerst vragen stellen
-- De quick action in de AI Coach moet niet meteen een volledig plan genereren.
-- Hij opent/gebruikt de bestaande workout-wizard met vragen zoals doel, dagen, locatie, ervaring, focus, blessures/voorkeuren.
-- De prompt in de chat wordt aangepast zodat Vita eerst aanvullende vragen stelt als informatie ontbreekt.
+## 2. Workout starten (zoals foto 1)
+Klik op een template-kaart in `/fitness` opent een bottom-sheet met:
+- Titel + "X oefeningen, Y sets"
+- Lijst van oefeningen (icoon, naam, "Machine · 3 sets")
+- Knoppen: **Bewerk** (opent bestaande TemplateEditor) en **▶ Start**
 
-2. “Voeg workout toe” maakt echte templates
-- De knop onder een AI-workout blijft zichtbaar bij workout-antwoorden.
-- Bij klikken worden de oefeningen omgezet naar workout-templates.
-- Daarna krijgt de gebruiker de keuze: bestaande templates vervangen, erbij zetten, of overslaan.
+## 3. Actieve workout-sessie (zoals foto 2)
+Nieuwe route `/fitness/session/$templateId`:
+- Lopende timer bovenaan (mm:ss, telt op vanaf start)
+- Titel van workout + knop **Voltooi** (rood/oranje)
+- Per oefening een kaart met:
+  - Icoon, naam, "Machine · 3 sets", rust-timer-icoon, ⋯ menu
+  - Rijen per set: setnummer, gewicht (kg, bewerkbaar), herhalingen (bewerkbaar), ▶ knop om set af te vinken
+  - Afgevinkte set krijgt groene/gevulde stijl
+  - "Voortgang" link + "+ Voeg set toe"
+- Auto-rust-timer popup tussen sets (optioneel, standaard 60-90s, in te stellen per oefening via stopwatch-icoon)
+- State wordt live opgeslagen in localStorage zodat je terug kunt komen als je per ongeluk wegnavigeert
 
-3. Geplande dag koppelen aan Startscherm
-- Als een template/AI-plan een dag heeft die overeenkomt met vandaag, wordt die workout automatisch zichtbaar in “Workout vandaag”.
-- De Startkaart toont dan de naam, focus/type en duur in plaats van “Geen workout gepland vandaag”.
-- Markeren als gedaan blijft werken op het Startscherm.
+## 4. Samenvatting na "Voltooi" (zoals foto 3)
+Modal/route die toont:
+- 🎉 Confetti-animatie + workoutnaam + tijdstempel
+- **Totale duur** + **Actieve duur** (totaal minus rusttijd)
+- **Totaal volume (kg)** = som van gewicht × herhalingen per set
+- **Totaal aantal herhalingen**
+- **Aantal sets voltooid**
+- Geschat **Calorieën** (op basis van duur, gewicht-gebruiker, MET-waarde krachttraining ≈ 5)
+- Per oefening: tabel met set, gewicht, herhalingen, (rusttijd indien gemeten)
+- PR-detectie: vergelijk met laatste sessie van dezelfde oefening, toon 💪 "Nieuw record" badge
+- Knoppen: **Gereed** (sluit, terug naar fitness), **Bekijk activiteit** (later: detailpagina), **Werk sjabloon bij** (overschrijft template-gewichten met deze sessie)
 
-4. Dag-format fixen
-- Ik maak één gedeelde dag-normalisatie voor Monday/Tuesday en mon/tue/nederlandse labels, zodat templates uit AI, wizard en editor hetzelfde worden herkend.
-- Dit voorkomt dat een workout niet op vandaag verschijnt omdat de dag anders opgeslagen is.
+## 5. Geschiedenis
+- Sessies opgeslagen in localStorage onder `fitness.sessions.v1`
+- Op fitness-scherm onder "Afgelopen 30 dagen" een lijst met voltooide sessies (datum, naam, duur, volume) — klik = open samenvatting opnieuw
 
-5. Vertalingen bijwerken
-- Nieuwe/gewijzigde UI-teksten voeg ik direct toe voor alle 6 talen: en, nl, ar, fr, de, es.
+## Extra opties om te overwegen (laat mij weten welke je wilt)
+- **A. Rusttimer met geluid/trilling** na elke set
+- **B. Superset-koppeling** (zoals 🔗-icoon op foto 2 tussen oefeningen)
+- **C. Hartslag/calorieën via Apple Health** — vereist native, voor nu schatting op basis van formule
+- **D. "Vorige keer"-hint** onder elke set (bv. "vorige: 35kg × 12") zodat je weet wat je moet doen
+- **E. Notities per oefening** (hoe voelde het, RPE 1-10)
+- **F. Plate calculator** (welke schijven op de stang voor X kg)
+- **G. Audio-cue / stem** voor "Set voltooid, rust 60s"
+- **H. Persoonlijke records** apart bijgehouden per oefening met grafiekje
+- **I. Workout pauzeren** zonder de timer kwijt te raken
 
-Technisch:
-- Aanpassen: `src/components/chat/chat-screen.tsx`, `src/lib/workout-prefs.ts`, `src/lib/dashboard-prefs.ts`, `src/routes/_authenticated/fitness.tsx`, `src/routes/_authenticated/profile.tsx`, mogelijk `src/lib/i18n.tsx`.
-- Geen databasewijziging nodig; dit blijft aansluiten op de bestaande lokale workout/template-opslag.
+## Technische opzet
+- `src/lib/workout-session.ts` — types `WorkoutSession`, `SessionSet`, hooks `useActiveSession`, `useSessionHistory`; alles localStorage
+- `src/components/workout/session-start-sheet.tsx` — bottom-sheet (foto 1)
+- `src/routes/_authenticated/fitness.session.$templateId.tsx` — actieve sessie (foto 2)
+- `src/components/workout/session-summary.tsx` — samenvattingsmodal (foto 3)
+- Template-kaart in `fitness.tsx` opent de start-sheet i.p.v. direct de editor
+- Chat-flow: na `applyTemplates` `navigate({ to: "/fitness" })`
+
+Welke van de extra opties (A–I) wil je meenemen in de eerste versie? Standaard pak ik **A (rusttimer)**, **D (vorige keer)** en **H (PR's)** mee — die geven de meeste waarde zonder native APIs.
