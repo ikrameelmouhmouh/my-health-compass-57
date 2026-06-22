@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Check, Dumbbell, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -302,6 +303,7 @@ function AddGeneratedTemplatesButton({
   onPersisted: (threadId: string) => void;
 }) {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const persist = useServerFn(appendWorkoutFlowMessages);
   const { templates: existing, loaded, upsert, remove } = useTemplates();
   const { save: saveTodayWorkout } = useTodayWorkout();
@@ -343,6 +345,7 @@ function AddGeneratedTemplatesButton({
       toast.success(tpls.length === 1 ? t("chat.addworkout.success_one") : t("chat.addworkout.success_many", { n: tpls.length }));
       setPending(null);
       setAdded(true);
+      setTimeout(() => navigate({ to: "/fitness" }), 400);
     } finally {
       setSaving(false);
     }
