@@ -752,7 +752,16 @@ export function ChatScreen({
                 </div>
               </div>
             )}
-            {workoutFlowActive && <WorkoutPlanChatFlow />}
+            {workoutFlowActive && (
+              <WorkoutPlanChatFlow
+                threadId={threadId}
+                onPersisted={(id) => {
+                  setActiveThread(id);
+                  void syncThreadMessages(id);
+                  setWorkoutFlowActive(false);
+                }}
+              />
+            )}
           </div>
         )}
       </div>
