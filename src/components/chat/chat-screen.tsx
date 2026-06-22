@@ -628,13 +628,30 @@ export function ChatScreen({
     }
   }
 
+  function isWorkoutPlanPrompt(text: string): boolean {
+    const s = text.toLowerCase();
+    const triggers = [
+      "workoutplan", "workout plan", "trainingsplan", "trainings plan",
+      "schema maken", "maak een workout", "maak workout",
+      "plan d'entraînement", "plan d'entrainement", "entrenamiento",
+      "workout-plan", "خطة تمارين",
+    ];
+    return triggers.some((k) => s.includes(k));
+  }
+
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const text = input.trim();
     if ((!text && !file) || isBusy) return;
+    if (text && !file && isWorkoutPlanPrompt(text)) {
+      setInput("");
+      navigate({ to: "/fitness", search: { wizard: 1 } });
+      return;
+    }
     const final = text || t("chat.image_caption");
     void sendNow(final, file);
   }
+
 
   function handlePick(key: string, prompt: string) {
     if (isBusy) return;
