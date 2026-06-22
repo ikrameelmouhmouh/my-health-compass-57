@@ -322,38 +322,75 @@ export function formatDuration(sec: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
+/** Module-level audio context, unlocked on first user gesture. iOS Safari
+ *  blocks audio that isn't kicked off inside a tap; priming here lets later
+ *  timer beeps actually play. */
+let _audioCtx: AudioContext | null = null;
+function getAudioCtx(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  if (_audioCtx) return _audioCtx;
+  const AC: typeof AudioContext | undefined =
+    (window as unknown as { AudioContext?: typeof AudioContext }).AudioContext
+    ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AC) return null;
+  try {
+    _audioCtx = new AC();
+  } catch {
+    _audioCtx = null;
+  }
+  return _audioCtx;
+}
+
+/** Call inside a user gesture (tap) to satisfy iOS audio unlock. */
+export function primeAudio() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  try {
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
+    // Play a near-silent buffer so iOS marks the context as unlocked.
+    const buf = ctx.createBuffer(1, 1, 22050);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    src.start(0);
+  } catch {
+    /* ignore */
+  }
+}
+
 /** Short beep + optional vibration. Safe on browsers that don't support either. */
 export function playRestEndCue() {
   if (typeof window === "undefined") return;
   try {
-    const AC: typeof AudioContext | undefined =
-      (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext })
-        .AudioContext
-      ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (AC) {
-      const ctx = new AC();
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.type = "sine";
-      o.frequency.value = 880;
-      g.gain.value = 0.0001;
-      o.connect(g).connect(ctx.destination);
-      const now = ctx.currentTime;
-      g.gain.exponentialRampToValueAtTime(0.2, now + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
-      o.start(now);
-      o.stop(now + 0.4);
-      setTimeout(() => ctx.close().catch(() => {}), 600);
+    const ctx = getAudioCtx();
+    if (ctx) {
+      if (ctx.state === "suspended") ctx.resume().catch(() => {});
+      const playBeep = (offset: number) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "sine";
+        o.frequency.value = 880;
+        g.gain.value = 0.0001;
+        o.connect(g).connect(ctx.destination);
+        const start = ctx.currentTime + offset;
+        g.gain.exponentialRampToValueAtTime(0.3, start + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, start + 0.25);
+        o.start(start);
+        o.stop(start + 0.3);
+      };
+      playBeep(0);
+      playBeep(0.35);
     }
   } catch {
     /* ignore */
   }
   try {
-    navigator.vibrate?.([120, 60, 120]);
+    navigator.vibrate?.([180, 80, 180]);
   } catch {
     /* ignore */
   }
 }
+
 
 export function vibrateShort() {
   try {
