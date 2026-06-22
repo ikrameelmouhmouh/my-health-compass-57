@@ -35,7 +35,7 @@ export function SessionStartSheet({
     const s = active && active.templateId === template.id ? active : buildSessionFromTemplate(template);
     start(s);
     onClose();
-    navigate({ to: "/fitness/session/$templateId", params: { templateId: template.id } });
+    navigate({ to: "/workout-session/$templateId", params: { templateId: template.id } });
     toast.success(t("session.started"));
   }
 
