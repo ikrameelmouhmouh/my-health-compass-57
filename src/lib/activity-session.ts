@@ -206,10 +206,55 @@ export function useActiveActivitySession() {
     writeHistory(hist);
     writeActive(null);
     setSession(null);
+    const hist = readHistory();
+    hist.unshift(finished);
+    writeHistory(hist);
+    writeActive(null);
+    setSession(null);
+    void pushActivityToCloud(finished);
     return finished;
   }, []);
 
   return { session, loaded, start, pause, resume, cancel, finish };
+}
+
+export function listActivitySessions(): FinishedActivitySession[] {
+  return readHistory();
+}
+
+export function updateActivitySession(id: string, patch: Partial<FinishedActivitySession>) {
+  const hist = readHistory();
+  const idx = hist.findIndex((s) => s.id === id);
+  if (idx === -1) return;
+  hist[idx] = { ...hist[idx], ...patch };
+  writeHistory(hist);
+  void (async () => {
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth.user?.id;
+      if (!uid) return;
+      const dbPatch: Record<string, unknown> = {};
+      if (patch.note !== undefined) dbPatch.notes = patch.note;
+      if (patch.kcal !== undefined) dbPatch.kcal = patch.kcal;
+      if (patch.heartRateAvg !== undefined) dbPatch.heart_rate_avg = patch.heartRateAvg;
+      if (patch.heartRateMax !== undefined) dbPatch.heart_rate_max = patch.heartRateMax;
+      if (patch.distanceM !== undefined) dbPatch.distance_m = patch.distanceM;
+      if (Object.keys(dbPatch).length === 0) return;
+      await supabase.from("activity_sessions").update(dbPatch).eq("id", id).eq("user_id", uid);
+    } catch { /* ignore */ }
+  })();
+}
+
+export function deleteActivitySession(id: string) {
+  writeHistory(readHistory().filter((s) => s.id !== id));
+  void (async () => {
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth.user?.id;
+      if (!uid) return;
+      await supabase.from("activity_sessions").delete().eq("id", id).eq("user_id", uid);
+    } catch { /* ignore */ }
+  })();
 }
 
 export function listActivitySessions(): FinishedActivitySession[] {
