@@ -288,38 +288,91 @@ function Choice({ active, disabled, multi, onClick, children }: { active?: boole
   );
 }
 
-function AddGeneratedTemplatesButton({ templates }: { templates: WorkoutTemplate[] }) {
-  const navigate = useNavigate();
+function AddGeneratedTemplatesButton({
+  templates,
+  plan,
+  summaries,
+  threadId,
+  onPersisted,
+}: {
+  templates: WorkoutTemplate[];
+  plan: WorkoutPlan;
+  summaries: string[];
+  threadId: string | null;
+  onPersisted: (threadId: string) => void;
+}) {
   const { t } = useI18n();
+  const persist = useServerFn(appendWorkoutFlowMessages);
   const { templates: existing, loaded, upsert, remove } = useTemplates();
   const { save: saveTodayWorkout } = useTodayWorkout();
   const [pending, setPending] = useState<WorkoutTemplate[] | null>(null);
+  const [added, setAdded] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  function applyTemplates(tpls: WorkoutTemplate[], mode: "replace" | "add" | "skip") {
+  async function applyTemplates(tpls: WorkoutTemplate[], mode: "replace" | "add" | "skip") {
     if (mode === "skip") {
       setPending(null);
       return;
     }
-    if (mode === "replace") existing.forEach((tpl) => remove(tpl.id));
-    tpls.forEach((tpl) => upsert(tpl));
-    scheduleTodayFrom(tpls, saveTodayWorkout);
-    toast.success(tpls.length === 1 ? t("chat.addworkout.success_one") : t("chat.addworkout.success_many", { n: tpls.length }));
-    setPending(null);
-    navigate({ to: "/fitness" });
+    setSaving(true);
+    try {
+      if (mode === "replace") existing.forEach((tpl) => remove(tpl.id));
+      tpls.forEach((tpl) => upsert(tpl));
+      scheduleTodayFrom(tpls, saveTodayWorkout);
+
+      const userText = `${t("chat.chip.workout")}\n\n${summaries.join(" · ")}`;
+      const assistantLines = [
+        `**${plan.name}** — ${plan.split}`,
+        ...tpls.map((tpl) => `• ${tpl.name} (${tpl.exercises.length} ${t("fit.tpl.ex_short")})`),
+        "",
+        plan.progressionNotes,
+        "",
+        tpls.length === 1
+          ? t("chat.addworkout.success_one")
+          : t("chat.addworkout.success_many", { n: tpls.length }),
+      ];
+      try {
+        const res = await persist({
+          data: { threadId, userText, assistantText: assistantLines.join("\n"), title: plan.name },
+        });
+        onPersisted(res.threadId);
+      } catch (err) {
+        console.error("[workout-chat] persist failed", err);
+      }
+
+      toast.success(tpls.length === 1 ? t("chat.addworkout.success_one") : t("chat.addworkout.success_many", { n: tpls.length }));
+      setPending(null);
+      setAdded(true);
+    } finally {
+      setSaving(false);
+    }
   }
 
   function handleAdd() {
-    if (!loaded || templates.length === 0) return;
-    if (existing.length === 0) applyTemplates(templates, "add");
+    if (!loaded || templates.length === 0 || added || saving) return;
+    if (existing.length === 0) void applyTemplates(templates, "add");
     else setPending(templates);
   }
 
   return (
     <>
-      <Button className="mt-3 w-full" disabled={!loaded || templates.length === 0} onClick={handleAdd}>
-        <Dumbbell className="mr-2 size-4" /> {t("chat.addworkout.cta")}
+      <Button
+        className="mt-3 w-full"
+        disabled={!loaded || templates.length === 0 || added || saving}
+        onClick={handleAdd}
+      >
+        {saving ? (
+          <Loader2 className="mr-2 size-4 animate-spin" />
+        ) : (
+          <Dumbbell className="mr-2 size-4" />
+        )}
+        {added ? t("chat.addworkout.success_one") : t("chat.addworkout.cta")}
       </Button>
-      <TemplateSyncDialog open={!!pending} count={pending?.length ?? 0} onChoose={(mode) => pending && applyTemplates(pending, mode)} />
+      <TemplateSyncDialog
+        open={!!pending}
+        count={pending?.length ?? 0}
+        onChoose={(mode) => pending && void applyTemplates(pending, mode)}
+      />
     </>
   );
 }
