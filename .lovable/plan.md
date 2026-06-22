@@ -1,46 +1,28 @@
-We gaan de workout-ervaring verder aanscherpen. De volgende wijzigingen komen in één keer:
+Probleem
+--------
+1. De onboarding-content is niet scrollbaar op mobiel. Bij stappen met veel opties (bv. activiteitsniveau) valt de "Volgende"-knop onder de viewport en kan de gebruiker er niet bij komen.
+2. De gebruiker wil bij keuze-stappen (geslacht, doel, tempo, activiteit) niet op een aparte "Volgende"-knop hoeven drukken. Eén klik op de gewenste optie moet direct naar de volgende stap springen.
 
-1. **Pauzeknop in de actieve sessie**
-   - De lopende timer kan worden gepauzeerd/hervat via een duidelijke knop in de sticky header.
-   - Gepauzeerde tijd telt niet mee voor de eindduur; we slaan `pausedAt` en `totalPausedSec` op in de sessie.
-   - Tijdens pauze kan de gebruiker wel sets afvinken/bewerken (geen harde blokkade).
+Oplossing
+----------
+1. Scrollbaar maken  
+   - Wikkel de stap-content in een container met `flex-1 overflow-y-auto` zodat lange stappen kunnen scrollen terwijl de header en knopbalk op hun plek blijven.
 
-2. **Rusttimer tussen sets**
-   - Bij het afvinken van een set verschijnt een optionele rusttimer (bijv. 30-180s).
-   - De timer is inklapbaar; hij loopt op de achtergrond door zolang de sessie actief is.
-   - Bij 0 seconden: korte trilling + optioneel piepje.
-   - Standaard rusttijd per oefening onthouden we in de sessie, niet in het template.
+2. Auto-advance bij option-stappen  
+   - Stap 0 (Gender): roep `next()` aan in `onChange` van `StepGender`.
+   - Stap 5 (Doel): roep `next()` aan in `onChange` van `StepGoal`.
+   - Stap 6 (Tempo): roep `next()` aan in `onChange` van `StepPace`.
+   - Stap 7 (Activiteit): roep `next()` aan in `onChange` van `StepActivity`.
 
-3. **Geluid en vibratie**
-   - Rusttimer-afloop: 1 korte piep via Web Audio API.
-   - Pauze knop bij pauzeren: zachte trilling (als toestel ondersteunt).
-   - Geen extra npm-pakketten; we gebruiken native browser-API's.
+3. KNOP-behavior per stap  
+   - Option-stappen (0, 5, 6, 7): verberg de "Volgende / Doorgaan"-knop volledig. De gebruiker selecteert een optie en gaat automatisch door.
+   - Invoer-stappen (1, 2, 3, 4, 8 — leeftijd, lengte, gewicht, doelgewicht, trainingsfrequentie): houd de knop. Bij deze stappen typt de gebruiker een waarde en bevestigt met Enter of via de knop.
+   - Laatste stap (8): knop toont "Afronden" en blijft bestaan.
 
-4. **"Vorige keer"-hint per set (verfijning)**
-   - Onder elke niet-afgevinkte set tonen we: "Vorige keer: 35 kg x 10".
-   - De hint verdwijnt zodra de set is gedaan.
-   - Voor nieuwe oefeningen tonen we een lichte tip in plaats van een streepje.
+4. Animatie / timing  
+   - Optionele korte vertraging (150 ms) na selectie zodat de checkmark zichtbaar is voordat de slide animatie start. Dit voorkomt een "gehaast" gevoel.
 
-5. **Persoonlijke records (PR's) bij afronden**
-   - In de afrond-schermen markeren we sets met een PR-badge wanneer gewicht x herhalingen hoger is dan eerder opgeslagen.
-   - We slaan PR's per oefening op in localStorage (`fitness.prs.v1`) zodat ze in latere sessies blijven bestaan.
-   - Op termijn kunnen we hier een PR-overzicht/grafiek van maken; nu tonen we de trofee alleen in het afrond-scherm.
+5. Vertalingen  
+   - Geen nieuwe strings nodig; bestaande `onb.continue` / `onb.finish` blijven voor de invoer-stappen.
 
-6. **Oefeningnotities (RPE)**
-   - Per oefening een inklapbaar notitieveld en een RPE-slider (1-10).
-   - Wordt opgeslagen in de sessiegeschiedenis, handig voor terugblik.
-
-7. **Meertaligheid**
-   - Alle nieuwe strings (pauze, rusttimer, PR, RPE, etc.) worden direct vertaald voor de 6 talen in `src/lib/i18n.tsx`.
-
-**Technische details**
-- Aanpassingen in `src/lib/workout-session.ts` voor pauze-logica, PR-opslag en RPE.
-- Aanpassingen in `src/routes/_authenticated/workout-session.$templateId.tsx` voor pauzeknop, rusttimer, geluid/vibratie en hints.
-- Aanpassingen in `src/components/workout/session-summary.tsx` voor PR-trofeeën en RPE-tonen.
-- Geen backend- of npm-wijzigingen nodig.
-
-**Uit scope voor nu (bespaar later):**
-- Supersets koppelen
-- Apple Health-koppeling
-- Plaatcalculator
-- Volledig PR-grafiekoverzicht
+Wijzigingen beperkt tot `src/routes/_authenticated/onboarding.tsx`.

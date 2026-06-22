@@ -83,6 +83,10 @@ function Onboarding() {
 
   function next() { setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1)); }
   function back() { setStep((s) => Math.max(s - 1, 0)); }
+  function advance() { setTimeout(() => next(), 150); }
+
+  const OPTION_STEPS = new Set([0, 5, 6, 7]);
+  const isOptionStep = OPTION_STEPS.has(step);
 
   const canContinue = useMemo(() => {
     switch (step) {
@@ -98,6 +102,7 @@ function Onboarding() {
       default: return true;
     }
   }, [step, state]);
+
 
   async function finish() {
     if (!user) return;
@@ -160,8 +165,8 @@ function Onboarding() {
         <div className="h-full bg-brand transition-[width] duration-500 ease-out" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="mt-10 flex-1">
-        {step === 0 && <StepGender value={state.gender} onChange={(v) => setState({ ...state, gender: v })} />}
+      <div className="mt-10 flex-1 overflow-y-auto -mx-6 px-6">
+        {step === 0 && <StepGender value={state.gender} onChange={(v) => { setState({ ...state, gender: v }); advance(); }} />}
         {step === 1 && <StepNumber title={t("onb.age.title")} subtitle={t("onb.age.subtitle")} unit={t("onb.age.unit")} min={13} max={100} value={state.age} step={1} onChange={(v) => setState({ ...state, age: v })} />}
         {step === 2 && <StepNumber title={t("onb.height.title")} subtitle={t("onb.height.subtitle")} unit={t("onb.height.unit")} min={120} max={230} value={state.heightCm} step={1} onChange={(v) => setState({ ...state, heightCm: v })} />}
         {step === 3 && <StepNumber title={t("onb.weight.title")} subtitle={t("onb.weight.subtitle")} unit={t("onb.weight.unit")} min={35} max={250} value={state.currentWeightKg} step={0.1} fractional onChange={(v) => setState({ ...state, currentWeightKg: v })} />}
@@ -179,23 +184,26 @@ function Onboarding() {
             warning={goalWeightWarning(state.goalWeightKg, state.heightCm, t)}
           />
         )}
-        {step === 5 && <StepGoal value={state.goal} onChange={(v) => setState({ ...state, goal: v })} />}
-        {step === 6 && <StepPace goal={state.goal} value={state.weeklyChangeKg} onChange={(v) => setState({ ...state, weeklyChangeKg: v })} />}
-        {step === 7 && <StepActivity value={state.activityLevel} onChange={(v) => setState({ ...state, activityLevel: v })} />}
+        {step === 5 && <StepGoal value={state.goal} onChange={(v) => { setState({ ...state, goal: v }); advance(); }} />}
+        {step === 6 && <StepPace goal={state.goal} value={state.weeklyChangeKg} onChange={(v) => { setState({ ...state, weeklyChangeKg: v }); advance(); }} />}
+        {step === 7 && <StepActivity value={state.activityLevel} onChange={(v) => { setState({ ...state, activityLevel: v }); advance(); }} />}
         {step === 8 && <StepNumber title={t("onb.training.title")} subtitle={t("onb.training.subtitle")} unit={t("onb.training.unit")} min={0} max={14} value={state.workoutFrequency} step={1} onChange={(v) => setState({ ...state, workoutFrequency: v })} />}
       </div>
 
-      <button
-        onClick={step === TOTAL_STEPS - 1 ? finish : next}
-        disabled={!canContinue || saving}
-        className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-display text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-40"
-      >
-        {step === TOTAL_STEPS - 1 ? (saving ? t("onb.saving") : t("onb.finish")) : t("onb.continue")}
-        {step !== TOTAL_STEPS - 1 && <ArrowRight className="size-4 rtl:rotate-180" />}
-      </button>
+      {(!isOptionStep || (step === 6 && state.goal === "maintain")) && (
+        <button
+          onClick={step === TOTAL_STEPS - 1 ? finish : next}
+          disabled={!canContinue || saving}
+          className="mt-6 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-display text-sm font-semibold text-primary-foreground transition-opacity disabled:opacity-40"
+        >
+          {step === TOTAL_STEPS - 1 ? (saving ? t("onb.saving") : t("onb.finish")) : t("onb.continue")}
+          {step !== TOTAL_STEPS - 1 && <ArrowRight className="size-4 rtl:rotate-180" />}
+        </button>
+      )}
     </main>
   );
 }
+
 
 function goalWeightWarning(goalKg: number, heightCm: number, t: (k: string) => string): string | null {
   if (!heightCm || heightCm < 100) return null;
