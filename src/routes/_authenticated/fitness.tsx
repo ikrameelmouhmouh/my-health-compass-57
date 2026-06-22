@@ -8,6 +8,7 @@ import { WorkoutWizard } from "@/components/workout-wizard";
 import { TemplateEditor } from "@/components/template-editor";
 import { TemplateSyncDialog } from "@/components/template-sync-dialog";
 import { ExerciseLibraryDialog } from "@/components/exercise-library-dialog";
+import { SessionStartSheet } from "@/components/workout/session-start-sheet";
 import { useWorkoutPlan, useTemplates, newTemplate, templatesFromPlan, type WorkoutTemplate } from "@/lib/workout-prefs";
 import { EXERCISES } from "@/lib/exercise-library";
 import { useI18n } from "@/lib/i18n";
