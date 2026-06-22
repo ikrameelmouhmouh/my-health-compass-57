@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Pause, Play, Square, Flame, Heart, Ruler, Activity } from "lucide-react";
+import { ArrowLeft, Pause, Play, Square, Flame, Heart, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
@@ -9,10 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { ACTIVITIES } from "@/routes/_authenticated/fitness";
 import {
   computeElapsedSec,
-  estimateKcal,
   formatTimer,
   useActiveActivitySession,
-  type ActivityIntensity,
   type FinishedActivitySession,
 } from "@/lib/activity-session";
 import { primeAudio } from "@/lib/workout-session";
@@ -55,7 +53,6 @@ function ActivitySessionPage() {
   const weightKg = Number(profile?.current_weight_kg) || 70;
 
   const { session, loaded, start, pause, resume, finish, cancel } = useActiveActivitySession();
-  const [intensity, setIntensity] = useState<ActivityIntensity>("normal");
   const [summary, setSummary] = useState<FinishedActivitySession | null>(null);
   const [confirmExit, setConfirmExit] = useState(false);
   const [now, setNow] = useState(Date.now());
@@ -107,7 +104,6 @@ function ActivitySessionPage() {
 
   // Pre-start screen
   if (!session || session.activityId !== activity.id) {
-    const intensities: ActivityIntensity[] = ["easy", "normal", "intense"];
     return (
       <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-6">
         <button onClick={() => navigate({ to: "/fitness" })} className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -120,38 +116,17 @@ function ActivitySessionPage() {
           </div>
           <h1 className="mt-4 font-display text-3xl font-semibold leading-tight">{t(`act.${activity.id}.name`)}</h1>
           <p className="mt-2 text-sm text-muted-foreground">{t(`act.${activity.id}.desc`)}</p>
-          <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">
-            {t("fit.act.kcal_per_h", { n: activity.kcalPerHour })}
-          </p>
-        </div>
-
-        <div className="mt-8">
-          <p className="mb-2 text-sm font-semibold">{t("activity.intensity")}</p>
-          <div className="grid grid-cols-3 gap-2">
-            {intensities.map((i) => (
-              <button
-                key={i}
-                onClick={() => setIntensity(i)}
-                className={`rounded-2xl border p-3 text-sm font-medium transition ${
-                  intensity === i ? "border-brand bg-brand/10 text-brand" : "border-border bg-card/50"
-                }`}
-              >
-                {t(`act.intensity.${i}`)}
-              </button>
-            ))}
-          </div>
-          <p className="mt-2 text-[11px] text-muted-foreground">{t("activity.intensity_hint")}</p>
         </div>
 
         <Button
-          className="mt-8 h-14 w-full text-base"
+          className="mt-10 h-14 w-full text-base"
           onClick={() => {
             primeAudio();
             start({
               activityId: activity.id,
               activityName: t(`act.${activity.id}.name`),
               kcalPerHour: activity.kcalPerHour,
-              intensity,
+              intensity: "normal",
               weightKg,
             });
           }}
@@ -164,7 +139,6 @@ function ActivitySessionPage() {
 
   // Active session screen
   const elapsed = computeElapsedSec(session, now);
-  const kcal = estimateKcal(session, elapsed);
   const isPaused = !!session.pausedAt;
 
   return (
@@ -183,13 +157,15 @@ function ActivitySessionPage() {
         <div className="mt-3 font-display text-7xl font-semibold tabular-nums tracking-tight">
           {formatTimer(elapsed)}
         </div>
-        <div className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-          {t(`act.intensity.${session.intensity}`)}
-        </div>
       </div>
 
       <div className="mt-10 space-y-3">
-        <Metric icon={Flame} label={t("session.calories")} value={`${kcal} kcal`} />
+        <Metric
+          icon={Flame}
+          label={t("session.calories")}
+          value="—"
+          hint={t("activity.healthkit_hint")}
+        />
         <Metric
           icon={Heart}
           label={t("activity.heart_rate")}
@@ -204,9 +180,8 @@ function ActivitySessionPage() {
         />
       </div>
 
-      <div className="mt-auto flex items-center justify-center gap-1 pt-6 text-[10px] uppercase tracking-wider text-muted-foreground">
-        <Activity className="size-3" /> {t("activity.source")}: {t("activity.source.estimate")}
-      </div>
+      <div className="mt-auto pt-6" />
+
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         {isPaused ? (
