@@ -16,6 +16,7 @@ import { useTemplates, newTemplate, type WorkoutTemplate } from "@/lib/workout-p
 import { TemplateSyncDialog } from "@/components/template-sync-dialog";
 import { normalizeDay, todayDayName } from "@/lib/workout-today";
 import { useTodayWorkout } from "@/lib/dashboard-prefs";
+import { WorkoutPlanChatFlow } from "@/components/chat/workout-plan-chat-flow";
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -428,10 +429,10 @@ export function ChatScreen({
   const t = useT();
   const { lang } = useI18n();
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [quickBusy, setQuickBusy] = useState(false);
+  const [workoutFlowActive, setWorkoutFlowActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
 
@@ -645,7 +646,7 @@ export function ChatScreen({
     if ((!text && !file) || isBusy) return;
     if (text && !file && isWorkoutPlanPrompt(text)) {
       setInput("");
-      navigate({ to: "/fitness", search: { wizard: 1 } });
+      setWorkoutFlowActive(true);
       return;
     }
     const final = text || t("chat.image_caption");
@@ -656,7 +657,7 @@ export function ChatScreen({
   function handlePick(key: string, prompt: string) {
     if (isBusy) return;
     if (key === "workout") {
-      navigate({ to: "/fitness", search: { wizard: 1 } });
+      setWorkoutFlowActive(true);
       return;
     }
     void sendQuick(prompt);
@@ -675,6 +676,7 @@ export function ChatScreen({
 
   const name = getDisplayName(user);
   const isEmpty = displayMessages.length === 0;
+  const showGreeting = isEmpty && !workoutFlowActive;
 
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background">
@@ -695,7 +697,7 @@ export function ChatScreen({
         ref={scrollerRef}
         className="flex-1 overflow-y-auto px-4 py-4 pb-[calc(env(safe-area-inset-bottom)+200px)]"
       >
-        {isEmpty ? (
+        {showGreeting ? (
           <>
             <GreetingPanel name={name} t={t} />
             <div className="px-0">
@@ -750,6 +752,7 @@ export function ChatScreen({
                 </div>
               </div>
             )}
+            {workoutFlowActive && <WorkoutPlanChatFlow />}
           </div>
         )}
       </div>
