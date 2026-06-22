@@ -142,7 +142,6 @@ function ActivitySessionPage() {
 
   // Active session screen
   const elapsed = computeElapsedSec(session, now);
-  const kcal = estimateKcal(session, elapsed);
   const isPaused = !!session.pausedAt;
 
   return (
@@ -161,13 +160,15 @@ function ActivitySessionPage() {
         <div className="mt-3 font-display text-7xl font-semibold tabular-nums tracking-tight">
           {formatTimer(elapsed)}
         </div>
-        <div className="mt-2 text-[10px] uppercase tracking-wider text-muted-foreground">
-          {t(`act.intensity.${session.intensity}`)}
-        </div>
       </div>
 
       <div className="mt-10 space-y-3">
-        <Metric icon={Flame} label={t("session.calories")} value={`${kcal} kcal`} />
+        <Metric
+          icon={Flame}
+          label={t("session.calories")}
+          value="—"
+          hint={t("activity.healthkit_hint")}
+        />
         <Metric
           icon={Heart}
           label={t("activity.heart_rate")}
@@ -182,9 +183,8 @@ function ActivitySessionPage() {
         />
       </div>
 
-      <div className="mt-auto flex items-center justify-center gap-1 pt-6 text-[10px] uppercase tracking-wider text-muted-foreground">
-        <Activity className="size-3" /> {t("activity.source")}: {t("activity.source.estimate")}
-      </div>
+      <div className="mt-auto pt-6" />
+
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         {isPaused ? (
