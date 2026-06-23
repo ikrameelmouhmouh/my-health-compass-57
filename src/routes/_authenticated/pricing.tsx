@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadStripe, type Stripe as StripeJs } from "@stripe/stripe-js";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Check, Crown, Loader2, Sparkles, X } from "lucide-react";
+import { Check, Crown, Loader2, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useSubscription, useCustomerCountry } from "@/lib/subscription";
