@@ -29,7 +29,7 @@ function FastingPage() {
   );
 
   // tick
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
   useEffect(() => {
     if (!state.startedAt || state.pausedAt) return;
     const id = setInterval(() => setTick((n) => n + 1), 1000);
