@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Lock } from "lucide-react";
+import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Lock, Play } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -572,7 +572,7 @@ function ActivitiesSection() {
                   key={a.id}
                   to="/activity-session/$activityId"
                   params={{ activityId: a.id }}
-                  className="flex flex-col items-start gap-2 rounded-2xl border border-border bg-card/50 p-3 text-left transition hover:bg-card"
+                  className="group relative flex flex-col items-start gap-2 rounded-2xl border border-border bg-card/50 p-3 text-left transition hover:bg-card"
                 >
                   <div className="grid size-10 place-items-center rounded-xl bg-brand/15 text-brand">
                     <a.icon className="size-5" />
@@ -582,6 +582,12 @@ function ActivitiesSection() {
                     <p className="line-clamp-2 text-[11px] text-muted-foreground">{t(`act.${a.id}.desc`)}</p>
                     <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">{t("fit.act.kcal_per_h", { n: a.kcalPerHour })}</p>
                   </div>
+                  <span
+                    aria-hidden
+                    className="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-brand/10 text-brand opacity-60 transition group-hover:opacity-100 group-hover:bg-brand group-hover:text-white"
+                  >
+                    <Play className="size-3.5 fill-current" />
+                  </span>
                 </Link>
               ))}
             </div>
