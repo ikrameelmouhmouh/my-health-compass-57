@@ -348,6 +348,7 @@ function ProgressPage() {
           )}
         </Card>
       </div>
+      </PaywallOverlay>
     </main>
   );
 }
