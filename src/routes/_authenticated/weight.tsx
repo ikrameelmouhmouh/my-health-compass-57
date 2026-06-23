@@ -183,6 +183,7 @@ function ProgressPage() {
         </div>
       </div>
 
+      <PaywallOverlay feature={t("prog.title")} description={t("pay.overlay.progress_desc")}>
       {/* Hero summary */}
       <section className="mt-5 overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-br from-brand/15 via-card to-card p-5">
         <div className="flex items-end justify-between">
