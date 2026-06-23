@@ -52,7 +52,7 @@ function FastingPage() {
       leftMs: Math.max(0, targetMs - elapsedMs),
       pct: Math.min(100, (elapsedMs / targetMs) * 100),
     };
-  }, [state.startedAt, state.pausedAt, state.pausedTotalMs, targetMs]);
+  }, [state.startedAt, state.pausedAt, state.pausedTotalMs, targetMs, tick]);
 
   // Fire end-of-fast notification once
   useEffect(() => {
