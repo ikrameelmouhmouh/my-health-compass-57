@@ -12,6 +12,7 @@ import { SessionStartSheet } from "@/components/workout/session-start-sheet";
 import { useWorkoutPlan, useTemplates, newTemplate, templatesFromPlan, type WorkoutTemplate } from "@/lib/workout-prefs";
 import { EXERCISES } from "@/lib/exercise-library";
 import { useI18n } from "@/lib/i18n";
+import { PaywallOverlay } from "@/components/paywall-gate";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
