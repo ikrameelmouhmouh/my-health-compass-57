@@ -203,6 +203,8 @@ function Profile() {
     }
   }
 
+  const goPricing = () => navigate({ to: "/pricing" });
+
   function renderCard(id: DashCardId, compact = false) {
     switch (id) {
       case "nutrition":
@@ -213,7 +215,7 @@ function Profile() {
             meals={day.meals}
             mode={caloriePrefs.mode}
             onToggleMode={toggleCalorieMode}
-            onLogFood={() => setOpenSheet("food")}
+            onLogFood={isPremium ? () => setOpenSheet("food") : goPricing}
             protein={{ have: day.protein, goal: proteinTarget }}
             carbs={{ have: day.carbs, goal: carbsTarget }}
             fat={{ have: day.fat, goal: fatTarget }}
@@ -259,8 +261,8 @@ function Profile() {
             windowHours={fasting.windowHours}
             pct={fastInfo.pct}
             streak={fasting.streak}
-            onStart={startFast}
-            onStop={stopFast}
+            onStart={isPremium ? startFast : goPricing}
+            onStop={isPremium ? stopFast : goPricing}
           />
         );
       case "weight":
@@ -272,7 +274,7 @@ function Profile() {
             delta={weightDelta}
             goal={goalWeight}
             progress={goalProgress}
-            onLog={() => setOpenSheet("weight")}
+            onLog={isPremium ? () => setOpenSheet("weight") : goPricing}
           />
         );
       case "activity":
@@ -291,8 +293,8 @@ function Profile() {
             key={id}
             workout={effectiveWorkout}
             completed={day.workoutCompleted}
-            onCreate={() => navigate({ to: "/fitness" })}
-            onStart={() => update({ workoutCompleted: true })}
+            onCreate={isPremium ? () => navigate({ to: "/fitness" }) : goPricing}
+            onStart={isPremium ? () => update({ workoutCompleted: true }) : goPricing}
             onClear={() => { saveWorkout(null); update({ workoutCompleted: false }); }}
           />
         );
