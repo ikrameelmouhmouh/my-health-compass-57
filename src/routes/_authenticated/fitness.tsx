@@ -105,7 +105,9 @@ function FitnessPage() {
       <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
         <Header />
         <ViewTabs view={view} setView={setView} />
-        <ActivitiesSection />
+        <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
+          <ActivitiesSection />
+        </PaywallOverlay>
       </main>
     );
   }
@@ -115,21 +117,23 @@ function FitnessPage() {
       <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
         <Header />
         <ViewTabs view={view} setView={setView} />
-        {!stored && !showWizard ? (
-          <>
-            <EmptyState onStart={openWizard} isPremium={isPremium} />
-            <LibrarySection />
-            <TemplatesSection />
-          </>
-        ) : (
-          <div className="mt-6">
-            <WorkoutWizard
-              initial={stored?.wizard}
-              onComplete={handleWizardComplete}
-              onCancel={stored ? () => setShowWizard(false) : undefined}
-            />
-          </div>
-        )}
+        <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
+          {!stored && !showWizard ? (
+            <>
+              <EmptyState onStart={openWizard} isPremium={isPremium} />
+              <LibrarySection />
+              <TemplatesSection />
+            </>
+          ) : (
+            <div className="mt-6">
+              <WorkoutWizard
+                initial={stored?.wizard}
+                onComplete={handleWizardComplete}
+                onCancel={stored ? () => setShowWizard(false) : undefined}
+              />
+            </div>
+          )}
+        </PaywallOverlay>
         <TemplateSyncDialog open={!!pendingTemplates} count={pendingTemplates?.length ?? 0} onChoose={handleSyncChoice} />
       </main>
     );
