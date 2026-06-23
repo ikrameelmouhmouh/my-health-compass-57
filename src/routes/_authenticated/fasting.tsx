@@ -105,6 +105,7 @@ function FastingPage() {
         )}
       </header>
 
+      <PaywallOverlay feature={t("fast.title")} description={t("pay.overlay.fasting_desc")}>
       {/* Timer */}
       <section className="mt-6 rounded-3xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
