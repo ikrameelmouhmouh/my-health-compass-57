@@ -271,6 +271,7 @@ function Dashboard({
       <Header />
       <ViewTabs view={view} setView={setView} />
 
+      <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
       <div className="mt-6 rounded-3xl border border-border bg-gradient-to-br from-brand/15 to-card p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
