@@ -41,13 +41,14 @@ interface OverlayProps {
   children: ReactNode;
   feature?: string;
   description?: string;
-  /** Smaller centered card — use for compact sections. */
+  /** Smaller CTA pill — use for compact sections. */
   compact?: boolean;
 }
 
 /**
- * Renders children blurred/non-interactive with a centered "Upgrade to Vita Plus"
- * card on top when the user is not Pro. Pro users see children as-is.
+ * Sneak-peek paywall: children stay fully visible but non-interactive,
+ * with a floating "Unlock Vita Plus" CTA pinned above the bottom nav.
+ * Pro users see children as-is.
  */
 export function PaywallOverlay({ children, feature, description, compact }: OverlayProps) {
   const t = useT();
@@ -57,34 +58,33 @@ export function PaywallOverlay({ children, feature, description, compact }: Over
   const label = feature ?? t("pay.feature_default");
   return (
     <div className="relative">
-      <div
-        aria-hidden
-        className="pointer-events-none select-none blur-[6px] opacity-50"
-      >
+      <div aria-hidden className="pointer-events-none select-none">
         {children}
       </div>
-      <div className="absolute inset-0 z-10 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/70 to-background/90" />
+
+      <div className="pointer-events-none fixed inset-x-0 bottom-20 z-40 flex justify-center px-4">
         <div
-          className={`relative w-full ${
-            compact ? "max-w-[260px] p-4" : "max-w-[320px] p-6"
-          } rounded-3xl border border-brand/30 bg-card/95 shadow-xl backdrop-blur text-center space-y-3`}
+          className={`pointer-events-auto w-full ${
+            compact ? "max-w-[280px]" : "max-w-[360px]"
+          } rounded-2xl border border-brand/30 bg-card/95 p-3 shadow-xl backdrop-blur-md`}
         >
-          <div className="mx-auto grid size-12 place-items-center rounded-full bg-brand/15">
-            <Lock className="size-5 text-brand" />
+          <div className="flex items-center gap-3">
+            <div className="grid size-9 shrink-0 place-items-center rounded-full bg-brand/15">
+              <Lock className="size-4 text-brand" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="flex items-center gap-1 truncate text-sm font-semibold">
+                <Crown className="size-3.5 text-brand" />
+                {label} {t("pay.is_pro")}
+              </p>
+              {description && (
+                <p className="truncate text-[11px] text-muted-foreground">{description}</p>
+              )}
+            </div>
+            <Button asChild size="sm" className="shrink-0">
+              <Link to="/pricing">{t("pay.unlock_cta")}</Link>
+            </Button>
           </div>
-          <div>
-            <h3 className="font-display text-base font-semibold flex items-center gap-1.5 justify-center">
-              <Crown className="size-4 text-brand" />
-              {label} {t("pay.is_pro")}
-            </h3>
-            {description && (
-              <p className="mt-1 text-xs text-muted-foreground leading-snug">{description}</p>
-            )}
-          </div>
-          <Button asChild className="w-full">
-            <Link to="/pricing">{t("pay.unlock_cta")}</Link>
-          </Button>
         </div>
       </div>
     </div>
