@@ -14,6 +14,7 @@ import {
 } from "@/lib/food";
 import { useDayLog, useFasting, getProtocol } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
+import { PaywallOverlay } from "@/components/paywall-gate";
 
 export const Route = createFileRoute("/_authenticated/nutrition")({
   head: () => ({ meta: [{ title: "Nutrition — Vita" }] }),
@@ -101,6 +102,7 @@ function Nutrition() {
         </button>
       </header>
 
+      <PaywallOverlay feature={t("nutr.title")} description={t("pay.overlay.food_desc")}>
       <section className="mt-5 rounded-3xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <div>
@@ -179,6 +181,7 @@ function Nutrition() {
       {isToday && (
         <NutritionSpeedDial onAddMeal={() => openFor(undefined)} onScan={openScan} />
       )}
+      </PaywallOverlay>
 
       <FoodLogDialog
         open={open}
