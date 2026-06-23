@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { loadStripe, type Stripe as StripeJs } from "@stripe/stripe-js";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Check, Crown, Loader2, Sparkles } from "lucide-react";
+import { Check, Crown, Loader2, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useSubscription, useCustomerCountry } from "@/lib/subscription";
@@ -108,11 +108,20 @@ function PricingPage() {
   return (
     <div className="min-h-dvh bg-gradient-to-b from-background to-background/80 pb-32">
       <header className="sticky top-0 z-10 backdrop-blur bg-background/70 border-b">
-        <div className="flex items-center gap-3 px-4 py-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate({ to: "/profile" })}>
-            <ArrowLeft className="size-5" />
-          </Button>
-          <h1 className="text-base font-semibold">{t("price.title")}</h1>
+        <div className="grid grid-cols-[2.5rem_1fr_2.5rem] items-center px-4 py-3">
+          <div />
+          <h1 className="text-base font-semibold text-center">{t("price.title")}</h1>
+          <div className="flex justify-end">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("common.close")}
+              onClick={() => navigate({ to: "/profile" })}
+              className="text-muted-foreground/70 hover:text-foreground"
+            >
+              <X className="size-5" />
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -140,7 +149,16 @@ function PricingPage() {
             </Button>
           </Card>
         ) : clientSecret ? (
-          <div className="rounded-xl overflow-hidden border bg-card">
+          <div className="rounded-xl overflow-hidden border bg-card relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("common.close")}
+              onClick={() => setClientSecret(null)}
+              className="absolute top-2 right-2 z-10 text-muted-foreground/70 hover:text-foreground"
+            >
+              <X className="size-4" />
+            </Button>
             <div ref={checkoutRef} />
           </div>
         ) : (
