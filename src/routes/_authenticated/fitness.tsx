@@ -374,6 +374,7 @@ function Dashboard({
           {t("fit.clear")}
         </button>
       </div>
+      </PaywallOverlay>
     </main>
   );
 }
