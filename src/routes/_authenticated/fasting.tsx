@@ -257,6 +257,9 @@ function FastingPage() {
           </ul>
         )}
       </section>
+      </PaywallOverlay>
+
+
 
       <EditStartDialog
         open={editStart}
