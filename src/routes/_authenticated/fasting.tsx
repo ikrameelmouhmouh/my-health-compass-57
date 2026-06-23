@@ -12,6 +12,7 @@ import {
   requestNotificationPermission, type FastingProtocol, type FastEntry,
 } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
+import { PaywallOverlay } from "@/components/paywall-gate";
 
 export const Route = createFileRoute("/_authenticated/fasting")({
   head: () => ({ meta: [{ title: "Fasting — Vita" }] }),
@@ -28,7 +29,7 @@ function FastingPage() {
   );
 
   // tick
-  const [, setTick] = useState(0);
+  const [tick, setTick] = useState(0);
   useEffect(() => {
     if (!state.startedAt || state.pausedAt) return;
     const id = setInterval(() => setTick((n) => n + 1), 1000);
@@ -51,7 +52,7 @@ function FastingPage() {
       leftMs: Math.max(0, targetMs - elapsedMs),
       pct: Math.min(100, (elapsedMs / targetMs) * 100),
     };
-  }, [state.startedAt, state.pausedAt, state.pausedTotalMs, targetMs]);
+  }, [state.startedAt, state.pausedAt, state.pausedTotalMs, targetMs, tick]);
 
   // Fire end-of-fast notification once
   useEffect(() => {
@@ -104,6 +105,7 @@ function FastingPage() {
         )}
       </header>
 
+      <PaywallOverlay feature={t("fast.title")} description={t("pay.overlay.fasting_desc")}>
       {/* Timer */}
       <section className="mt-6 rounded-3xl border border-border bg-card p-6">
         <div className="flex items-center justify-between">
@@ -255,6 +257,9 @@ function FastingPage() {
           </ul>
         )}
       </section>
+      </PaywallOverlay>
+
+
 
       <EditStartDialog
         open={editStart}

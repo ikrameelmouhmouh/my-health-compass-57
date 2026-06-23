@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/lib/i18n";
+import { PaywallOverlay } from "@/components/paywall-gate";
 
 import { SocialPage } from "./social";
 
@@ -182,6 +183,7 @@ function ProgressPage() {
         </div>
       </div>
 
+      <PaywallOverlay feature={t("prog.title")} description={t("pay.overlay.progress_desc")}>
       {/* Hero summary */}
       <section className="mt-5 overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-br from-brand/15 via-card to-card p-5">
         <div className="flex items-end justify-between">
@@ -346,6 +348,7 @@ function ProgressPage() {
           )}
         </Card>
       </div>
+      </PaywallOverlay>
     </main>
   );
 }
