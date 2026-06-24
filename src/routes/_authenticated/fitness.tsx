@@ -33,7 +33,7 @@ function FitnessPage() {
   const { stored, loaded, save, clear, toggleCompleted } = useWorkoutPlan();
   const { templates, upsert, remove } = useTemplates();
   const { t } = useI18n();
-  const { user } = useAuth();
+  
   const search = Route.useSearch();
   const navigate = useNavigate();
   const [showWizard, setShowWizard] = useState(false);
