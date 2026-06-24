@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Lock, Play } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { WorkoutWizard } from "@/components/workout-wizard";
@@ -13,9 +13,7 @@ import { useWorkoutPlan, useTemplates, newTemplate, templatesFromPlan, type Work
 import { EXERCISES } from "@/lib/exercise-library";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
-import { useAuth } from "@/lib/auth-context";
 import { usePremium } from "@/hooks/use-premium";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTodayWorkout } from "@/lib/dashboard-prefs";
 import { normalizeDay, todayDayName } from "@/lib/workout-today";
