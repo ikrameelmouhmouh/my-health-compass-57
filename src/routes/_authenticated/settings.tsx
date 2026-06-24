@@ -12,6 +12,7 @@ import { PushToggle } from "@/components/push-toggle";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { usePremium } from "@/hooks/use-premium";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Vita" }] }),
@@ -38,9 +39,7 @@ function SettingsPage() {
     },
   });
 
-  const sub = data?.subscription;
-  const isPremium = !!sub && ["active", "trialing", "past_due"].includes(sub.status) &&
-    (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
+  const { isPremium, override, setOverride } = usePremium();
 
   async function changeLanguage(code: Language) {
     setLang(code);
@@ -94,6 +93,46 @@ function SettingsPage() {
           >
             {isPremium ? t("set.plan.cta_pro") : t("set.plan.cta_free")}
           </Link>
+        </div>
+      </section>
+
+      {/* Test mode (dev) */}
+      <section className="mt-4">
+        <div className="rounded-3xl border border-dashed border-border bg-card p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-display text-[13px] font-semibold tracking-tight">
+                {t("set.testmode.title")}
+              </p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {t("set.testmode.desc")}
+              </p>
+            </div>
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-1.5 rounded-full bg-background p-1">
+            {(["auto", "on", "off"] as const).map((mode) => {
+              const active = override === mode;
+              const label =
+                mode === "auto"
+                  ? t("set.testmode.auto")
+                  : mode === "on"
+                  ? t("set.testmode.force_plus")
+                  : t("set.testmode.force_free");
+              return (
+                <button
+                  key={mode}
+                  onClick={() => setOverride(mode)}
+                  className={`rounded-full px-2 py-1.5 text-[11px] font-semibold transition ${
+                    active
+                      ? "bg-brand text-brand-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </section>
 

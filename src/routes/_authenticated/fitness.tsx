@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Lock, Play } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { WorkoutWizard } from "@/components/workout-wizard";
@@ -13,8 +13,7 @@ import { useWorkoutPlan, useTemplates, newTemplate, templatesFromPlan, type Work
 import { EXERCISES } from "@/lib/exercise-library";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
-import { useAuth } from "@/lib/auth-context";
-import { supabase } from "@/integrations/supabase/client";
+import { usePremium } from "@/hooks/use-premium";
 import { toast } from "sonner";
 import { useTodayWorkout } from "@/lib/dashboard-prefs";
 import { normalizeDay, todayDayName } from "@/lib/workout-today";
@@ -34,7 +33,7 @@ function FitnessPage() {
   const { stored, loaded, save, clear, toggleCompleted } = useWorkoutPlan();
   const { templates, upsert, remove } = useTemplates();
   const { t } = useI18n();
-  const { user } = useAuth();
+  
   const search = Route.useSearch();
   const navigate = useNavigate();
   const [showWizard, setShowWizard] = useState(false);
@@ -49,16 +48,7 @@ function FitnessPage() {
     }
   }, [search.wizard, navigate]);
 
-  const { data: sub } = useQuery({
-    queryKey: ["subscription", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase.from("subscriptions").select("*").eq("user_id", user!.id).maybeSingle();
-      return data;
-    },
-  });
-  const isPremium = !!sub && ["active", "trialing", "past_due"].includes(sub.status) &&
-    (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
+  const { isPremium } = usePremium();
 
   const handleWizardComplete = (w: Parameters<typeof save>[0], p: Parameters<typeof save>[1]) => {
     save(w, p);
