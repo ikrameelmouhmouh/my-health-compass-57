@@ -14,6 +14,7 @@ import { EXERCISES } from "@/lib/exercise-library";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
 import { useAuth } from "@/lib/auth-context";
+import { usePremium } from "@/hooks/use-premium";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useTodayWorkout } from "@/lib/dashboard-prefs";
@@ -49,16 +50,7 @@ function FitnessPage() {
     }
   }, [search.wizard, navigate]);
 
-  const { data: sub } = useQuery({
-    queryKey: ["subscription", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase.from("subscriptions").select("*").eq("user_id", user!.id).maybeSingle();
-      return data;
-    },
-  });
-  const isPremium = !!sub && ["active", "trialing", "past_due"].includes(sub.status) &&
-    (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
+  const { isPremium } = usePremium();
 
   const handleWizardComplete = (w: Parameters<typeof save>[0], p: Parameters<typeof save>[1]) => {
     save(w, p);
