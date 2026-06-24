@@ -27,6 +27,7 @@ import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
 import { RetentionSection } from "@/components/retention-section";
 import { NotificationsSheet, useNotifications } from "@/components/notifications-sheet";
+import { usePremium } from "@/hooks/use-premium";
 
 import { useServerFn } from "@tanstack/react-start";
 import { ensureTodayAura } from "@/lib/notifications.functions";
@@ -98,8 +99,7 @@ function Profile() {
   }, [fasting.startedAt]);
 
   const p = data?.profile;
-  const sub = data?.subscription;
-  const isPremium = !!sub && ["active", "trialing", "past_due"].includes(sub.status) && (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
+  const { isPremium } = usePremium();
 
   const calorieTarget = p?.daily_calories ?? 0;
   const proteinTarget = p?.protein_g ?? 0;
