@@ -12,6 +12,7 @@ import { PushToggle } from "@/components/push-toggle";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { usePremium } from "@/hooks/use-premium";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Vita" }] }),
@@ -38,9 +39,7 @@ function SettingsPage() {
     },
   });
 
-  const sub = data?.subscription;
-  const isPremium = !!sub && ["active", "trialing", "past_due"].includes(sub.status) &&
-    (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
+  const { isPremium, override, setOverride } = usePremium();
 
   async function changeLanguage(code: Language) {
     setLang(code);
