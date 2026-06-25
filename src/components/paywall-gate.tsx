@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Crown, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSubscription } from "@/lib/subscription";
+import { usePremium } from "@/hooks/use-premium";
 import { useT } from "@/lib/i18n";
 import type { ReactNode } from "react";
 
@@ -11,12 +11,11 @@ interface Props {
   description?: string;
 }
 
-/** Wraps premium-only UI. Shows a paywall card when user is not Pro. */
+/** Wraps premium-only UI. Shows a paywall card when user is not Premium. */
 export function PaywallGate({ children, feature, description }: Props) {
   const t = useT();
-  const { isPro, isLoading } = useSubscription();
-  if (isLoading) return null;
-  if (isPro) return <>{children}</>;
+  const { isPremium } = usePremium();
+  if (isPremium) return <>{children}</>;
   const label = feature ?? t("pay.feature_default");
   return (
     <div className="rounded-xl border border-brand/30 bg-gradient-to-br from-brand/10 via-brand/5 to-transparent p-6 text-center space-y-3">
@@ -41,20 +40,17 @@ interface OverlayProps {
   children: ReactNode;
   feature?: string;
   description?: string;
-  /** Smaller CTA pill — use for compact sections. */
   compact?: boolean;
 }
 
 /**
  * Sneak-peek paywall: children stay fully visible but non-interactive,
- * with a floating "Unlock Vita Plus" CTA pinned above the bottom nav.
- * Pro users see children as-is.
+ * with a tap-anywhere link to the pricing page. Premium users see children as-is.
  */
 export function PaywallOverlay({ children, feature, description, compact: _compact }: OverlayProps) {
   const t = useT();
-  const { isPro, isLoading } = useSubscription();
-  if (isLoading) return <>{children}</>;
-  if (isPro) return <>{children}</>;
+  const { isPremium } = usePremium();
+  if (isPremium) return <>{children}</>;
   const label = feature ?? t("pay.feature_default");
   return (
     <div className="relative">

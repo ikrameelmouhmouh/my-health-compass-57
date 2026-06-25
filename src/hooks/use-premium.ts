@@ -3,14 +3,16 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 
-export type PremiumOverride = "auto" | "on" | "off";
+export type PremiumOverride = "premium" | "free" | null;
 const STORAGE_KEY = "vita.premiumOverride";
 const EVENT = "vita:premium-override";
 
 function readOverride(): PremiumOverride {
-  if (typeof window === "undefined") return "auto";
+  if (typeof window === "undefined") return null;
   const v = window.localStorage.getItem(STORAGE_KEY);
-  return v === "on" || v === "off" ? v : "auto";
+  if (v === "premium" || v === "on") return "premium";
+  if (v === "free" || v === "off") return "free";
+  return null;
 }
 
 export function usePremium() {
@@ -47,13 +49,13 @@ export function usePremium() {
   }, []);
 
   const setOverride = useCallback((next: PremiumOverride) => {
-    if (next === "auto") window.localStorage.removeItem(STORAGE_KEY);
+    if (next === null) window.localStorage.removeItem(STORAGE_KEY);
     else window.localStorage.setItem(STORAGE_KEY, next);
     window.dispatchEvent(new Event(EVENT));
     setOverrideState(next);
   }, []);
 
-  const isPremium = override === "on" ? true : override === "off" ? false : realIsPremium;
+  const isPremium = override === "premium" ? true : override === "free" ? false : realIsPremium;
 
   return { isPremium, realIsPremium, override, setOverride, sub };
 }

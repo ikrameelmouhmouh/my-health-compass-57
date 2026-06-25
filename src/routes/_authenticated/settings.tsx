@@ -96,28 +96,24 @@ function SettingsPage() {
         </div>
       </section>
 
-      {/* Test mode (dev) */}
+      {/* View mode */}
       <section className="mt-4">
         <div className="rounded-3xl border border-dashed border-border bg-card p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="font-display text-[13px] font-semibold tracking-tight">
-                {t("set.testmode.title")}
+                {t("set.viewmode.title")}
               </p>
               <p className="mt-0.5 text-[11px] text-muted-foreground">
-                {t("set.testmode.desc")}
+                {t("set.viewmode.desc")}
               </p>
             </div>
           </div>
-          <div className="mt-3 grid grid-cols-3 gap-1.5 rounded-full bg-background p-1">
-            {(["auto", "on", "off"] as const).map((mode) => {
-              const active = override === mode;
+          <div className="mt-3 grid grid-cols-2 gap-1.5 rounded-full bg-background p-1">
+            {(["premium", "free"] as const).map((mode) => {
+              const active = isPremium === (mode === "premium");
               const label =
-                mode === "auto"
-                  ? t("set.testmode.auto")
-                  : mode === "on"
-                  ? t("set.testmode.force_plus")
-                  : t("set.testmode.force_free");
+                mode === "premium" ? t("set.viewmode.premium") : t("set.viewmode.free");
               return (
                 <button
                   key={mode}
