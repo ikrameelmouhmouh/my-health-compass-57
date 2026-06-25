@@ -1,34 +1,40 @@
-## Doel
-Een dev/test-schakelaar in **Instellingen** waarmee jij zelf bepaalt of de app je behandelt als Vita Plus (alles ontgrendeld) of als gratis gebruiker (paywalls zichtbaar). Zo kun je beide ervaringen snel testen zonder daadwerkelijk te betalen of te downgraden.
+# Premium-toggle herzien
 
-## Hoe het werkt voor jou
-- In **Profiel → Instellingen** komt onder het "Plan"-kaartje een nieuw blokje **"Weergavemodus (test)"** met drie opties:
-  1. **Automatisch** — gebruikt je echte abonnementsstatus (standaard).
-  2. **Forceer Plus** — alles ontgrendeld, geen paywalls, ook al ben je gratis.
-  3. **Forceer Gratis** — laat de paywall-overlays zien zoals een gratis gebruiker ze ziet.
-- De keuze wordt lokaal bewaard (localStorage), dus blijft staan na refresh, en is alleen voor jouw apparaat.
-- Wanneer een override actief is verschijnt er een klein, subtiel chipje bovenaan ("Testmodus: Plus" / "Testmodus: Gratis") zodat je nooit vergeet dat je niet de echte status ziet — met één tik schakel je terug naar Automatisch.
+## Probleem
+- `PaywallGate` en `PaywallOverlay` gebruiken `useSubscription()` (echte Stripe-status), niet de override uit `usePremium()`. Daarom blijft alles op "betaal" staan zelfs als je in Settings op "Forceer plus" drukt.
+- De extra "Automatisch"-modus en de zwevende chip rechtsonder zijn ongewenst.
+- AI Coach (chat) is nu ook in gratis bereikbaar.
 
-## Technische uitvoering
-1. **Nieuwe hook `src/hooks/use-premium.ts`**
-   - Centraliseert de huidige logica (`!!sub && ["active","trialing","past_due"].includes(sub.status) && …`).
-   - Leest een override uit `localStorage` (`vita.premiumOverride` = `"auto" | "on" | "off"`).
-   - Retourneert `{ isPremium, override, setOverride, realIsPremium }`.
-   - Subscribe op `storage` events zodat alle pagina's tegelijk updaten.
+## Wijzigingen
 
-2. **`src/routes/_authenticated/settings.tsx`**
-   - Vervang lokale `isPremium`-berekening door de hook.
-   - Voeg nieuw kaartje "Weergavemodus (test)" toe met drie segment-knoppen (Automatisch / Plus / Gratis), in dezelfde stijl als bestaande kaarten.
+### 1. `src/components/paywall-gate.tsx`
+- Vervang `useSubscription()` door `usePremium()` in zowel `PaywallGate` als `PaywallOverlay`.
+- Gebruik `isPremium` (die respecteert override) i.p.v. `isPro`. Hiermee unlockt "Premium" écht alles: fasting, fitness, weight overlays en alle gates.
 
-3. **`src/routes/_authenticated/profile.tsx`** en **`src/routes/_authenticated/fitness.tsx`**
-   - Vervang lokale `isPremium`-berekening door de hook. Verder geen gedragswijziging — de bestaande paywall-routing blijft werken.
+### 2. `src/hooks/use-premium.ts`
+- Reduceer override-type naar `"premium" | "free" | null` (null = echte abonnementsstatus volgen).
+- `isPremium` = `override === "premium"` ? true : `override === "free"` ? false : `realIsPremium`.
+- Houd `localStorage`-key + event sync hetzelfde.
 
-4. **Subtiel testmodus-chipje**
-   - Klein component `src/components/test-mode-badge.tsx`, gemount in `__root.tsx` (alleen zichtbaar als override ≠ `"auto"`), positie `fixed bottom-4 right-4`, `text-xs`, klikbaar → zet override terug naar `auto`.
+### 3. `src/routes/__root.tsx`
+- Verwijder `<TestModeBadge />` en de import.
 
-5. **i18n**
-   - Nieuwe keys in alle 6 talen: `set.testmode.title`, `set.testmode.desc`, `set.testmode.auto`, `set.testmode.force_plus`, `set.testmode.force_free`, `testmode.badge_plus`, `testmode.badge_free`.
+### 4. `src/components/test-mode-badge.tsx`
+- Bestand verwijderen.
 
-## Wat niet verandert
-- Geen aanpassingen aan Stripe, backend, of echte abonnementsstatus.
-- Paywall-overlays en pricing-flow blijven exact zoals ze zijn.
+### 5. `src/routes/_authenticated/settings.tsx`
+- Hernoem sectietitel naar "Weergavemodus" (gewoon Premium/Gratis, geen "test").
+- Vervang 3-knops switch door 2-knops segmented control: **Premium** | **Gratis**. Actieve knop = huidige `isPremium` (premium = aan, gratis = uit).
+- Klik op een knop zet `setOverride("premium")` of `setOverride("free")`.
+
+### 6. AI Coach gating
+- In `src/routes/_authenticated/ai-coach.tsx` (en `ai-coach.$threadId.tsx`): als `!isPremium` toon `PaywallGate` met label "AI Coach" i.p.v. de chat. Premium = volledige toegang.
+
+### 7. `src/lib/i18n.tsx`
+- Verwijder keys: `set.testmode.auto`, `set.testmode.force_plus`, `set.testmode.force_free`, `testmode.badge.*`.
+- Voeg toe (6 talen): `set.viewmode.title` ("Weergavemodus"), `set.viewmode.desc` ("Bekijk de app als Premium- of gratis gebruiker."), `set.viewmode.premium` ("Premium"), `set.viewmode.free` ("Gratis"), `pay.feature.ai_coach` ("AI Coach").
+
+## Technische details
+- Override-defaultwaarde verandert niet voor bestaande users: oude `"on"`/`"off"` waarden in localStorage worden bij lezen gemapt naar `"premium"`/`"free"` (backwards compat in `readOverride`); oude `"auto"` wordt `null`.
+- Geen wijzigingen in DB, RLS of server-functions. Alleen frontend.
+- `useSubscription` blijft bestaan voor `pricing.tsx` (echte Stripe-status tonen).

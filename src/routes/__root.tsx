@@ -15,7 +15,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { I18nProvider } from "@/lib/i18n";
 import { Toaster } from "@/components/ui/sonner";
-import { TestModeBadge } from "@/components/test-mode-badge";
+
 
 
 function NotFoundComponent() {
@@ -130,7 +130,6 @@ function RootComponent() {
           <AuthProvider>
             <Outlet />
             <Toaster />
-            <TestModeBadge />
           </AuthProvider>
         </I18nProvider>
       </ThemeProvider>
