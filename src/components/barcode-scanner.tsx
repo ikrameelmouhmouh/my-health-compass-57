@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, ScanLine, Keyboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { isBarcodeScanSupported } from "@/lib/food";
 import { useT } from "@/lib/i18n";
+
 
 
 type Props = {
