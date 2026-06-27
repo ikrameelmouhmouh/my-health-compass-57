@@ -79,13 +79,17 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
 
   return (
     <div className="fixed inset-0 z-[60] grid place-items-center bg-black/90 p-4">
-      <button
-        onClick={onClose}
-        className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-white/15 text-white"
-        aria-label={t("scan.close")}
-      >
-        <X className="size-5" />
-      </button>
+      {supported && !showManual && (
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 grid size-10 place-items-center rounded-full bg-white/15 text-white"
+          aria-label={t("scan.close")}
+        >
+          <X className="size-5" />
+        </button>
+      )}
+
+
 
       {supported && !showManual ? (
         <div className="relative aspect-[3/4] w-full max-w-sm overflow-hidden rounded-3xl bg-black">
