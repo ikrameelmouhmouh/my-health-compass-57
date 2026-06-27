@@ -77,10 +77,11 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
     };
   }, [open, supported, onDetected]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
-    <div className="fixed inset-0 z-[60] grid place-items-center bg-black/90 p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-black/90 p-4" style={{ pointerEvents: "auto" }}>
+
       {supported && !showManual && (
         <button
           onClick={onClose}
