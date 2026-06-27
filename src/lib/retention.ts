@@ -6,8 +6,10 @@ export type Badge = {
   id: string;
   name: string;
   description: string;
+  criteria: string;
   icon: string; // emoji
   check: (s: RetentionStats) => boolean;
+  progress: (s: RetentionStats) => { current: number; target: number; unit?: string };
 };
 
 export type RetentionStats = {
@@ -22,15 +24,15 @@ export type RetentionStats = {
 };
 
 export const BADGES: Badge[] = [
-  { id: "first-workout", name: "Eerste stap", description: "Voltooi je eerste workout", icon: "🌱", check: (s) => s.totalWorkouts >= 1 },
-  { id: "workouts-5", name: "Op dreef", description: "5 workouts voltooid", icon: "⚡", check: (s) => s.totalWorkouts >= 5 },
-  { id: "workouts-25", name: "Toegewijd", description: "25 workouts voltooid", icon: "🔥", check: (s) => s.totalWorkouts >= 25 },
-  { id: "workouts-100", name: "Centurion", description: "100 workouts voltooid", icon: "🏆", check: (s) => s.totalWorkouts >= 100 },
-  { id: "streak-3", name: "3-daagse streak", description: "3 dagen op rij actief", icon: "✨", check: (s) => s.longestStreak >= 3 },
-  { id: "streak-7", name: "Volle week", description: "7 dagen op rij actief", icon: "🌟", check: (s) => s.longestStreak >= 7 },
-  { id: "streak-30", name: "Onverstoorbaar", description: "30 dagen streak", icon: "💎", check: (s) => s.longestStreak >= 30 },
-  { id: "volume-10k", name: "10.000 kg", description: "Totaal volume", icon: "🏋️", check: (s) => s.totalVolumeKg >= 10000 },
-  { id: "week-4", name: "4× per week", description: "4 workouts in één week", icon: "📅", check: (s) => s.thisWeekWorkouts >= 4 },
+  { id: "first-workout", name: "Eerste stap", description: "Voltooi je eerste workout", criteria: "Voltooi 1 workout van begin tot eind.", icon: "🌱", check: (s) => s.totalWorkouts >= 1, progress: (s) => ({ current: Math.min(s.totalWorkouts, 1), target: 1, unit: "workout" }) },
+  { id: "workouts-5", name: "Op dreef", description: "5 workouts voltooid", criteria: "Voltooi in totaal 5 workouts.", icon: "⚡", check: (s) => s.totalWorkouts >= 5, progress: (s) => ({ current: Math.min(s.totalWorkouts, 5), target: 5, unit: "workouts" }) },
+  { id: "workouts-25", name: "Toegewijd", description: "25 workouts voltooid", criteria: "Voltooi in totaal 25 workouts.", icon: "🔥", check: (s) => s.totalWorkouts >= 25, progress: (s) => ({ current: Math.min(s.totalWorkouts, 25), target: 25, unit: "workouts" }) },
+  { id: "workouts-100", name: "Centurion", description: "100 workouts voltooid", criteria: "Voltooi in totaal 100 workouts.", icon: "🏆", check: (s) => s.totalWorkouts >= 100, progress: (s) => ({ current: Math.min(s.totalWorkouts, 100), target: 100, unit: "workouts" }) },
+  { id: "streak-3", name: "3-daagse streak", description: "3 dagen op rij actief", criteria: "Train 3 dagen achter elkaar zonder een dag over te slaan.", icon: "✨", check: (s) => s.longestStreak >= 3, progress: (s) => ({ current: Math.min(s.longestStreak, 3), target: 3, unit: "dagen" }) },
+  { id: "streak-7", name: "Volle week", description: "7 dagen op rij actief", criteria: "Train 7 dagen op rij.", icon: "🌟", check: (s) => s.longestStreak >= 7, progress: (s) => ({ current: Math.min(s.longestStreak, 7), target: 7, unit: "dagen" }) },
+  { id: "streak-30", name: "Onverstoorbaar", description: "30 dagen streak", criteria: "Houd een streak vol van 30 dagen achter elkaar.", icon: "💎", check: (s) => s.longestStreak >= 30, progress: (s) => ({ current: Math.min(s.longestStreak, 30), target: 30, unit: "dagen" }) },
+  { id: "volume-10k", name: "10.000 kg", description: "Totaal volume bereikt", criteria: "Til in totaal 10.000 kg over al je workouts (sets × reps × gewicht).", icon: "🏋️", check: (s) => s.totalVolumeKg >= 10000, progress: (s) => ({ current: Math.min(s.totalVolumeKg, 10000), target: 10000, unit: "kg" }) },
+  { id: "week-4", name: "4× per week", description: "4 workouts in één week", criteria: "Voltooi 4 workouts binnen dezelfde week (ma–zo).", icon: "📅", check: (s) => s.thisWeekWorkouts >= 4, progress: (s) => ({ current: Math.min(s.thisWeekWorkouts, 4), target: 4, unit: "workouts" }) },
 ];
 
 function ymd(d: Date | string): string {

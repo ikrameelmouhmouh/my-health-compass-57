@@ -1,8 +1,8 @@
-import { Flame, Trophy, Calendar, Check } from "lucide-react";
+import { Flame, Trophy, Calendar, ChevronRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { BADGES, useRetention } from "@/lib/retention";
 import { useAuth } from "@/lib/auth-context";
 import { useT } from "@/lib/i18n";
-import { toast } from "sonner";
 
 
 export function RetentionSection() {
@@ -20,7 +20,16 @@ export function RetentionSection() {
 
   const maxWorkouts = Math.max(1, ...weekDays.map((d) => d.workouts));
 
-
+  // Preview: 4 badges — earned first, then closest to being earned
+  const preview = [...BADGES]
+    .sort((a, b) => {
+      const ae = earnedBadgeIds.has(a.id) ? 1 : 0;
+      const be = earnedBadgeIds.has(b.id) ? 1 : 0;
+      if (ae !== be) return be - ae;
+      const ap = a.progress(stats); const bp = b.progress(stats);
+      return (bp.current / bp.target) - (ap.current / ap.target);
+    })
+    .slice(0, 4);
 
   return (
     <section className="space-y-4">
@@ -67,36 +76,34 @@ export function RetentionSection() {
         </div>
       </div>
 
-      {/* Badges */}
-      <div className="rounded-3xl border border-border bg-surface p-5">
-        <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          <Trophy className="h-3.5 w-3.5" /> {t("ret.badges")} ({earnedBadgeIds.size}/{BADGES.length})
+      {/* Badges preview → library */}
+      <Link
+        to="/badges"
+        className="block rounded-3xl border border-border bg-surface p-5 transition active:scale-[0.99]"
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <Trophy className="h-3.5 w-3.5" /> {t("ret.badges")} ({earnedBadgeIds.size}/{BADGES.length})
+          </div>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            {t("ret.view_all")} <ChevronRight className="h-3.5 w-3.5" />
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-          {BADGES.map((b) => {
+        <div className="grid grid-cols-4 gap-2">
+          {preview.map((b) => {
             const earned = earnedBadgeIds.has(b.id);
             return (
-              <button
-                type="button"
+              <div
                 key={b.id}
-                onClick={() =>
-                  toast(b.name, {
-                    description: earned
-                      ? `${b.description} · ${t("ret.badge_earned")}`
-                      : b.description,
-                    icon: earned ? <Check className="size-4 text-brand" /> : undefined,
-                  })
-                }
-                className={`flex flex-col items-center gap-1 rounded-2xl border p-3 text-center transition active:scale-[0.98] ${earned ? "border-border bg-background" : "border-border/40 bg-muted/20 opacity-50"}`}
-                title={b.description}
+                className={`flex flex-col items-center gap-1 rounded-2xl border p-3 text-center ${earned ? "border-border bg-background" : "border-border/40 bg-muted/20 opacity-60"}`}
               >
                 <div className="text-2xl">{b.icon}</div>
-                <div className="text-[11px] font-semibold leading-tight">{b.name}</div>
-              </button>
+                <div className="text-[11px] font-semibold leading-tight line-clamp-2">{b.name}</div>
+              </div>
             );
           })}
         </div>
-      </div>
+      </Link>
     </section>
   );
 }
