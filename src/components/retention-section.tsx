@@ -9,11 +9,6 @@ export function RetentionSection() {
   const t = useT();
   const { user } = useAuth();
   const { loading, stats, weekDays, earnedBadgeIds } = useRetention(user?.id);
-  const [perm, setPerm] = useState<"granted" | "denied" | "default" | "unsupported">("default");
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => { pushStatus().then(setPerm); }, []);
-
 
   if (!user || loading || !stats) {
     return (
@@ -25,21 +20,6 @@ export function RetentionSection() {
 
   const maxWorkouts = Math.max(1, ...weekDays.map((d) => d.workouts));
 
-  async function toggle() {
-    if (!user) return;
-    setBusy(true);
-    try {
-      if (perm === "granted") {
-        await disablePush(user.id);
-        setPerm("default");
-        toast.success(t("ret.reminders_off"));
-      } else {
-        const r = await enablePush(user.id);
-        if (r.ok) { setPerm("granted"); toast.success(t("ret.reminders_on")); }
-        else toast.error(r.reason ?? t("ret.activation_failed"));
-      }
-    } finally { setBusy(false); }
-  }
 
 
   return (
