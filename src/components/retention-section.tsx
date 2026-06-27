@@ -76,43 +76,29 @@ export function RetentionSection() {
           {BADGES.map((b) => {
             const earned = earnedBadgeIds.has(b.id);
             return (
-              <div
+              <button
+                type="button"
                 key={b.id}
-                className={`flex flex-col items-center gap-1 rounded-2xl border p-3 text-center transition ${earned ? "border-border bg-background" : "border-border/40 bg-muted/20 opacity-50"}`}
+                onClick={() =>
+                  toast(b.name, {
+                    description: earned
+                      ? `${b.description} · ${t("ret.badge_earned")}`
+                      : b.description,
+                    icon: earned ? <Check className="size-4 text-brand" /> : undefined,
+                  })
+                }
+                className={`flex flex-col items-center gap-1 rounded-2xl border p-3 text-center transition active:scale-[0.98] ${earned ? "border-border bg-background" : "border-border/40 bg-muted/20 opacity-50"}`}
                 title={b.description}
               >
                 <div className="text-2xl">{b.icon}</div>
                 <div className="text-[11px] font-semibold leading-tight">{b.name}</div>
-              </div>
+              </button>
             );
           })}
         </div>
       </div>
-
-      {/* Push toggle */}
-      <div className="flex items-center justify-between rounded-3xl border border-border bg-surface p-5">
-        <div>
-          <div className="font-semibold">{t("ret.reminders")}</div>
-          <div className="text-xs text-muted-foreground">
-            {perm === "unsupported"
-              ? t("ret.unsupported")
-              : perm === "denied"
-              ? t("ret.denied")
-              : perm === "granted"
-              ? t("ret.granted_desc")
-              : t("ret.enable_desc")}
-          </div>
-        </div>
-        <Button
-          variant={perm === "granted" ? "outline" : "default"}
-          size="sm"
-          disabled={busy || perm === "unsupported" || perm === "denied"}
-          onClick={toggle}
-        >
-          {perm === "granted" ? <><BellOff className="mr-1.5 h-4 w-4" /> {t("ret.off")}</> : <><BellRing className="mr-1.5 h-4 w-4" /> {t("ret.on")}</>}
-        </Button>
-      </div>
     </section>
   );
 }
+
 
