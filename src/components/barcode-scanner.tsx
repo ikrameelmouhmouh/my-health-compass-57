@@ -153,6 +153,8 @@ export function BarcodeScanner({ open, onClose, onDetected }: Props) {
         </div>
 
       )}
-    </div>
+    </div>,
+    document.body,
   );
+
 }
