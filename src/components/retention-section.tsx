@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
-import { Flame, Trophy, BellRing, BellOff, Calendar } from "lucide-react";
+import { Flame, Trophy, Calendar, Check } from "lucide-react";
 import { BADGES, useRetention } from "@/lib/retention";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
-import { enablePush, disablePush, pushStatus, pushSupported } from "@/lib/push";
 import { useT } from "@/lib/i18n";
 import { toast } from "sonner";
+
 
 export function RetentionSection() {
   const t = useT();
