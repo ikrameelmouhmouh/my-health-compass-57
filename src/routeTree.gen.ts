@@ -25,6 +25,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedNutritionRouteImport } from './routes/_authenticated/nutrition'
 import { Route as AuthenticatedFitnessRouteImport } from './routes/_authenticated/fitness'
 import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticated/fasting'
+import { Route as AuthenticatedBadgesRouteImport } from './routes/_authenticated/badges'
 import { Route as AuthenticatedAiCoachRouteImport } from './routes/_authenticated/ai-coach'
 import { Route as AuthenticatedWorkoutSessionTemplateIdRouteImport } from './routes/_authenticated/workout-session.$templateId'
 import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
@@ -113,6 +114,11 @@ const AuthenticatedFastingRoute = AuthenticatedFastingRouteImport.update({
   path: '/fasting',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedBadgesRoute = AuthenticatedBadgesRouteImport.update({
+  id: '/badges',
+  path: '/badges',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedAiCoachRoute = AuthenticatedAiCoachRouteImport.update({
   id: '/ai-coach',
   path: '/ai-coach',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
+  '/badges': typeof AuthenticatedBadgesRoute
   '/fasting': typeof AuthenticatedFastingRoute
   '/fitness': typeof AuthenticatedFitnessRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
@@ -192,6 +199,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
+  '/badges': typeof AuthenticatedBadgesRoute
   '/fasting': typeof AuthenticatedFastingRoute
   '/fitness': typeof AuthenticatedFitnessRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
   '/_authenticated/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
+  '/_authenticated/badges': typeof AuthenticatedBadgesRoute
   '/_authenticated/fasting': typeof AuthenticatedFastingRoute
   '/_authenticated/fitness': typeof AuthenticatedFitnessRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/welcome'
     | '/ai-coach'
+    | '/badges'
     | '/fasting'
     | '/fitness'
     | '/nutrition'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/welcome'
     | '/ai-coach'
+    | '/badges'
     | '/fasting'
     | '/fitness'
     | '/nutrition'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/welcome'
     | '/_authenticated/ai-coach'
+    | '/_authenticated/badges'
     | '/_authenticated/fasting'
     | '/_authenticated/fitness'
     | '/_authenticated/nutrition'
@@ -444,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFastingRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/badges': {
+      id: '/_authenticated/badges'
+      path: '/badges'
+      fullPath: '/badges'
+      preLoaderRoute: typeof AuthenticatedBadgesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/ai-coach': {
       id: '/_authenticated/ai-coach'
       path: '/ai-coach'
@@ -516,6 +535,7 @@ const AuthenticatedAiCoachRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedAiCoachRoute: typeof AuthenticatedAiCoachRouteWithChildren
+  AuthenticatedBadgesRoute: typeof AuthenticatedBadgesRoute
   AuthenticatedFastingRoute: typeof AuthenticatedFastingRoute
   AuthenticatedFitnessRoute: typeof AuthenticatedFitnessRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
@@ -531,6 +551,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAiCoachRoute: AuthenticatedAiCoachRouteWithChildren,
+  AuthenticatedBadgesRoute: AuthenticatedBadgesRoute,
   AuthenticatedFastingRoute: AuthenticatedFastingRoute,
   AuthenticatedFitnessRoute: AuthenticatedFitnessRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
