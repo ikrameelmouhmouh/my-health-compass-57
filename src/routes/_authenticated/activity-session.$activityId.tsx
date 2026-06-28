@@ -142,7 +142,7 @@ function ActivitySessionPage() {
   const isPaused = !!session.pausedAt;
 
   return (
-    <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background px-5 pb-10 pt-6">
+    <main className="mx-auto flex min-h-[100dvh] w-full max-w-md flex-col bg-background px-5 pb-[calc(env(safe-area-inset-bottom)+120px)] pt-6">
       <button
         onClick={() => setConfirmExit(true)}
         className="flex items-center gap-2 text-sm text-muted-foreground"
