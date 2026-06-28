@@ -13,11 +13,16 @@ function AuthenticatedLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !session) {
+    if (loading || session) return;
+    // Grace period: give Supabase one more tick to hydrate from localStorage
+    // before bouncing the user to the login screen.
+    const t = setTimeout(() => {
       const hasAccount = typeof window !== "undefined" && localStorage.getItem("vita.has_account");
       navigate({ to: hasAccount ? "/login" : "/welcome", replace: true });
-    }
+    }, 600);
+    return () => clearTimeout(t);
   }, [loading, session, navigate]);
+
 
   if (loading || !session) {
     return (
