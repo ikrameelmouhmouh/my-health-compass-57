@@ -214,6 +214,17 @@ function ProgressPage() {
           <span>{goalProgress.toFixed(0)}%</span>
           <span>{goal ? t("prog.goalK", { n: goal }) : t("prog.setGoal")}</span>
         </div>
+        <div className="mt-4 flex items-center justify-between rounded-2xl border border-border/50 bg-background/60 p-3">
+          <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("prog.remaining")}</div>
+          <div className="text-right">
+            <div className="text-xl font-semibold tabular-nums">
+              {goal && curW ? remainingKg.toFixed(1) : "—"} <span className="text-sm text-muted-foreground">kg</span>
+            </div>
+            <div className="text-[10px] text-muted-foreground">
+              {goal && curW ? t("prog.remainingK", { n: remainingKg.toFixed(1) }) : t("prog.setGoal")}
+            </div>
+          </div>
+        </div>
       </section>
 
       <div className="mt-4 grid gap-3">
