@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import {
   TrendingUp, Scale, Ruler, Camera, Flame, Activity, Footprints,
-  Moon, Timer, Trophy, Plus, X,
+  Moon, Timer, Trophy, Plus, X, ChevronRight,
 } from "lucide-react";
 import { useWeightLog, useFasting, useDayLog } from "@/lib/dashboard-prefs";
 import { useMeasurements, usePhotos, useMilestones } from "@/lib/progress";
