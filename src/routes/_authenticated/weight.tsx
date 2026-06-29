@@ -143,6 +143,7 @@ function ProgressPage() {
   const startW = weights[0]?.kg ?? 0;
   const curW = weights.at(-1)?.kg ?? 0;
   const lost = startW && curW ? startW - curW : 0;
+  const remainingKg = goal && curW ? Math.max(0, curW - goal) : 0;
   const weekVals = useMemo(() => weights.slice(-14).map((w) => w.kg), [weights]);
   const goalProgress = goal && startW ? Math.min(100, Math.max(0, ((startW - curW) / (startW - goal)) * 100)) : 0;
 
