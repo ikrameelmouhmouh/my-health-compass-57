@@ -143,6 +143,7 @@ function ProgressPage() {
   const startW = weights[0]?.kg ?? 0;
   const curW = weights.at(-1)?.kg ?? 0;
   const lost = startW && curW ? startW - curW : 0;
+  const remainingKg = goal && curW ? Math.max(0, curW - goal) : 0;
   const weekVals = useMemo(() => weights.slice(-14).map((w) => w.kg), [weights]);
   const goalProgress = goal && startW ? Math.min(100, Math.max(0, ((startW - curW) / (startW - goal)) * 100)) : 0;
 
@@ -212,6 +213,17 @@ function ProgressPage() {
           <span>{startW ? t("prog.startK", { n: startW.toFixed(1) }) : t("prog.startLabel")}</span>
           <span>{goalProgress.toFixed(0)}%</span>
           <span>{goal ? t("prog.goalK", { n: goal }) : t("prog.setGoal")}</span>
+        </div>
+        <div className="mt-4 flex items-center justify-between rounded-2xl border border-border/50 bg-background/60 p-3">
+          <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{t("prog.remaining")}</div>
+          <div className="text-right">
+            <div className="text-xl font-semibold tabular-nums">
+              {goal && curW ? remainingKg.toFixed(1) : "—"} <span className="text-sm text-muted-foreground">kg</span>
+            </div>
+            <div className="text-[10px] text-muted-foreground">
+              {goal && curW ? t("prog.remainingK", { n: remainingKg.toFixed(1) }) : t("prog.setGoal")}
+            </div>
+          </div>
         </div>
       </section>
 
