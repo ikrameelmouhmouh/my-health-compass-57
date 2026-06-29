@@ -80,7 +80,7 @@ function WorkoutHistoryPage() {
 
       <section className="mt-5 space-y-2">
         {isLoading && (
-          <p className="py-10 text-center text-sm text-muted-foreground">{t("common.loading")}</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">…</p>
         )}
         {!isLoading && sessions.length === 0 && (
           <div className="mt-6 rounded-3xl border border-dashed border-border bg-card/50 p-8 text-center">
