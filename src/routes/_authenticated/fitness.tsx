@@ -398,9 +398,16 @@ function TemplatesSection() {
           <h3 className="text-sm font-semibold">{t("fit.tpl.title")}</h3>
           <p className="text-xs text-muted-foreground">{t("fit.tpl.desc")}</p>
         </div>
-        <Button size="sm" variant="outline" onClick={() => setEditing(newTemplate())}>
-          <Plus className="mr-1 size-4" /> {t("fit.tpl.new")}
-        </Button>
+        <div className="flex items-center gap-1">
+          <Link to="/workout-history">
+            <Button size="sm" variant="ghost">
+              <Clock className="mr-1 size-4" /> {t("hist.view")}
+            </Button>
+          </Link>
+          <Button size="sm" variant="outline" onClick={() => setEditing(newTemplate())}>
+            <Plus className="mr-1 size-4" /> {t("fit.tpl.new")}
+          </Button>
+        </div>
       </div>
 
       {templates.length === 0 ? (
@@ -546,9 +553,16 @@ function ActivitiesSection() {
   const categories: ActivityCategory[] = ["Cardio", "Outdoor", "Sport", "Wellness"];
   return (
     <section className="mt-6 space-y-6">
-      <div>
-        <h2 className="font-display text-xl font-semibold tracking-tight">{t("fit.act.title")}</h2>
-        <p className="mt-1 text-xs text-muted-foreground">{t("fit.act.subtitle")}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="font-display text-xl font-semibold tracking-tight">{t("fit.act.title")}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">{t("fit.act.subtitle")}</p>
+        </div>
+        <Link to="/activity-history">
+          <Button size="sm" variant="ghost">
+            <Clock className="mr-1 size-4" /> {t("hist.view")}
+          </Button>
+        </Link>
       </div>
       {categories.map((cat) => {
         const items = ACTIVITIES.filter((a) => a.category === cat);

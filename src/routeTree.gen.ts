@@ -16,6 +16,8 @@ import { Route as IntroRouteImport } from './routes/intro'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as AuthenticatedWorkoutHistoryRouteImport } from './routes/_authenticated/workout-history'
+import { Route as AuthenticatedWeightHistoryRouteImport } from './routes/_authenticated/weight-history'
 import { Route as AuthenticatedWeightRouteImport } from './routes/_authenticated/weight'
 import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated/social'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -27,6 +29,7 @@ import { Route as AuthenticatedFitnessRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticated/fasting'
 import { Route as AuthenticatedBadgesRouteImport } from './routes/_authenticated/badges'
 import { Route as AuthenticatedAiCoachRouteImport } from './routes/_authenticated/ai-coach'
+import { Route as AuthenticatedActivityHistoryRouteImport } from './routes/_authenticated/activity-history'
 import { Route as AuthenticatedWorkoutSessionTemplateIdRouteImport } from './routes/_authenticated/workout-session.$templateId'
 import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
 import { Route as AuthenticatedActivitySessionActivityIdRouteImport } from './routes/_authenticated/activity-session.$activityId'
@@ -69,6 +72,18 @@ const ApiChatRoute = ApiChatRouteImport.update({
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWorkoutHistoryRoute =
+  AuthenticatedWorkoutHistoryRouteImport.update({
+    id: '/workout-history',
+    path: '/workout-history',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedWeightHistoryRoute =
+  AuthenticatedWeightHistoryRouteImport.update({
+    id: '/weight-history',
+    path: '/weight-history',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedWeightRoute = AuthenticatedWeightRouteImport.update({
   id: '/weight',
   path: '/weight',
@@ -124,6 +139,12 @@ const AuthenticatedAiCoachRoute = AuthenticatedAiCoachRouteImport.update({
   path: '/ai-coach',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedActivityHistoryRoute =
+  AuthenticatedActivityHistoryRouteImport.update({
+    id: '/activity-history',
+    path: '/activity-history',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedWorkoutSessionTemplateIdRoute =
   AuthenticatedWorkoutSessionTemplateIdRouteImport.update({
     id: '/workout-session/$templateId',
@@ -172,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/activity-history': typeof AuthenticatedActivityHistoryRoute
   '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/badges': typeof AuthenticatedBadgesRoute
   '/fasting': typeof AuthenticatedFastingRoute
@@ -183,6 +205,8 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
+  '/weight-history': typeof AuthenticatedWeightHistoryRoute
+  '/workout-history': typeof AuthenticatedWorkoutHistoryRoute
   '/api/chat': typeof ApiChatRoute
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
@@ -198,6 +222,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/activity-history': typeof AuthenticatedActivityHistoryRoute
   '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/badges': typeof AuthenticatedBadgesRoute
   '/fasting': typeof AuthenticatedFastingRoute
@@ -209,6 +234,8 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/social': typeof AuthenticatedSocialRoute
   '/weight': typeof AuthenticatedWeightRoute
+  '/weight-history': typeof AuthenticatedWeightHistoryRoute
+  '/workout-history': typeof AuthenticatedWorkoutHistoryRoute
   '/api/chat': typeof ApiChatRoute
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
@@ -226,6 +253,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/_authenticated/activity-history': typeof AuthenticatedActivityHistoryRoute
   '/_authenticated/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/_authenticated/badges': typeof AuthenticatedBadgesRoute
   '/_authenticated/fasting': typeof AuthenticatedFastingRoute
@@ -237,6 +265,8 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/social': typeof AuthenticatedSocialRoute
   '/_authenticated/weight': typeof AuthenticatedWeightRoute
+  '/_authenticated/weight-history': typeof AuthenticatedWeightHistoryRoute
+  '/_authenticated/workout-history': typeof AuthenticatedWorkoutHistoryRoute
   '/api/chat': typeof ApiChatRoute
   '/_authenticated/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
@@ -254,6 +284,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/welcome'
+    | '/activity-history'
     | '/ai-coach'
     | '/badges'
     | '/fasting'
@@ -265,6 +296,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/social'
     | '/weight'
+    | '/weight-history'
+    | '/workout-history'
     | '/api/chat'
     | '/activity-session/$activityId'
     | '/ai-coach/$threadId'
@@ -280,6 +313,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/welcome'
+    | '/activity-history'
     | '/ai-coach'
     | '/badges'
     | '/fasting'
@@ -291,6 +325,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/social'
     | '/weight'
+    | '/weight-history'
+    | '/workout-history'
     | '/api/chat'
     | '/activity-session/$activityId'
     | '/ai-coach/$threadId'
@@ -307,6 +343,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/welcome'
+    | '/_authenticated/activity-history'
     | '/_authenticated/ai-coach'
     | '/_authenticated/badges'
     | '/_authenticated/fasting'
@@ -318,6 +355,8 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/social'
     | '/_authenticated/weight'
+    | '/_authenticated/weight-history'
+    | '/_authenticated/workout-history'
     | '/api/chat'
     | '/_authenticated/activity-session/$activityId'
     | '/_authenticated/ai-coach/$threadId'
@@ -392,6 +431,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/chat'
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/workout-history': {
+      id: '/_authenticated/workout-history'
+      path: '/workout-history'
+      fullPath: '/workout-history'
+      preLoaderRoute: typeof AuthenticatedWorkoutHistoryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/weight-history': {
+      id: '/_authenticated/weight-history'
+      path: '/weight-history'
+      fullPath: '/weight-history'
+      preLoaderRoute: typeof AuthenticatedWeightHistoryRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/weight': {
       id: '/_authenticated/weight'
@@ -470,6 +523,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiCoachRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/activity-history': {
+      id: '/_authenticated/activity-history'
+      path: '/activity-history'
+      fullPath: '/activity-history'
+      preLoaderRoute: typeof AuthenticatedActivityHistoryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/workout-session/$templateId': {
       id: '/_authenticated/workout-session/$templateId'
       path: '/workout-session/$templateId'
@@ -534,6 +594,7 @@ const AuthenticatedAiCoachRouteWithChildren =
   AuthenticatedAiCoachRoute._addFileChildren(AuthenticatedAiCoachRouteChildren)
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedActivityHistoryRoute: typeof AuthenticatedActivityHistoryRoute
   AuthenticatedAiCoachRoute: typeof AuthenticatedAiCoachRouteWithChildren
   AuthenticatedBadgesRoute: typeof AuthenticatedBadgesRoute
   AuthenticatedFastingRoute: typeof AuthenticatedFastingRoute
@@ -545,11 +606,14 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSocialRoute: typeof AuthenticatedSocialRoute
   AuthenticatedWeightRoute: typeof AuthenticatedWeightRoute
+  AuthenticatedWeightHistoryRoute: typeof AuthenticatedWeightHistoryRoute
+  AuthenticatedWorkoutHistoryRoute: typeof AuthenticatedWorkoutHistoryRoute
   AuthenticatedActivitySessionActivityIdRoute: typeof AuthenticatedActivitySessionActivityIdRoute
   AuthenticatedWorkoutSessionTemplateIdRoute: typeof AuthenticatedWorkoutSessionTemplateIdRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedActivityHistoryRoute: AuthenticatedActivityHistoryRoute,
   AuthenticatedAiCoachRoute: AuthenticatedAiCoachRouteWithChildren,
   AuthenticatedBadgesRoute: AuthenticatedBadgesRoute,
   AuthenticatedFastingRoute: AuthenticatedFastingRoute,
@@ -561,6 +625,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSocialRoute: AuthenticatedSocialRoute,
   AuthenticatedWeightRoute: AuthenticatedWeightRoute,
+  AuthenticatedWeightHistoryRoute: AuthenticatedWeightHistoryRoute,
+  AuthenticatedWorkoutHistoryRoute: AuthenticatedWorkoutHistoryRoute,
   AuthenticatedActivitySessionActivityIdRoute:
     AuthenticatedActivitySessionActivityIdRoute,
   AuthenticatedWorkoutSessionTemplateIdRoute:

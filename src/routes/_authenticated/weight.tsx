@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import {
   TrendingUp, Scale, Ruler, Camera, Flame, Activity, Footprints,
-  Moon, Timer, Trophy, Plus, X,
+  Moon, Timer, Trophy, Plus, X, ChevronRight,
 } from "lucide-react";
 import { useWeightLog, useFasting, useDayLog } from "@/lib/dashboard-prefs";
 import { useMeasurements, usePhotos, useMilestones } from "@/lib/progress";
@@ -245,6 +245,15 @@ function ProgressPage() {
               tone={lost > 0 ? "good" : "default"}
             />
           </div>
+          {weights.length > 0 && (
+            <Link
+              to="/weight-history"
+              className="mt-3 flex items-center justify-between rounded-2xl bg-accent/40 px-3 py-2 text-[12px] font-medium text-foreground ios-press"
+            >
+              <span>{t("hist.weight")} ({weights.length})</span>
+              <ChevronRight className="size-4 text-muted-foreground rtl:rotate-180" />
+            </Link>
+          )}
         </Card>
 
         {/* Body measurements */}
