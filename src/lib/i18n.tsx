@@ -18,7 +18,7 @@ type Translations = Record<Language, Dict>;
 const translations: Translations = {
   en: {
     "app.name": "Alyva",
-    "app.tagline": "Nutrition, fasting and fitness — together.",
+    "app.tagline": "Alive · You · Vitality",
 
     "lang.title": "Choose your language",
     "lang.subtitle": "You can change this later in Settings.",
@@ -935,7 +935,7 @@ const translations: Translations = {
   },
   nl: {
     "app.name": "Alyva",
-    "app.tagline": "Voeding, vasten en fitness — samen.",
+    "app.tagline": "Alive · You · Vitality",
     "lang.title": "Kies je taal",
     "lang.subtitle": "Je kunt dit later wijzigen in Instellingen.",
     "lang.continue": "Doorgaan",
@@ -1838,7 +1838,7 @@ const translations: Translations = {
   },
   ar: {
     "app.name": "فيتا",
-    "app.tagline": "التغذية والصيام واللياقة — معًا.",
+    "app.tagline": "Alive · You · Vitality",
     "lang.title": "اختر لغتك",
     "lang.subtitle": "يمكنك تغيير ذلك لاحقًا في الإعدادات.",
     "lang.continue": "متابعة",
@@ -2741,7 +2741,7 @@ const translations: Translations = {
   },
   fr: {
     "app.name": "Alyva",
-    "app.tagline": "Nutrition, jeûne et fitness — ensemble.",
+    "app.tagline": "Alive · You · Vitality",
     "lang.title": "Choisissez votre langue",
     "lang.subtitle": "Vous pourrez la modifier plus tard dans les Paramètres.",
     "lang.continue": "Continuer",
@@ -3644,7 +3644,7 @@ const translations: Translations = {
   },
   de: {
     "app.name": "Alyva",
-    "app.tagline": "Ernährung, Fasten und Fitness — vereint.",
+    "app.tagline": "Alive · You · Vitality",
     "lang.title": "Wähle deine Sprache",
     "lang.subtitle": "Du kannst dies später in den Einstellungen ändern.",
     "lang.continue": "Weiter",
@@ -4547,7 +4547,7 @@ const translations: Translations = {
   },
   es: {
     "app.name": "Alyva",
-    "app.tagline": "Nutrición, ayuno y fitness — juntos.",
+    "app.tagline": "Alive · You · Vitality",
     "lang.title": "Elige tu idioma",
     "lang.subtitle": "Puedes cambiarlo más tarde en Ajustes.",
     "lang.continue": "Continuar",
