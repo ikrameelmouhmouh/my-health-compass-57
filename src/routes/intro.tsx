@@ -46,7 +46,7 @@ function Intro() {
           </div>
           <div className="flex flex-col leading-tight">
             <span className="font-display text-sm font-semibold tracking-tight">{t("app.name")}</span>
-            <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-brand/80">Alive · You · Vitality</span>
+            <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-brand/80">{t("app.tagline")}</span>
           </div>
         </div>
 

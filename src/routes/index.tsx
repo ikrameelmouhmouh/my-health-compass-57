@@ -46,7 +46,7 @@ function LanguagePicker() {
         </div>
         <div className="flex flex-col leading-tight">
           <span className="font-display text-base font-semibold tracking-tight">{t("app.name")}</span>
-          <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-brand/80">Alive · You · Vitality</span>
+          <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-brand/80">{t("app.tagline")}</span>
         </div>
       </div>
 
