@@ -15,6 +15,7 @@ function Intro() {
   const [step, setStep] = useState(0);
 
   const slides = [
+    { icon: null,     title: t("intro.s0.title"), desc: t("intro.s0.desc"), brand: true },
     { icon: Sparkles, title: t("intro.s1.title"), desc: t("intro.s1.desc") },
     { icon: Target,   title: t("intro.s2.title"), desc: t("intro.s2.desc") },
     { icon: Heart,    title: t("intro.s3.title"), desc: t("intro.s3.desc") },
@@ -22,7 +23,8 @@ function Intro() {
   ];
 
   const isLast = step === slides.length - 1;
-  const Icon = slides[step].icon;
+  const current = slides[step];
+  const Icon = current.icon;
 
   function finish() {
     try { localStorage.setItem("vita.intro_done", "1"); } catch {}
