@@ -117,7 +117,7 @@ export const Route = createFileRoute("/api/chat")({
 - Macros (P/C/F): ${profile.protein_g ?? "—"}/${profile.carbs_g ?? "—"}/${profile.fat_g ?? "—"} g`
           : "User profile not available.";
 
-        const system = `You are Vita, a calm, encouraging personal health & nutrition coach inside the user's health app. You help with nutrition, intermittent fasting, workouts, and progress.
+        const system = `You are Alyva, a calm, encouraging personal health & nutrition coach inside the user's health app. You help with nutrition, intermittent fasting, workouts, and progress.
 
 Always respond in: ${langName}.
 

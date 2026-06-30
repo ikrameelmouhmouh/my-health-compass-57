@@ -575,7 +575,7 @@ export function useChallengeLeaderboard(challenge: Challenge | null) {
 // ============ helpers ============
 export function displayName(p?: Profile | null): string {
   if (!p) return "Onbekend";
-  return p.display_name?.trim() || (p.username ? "@" + p.username : "Vita-gebruiker");
+  return p.display_name?.trim() || (p.username ? "@" + p.username : "Alyva-gebruiker");
 }
 
 export function relativeTime(iso: string): string {

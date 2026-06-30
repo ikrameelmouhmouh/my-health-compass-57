@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// Daily Aura tip push. Sends a generic "open Vita for today's tip" push to
+// Daily Aura tip push. Sends a generic "open Alyva for today's tip" push to
 // every subscription with enabled_streak. The actual personalized tip is
 // computed client-side when the user opens the app (ensureTodayAura) and
 // shown in the in-app notification inbox.
@@ -49,7 +49,7 @@ export const Route = createFileRoute("/api/public/hooks/send-aura-tips")({
           const aura = auraByUser.get(sub.user_id);
           const payload = JSON.stringify({
             title: aura?.title || "Je dagelijkse Aura-tip",
-            body: aura?.body || "Open Vita voor je persoonlijke tip van vandaag.",
+            body: aura?.body || "Open Alyva voor je persoonlijke tip van vandaag.",
             url: "/profile",
             tag: "aura-daily",
           });

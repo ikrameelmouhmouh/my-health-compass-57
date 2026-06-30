@@ -9,7 +9,7 @@ import { formatTimer } from "@/lib/activity-session";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/_authenticated/activity-history")({
-  head: () => ({ meta: [{ title: "Activity history — Vita" }] }),
+  head: () => ({ meta: [{ title: "Activity history — Alyva" }] }),
   component: ActivityHistoryPage,
 });
 

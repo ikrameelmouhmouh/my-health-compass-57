@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { useWeightLog } from "@/lib/dashboard-prefs";
 
 export const Route = createFileRoute("/_authenticated/weight-history")({
-  head: () => ({ meta: [{ title: "Weight history — Vita" }] }),
+  head: () => ({ meta: [{ title: "Weight history — Alyva" }] }),
   component: WeightHistoryPage,
 });
 

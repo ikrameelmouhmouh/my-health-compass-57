@@ -9,7 +9,7 @@ import { formatDuration } from "@/lib/workout-session";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export const Route = createFileRoute("/_authenticated/workout-history")({
-  head: () => ({ meta: [{ title: "Workout history — Vita" }] }),
+  head: () => ({ meta: [{ title: "Workout history — Alyva" }] }),
   component: WorkoutHistoryPage,
 });
 

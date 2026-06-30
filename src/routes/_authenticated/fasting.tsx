@@ -15,7 +15,7 @@ import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
 
 export const Route = createFileRoute("/_authenticated/fasting")({
-  head: () => ({ meta: [{ title: "Fasting — Vita" }] }),
+  head: () => ({ meta: [{ title: "Fasting — Alyva" }] }),
   component: FastingPage,
 });
 

@@ -7,9 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vita — Your personal health plan" },
+      { title: "Alyva — Your personal health plan" },
       { name: "description", content: "Nutrition, intermittent fasting, workouts and progress — all in one calm, personalized app." },
-      { property: "og:title", content: "Vita — Your personal health plan" },
+      { property: "og:title", content: "Alyva — Your personal health plan" },
       { property: "og:description", content: "Nutrition, fasting, workouts and progress in one app." },
     ],
   }),
@@ -44,8 +44,12 @@ function LanguagePicker() {
         <div className="grid size-9 place-items-center rounded-2xl bg-brand/15">
           <span className="size-2.5 rounded-full bg-brand" />
         </div>
-        <span className="font-display text-base font-semibold tracking-tight">{t("app.name")}</span>
+        <div className="flex flex-col leading-tight">
+          <span className="font-display text-base font-semibold tracking-tight">{t("app.name")}</span>
+          <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-brand/80">Alive · You · Vitality</span>
+        </div>
       </div>
+
 
       <div className="mt-10">
         <h1 className="font-display text-3xl font-semibold tracking-tight text-balance">{t("lang.title")}</h1>

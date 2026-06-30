@@ -21,7 +21,7 @@ import {
 import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/social")({
-  head: () => ({ meta: [{ title: "Sociaal — Vita" }] }),
+  head: () => ({ meta: [{ title: "Sociaal — Alyva" }] }),
   component: SocialPage,
 });
 

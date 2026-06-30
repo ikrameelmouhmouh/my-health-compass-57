@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/welcome")({
   head: () => ({
     meta: [
-      { title: "Your personal health plan starts here — Vita" },
+      { title: "Your personal health plan starts here — Alyva" },
       { name: "description", content: "Reach your goals through nutrition, fasting and fitness — all in one app." },
     ],
   }),
@@ -45,8 +45,12 @@ function Welcome() {
         <div className="grid size-9 place-items-center rounded-2xl bg-brand/15">
           <span className="size-2.5 rounded-full bg-brand" />
         </div>
-        <span className="font-display text-base font-semibold tracking-tight">{t("app.name")}</span>
+        <div className="flex flex-col leading-tight">
+          <span className="font-display text-base font-semibold tracking-tight">{t("app.name")}</span>
+          <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-brand/80">Alive · You · Vitality</span>
+        </div>
       </header>
+
 
       <section className="relative mt-16 flex-1">
         <h1 className="font-display text-[40px] font-semibold leading-[1.05] tracking-tight text-balance">
