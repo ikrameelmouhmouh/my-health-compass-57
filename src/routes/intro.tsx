@@ -15,6 +15,7 @@ function Intro() {
   const [step, setStep] = useState(0);
 
   const slides = [
+    { icon: null,     title: t("intro.s0.title"), desc: t("intro.s0.desc"), brand: true },
     { icon: Sparkles, title: t("intro.s1.title"), desc: t("intro.s1.desc") },
     { icon: Target,   title: t("intro.s2.title"), desc: t("intro.s2.desc") },
     { icon: Heart,    title: t("intro.s3.title"), desc: t("intro.s3.desc") },
@@ -22,7 +23,8 @@ function Intro() {
   ];
 
   const isLast = step === slides.length - 1;
-  const Icon = slides[step].icon;
+  const current = slides[step];
+  const Icon = current.icon;
 
   function finish() {
     try { localStorage.setItem("vita.intro_done", "1"); } catch {}
@@ -58,10 +60,24 @@ function Intro() {
       <section className="relative mt-12 flex-1">
         {/* Illustration */}
         <div className="relative mx-auto flex h-56 w-56 items-center justify-center">
-          <div className="absolute inset-0 rounded-full bg-brand/15 blur-2xl" />
-          <div className="relative grid size-40 place-items-center rounded-[2rem] bg-gradient-to-br from-brand/80 to-brand/40 shadow-[0_30px_60px_-30px_color-mix(in_oklab,var(--brand)_55%,transparent)]">
-            <Icon className="size-16 text-brand-foreground" strokeWidth={1.5} />
-          </div>
+          <div className="absolute inset-0 rounded-full bg-brand/15 blur-3xl" />
+          {current.brand ? (
+            <div className="relative flex flex-col items-center">
+              <div className="font-display text-[140px] leading-none font-semibold text-brand" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
+                A
+              </div>
+              <div className="mt-4 font-display text-2xl font-medium tracking-[0.35em] text-foreground">
+                ALYVA
+              </div>
+              <div className="mt-2 text-[10px] font-medium uppercase tracking-[0.3em] text-brand/80">
+                Alive · You · Vitality
+              </div>
+            </div>
+          ) : Icon ? (
+            <div className="relative grid size-40 place-items-center rounded-[2rem] bg-gradient-to-br from-brand/80 to-brand/40 shadow-[0_30px_60px_-30px_color-mix(in_oklab,var(--brand)_55%,transparent)]">
+              <Icon className="size-16 text-brand-foreground" strokeWidth={1.5} />
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-10 text-center">
