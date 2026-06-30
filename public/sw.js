@@ -1,11 +1,11 @@
-// Vita service worker — push notifications + installability.
+// Alyva service worker — push notifications + installability.
 // Intentionally minimal: no app-shell caching to avoid stale-content issues.
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
 self.addEventListener("push", (event) => {
-  let payload = { title: "Vita", body: "Tijd om verder te gaan.", url: "/profile" };
+  let payload = { title: "Alyva", body: "Tijd om verder te gaan.", url: "/profile" };
   try {
     if (event.data) {
       const parsed = event.data.json();

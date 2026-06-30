@@ -7,9 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vita — Your personal health plan" },
+      { title: "Alyva — Your personal health plan" },
       { name: "description", content: "Nutrition, intermittent fasting, workouts and progress — all in one calm, personalized app." },
-      { property: "og:title", content: "Vita — Your personal health plan" },
+      { property: "og:title", content: "Alyva — Your personal health plan" },
       { property: "og:description", content: "Nutrition, fasting, workouts and progress in one app." },
     ],
   }),

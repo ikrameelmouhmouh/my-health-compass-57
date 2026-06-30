@@ -15,7 +15,7 @@ import {
 import { usePremium } from "@/hooks/use-premium";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  head: () => ({ meta: [{ title: "Settings — Vita" }] }),
+  head: () => ({ meta: [{ title: "Settings — Alyva" }] }),
   component: SettingsPage,
 });
 
@@ -75,7 +75,7 @@ function SettingsPage() {
               <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1">
                 <span className={`size-1.5 rounded-full ${isPremium ? "bg-brand" : "bg-muted-foreground"}`} />
                 <span className="font-display text-[10px] font-semibold uppercase tracking-wider">
-                  {isPremium ? `Vita ${t("profile.plus")}` : t("profile.free")}
+                  {isPremium ? `Alyva ${t("profile.plus")}` : t("profile.free")}
                 </span>
               </div>
               <p className="mt-3 font-display text-lg font-semibold leading-tight tracking-tight">

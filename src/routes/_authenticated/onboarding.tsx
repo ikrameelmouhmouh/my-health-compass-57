@@ -13,7 +13,7 @@ import {
 import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
-  head: () => ({ meta: [{ title: "Build your plan — Vita" }] }),
+  head: () => ({ meta: [{ title: "Build your plan — Alyva" }] }),
   validateSearch: (s: Record<string, unknown>) => ({
     recalc: s.recalc === "1" || s.recalc === 1 || s.recalc === true ? 1 : undefined,
   }),

@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Sparkles, Target, Heart, Map } from "lucide-reac
 import { useT, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/intro")({
-  head: () => ({ meta: [{ title: "Welcome — Vita" }] }),
+  head: () => ({ meta: [{ title: "Welcome — Alyva" }] }),
   component: Intro,
 });
 

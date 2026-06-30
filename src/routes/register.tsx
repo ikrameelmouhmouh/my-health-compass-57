@@ -9,8 +9,8 @@ import { useT, useI18n } from "@/lib/i18n";
 export const Route = createFileRoute("/register")({
   head: () => ({
     meta: [
-      { title: "Create your account — Vita" },
-      { name: "description", content: "Create your Vita account to start your personalized health plan." },
+      { title: "Create your account — Alyva" },
+      { name: "description", content: "Create your Alyva account to start your personalized health plan." },
     ],
   }),
   component: Register,

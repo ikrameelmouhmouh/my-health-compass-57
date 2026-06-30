@@ -33,7 +33,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ensureTodayAura } from "@/lib/notifications.functions";
 
 export const Route = createFileRoute("/_authenticated/profile")({
-  head: () => ({ meta: [{ title: "Today — Vita" }] }),
+  head: () => ({ meta: [{ title: "Today — Alyva" }] }),
   component: Profile,
 });
 
@@ -368,7 +368,7 @@ function Profile() {
         <div className="mt-3 flex items-center px-1">
           <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1">
             <span className="size-1.5 rounded-full bg-brand" />
-            <span className="text-[12px] font-semibold uppercase tracking-wider">Vita {t("profile.plus")}</span>
+            <span className="text-[12px] font-semibold uppercase tracking-wider">Alyva {t("profile.plus")}</span>
           </div>
         </div>
       )}

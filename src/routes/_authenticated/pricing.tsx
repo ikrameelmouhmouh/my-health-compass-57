@@ -13,7 +13,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/pricing")({
   component: PricingPage,
-  head: () => ({ meta: [{ title: "Vita Pro — Upgrade je fitness reis" }] }),
+  head: () => ({ meta: [{ title: "Alyva Pro — Upgrade je fitness reis" }] }),
 });
 
 const TOKEN = import.meta.env.VITE_PAYMENTS_CLIENT_TOKEN as string | undefined;

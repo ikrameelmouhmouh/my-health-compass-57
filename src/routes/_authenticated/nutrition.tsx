@@ -17,7 +17,7 @@ import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
 
 export const Route = createFileRoute("/_authenticated/nutrition")({
-  head: () => ({ meta: [{ title: "Nutrition — Vita" }] }),
+  head: () => ({ meta: [{ title: "Nutrition — Alyva" }] }),
   component: Nutrition,
 });
 

@@ -229,7 +229,7 @@ function AddWorkoutButton({
   );
 }
 
-function VitaAvatar({ size = 64 }: { size?: number }) {
+function AlyvaAvatar({ size = 64 }: { size?: number }) {
   return (
     <div
       className="grid place-items-center rounded-full bg-gradient-to-br from-brand/40 to-brand/10 shadow-[0_0_60px_-10px_var(--brand)]"
@@ -366,7 +366,7 @@ function GreetingPanel({
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6 pb-4">
-      <VitaAvatar size={88} />
+      <AlyvaAvatar size={88} />
       <p className="mt-6 text-center font-display text-xl font-semibold tracking-tight text-foreground">
         {name ? t("chat.welcome", { name }) : t("chat.welcome_anon")}
       </p>
@@ -399,7 +399,7 @@ function ChatHeader({
             </button>
           }
         />
-        <div className="min-w-0 flex-1 text-center font-display text-sm font-semibold">Vita</div>
+        <div className="min-w-0 flex-1 text-center font-display text-sm font-semibold">Alyva</div>
         {showNewLink ? (
           <button
             type="button"

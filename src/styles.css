@@ -62,7 +62,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0 0 0);
 
-  /* Vital forest green brand (chosen direction) */
+  /* Alyval forest green brand (chosen direction) */
   --primary: oklch(0.39 0.09 142);             /* #2d5a27 forest green */
   --primary-foreground: oklch(1 0 0);
 
