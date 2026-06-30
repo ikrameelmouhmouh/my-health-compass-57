@@ -39,6 +39,17 @@ function Intro() {
         >
           <ArrowLeft className="size-4 rtl:rotate-180" />
         </button>
+
+        <div className="flex items-center gap-2">
+          <div className="grid size-8 place-items-center rounded-2xl bg-brand/15">
+            <span className="size-2 rounded-full bg-brand" />
+          </div>
+          <div className="flex flex-col leading-tight">
+            <span className="font-display text-sm font-semibold tracking-tight">{t("app.name")}</span>
+            <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-brand/80">Alive · You · Vitality</span>
+          </div>
+        </div>
+
         <button onClick={finish} className="text-sm font-medium text-muted-foreground">
           {t("intro.skip")}
         </button>
