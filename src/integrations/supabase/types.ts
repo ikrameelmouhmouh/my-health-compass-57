@@ -743,7 +743,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          bio: string | null
+          display_name: string | null
+          id: string | null
+          username: string | null
+        }
+        Insert: {
+          bio?: string | null
+          display_name?: string | null
+          id?: string | null
+          username?: string | null
+        }
+        Update: {
+          bio?: string | null
+          display_name?: string | null
+          id?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       are_friends: { Args: { _a: string; _b: string }; Returns: boolean }

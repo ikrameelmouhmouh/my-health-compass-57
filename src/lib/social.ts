@@ -95,13 +95,13 @@ export function useFriendSearch(query: string) {
     queryFn: async () => {
       const q = query.trim();
       const { data, error } = await supabase
-        .from("profiles")
+        .from("public_profiles" as any)
         .select("id, display_name, username")
         .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
         .neq("id", user!.id)
         .limit(20);
       if (error) throw error;
-      return (data ?? []) as Profile[];
+      return ((data ?? []) as unknown) as Profile[];
     },
   });
 }
@@ -154,7 +154,7 @@ export function useFriends() {
     enabled: otherIds.length > 0,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("profiles")
+        .from("public_profiles" as any)
         .select("id, display_name, username")
         .in("id", otherIds);
       if (error) throw error;
@@ -275,7 +275,7 @@ export function useFeed() {
     enabled: authorIds.length > 0,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("profiles")
+        .from("public_profiles" as any)
         .select("id, display_name, username")
         .in("id", authorIds);
       if (error) throw error;
@@ -516,7 +516,7 @@ export function useChallengeLeaderboard(challenge: Challenge | null) {
       if (userIds.length === 0) return [];
 
       const { data: profiles } = await supabase
-        .from("profiles")
+        .from("public_profiles" as any)
         .select("id, display_name, username")
         .in("id", userIds);
       const profMap: Record<string, Profile> = {};
