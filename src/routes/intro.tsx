@@ -68,14 +68,14 @@ function Intro() {
           <div className="absolute inset-0 rounded-full bg-brand/15 blur-3xl" />
           {current.brand ? (
             <div className="relative flex flex-col items-center">
-              <div className="font-display text-[140px] leading-none font-semibold text-brand" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
-                A
-              </div>
               <div
-                className="mt-6 text-center font-display text-[28px] font-medium tracking-[0.18em] text-foreground"
+                className="text-center font-display text-[28px] font-medium tracking-[0.18em] text-foreground"
                 style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}
               >
                 {slides[step].title}
+              </div>
+              <div className="font-display text-[140px] leading-none font-semibold text-brand" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
+                A
               </div>
               <div className="mt-3 text-[10px] font-medium uppercase tracking-[0.3em] text-brand/80">
                 Alive · You · Vitality
