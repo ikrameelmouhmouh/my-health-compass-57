@@ -750,18 +750,6 @@ export type Database = {
           id: string | null
           username: string | null
         }
-        Insert: {
-          bio?: string | null
-          display_name?: string | null
-          id?: string | null
-          username?: string | null
-        }
-        Update: {
-          bio?: string | null
-          display_name?: string | null
-          id?: string | null
-          username?: string | null
-        }
         Relationships: []
       }
     }
@@ -774,6 +762,15 @@ export type Database = {
       is_challenge_participant: {
         Args: { _cid: string; _uid: string }
         Returns: boolean
+      }
+      public_profiles_fn: {
+        Args: never
+        Returns: {
+          bio: string
+          display_name: string
+          id: string
+          username: string
+        }[]
       }
     }
     Enums: {
