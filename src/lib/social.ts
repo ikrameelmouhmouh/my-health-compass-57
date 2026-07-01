@@ -101,7 +101,7 @@ export function useFriendSearch(query: string) {
         .neq("id", user!.id)
         .limit(20);
       if (error) throw error;
-      return (data ?? []) as Profile[];
+      return ((data ?? []) as unknown) as Profile[];
     },
   });
 }
