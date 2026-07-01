@@ -95,7 +95,7 @@ export function useFriendSearch(query: string) {
     queryFn: async () => {
       const q = query.trim();
       const { data, error } = await supabase
-        .from("profiles")
+        .from("public_profiles" as any)
         .select("id, display_name, username")
         .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
         .neq("id", user!.id)
