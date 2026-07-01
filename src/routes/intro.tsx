@@ -62,7 +62,7 @@ function Intro() {
       </div>
 
 
-      <section className="relative mt-12 flex-1">
+      <section className={`relative flex-1 ${step === 0 ? "flex flex-col items-center justify-center" : "mt-12"}`}>
         {/* Illustration */}
         <div className="relative mx-auto flex h-56 w-56 items-center justify-center">
           <div className="absolute inset-0 rounded-full bg-brand/15 blur-3xl" />
