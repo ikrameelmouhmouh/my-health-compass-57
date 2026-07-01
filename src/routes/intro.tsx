@@ -42,20 +42,25 @@ function Intro() {
           <ArrowLeft className="size-4 rtl:rotate-180" />
         </button>
 
-        <div className="flex items-center gap-2">
-          <div className="grid size-8 place-items-center rounded-2xl bg-brand/15">
-            <span className="size-2 rounded-full bg-brand" />
+        {step === 0 ? (
+          <div />
+        ) : (
+          <div className="flex items-center gap-2">
+            <div className="grid size-8 place-items-center rounded-2xl bg-brand/15">
+              <span className="size-2 rounded-full bg-brand" />
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="font-display text-sm font-semibold tracking-tight">{t("app.name")}</span>
+              <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-brand/80">{t("app.tagline")}</span>
+            </div>
           </div>
-          <div className="flex flex-col leading-tight">
-            <span className="font-display text-sm font-semibold tracking-tight">{t("app.name")}</span>
-            <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-brand/80">{t("app.tagline")}</span>
-          </div>
-        </div>
+        )}
 
         <button onClick={finish} className="text-sm font-medium text-muted-foreground">
           {t("intro.skip")}
         </button>
       </div>
+
 
       <section className="relative mt-12 flex-1">
         {/* Illustration */}
@@ -66,10 +71,13 @@ function Intro() {
               <div className="font-display text-[140px] leading-none font-semibold text-brand" style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}>
                 A
               </div>
-              <div className="mt-4 font-display text-2xl font-medium tracking-[0.35em] text-foreground">
-                ALYVA
+              <div
+                className="mt-6 text-center font-display text-[28px] font-medium tracking-[0.18em] text-foreground"
+                style={{ fontFamily: "'Cormorant Garamond', 'Playfair Display', Georgia, serif" }}
+              >
+                {slides[step].title}
               </div>
-              <div className="mt-2 text-[10px] font-medium uppercase tracking-[0.3em] text-brand/80">
+              <div className="mt-3 text-[10px] font-medium uppercase tracking-[0.3em] text-brand/80">
                 Alive · You · Vitality
               </div>
             </div>
@@ -80,14 +88,17 @@ function Intro() {
           ) : null}
         </div>
 
-        <div className="mt-10 text-center">
-          <h1 key={step} className="animate-in fade-in slide-in-from-bottom-2 duration-500 font-display text-3xl font-semibold tracking-tight text-balance">
-            {slides[step].title}
-          </h1>
-          <p key={`d-${step}`} className="animate-in fade-in slide-in-from-bottom-3 duration-700 mx-auto mt-4 max-w-[36ch] text-pretty text-[15px] leading-relaxed text-muted-foreground">
-            {slides[step].desc}
-          </p>
-        </div>
+        {!current.brand && (
+          <div className="mt-10 text-center">
+            <h1 key={step} className="animate-in fade-in slide-in-from-bottom-2 duration-500 font-display text-3xl font-semibold tracking-tight text-balance">
+              {slides[step].title}
+            </h1>
+            <p key={`d-${step}`} className="animate-in fade-in slide-in-from-bottom-3 duration-700 mx-auto mt-4 max-w-[36ch] text-pretty text-[15px] leading-relaxed text-muted-foreground">
+              {slides[step].desc}
+            </p>
+          </div>
+        )}
+
 
         {/* Dots */}
         <div className="mt-10 flex items-center justify-center gap-2">
