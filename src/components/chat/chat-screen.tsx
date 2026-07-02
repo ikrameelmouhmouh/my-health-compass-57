@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
 import { useT, useI18n } from "@/lib/i18n";
-import { getThreadMessages } from "@/lib/chat.functions";
+import { getThreadMessages, createThread } from "@/lib/chat.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
 import { extractWorkoutTemplates } from "@/lib/coach-extract.functions";
