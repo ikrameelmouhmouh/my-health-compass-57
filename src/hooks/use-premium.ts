@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { getStripeEnvironment } from "@/lib/stripe";
 
 export type PremiumOverride = "premium" | "free" | null;
 const STORAGE_KEY = "vita.premiumOverride";
@@ -17,24 +18,33 @@ function readOverride(): PremiumOverride {
 
 export function usePremium() {
   const { user } = useAuth();
+  const env = getStripeEnvironment();
 
   const { data: sub } = useQuery({
-    queryKey: ["subscription", user?.id],
+    queryKey: ["subscription", user?.id, env],
     enabled: !!user,
     queryFn: async () => {
       const { data } = await supabase
         .from("subscriptions")
         .select("*")
         .eq("user_id", user!.id)
+        .eq("environment", env)
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
       return data;
     },
   });
 
+  const now = Date.now();
   const realIsPremium =
     !!sub &&
-    ["active", "trialing", "past_due"].includes(sub.status) &&
-    (!sub.current_period_end || new Date(sub.current_period_end).getTime() > Date.now());
+    ((["active", "trialing", "past_due"].includes(sub.status) &&
+      (!sub.current_period_end || new Date(sub.current_period_end).getTime() > now)) ||
+      (sub.status === "canceled" &&
+        !!sub.current_period_end &&
+        new Date(sub.current_period_end).getTime() > now));
+
 
   const [override, setOverrideState] = useState<PremiumOverride>(() => readOverride());
 

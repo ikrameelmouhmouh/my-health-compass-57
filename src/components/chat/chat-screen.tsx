@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { useAuth } from "@/lib/auth-context";
 import { useT, useI18n } from "@/lib/i18n";
-import { getThreadMessages } from "@/lib/chat.functions";
+import { getThreadMessages, createThread } from "@/lib/chat.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { ChatHistoryDrawer } from "@/components/chat/history-drawer";
 import { extractWorkoutTemplates } from "@/lib/coach-extract.functions";
@@ -520,8 +520,11 @@ export function ChatScreen({
 
   async function ensureThread(): Promise<string> {
     if (threadIdRef.current) return threadIdRef.current;
-    return "";
+    const created = await createThread({ data: {} });
+    setActiveThread(created.id);
+    return created.id;
   }
+
 
   function setActiveThread(id: string | null) {
     if (!id) return;
