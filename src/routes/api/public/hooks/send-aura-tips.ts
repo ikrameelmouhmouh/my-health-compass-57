@@ -18,7 +18,9 @@ export const Route = createFileRoute("/api/public/hooks/send-aura-tips")({
 
         const vapidPublic = "BHdqCSyPw1FbZU1SH9mzadLqPI0q_maMGk1GyRuFDOLO38gtLVu6DmvFsBGg3cLlXzgSeQySQRhSoY-Zp4rTKu0";
         const vapidPrivate = process.env.VAPID_PRIVATE_KEY!;
-        const subject = process.env.VAPID_SUBJECT || "mailto:noreply@vita.app";
+        const rawSubject = process.env.VAPID_SUBJECT;
+        const subject =
+          rawSubject && /^(mailto:|https:\/\/)/i.test(rawSubject) ? rawSubject : "mailto:noreply@alyva.app";
         if (!vapidPrivate) return new Response("VAPID not configured", { status: 500 });
 
         const { default: webpush } = await import("web-push");
