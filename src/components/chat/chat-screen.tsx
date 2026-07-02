@@ -520,8 +520,11 @@ export function ChatScreen({
 
   async function ensureThread(): Promise<string> {
     if (threadIdRef.current) return threadIdRef.current;
-    return "";
+    const created = await createThread({ data: {} });
+    setActiveThread(created.id);
+    return created.id;
   }
+
 
   function setActiveThread(id: string | null) {
     if (!id) return;
