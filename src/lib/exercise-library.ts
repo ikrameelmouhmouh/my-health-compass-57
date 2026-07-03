@@ -125,35 +125,18 @@ const mk = (
 ): LibraryExercise => ({ id, name, equipment, primary, secondary, image: PLACEHOLDER_IMG, steps });
 
 
-/**
- * Fallback neutral 3D-anatomy demo frames per primary muscle group.
- * Used for catalog exercises that don't yet have a dedicated AI demo,
- * so every exercise still shows a start/end animation.
- */
-const FALLBACK_BY_MUSCLE: Record<MuscleGroup, string[]> = {
-  Chest: pair(bench0, bench1),
-  Back: pair(lat0, lat1),
-  Shoulders: pair(ohp0, ohp1),
-  Biceps: pair(bc0, bc1),
-  Triceps: pair(tpd0, tpd1),
-  Quads: pair(sq0, sq1),
-  Hamstrings: pair(rdl0, rdl1),
-  Glutes: pair(hip0, hip1),
-  Calves: pair(calf0, calf1),
-  Core: pair(plank0, plank1),
-  "Full body": pair(dl0, dl1),
-};
-
 function resolveFrames(ex: LibraryExercise): string[] | undefined {
   if (ex.frames && ex.frames.length > 0) return ex.frames;
-  const primary = ex.primary[0];
-  return primary ? FALLBACK_BY_MUSCLE[primary] : undefined;
+  return undefined;
 }
 
 /**
  * Returns the looping preview frames for an exercise.
  * The optional `_gender` parameter is kept for backward compatibility
  * but is ignored — all demos use a single neutral mannequin.
+ *
+ * Oefeningen zonder eigen AI-demo krijgen de neutrale placeholder in plaats
+ * van een misleidend fallback-plaatje (bv. een plank voor "Ab Crunch Machine").
  */
 export function getExerciseFrames(ex: LibraryExercise, _gender?: AppGender): string[] {
   const frames = resolveFrames(ex);
@@ -166,6 +149,7 @@ export function hasGenderVariants(ex: LibraryExercise): boolean {
   const frames = resolveFrames(ex);
   return !!(frames && frames.length > 0);
 }
+
 
 export const EXERCISES: LibraryExercise[] = [
   // ===== LEGS =====
