@@ -1,18 +1,65 @@
-## Slide 0 opschonen
+# Alle oefening-afbeeldingen opnieuw genereren
 
-Op de eerste intro-slide:
+## Waarom niet "in één keer alles"
 
-1. **Bovenbalk verbergen op slide 0** — de kleine "Alyva · ALIVE · YOU · VITALITY" chip bovenaan (tussen terug-knop en Overslaan) is dubbelop met de grote merkmark. Op slide 0 tonen we alleen de terug-knop en "Overslaan"; het logo-blok in het midden vervalt. Vanaf slide 1 blijft de bovenbalk zoals nu.
+- ~500 oefeningen × 2 frames = ~1000 afbeeldingen. Dat past niet in één berichtbeurt en kan ik niet als 1000 bundle-imports in de app zetten (build explodeert).
+- Elke afbeelding kost credits en tijd. We moeten dit als **doorlopend proces** aanpakken, niet als één-shot.
 
-2. **Losse "Welkom bij Alyva"-titel/omschrijving weghalen** — het aparte tekstblok onder de A wordt verwijderd.
+## Aanpak: server-generatie + Cloud Storage + admin-scherm
 
-3. **"Welkom bij Alyva" in het merkthema** — in plaats van het losse woordmerk "ALYVA" tonen we onder de grote A de tekst **"Welkom bij Alyva"** in dezelfde elegante serif-stijl (Cormorant/Playfair, spaced caps-look), met daaronder de tagline `Alive · You · Vitality` zoals nu. Zo blijft één rustig, centraal merkbeeld staan.
+### 1. Nieuwe storage bucket `exercise-frames` (publiek)
+- Sleutel-formaat: `{exercise-id}-0.jpg` en `{exercise-id}-1.jpg`
+- Publiek lezen; alleen server-role schrijven
 
-4. **i18n** — `intro.s0.title` wordt "Welkom bij Alyva" (en equivalent in en/ar/fr/de/es: "Welcome to Alyva", enz.). `intro.s0.desc` vervalt (niet meer gebruikt op slide 0, key blijft staan voor compat).
+### 2. Nieuwe tabel `exercise_frame_jobs`
+Houdt bij welke oefeningen al gegenereerd zijn, welke gefaald zijn, en welke prompt gebruikt is. Kolommen: `exercise_id` (pk), `status` (`pending`/`done`/`failed`/`bad`), `prompt`, `updated_at`, `error`.
 
-## Bestanden
-- `src/routes/intro.tsx` — bovenbalk conditioneel verbergen op `step === 0`; brand-slide rendert grote A + "Welkom bij Alyva" in serif + tagline; losse titel/desc onder de illustratie niet renderen voor slide 0.
-- `src/lib/i18n.tsx` — `intro.s0.title` bijwerken in alle 6 talen.
+### 3. Server route `POST /api/generate-exercise-frames`
+- Input: `{ exerciseId, force?: boolean }`
+- Bouwt een strakke prompt per oefening:
+  - "Neutral androgynous 3D mannequin, matte grey skin, no hair, no facial features, no gender markers"
+  - "Studio white background, soft shadow"
+  - **Voor machine-oefeningen**: "sitting on/using a [machine type] gym machine, machine clearly visible in the frame"
+  - Twee frames: `-0` = startpositie, `-1` = eindpositie/contractie
+- Roept AI Gateway aan met `google/gemini-3.1-flash-image` (Nano Banana 2 — snelst + goede kwaliteit)
+- Upload beide frames naar `exercise-frames` bucket via `supabaseAdmin.storage`
+- Update `exercise_frame_jobs`-rij
 
-## Buiten scope
-Overige slides en andere schermen blijven ongewijzigd.
+### 4. Nieuwe helper `getExerciseFrames(ex)`
+Vervangt de huidige bundle-imports voor de niet-curated oefeningen:
+- Geeft direct de publieke Storage URL's terug (`{project-url}/storage/v1/object/public/exercise-frames/{id}-0.jpg`)
+- Als er nog geen frame is: neutrale placeholder + trigger achtergrond-generatie
+
+### 5. Admin-scherm `/_authenticated/admin/exercise-frames`
+- Alleen zichtbaar voor jouw account (via `has_role`-check of hard user-id gate)
+- Toont voortgangsbalk: X van ~500 klaar, Y gefaald
+- Knop **"Genereer volgende 20"** → verwerkt batch achter elkaar met live UI-update per klaar frame
+- Grid met alle oefeningen: preview van beide frames, knop **"Opnieuw"** per oefening als je een slechte ziet (zoals die Ab Crunch)
+- Filter: alleen tonen die `pending`/`failed`/`bad` zijn
+
+### 6. Bestaande 26 curated frames blijven
+De handmatig geïmporteerde frames (`wlp0`, `sq0`, etc.) blijven voorlopig zoals ze zijn. Als je later ook die wilt vervangen, kan dat via dezelfde admin-tool (knop "Overschrijf curated").
+
+## Wat je krijgt
+
+1. Bucket + tabel + server route zijn direct klaar
+2. Admin-scherm werkt vanaf het moment dat je deze wijziging aanvaardt
+3. **Jij bepaalt zelf het tempo**: batch van 20 doen, kijken, nog eens 20, etc. Geen 3 uur wachten op één turn
+4. Foute individuele afbeeldingen (zoals de Ab Crunch) fix je met één klik
+
+## Technische details
+
+- **Model**: `google/gemini-3.1-flash-image` via `/v1/images/generations` (server-side, geen streaming want we schrijven direct naar Storage)
+- **Prompt-template per equipment-type**: aparte varianten voor `Machine`, `Cable`, `Barbell`, `Dumbbell`, `Bodyweight`, `Kettlebell`, `Band`, `TRX`, `Smith Machine`, `Landmine`, `EZ Bar`. Zorgt dat de juiste apparatuur zichtbaar is
+- **Batch grootte**: 20 per klik (voorkomt Worker-timeout van 60s; ~2s per beeld × 20 × 2 frames = ~80s → we doen ze parallel in 4 groepen)
+- **Idempotent**: bestaande `done` overslaat, tenzij `force`
+
+## Ruwe schatting
+
+- ~500 oefeningen × 2 frames = ~1000 API-calls
+- Credits: substantieel maar overzichtelijk per batch — jij ziet in het admin-scherm de teller lopen
+- Doorlooptijd: als je elke ~10 minuten een batch triggert, is het in een middag klaar
+
+## Bevestiging
+
+Klopt dit met wat je bedoelt? Dan bouw ik in de volgende beurt: bucket + tabel + server route + admin-scherm + nieuwe `getExerciseFrames`-helper. Genereren start daarna zodra jij op de knop drukt.
