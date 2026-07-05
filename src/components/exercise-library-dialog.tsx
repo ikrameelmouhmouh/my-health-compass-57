@@ -179,7 +179,8 @@ function DetailView({
   const [tab, setTab] = useState<"about" | "guide">("about");
   const [zoom, setZoom] = useState(false);
   const gender = useGender();
-  const frames = getExerciseFrames(ex, gender);
+  const generatedIds = useGeneratedExerciseFrameIds();
+  const frames = getExerciseFrames(ex, gender, generatedIds);
   const tr = tex(ex.id, ex.name, ex.steps);
   return (
     <div className="flex h-full flex-col">
