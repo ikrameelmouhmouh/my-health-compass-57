@@ -118,7 +118,7 @@ function ListView({
         ) : (
           <div className="space-y-2">
             {items.map((ex) => {
-              const thumb = getExerciseFrames(ex, gender)[0];
+              const thumb = getExerciseFrames(ex, gender, generatedIds)[0];
               const tr = tex(ex.id, ex.name, ex.steps);
               return (
                 <button
