@@ -30,6 +30,7 @@ import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedBadgesRouteImport } from './routes/_authenticated/badges'
 import { Route as AuthenticatedAiCoachRouteImport } from './routes/_authenticated/ai-coach'
 import { Route as AuthenticatedActivityHistoryRouteImport } from './routes/_authenticated/activity-history'
+import { Route as ApiAdminGenerateExerciseFramesRouteImport } from './routes/api/admin/generate-exercise-frames'
 import { Route as AuthenticatedWorkoutSessionTemplateIdRouteImport } from './routes/_authenticated/workout-session.$templateId'
 import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
 import { Route as AuthenticatedActivitySessionActivityIdRouteImport } from './routes/_authenticated/activity-session.$activityId'
@@ -146,6 +147,12 @@ const AuthenticatedActivityHistoryRoute =
     path: '/activity-history',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const ApiAdminGenerateExerciseFramesRoute =
+  ApiAdminGenerateExerciseFramesRouteImport.update({
+    id: '/api/admin/generate-exercise-frames',
+    path: '/api/admin/generate-exercise-frames',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedWorkoutSessionTemplateIdRoute =
   AuthenticatedWorkoutSessionTemplateIdRouteImport.update({
     id: '/workout-session/$templateId',
@@ -217,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
+  '/api/admin/generate-exercise-frames': typeof ApiAdminGenerateExerciseFramesRoute
   '/api/exercise-frame/$id/$i': typeof ApiExerciseFrameIdIRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
@@ -247,6 +255,7 @@ export interface FileRoutesByTo {
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
+  '/api/admin/generate-exercise-frames': typeof ApiAdminGenerateExerciseFramesRoute
   '/api/exercise-frame/$id/$i': typeof ApiExerciseFrameIdIRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
@@ -279,6 +288,7 @@ export interface FileRoutesById {
   '/_authenticated/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/_authenticated/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
+  '/api/admin/generate-exercise-frames': typeof ApiAdminGenerateExerciseFramesRoute
   '/api/exercise-frame/$id/$i': typeof ApiExerciseFrameIdIRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
     | '/activity-session/$activityId'
     | '/ai-coach/$threadId'
     | '/workout-session/$templateId'
+    | '/api/admin/generate-exercise-frames'
     | '/api/exercise-frame/$id/$i'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
@@ -341,6 +352,7 @@ export interface FileRouteTypes {
     | '/activity-session/$activityId'
     | '/ai-coach/$threadId'
     | '/workout-session/$templateId'
+    | '/api/admin/generate-exercise-frames'
     | '/api/exercise-frame/$id/$i'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
@@ -372,6 +384,7 @@ export interface FileRouteTypes {
     | '/_authenticated/activity-session/$activityId'
     | '/_authenticated/ai-coach/$threadId'
     | '/_authenticated/workout-session/$templateId'
+    | '/api/admin/generate-exercise-frames'
     | '/api/exercise-frame/$id/$i'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
@@ -387,6 +400,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   WelcomeRoute: typeof WelcomeRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiAdminGenerateExerciseFramesRoute: typeof ApiAdminGenerateExerciseFramesRoute
   ApiExerciseFrameIdIRoute: typeof ApiExerciseFrameIdIRoute
   ApiPublicHooksSendAuraTipsRoute: typeof ApiPublicHooksSendAuraTipsRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
@@ -543,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedActivityHistoryRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/admin/generate-exercise-frames': {
+      id: '/api/admin/generate-exercise-frames'
+      path: '/api/admin/generate-exercise-frames'
+      fullPath: '/api/admin/generate-exercise-frames'
+      preLoaderRoute: typeof ApiAdminGenerateExerciseFramesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/workout-session/$templateId': {
       id: '/_authenticated/workout-session/$templateId'
       path: '/workout-session/$templateId'
@@ -665,6 +686,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   WelcomeRoute: WelcomeRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiAdminGenerateExerciseFramesRoute: ApiAdminGenerateExerciseFramesRoute,
   ApiExerciseFrameIdIRoute: ApiExerciseFrameIdIRoute,
   ApiPublicHooksSendAuraTipsRoute: ApiPublicHooksSendAuraTipsRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
