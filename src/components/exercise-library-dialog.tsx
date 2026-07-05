@@ -16,6 +16,7 @@ import {
 import { useGender } from "@/lib/gender";
 import { useT } from "@/lib/i18n";
 import { useExerciseT } from "@/lib/exercise-i18n";
+import { useGeneratedExerciseFrameIds } from "@/lib/exercise-frames-availability";
 
 type Props = {
   open: boolean;
