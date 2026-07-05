@@ -92,6 +92,7 @@ function ListView({
   const t = useT();
   const tex = useExerciseT();
   const gender = useGender();
+  const generatedIds = useGeneratedExerciseFrameIds();
   return (
     <>
       <div className="border-b border-border px-5 pb-3 pt-5">
