@@ -37,6 +37,7 @@ import { Route as ApiPublicWidgetAuraRouteImport } from './routes/api/public/wid
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 import { Route as ApiPublicHooksSendAuraTipsRouteImport } from './routes/api/public/hooks/send-aura-tips'
+import { Route as ApiExerciseFrameIdIRouteImport } from './routes/api/exercise-frame.$id.$i'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -186,6 +187,11 @@ const ApiPublicHooksSendAuraTipsRoute =
     path: '/api/public/hooks/send-aura-tips',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiExerciseFrameIdIRoute = ApiExerciseFrameIdIRouteImport.update({
+  id: '/api/exercise-frame/$id/$i',
+  path: '/api/exercise-frame/$id/$i',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -211,6 +217,7 @@ export interface FileRoutesByFullPath {
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
+  '/api/exercise-frame/$id/$i': typeof ApiExerciseFrameIdIRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -240,6 +247,7 @@ export interface FileRoutesByTo {
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
+  '/api/exercise-frame/$id/$i': typeof ApiExerciseFrameIdIRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/_authenticated/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/_authenticated/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
+  '/api/exercise-frame/$id/$i': typeof ApiExerciseFrameIdIRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -302,6 +311,7 @@ export interface FileRouteTypes {
     | '/activity-session/$activityId'
     | '/ai-coach/$threadId'
     | '/workout-session/$templateId'
+    | '/api/exercise-frame/$id/$i'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
@@ -331,6 +341,7 @@ export interface FileRouteTypes {
     | '/activity-session/$activityId'
     | '/ai-coach/$threadId'
     | '/workout-session/$templateId'
+    | '/api/exercise-frame/$id/$i'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/_authenticated/activity-session/$activityId'
     | '/_authenticated/ai-coach/$threadId'
     | '/_authenticated/workout-session/$templateId'
+    | '/api/exercise-frame/$id/$i'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
@@ -375,6 +387,7 @@ export interface RootRouteChildren {
   RegisterRoute: typeof RegisterRoute
   WelcomeRoute: typeof WelcomeRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiExerciseFrameIdIRoute: typeof ApiExerciseFrameIdIRoute
   ApiPublicHooksSendAuraTipsRoute: typeof ApiPublicHooksSendAuraTipsRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -579,6 +592,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSendAuraTipsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/exercise-frame/$id/$i': {
+      id: '/api/exercise-frame/$id/$i'
+      path: '/api/exercise-frame/$id/$i'
+      fullPath: '/api/exercise-frame/$id/$i'
+      preLoaderRoute: typeof ApiExerciseFrameIdIRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -645,6 +665,7 @@ const rootRouteChildren: RootRouteChildren = {
   RegisterRoute: RegisterRoute,
   WelcomeRoute: WelcomeRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiExerciseFrameIdIRoute: ApiExerciseFrameIdIRoute,
   ApiPublicHooksSendAuraTipsRoute: ApiPublicHooksSendAuraTipsRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
