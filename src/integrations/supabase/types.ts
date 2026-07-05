@@ -198,6 +198,30 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_frame_jobs: {
+        Row: {
+          error: string | null
+          exercise_id: string
+          prompt: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          error?: string | null
+          exercise_id: string
+          prompt?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          error?: string | null
+          exercise_id?: string
+          prompt?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       exercise_prs: {
         Row: {
           best_1rm_at: string | null
@@ -625,6 +649,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       workout_sessions: {
         Row: {
           active_seconds: number | null
@@ -759,6 +804,13 @@ export type Database = {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_challenge_participant: {
         Args: { _cid: string; _uid: string }
         Returns: boolean
@@ -780,6 +832,7 @@ export type Database = {
         | "moderate"
         | "very_active"
         | "athlete"
+      app_role: "admin" | "moderator" | "user"
       gender_type: "male" | "female" | "other"
       goal_type: "lose" | "maintain" | "gain"
     }
@@ -916,6 +969,7 @@ export const Constants = {
         "very_active",
         "athlete",
       ],
+      app_role: ["admin", "moderator", "user"],
       gender_type: ["male", "female", "other"],
       goal_type: ["lose", "maintain", "gain"],
     },

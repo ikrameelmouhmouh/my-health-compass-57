@@ -16,6 +16,7 @@ import {
 import { useGender } from "@/lib/gender";
 import { useT } from "@/lib/i18n";
 import { useExerciseT } from "@/lib/exercise-i18n";
+import { useGeneratedExerciseFrameIds } from "@/lib/exercise-frames-availability";
 
 type Props = {
   open: boolean;
@@ -91,6 +92,7 @@ function ListView({
   const t = useT();
   const tex = useExerciseT();
   const gender = useGender();
+  const generatedIds = useGeneratedExerciseFrameIds();
   return (
     <>
       <div className="border-b border-border px-5 pb-3 pt-5">
@@ -116,7 +118,7 @@ function ListView({
         ) : (
           <div className="space-y-2">
             {items.map((ex) => {
-              const thumb = getExerciseFrames(ex, gender)[0];
+              const thumb = getExerciseFrames(ex, gender, generatedIds)[0];
               const tr = tex(ex.id, ex.name, ex.steps);
               return (
                 <button
@@ -177,7 +179,8 @@ function DetailView({
   const [tab, setTab] = useState<"about" | "guide">("about");
   const [zoom, setZoom] = useState(false);
   const gender = useGender();
-  const frames = getExerciseFrames(ex, gender);
+  const generatedIds = useGeneratedExerciseFrameIds();
+  const frames = getExerciseFrames(ex, gender, generatedIds);
   const tr = tex(ex.id, ex.name, ex.steps);
   return (
     <div className="flex h-full flex-col">

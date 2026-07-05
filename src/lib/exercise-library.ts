@@ -137,17 +137,34 @@ function resolveFrames(ex: LibraryExercise): string[] | undefined {
  *
  * Oefeningen zonder eigen AI-demo krijgen de neutrale placeholder in plaats
  * van een misleidend fallback-plaatje (bv. een plank voor "Ab Crunch Machine").
+ *
+ * `generatedIds` (optional): set of exercise ids that have AI frames rendered
+ * in the Cloud Storage `exercise-frames` bucket. When the exercise doesn't
+ * have curated bundled frames but IS in this set, we return the two storage
+ * URLs (served through the /api/exercise-frame proxy) instead of the neutral
+ * placeholder — so the workout UI shows the freshly-generated demo.
  */
-export function getExerciseFrames(ex: LibraryExercise, _gender?: AppGender): string[] {
+export function getExerciseFrames(
+  ex: LibraryExercise,
+  _gender?: AppGender,
+  generatedIds?: ReadonlySet<string>,
+): string[] {
   const frames = resolveFrames(ex);
   if (frames && frames.length > 0) return frames;
+  if (generatedIds?.has(ex.id)) {
+    return [
+      `/api/exercise-frame/${encodeURIComponent(ex.id)}/0`,
+      `/api/exercise-frame/${encodeURIComponent(ex.id)}/1`,
+    ];
+  }
   return [ex.image];
 }
 
 /** Returns true when the exercise has AI-rendered demo frames available. */
-export function hasGenderVariants(ex: LibraryExercise): boolean {
+export function hasGenderVariants(ex: LibraryExercise, generatedIds?: ReadonlySet<string>): boolean {
   const frames = resolveFrames(ex);
-  return !!(frames && frames.length > 0);
+  if (frames && frames.length > 0) return true;
+  return !!generatedIds?.has(ex.id);
 }
 
 
