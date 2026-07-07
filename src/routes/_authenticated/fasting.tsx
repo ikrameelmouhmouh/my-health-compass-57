@@ -239,7 +239,7 @@ function FastingPage() {
                 <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${e.completed ? "bg-brand/15 text-brand" : "bg-muted text-muted-foreground"}`}>
                   {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
                 </div>
-                <div className="min-w-0 flex-1">
+                <button onClick={() => setSummary(e)} className="min-w-0 flex-1 text-left">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="truncate font-display text-sm font-semibold">{formatHM(e.durationMs)} · {e.protocol}</span>
                     <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -249,7 +249,8 @@ function FastingPage() {
                   <p className="truncate text-[11px] text-muted-foreground">
                     {new Date(e.startedAt).toLocaleString(lang, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} → {new Date(e.endedAt).toLocaleString(lang, { hour: "2-digit", minute: "2-digit" })}
                   </p>
-                </div>
+                </button>
+
                 <button onClick={() => setEditEntry(e)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.edit")}>
                   <Pencil className="size-3.5" />
                 </button>
