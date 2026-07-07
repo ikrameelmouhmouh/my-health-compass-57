@@ -147,7 +147,7 @@ function FastingPage() {
               ) : (
                 <Button variant="outline" className="h-11 flex-1" onClick={pause}><Pause className="mr-1.5 size-4" />{t("fast.action.pause")}</Button>
               )}
-              <Button variant="destructive" className="h-11 flex-1" onClick={stop}><Square className="mr-1.5 size-4" />{t("fast.action.end")}</Button>
+              <Button variant="destructive" className="h-11 flex-1" onClick={() => { const e = stop(); if (e) setSummary(e); }}><Square className="mr-1.5 size-4" />{t("fast.action.end")}</Button>
             </>
           )}
         </div>
