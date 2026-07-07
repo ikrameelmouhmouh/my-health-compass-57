@@ -277,9 +277,17 @@ function FastingPage() {
         onClose={() => setEditEntry(null)}
         onSave={(id, patch) => { updateEntry(id, patch); setEditEntry(null); }}
       />
+
+      <FastingSummarySheet
+        entry={summary}
+        streak={state.streak}
+        onClose={() => setSummary(null)}
+        onStartAgain={() => { setSummary(null); start(); }}
+      />
     </main>
   );
 }
+
 
 /* ---------- UI bits ---------- */
 function BigRing({ pct, label, sub }: { pct: number; label: string; sub: string }) {
