@@ -357,10 +357,13 @@ function fmtDur(ms: number) {
 
 export function useFasting() {
   const [state, setState] = useState<FastingState>(() => loadFast());
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
     try { localStorage.setItem(FAST_KEY, JSON.stringify(state)); } catch {}
   }, [state]);
+
 
   const setProtocol = useCallback((id: FastingProtocol) => {
     const p = getProtocol(id);
