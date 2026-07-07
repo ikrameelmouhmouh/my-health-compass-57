@@ -26,7 +26,9 @@ function FastingPage() {
   const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry } = useFasting();
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
+  const [summary, setSummary] = useState<FastEntry | null>(null);
   const [notifPerm, setNotifPerm] = useState<NotificationPermission>(() =>
+
     typeof window !== "undefined" && "Notification" in window ? Notification.permission : "denied"
   );
 
