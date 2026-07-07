@@ -13,6 +13,8 @@ import {
 } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
+import { FastingSummarySheet } from "@/components/fasting/fasting-summary";
+
 
 export const Route = createFileRoute("/_authenticated/fasting")({
   head: () => ({ meta: [{ title: "Fasting — Alyva" }] }),
