@@ -13,6 +13,8 @@ import {
 } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
+import { FastingSummarySheet } from "@/components/fasting/fasting-summary";
+
 
 export const Route = createFileRoute("/_authenticated/fasting")({
   head: () => ({ meta: [{ title: "Fasting — Alyva" }] }),
@@ -24,7 +26,9 @@ function FastingPage() {
   const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry } = useFasting();
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
+  const [summary, setSummary] = useState<FastEntry | null>(null);
   const [notifPerm, setNotifPerm] = useState<NotificationPermission>(() =>
+
     typeof window !== "undefined" && "Notification" in window ? Notification.permission : "denied"
   );
 
@@ -143,7 +147,7 @@ function FastingPage() {
               ) : (
                 <Button variant="outline" className="h-11 flex-1" onClick={pause}><Pause className="mr-1.5 size-4" />{t("fast.action.pause")}</Button>
               )}
-              <Button variant="destructive" className="h-11 flex-1" onClick={stop}><Square className="mr-1.5 size-4" />{t("fast.action.end")}</Button>
+              <Button variant="destructive" className="h-11 flex-1" onClick={() => { const e = stop(); if (e) setSummary(e); }}><Square className="mr-1.5 size-4" />{t("fast.action.end")}</Button>
             </>
           )}
         </div>
@@ -235,7 +239,7 @@ function FastingPage() {
                 <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${e.completed ? "bg-brand/15 text-brand" : "bg-muted text-muted-foreground"}`}>
                   {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
                 </div>
-                <div className="min-w-0 flex-1">
+                <button onClick={() => setSummary(e)} className="min-w-0 flex-1 text-left">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="truncate font-display text-sm font-semibold">{formatHM(e.durationMs)} · {e.protocol}</span>
                     <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -245,7 +249,8 @@ function FastingPage() {
                   <p className="truncate text-[11px] text-muted-foreground">
                     {new Date(e.startedAt).toLocaleString(lang, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} → {new Date(e.endedAt).toLocaleString(lang, { hour: "2-digit", minute: "2-digit" })}
                   </p>
-                </div>
+                </button>
+
                 <button onClick={() => setEditEntry(e)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.edit")}>
                   <Pencil className="size-3.5" />
                 </button>
@@ -273,9 +278,17 @@ function FastingPage() {
         onClose={() => setEditEntry(null)}
         onSave={(id, patch) => { updateEntry(id, patch); setEditEntry(null); }}
       />
+
+      <FastingSummarySheet
+        entry={summary}
+        streak={state.streak}
+        onClose={() => setSummary(null)}
+        onStartAgain={() => { setSummary(null); start(); }}
+      />
     </main>
   );
 }
+
 
 /* ---------- UI bits ---------- */
 function BigRing({ pct, label, sub }: { pct: number; label: string; sub: string }) {

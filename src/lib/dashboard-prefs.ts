@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 export type DashCardId =
   | "nutrition"
@@ -357,10 +357,13 @@ function fmtDur(ms: number) {
 
 export function useFasting() {
   const [state, setState] = useState<FastingState>(() => loadFast());
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
     try { localStorage.setItem(FAST_KEY, JSON.stringify(state)); } catch {}
   }, [state]);
+
 
   const setProtocol = useCallback((id: FastingProtocol) => {
     const p = getProtocol(id);
@@ -390,8 +393,9 @@ export function useFasting() {
     setState((s) => ({ ...s, startedAt: iso, pausedTotalMs: 0, pausedAt: null }));
   }, []);
 
-  const stop = useCallback(() => setState((s) => {
-    if (!s.startedAt) return s;
+  const stop = useCallback((): FastEntry | null => {
+    const s = stateRef.current;
+    if (!s.startedAt) return null;
     const proto = getProtocol(s.protocol);
     const endedAt = new Date();
     let pausedMs = s.pausedTotalMs;
@@ -416,7 +420,7 @@ export function useFasting() {
       ? sameDay ? s.streak : consecutive ? s.streak + 1 : 1
       : s.streak;
     notify(completed ? "Fast complete!" : "Fast ended", `${fmtDur(durationMs)} • ${completed ? "Goal reached" : "Below goal"}`);
-    return {
+    setState({
       ...s,
       startedAt: null,
       pausedAt: null,
@@ -425,8 +429,10 @@ export function useFasting() {
       longestStreak: Math.max(s.longestStreak, newStreak),
       lastCompletedDate: completed ? today : s.lastCompletedDate,
       history: [entry, ...s.history].slice(0, 365),
-    };
-  }), []);
+    });
+    return entry;
+  }, []);
+
 
   const deleteEntry = useCallback((id: string) => {
     setState((s) => ({ ...s, history: s.history.filter((e) => e.id !== id) }));
