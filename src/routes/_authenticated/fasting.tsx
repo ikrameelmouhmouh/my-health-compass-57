@@ -14,6 +14,8 @@ import {
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
 import { FastingSummarySheet } from "@/components/fasting/fasting-summary";
+import { FastingPhaseStrip } from "@/components/fasting/fasting-phase-strip";
+import { FastingPhaseSheet } from "@/components/fasting/fasting-phase-sheet";
 
 
 export const Route = createFileRoute("/_authenticated/fasting")({
