@@ -1,20 +1,25 @@
-import { Flame, Check, X, Trophy } from "lucide-react";
+import { Flame, Check, X, Trophy, Utensils, Droplet, ArrowRightLeft, RefreshCw, Sparkles, Zap } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import type { FastEntry } from "@/lib/dashboard-prefs";
 
-/** Metabolic phase thresholds (hours) */
+/** Metabolic phase thresholds (hours) — 8 phases up to 72h+ */
 export const FASTING_PHASES = [
-  { id: "fed",       minH: 0,  maxH: 4,  key: "fed" },
-  { id: "glycogen",  minH: 4,  maxH: 12, key: "glycogen" },
-  { id: "ketosis",   minH: 12, maxH: 18, key: "ketosis" },
-  { id: "deepKeto",  minH: 18, maxH: 24, key: "deepKeto" },
-  { id: "autophagy", minH: 24, maxH: 48, key: "autophagy" },
-  { id: "growth",    minH: 48, maxH: 999, key: "growth" },
+  { id: "fed",       minH: 0,  maxH: 4,   key: "fed",       icon: Utensils },
+  { id: "glycogen",  minH: 4,  maxH: 8,   key: "glycogen",  icon: Droplet },
+  { id: "switch",    minH: 8,  maxH: 12,  key: "switch",    icon: ArrowRightLeft },
+  { id: "ketosis",   minH: 12, maxH: 18,  key: "ketosis",   icon: Flame },
+  { id: "deepKeto",  minH: 18, maxH: 24,  key: "deepKeto",  icon: Flame },
+  { id: "autophagy", minH: 24, maxH: 48,  key: "autophagy", icon: RefreshCw },
+  { id: "growth",    minH: 48, maxH: 72,  key: "growth",    icon: Sparkles },
+  { id: "reset",     minH: 72, maxH: 999, key: "reset",     icon: Zap },
 ] as const;
 
-function phaseForHours(h: number) {
+export type FastingPhaseIcon = LucideIcon;
+
+export function phaseForHours(h: number) {
   return FASTING_PHASES.slice().reverse().find((p) => h >= p.minH) ?? FASTING_PHASES[0];
 }
 

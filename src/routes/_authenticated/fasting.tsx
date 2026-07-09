@@ -14,6 +14,8 @@ import {
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
 import { FastingSummarySheet } from "@/components/fasting/fasting-summary";
+import { FastingPhaseStrip } from "@/components/fasting/fasting-phase-strip";
+import { FastingPhaseSheet } from "@/components/fasting/fasting-phase-sheet";
 
 
 export const Route = createFileRoute("/_authenticated/fasting")({
@@ -27,6 +29,7 @@ function FastingPage() {
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
   const [summary, setSummary] = useState<FastEntry | null>(null);
+  const [phaseSheet, setPhaseSheet] = useState<string | null>(null);
   const [notifPerm, setNotifPerm] = useState<NotificationPermission>(() =>
 
     typeof window !== "undefined" && "Notification" in window ? Notification.permission : "denied"
@@ -171,6 +174,15 @@ function FastingPage() {
         )}
       </section>
 
+      {/* Phase strip */}
+      <FastingPhaseStrip
+        currentHours={live.active ? live.elapsedMs / 3_600_000 : 0}
+        active={live.active}
+        onSelect={(id) => setPhaseSheet(id)}
+      />
+
+
+
       {/* Protocols */}
       <section className="mt-5">
         <h2 className="mb-2 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">{t("fast.proto.title")}</h2>
@@ -284,6 +296,12 @@ function FastingPage() {
         streak={state.streak}
         onClose={() => setSummary(null)}
         onStartAgain={() => { setSummary(null); start(); }}
+      />
+
+      <FastingPhaseSheet
+        phaseId={phaseSheet}
+        currentHours={live.active ? live.elapsedMs / 3_600_000 : undefined}
+        onClose={() => setPhaseSheet(null)}
       />
     </main>
   );
