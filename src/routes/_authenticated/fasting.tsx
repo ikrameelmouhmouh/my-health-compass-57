@@ -29,6 +29,7 @@ function FastingPage() {
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
   const [summary, setSummary] = useState<FastEntry | null>(null);
+  const [phaseSheet, setPhaseSheet] = useState<string | null>(null);
   const [notifPerm, setNotifPerm] = useState<NotificationPermission>(() =>
 
     typeof window !== "undefined" && "Notification" in window ? Notification.permission : "denied"
