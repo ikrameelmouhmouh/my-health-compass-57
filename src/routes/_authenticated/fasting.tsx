@@ -174,6 +174,15 @@ function FastingPage() {
         )}
       </section>
 
+      {/* Phase strip */}
+      <FastingPhaseStrip
+        currentHours={live.active ? live.elapsedMs / 3_600_000 : 0}
+        active={live.active}
+        onSelect={(id) => setPhaseSheet(id)}
+      />
+
+
+
       {/* Protocols */}
       <section className="mt-5">
         <h2 className="mb-2 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">{t("fast.proto.title")}</h2>
