@@ -297,6 +297,12 @@ function FastingPage() {
         onClose={() => setSummary(null)}
         onStartAgain={() => { setSummary(null); start(); }}
       />
+
+      <FastingPhaseSheet
+        phaseId={phaseSheet}
+        currentHours={live.active ? live.elapsedMs / 3_600_000 : undefined}
+        onClose={() => setPhaseSheet(null)}
+      />
     </main>
   );
 }
