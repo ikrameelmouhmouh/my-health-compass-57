@@ -29,6 +29,7 @@ function FastingPage() {
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
   const [summary, setSummary] = useState<FastEntry | null>(null);
+  const [summaryIsLive, setSummaryIsLive] = useState(false);
   const [phaseSheet, setPhaseSheet] = useState<string | null>(null);
   const [notifPerm, setNotifPerm] = useState<NotificationPermission>(() =>
 
