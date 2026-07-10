@@ -29,6 +29,7 @@ function FastingPage() {
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
   const [summary, setSummary] = useState<FastEntry | null>(null);
+  const [summaryIsLive, setSummaryIsLive] = useState(false);
   const [phaseSheet, setPhaseSheet] = useState<string | null>(null);
   const [notifPerm, setNotifPerm] = useState<NotificationPermission>(() =>
 
@@ -150,7 +151,7 @@ function FastingPage() {
               ) : (
                 <Button variant="outline" className="h-11 flex-1" onClick={pause}><Pause className="mr-1.5 size-4" />{t("fast.action.pause")}</Button>
               )}
-              <Button variant="destructive" className="h-11 flex-1" onClick={() => { const e = stop(); if (e) setSummary(e); }}><Square className="mr-1.5 size-4" />{t("fast.action.end")}</Button>
+              <Button variant="destructive" className="h-11 flex-1" onClick={() => { const e = stop(); if (e) { setSummary(e); setSummaryIsLive(true); } }}><Square className="mr-1.5 size-4" />{t("fast.action.end")}</Button>
             </>
           )}
         </div>
@@ -251,7 +252,7 @@ function FastingPage() {
                 <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${e.completed ? "bg-brand/15 text-brand" : "bg-muted text-muted-foreground"}`}>
                   {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
                 </div>
-                <button onClick={() => setSummary(e)} className="min-w-0 flex-1 text-left">
+                <button onClick={() => { setSummary(e); setSummaryIsLive(false); }} className="min-w-0 flex-1 text-left">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="truncate font-display text-sm font-semibold">{formatHM(e.durationMs)} · {e.protocol}</span>
                     <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -293,9 +294,9 @@ function FastingPage() {
 
       <FastingSummarySheet
         entry={summary}
-        streak={state.streak}
-        onClose={() => setSummary(null)}
-        onStartAgain={() => { setSummary(null); start(); }}
+        streak={summaryIsLive ? state.streak : undefined}
+        onClose={() => { setSummary(null); setSummaryIsLive(false); }}
+        onStartAgain={summaryIsLive ? () => { setSummary(null); setSummaryIsLive(false); start(); } : undefined}
       />
 
       <FastingPhaseSheet
