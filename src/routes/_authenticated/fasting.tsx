@@ -252,7 +252,7 @@ function FastingPage() {
                 <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${e.completed ? "bg-brand/15 text-brand" : "bg-muted text-muted-foreground"}`}>
                   {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
                 </div>
-                <button onClick={() => setSummary(e)} className="min-w-0 flex-1 text-left">
+                <button onClick={() => { setSummary(e); setSummaryIsLive(false); }} className="min-w-0 flex-1 text-left">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="truncate font-display text-sm font-semibold">{formatHM(e.durationMs)} · {e.protocol}</span>
                     <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
