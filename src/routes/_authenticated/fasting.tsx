@@ -294,9 +294,9 @@ function FastingPage() {
 
       <FastingSummarySheet
         entry={summary}
-        streak={state.streak}
-        onClose={() => setSummary(null)}
-        onStartAgain={() => { setSummary(null); start(); }}
+        streak={summaryIsLive ? state.streak : undefined}
+        onClose={() => { setSummary(null); setSummaryIsLive(false); }}
+        onStartAgain={summaryIsLive ? () => { setSummary(null); setSummaryIsLive(false); start(); } : undefined}
       />
 
       <FastingPhaseSheet
