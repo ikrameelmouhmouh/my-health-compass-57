@@ -390,6 +390,44 @@ function SessionPage() {
         })}
       </div>
 
+      {restEndAt != null && (() => {
+        const remaining = Math.max(0, Math.ceil((restEndAt - now) / 1000));
+        const pct = Math.min(100, Math.max(0, ((restDuration - remaining) / restDuration) * 100));
+        const done = remaining === 0;
+        return (
+          <div className={`fixed inset-x-0 z-30 mx-auto w-full max-w-md p-4 ${isPaused ? "bottom-20" : "bottom-0"}`}>
+            <div className="overflow-hidden rounded-2xl border border-border bg-card/95 shadow-lg backdrop-blur">
+              <div className="flex items-center gap-3 p-3">
+                <Timer className="size-4 text-brand" />
+                <p className="flex-1 text-sm font-medium tabular-nums">
+                  {done ? t("session.rest_done") : `${t("session.rest")} · ${formatDuration(remaining)}`}
+                </p>
+                {!done && (
+                  <button
+                    onClick={() => setRestEndAt((v) => (v == null ? v : v + 15000))}
+                    className="rounded-full border border-border px-2 py-1 text-[11px] font-semibold"
+                  >
+                    +15s
+                  </button>
+                )}
+                <button
+                  onClick={clearRest}
+                  className="rounded-full bg-brand px-3 py-1 text-[11px] font-semibold text-brand-foreground"
+                >
+                  {done ? "OK" : t("session.skip_rest")}
+                </button>
+              </div>
+              <div className="h-1 bg-background">
+                <div
+                  className="h-full bg-brand transition-[width] duration-500 ease-linear"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {isPaused && (
         <div className="fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-md p-4">
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur">
