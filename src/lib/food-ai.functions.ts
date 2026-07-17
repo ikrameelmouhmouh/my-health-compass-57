@@ -11,7 +11,10 @@ export type AnalyzedMeal = {
   name: string;
   brand?: string;
   estimatedGrams: number;
-  per100: { kcal: number; protein: number; carbs: number; fat: number };
+  per100: {
+    kcal: number; protein: number; carbs: number; fat: number;
+    vitaminC?: number; vitaminD?: number; potassium?: number; iron?: number; calcium?: number;
+  };
   confidence: "low" | "medium" | "high";
   reasoning: string;
 };
@@ -27,10 +30,12 @@ Geef ALLEEN geldige JSON terug, geen prose, geen markdown fences.
 Schema: { "name": string (Nederlandse naam van het gerecht/product),
   "brand": string|null (merk indien zichtbaar, bv. "Albert Heijn", "Jumbo"),
   "estimatedGrams": number (geschatte totale portie in gram),
-  "per100": { "kcal": number, "protein": number, "carbs": number, "fat": number },
+  "per100": { "kcal": number, "protein": number, "carbs": number, "fat": number,
+    "vitaminC": number (mg per 100g), "vitaminD": number (µg per 100g),
+    "potassium": number (mg per 100g), "iron": number (mg per 100g), "calcium": number (mg per 100g) },
   "confidence": "low"|"medium"|"high",
   "reasoning": string (1 korte zin in het Nederlands waarom je deze schatting maakt) }
-Gebruik realistische Nederlandse voedingswaarden. Wees conservatief bij onduidelijke foto's (low confidence).`;
+Gebruik realistische Nederlandse voedingswaarden inclusief micronutriënten. Wees conservatief bij onduidelijke foto's (low confidence). Zet micro's op 0 als je ze niet kunt inschatten.`;
 
     const body = {
       model: "google/gemini-2.5-flash",
@@ -81,6 +86,11 @@ Gebruik realistische Nederlandse voedingswaarden. Wees conservatief bij onduidel
         protein: Math.max(0, Number(parsed.per100?.protein) || 0),
         carbs: Math.max(0, Number(parsed.per100?.carbs) || 0),
         fat: Math.max(0, Number(parsed.per100?.fat) || 0),
+        vitaminC: Math.max(0, Number(parsed.per100?.vitaminC) || 0),
+        vitaminD: Math.max(0, Number(parsed.per100?.vitaminD) || 0),
+        potassium: Math.max(0, Number(parsed.per100?.potassium) || 0),
+        iron: Math.max(0, Number(parsed.per100?.iron) || 0),
+        calcium: Math.max(0, Number(parsed.per100?.calcium) || 0),
       },
       confidence: (["low", "medium", "high"].includes(parsed.confidence) ? parsed.confidence : "medium") as AnalyzedMeal["confidence"],
       reasoning: String(parsed.reasoning || ""),

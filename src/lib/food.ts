@@ -16,6 +16,20 @@ export type Per100 = {
   protein: number;
   carbs: number;
   fat: number;
+  /** Micros — all optional, values per 100 g. mg unless noted. */
+  vitaminC?: number;   // mg
+  vitaminD?: number;   // µg
+  potassium?: number;  // mg
+  iron?: number;       // mg
+  calcium?: number;    // mg
+};
+
+export type Micros = {
+  vitaminC: number;
+  vitaminD: number;
+  potassium: number;
+  iron: number;
+  calcium: number;
 };
 
 export type FoodServing = {
@@ -66,6 +80,18 @@ export function computeNutrition(per100: Per100, grams: number) {
     fat: round1(per100.fat * f),
   };
 }
+
+export function computeMicros(per100: Per100, grams: number): Micros {
+  const f = grams / 100;
+  return {
+    vitaminC: round1((per100.vitaminC ?? 0) * f),
+    vitaminD: round1((per100.vitaminD ?? 0) * f),
+    potassium: Math.round((per100.potassium ?? 0) * f),
+    iron: round1((per100.iron ?? 0) * f),
+    calcium: Math.round((per100.calcium ?? 0) * f),
+  };
+}
+
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
 const uid = () =>
@@ -76,15 +102,24 @@ const uid = () =>
 // ============ Open Food Facts ============
 type OFFNutriments = Record<string, number | string | undefined>;
 
+function num(v: unknown): number { return Number(v) || 0; }
+
 function mapOFFProduct(p: any): FoodItem | null {
   const n: OFFNutriments = p?.nutriments ?? {};
   const kcal = Number(n["energy-kcal_100g"] ?? n["energy-kcal"] ?? 0);
   if (!kcal && !p.product_name) return null;
+  // Vitamin D in OFF is grams; convert to µg. Others are already in grams -> mg.
+  const vitDGrams = num(n["vitamin-d_100g"]);
   const per100: Per100 = {
     kcal: Math.round(kcal),
     protein: round1(Number(n["proteins_100g"] ?? 0)),
     carbs: round1(Number(n["carbohydrates_100g"] ?? 0)),
     fat: round1(Number(n["fat_100g"] ?? 0)),
+    vitaminC: round1(num(n["vitamin-c_100g"]) * 1000),   // g -> mg
+    vitaminD: round1(vitDGrams * 1_000_000),             // g -> µg
+    potassium: Math.round(num(n["potassium_100g"]) * 1000),
+    iron: round1(num(n["iron_100g"]) * 1000),
+    calcium: Math.round(num(n["calcium_100g"]) * 1000),
   };
   const servingGrams = Number(p.serving_quantity);
   const servings: FoodServing[] = [];

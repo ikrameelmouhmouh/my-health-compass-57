@@ -5,9 +5,11 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
+  Camera, CalendarDays,
 } from "lucide-react";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { NutritionSpeedDial } from "@/components/nutrition-speed-dial";
+import { MicroDetailsCard } from "@/components/nutrition/micro-details-card";
 import {
   useMeals, MEAL_TYPES,
   type MealType, type LoggedMeal,
@@ -143,6 +145,44 @@ function Nutrition() {
           <MacroBlock label={t("food.fat")} value={totals.fat} goal={fatTarget} color="text-orange-500" />
         </div>
       </section>
+
+      {isToday && (
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <button
+            onClick={openScan}
+            className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
+          >
+            <div className="grid size-10 place-items-center rounded-2xl bg-brand/15 text-brand">
+              <Camera className="size-5" />
+            </div>
+            <p className="mt-3 font-display text-sm font-semibold">{t("nutr.scan_meal")}</p>
+            <p className="text-[11px] text-muted-foreground">{t("nutr.scan_sub")}</p>
+          </button>
+          <Link
+            to="/meal-planner"
+            className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
+          >
+            <div className="grid size-10 place-items-center rounded-2xl bg-accent text-foreground">
+              <CalendarDays className="size-5" />
+            </div>
+            <p className="mt-3 font-display text-sm font-semibold">{t("mealplan.title")}</p>
+            <p className="text-[11px] text-muted-foreground">{t("mealplan.sub_short")}</p>
+          </Link>
+        </div>
+      )}
+
+      <MicroDetailsCard
+        meals={dayMeals}
+        title={t("nutr.micro_title")}
+        todayLabel={isToday ? t("nutr.today") : formatDate(viewDate, lang)}
+        labels={{
+          vitaminC: t("nutr.micro.vitaminC"),
+          vitaminD: t("nutr.micro.vitaminD"),
+          potassium: t("nutr.micro.potassium"),
+          iron: t("nutr.micro.iron"),
+          calcium: t("nutr.micro.calcium"),
+        }}
+      />
 
 
 
