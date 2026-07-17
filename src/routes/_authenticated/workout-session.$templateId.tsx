@@ -220,48 +220,6 @@ function SessionPage() {
         </Button>
       </div>
 
-      {restEndAt !== null && (() => {
-        const isDone = restRemaining <= 0;
-        return (
-          <div className={`sticky top-[57px] z-10 -mx-5 border-b px-5 py-2.5 backdrop-blur ${isDone ? "border-brand/40 bg-brand/15" : "border-border bg-card/95"}`}>
-            <div className="flex items-center gap-3">
-              <Timer className={`size-4 ${isDone ? "text-brand" : "text-brand"}`} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between">
-                  <p className={`text-xs ${isDone ? "font-semibold text-brand" : "text-muted-foreground"}`}>
-                    {isDone ? t("session.rest_done") : t("session.rest")}
-                  </p>
-                  <p className="font-display text-base font-semibold tabular-nums">
-                    {isDone ? "✓" : formatDuration(restRemaining)}
-                  </p>
-                </div>
-                <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-border">
-                  <div
-                    className="h-full bg-brand transition-all"
-                    style={{ width: `${restProgress * 100}%` }}
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                {!isDone && (
-                  <button
-                    onClick={() => setRestEndAt((v) => (v ? v + 15_000 : v))}
-                    className="rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground"
-                  >
-                    +15s
-                  </button>
-                )}
-                <button
-                  onClick={clearRest}
-                  className={`rounded-md px-2 py-1 text-[11px] ${isDone ? "bg-brand text-brand-foreground" : "border border-border text-muted-foreground"}`}
-                >
-                  {isDone ? t("common.close") : t("session.skip_rest")}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
 
       <div className="mt-5 space-y-5">
         {session.exercises.map((ex, exIdx) => {
