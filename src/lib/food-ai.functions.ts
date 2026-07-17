@@ -30,10 +30,12 @@ Geef ALLEEN geldige JSON terug, geen prose, geen markdown fences.
 Schema: { "name": string (Nederlandse naam van het gerecht/product),
   "brand": string|null (merk indien zichtbaar, bv. "Albert Heijn", "Jumbo"),
   "estimatedGrams": number (geschatte totale portie in gram),
-  "per100": { "kcal": number, "protein": number, "carbs": number, "fat": number },
+  "per100": { "kcal": number, "protein": number, "carbs": number, "fat": number,
+    "vitaminC": number (mg per 100g), "vitaminD": number (µg per 100g),
+    "potassium": number (mg per 100g), "iron": number (mg per 100g), "calcium": number (mg per 100g) },
   "confidence": "low"|"medium"|"high",
   "reasoning": string (1 korte zin in het Nederlands waarom je deze schatting maakt) }
-Gebruik realistische Nederlandse voedingswaarden. Wees conservatief bij onduidelijke foto's (low confidence).`;
+Gebruik realistische Nederlandse voedingswaarden inclusief micronutriënten. Wees conservatief bij onduidelijke foto's (low confidence). Zet micro's op 0 als je ze niet kunt inschatten.`;
 
     const body = {
       model: "google/gemini-2.5-flash",
