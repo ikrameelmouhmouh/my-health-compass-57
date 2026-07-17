@@ -319,3 +319,136 @@ function NumField({
     </label>
   );
 }
+
+const uid2 = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `m-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+function FoodSearchBlock({ onPick }: { onPick: (meal: PlannedMeal) => void }) {
+  const { t } = useI18n();
+  const [q, setQ] = useState("");
+  const [grams, setGrams] = useState("100");
+  const [results, setResults] = useState<FoodItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const query = q.trim();
+    if (!query) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    setTouched(true);
+    const handle = setTimeout(() => {
+      abortRef.current?.abort();
+      const ctrl = new AbortController();
+      abortRef.current = ctrl;
+      searchFoods(query, ctrl.signal)
+        .then((items) => {
+          if (ctrl.signal.aborted) return;
+          setResults(items);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!ctrl.signal.aborted) setLoading(false);
+        });
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [q]);
+
+  const g = Math.max(1, Number(grams) || 100);
+
+  function pick(item: FoodItem) {
+    const n = computeNutrition(item.per100, g);
+    onPick({
+      id: uid2(),
+      name: item.brand ? `${item.name} — ${item.brand}` : item.name,
+      kcal: n.kcal,
+      protein: Math.round(n.protein),
+      carbs: Math.round(n.carbs),
+      fat: Math.round(n.fat),
+    });
+  }
+
+  return (
+    <div className="mt-4 space-y-2 rounded-2xl border border-border p-3">
+      <div className="flex items-center gap-2">
+        <div className="flex flex-1 items-center gap-2 rounded-xl border border-border bg-background px-3 py-2">
+          <Search className="size-4 text-muted-foreground" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder={t("mealplan.search_placeholder")}
+            className="w-full bg-transparent text-sm outline-none"
+          />
+        </div>
+        <label className="flex items-center gap-1 rounded-xl border border-border bg-background px-2 py-2">
+          <input
+            inputMode="numeric"
+            value={grams}
+            onChange={(e) => setGrams(e.target.value.replace(/[^\d]/g, ""))}
+            className="w-12 bg-transparent text-center text-sm tabular-nums outline-none"
+          />
+          <span className="text-[11px] text-muted-foreground">g</span>
+        </label>
+      </div>
+
+      {loading && (
+        <p className="text-center text-[11px] text-muted-foreground">…</p>
+      )}
+
+      {!loading && touched && q.trim() && results.length === 0 && (
+        <p className="rounded-xl border border-dashed border-border p-3 text-center text-[11px] text-muted-foreground">
+          {t("mealplan.search_empty")}
+        </p>
+      )}
+
+      {!touched && (
+        <p className="text-[11px] text-muted-foreground">
+          {t("mealplan.search_hint")}
+        </p>
+      )}
+
+      {results.length > 0 && (
+        <ul className="max-h-56 space-y-1.5 overflow-y-auto">
+          {results.map((item) => {
+            const n = computeNutrition(item.per100, g);
+            return (
+              <li key={item.id}>
+                <button
+                  onClick={() => pick(item)}
+                  className="flex w-full items-center gap-3 rounded-xl border border-border bg-background/60 px-3 py-2 text-left ios-press"
+                >
+                  {item.imageUrl ? (
+                    <img
+                      src={item.imageUrl}
+                      alt=""
+                      className="size-9 shrink-0 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-[10px] text-muted-foreground">
+                      🍽️
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold">{item.name}</p>
+                    <p className="truncate text-[11px] text-muted-foreground">
+                      {item.brand ? `${item.brand} · ` : ""}
+                      {n.kcal} {t("food.kcal")} · P{Math.round(n.protein)} · C
+                      {Math.round(n.carbs)} · F{Math.round(n.fat)}
+                    </p>
+                  </div>
+                  <Plus className="size-4 shrink-0 text-brand" />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
