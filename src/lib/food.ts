@@ -80,6 +80,18 @@ export function computeNutrition(per100: Per100, grams: number) {
     fat: round1(per100.fat * f),
   };
 }
+
+export function computeMicros(per100: Per100, grams: number): Micros {
+  const f = grams / 100;
+  return {
+    vitaminC: round1((per100.vitaminC ?? 0) * f),
+    vitaminD: round1((per100.vitaminD ?? 0) * f),
+    potassium: Math.round((per100.potassium ?? 0) * f),
+    iron: round1((per100.iron ?? 0) * f),
+    calcium: Math.round((per100.calcium ?? 0) * f),
+  };
+}
+
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
 const uid = () =>
@@ -90,10 +102,14 @@ const uid = () =>
 // ============ Open Food Facts ============
 type OFFNutriments = Record<string, number | string | undefined>;
 
+function num(v: unknown): number { return Number(v) || 0; }
+
 function mapOFFProduct(p: any): FoodItem | null {
   const n: OFFNutriments = p?.nutriments ?? {};
   const kcal = Number(n["energy-kcal_100g"] ?? n["energy-kcal"] ?? 0);
   if (!kcal && !p.product_name) return null;
+  // Vitamin D in OFF is grams; convert to µg. Others are already in grams -> mg.
+  const vitDGrams = num(n["vitamin-d_100g"]);
   const per100: Per100 = {
     kcal: Math.round(kcal),
     protein: round1(Number(n["proteins_100g"] ?? 0)),
