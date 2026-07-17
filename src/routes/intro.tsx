@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowLeft, ArrowRight, Sparkles, Target, Heart, Map } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Target, Heart, Map, Flame, Camera, CalendarDays } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/intro")({
