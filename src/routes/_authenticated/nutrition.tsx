@@ -145,6 +145,7 @@ function Nutrition() {
           <MacroBlock label={t("food.fat")} value={totals.fat} goal={fatTarget} color="text-orange-500" />
         </div>
       </section>
+      </PaywallOverlay>
 
       {isToday && (
         <div className="mt-4 grid grid-cols-2 gap-3">
@@ -170,6 +171,9 @@ function Nutrition() {
           </Link>
         </div>
       )}
+
+      <PaywallOverlay feature={t("nutr.title")} description={t("pay.overlay.food_desc")}>
+
 
       <MicroDetailsCard
         meals={dayMeals}
