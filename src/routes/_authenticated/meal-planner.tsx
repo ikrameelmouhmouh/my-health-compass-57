@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronLeft, ChevronRight, Plus, Trash2, X, Save } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Search, Trash2, X, Save } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import {
   listMealPlan,
@@ -10,6 +10,7 @@ import {
   type PlannedMeal,
 } from "@/lib/meal-plans.functions";
 import { PaywallOverlay } from "@/components/paywall-gate";
+import { searchFoods, computeNutrition, type FoodItem } from "@/lib/food";
 
 export const Route = createFileRoute("/_authenticated/meal-planner")({
   head: () => ({ meta: [{ title: "Meal planner — Alyva" }] }),
