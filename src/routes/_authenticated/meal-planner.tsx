@@ -251,7 +251,14 @@ function DaySheet({
           )}
         </ul>
 
-        <div className="mt-4 space-y-2 rounded-2xl border border-border p-3">
+        <FoodSearchBlock
+          onPick={(meal) => setMeals((prev) => [...prev, meal])}
+        />
+
+        <div className="mt-3 space-y-2 rounded-2xl border border-border p-3">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            {t("mealplan.manual_entry")}
+          </p>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
