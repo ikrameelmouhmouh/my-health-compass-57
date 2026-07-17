@@ -15,11 +15,14 @@ function Intro() {
   const [step, setStep] = useState(0);
 
   const slides = [
-    { icon: null,     title: t("intro.s0.title"), desc: t("intro.s0.desc"), brand: true },
-    { icon: Sparkles, title: t("intro.s1.title"), desc: t("intro.s1.desc") },
-    { icon: Target,   title: t("intro.s2.title"), desc: t("intro.s2.desc") },
-    { icon: Heart,    title: t("intro.s3.title"), desc: t("intro.s3.desc") },
-    { icon: Map,      title: t("intro.s4.title"), desc: t("intro.s4.desc") },
+    { icon: null,        title: t("intro.s0.title"), desc: t("intro.s0.desc"), brand: true },
+    { icon: Sparkles,    title: t("intro.s1.title"), desc: t("intro.s1.desc") },
+    { icon: Flame,       title: t("intro.s_nutr.title"), desc: t("intro.s_nutr.desc") },
+    { icon: Camera,      title: t("intro.s_scan.title"), desc: t("intro.s_scan.desc") },
+    { icon: CalendarDays,title: t("intro.s_mealprep.title"), desc: t("intro.s_mealprep.desc") },
+    { icon: Target,      title: t("intro.s2.title"), desc: t("intro.s2.desc") },
+    { icon: Heart,       title: t("intro.s3.title"), desc: t("intro.s3.desc") },
+    { icon: Map,         title: t("intro.s4.title"), desc: t("intro.s4.desc") },
   ];
 
   const isLast = step === slides.length - 1;
