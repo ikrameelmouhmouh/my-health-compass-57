@@ -1,69 +1,53 @@
-## Vasten-status tijdlijn bovenaan (tot 72 uur)
 
-Horizontaal scrollbare **fase-tijdlijn** bovenaan `/fasting`. In één oogopslag zie je welk uur bij welke fase hoort, én tijdens een actieve vast wordt de huidige fase gemarkeerd. Fases lopen door tot **72h**.
+# Voeding upgrade + onboarding-slides
 
-### Nieuwe fase-indeling (8 stadia, 0 → 72h+)
+Op basis van de screenshots pak ik 3 features aan én bouw ik matching onboarding-slides. AH-integratie sla ik over (vereist Albert Heijn partnership/API-deal — kan later).
 
-| Lv | Bereik | Key | Titel (NL) |
-|----|--------|-----|------------|
-| 1 | 0–4h   | fed        | Voeding & anabole fase |
-| 2 | 4–8h   | glycogen   | Glycogeen-verbranding |
-| 3 | 8–12h  | switch     | Overschakelen naar vasten-modus |
-| 4 | 12–18h | ketosis    | Ketose start |
-| 5 | 18–24h | deepKeto   | Diepe ketose |
-| 6 | 24–48h | autophagy  | Autofagie (cel-opruiming) |
-| 7 | 48–72h | growth     | Groeihormoon-piek |
-| 8 | 72h+   | reset      | Diepe metabolische reset |
+## Wat ik ga bouwen
 
-Vervangt de huidige 6-fase constante in `FASTING_PHASES` (`src/components/fasting/fasting-summary.tsx`) — één bron van waarheid, dus de completion-summary gebruikt dezelfde fases.
+### 1. Voeding-dashboard — micronutriënten toevoegen
+Huidig scherm heeft al kcal-ring + eiwit/koolh./vet bars. Missend: micro's.
 
-### Wat komt erbij
+- Uitbreiden `src/lib/food.ts` met micro-velden op `FoodItem` en `MealEntry`: `vitaminC`, `vitaminD`, `kalium`, `ijzer`, `calcium` (mg / µg).
+- OpenFoodFacts-parser (`fromOFFProduct`) mapt beschikbare nutriment-velden (`vitamin-c_100g`, `vitamin-d_100g`, `potassium_100g`, `iron_100g`, `calcium_100g`).
+- AI-photoscan prompt (`food-ai.functions.ts`) uitbreiden zodat Gemini ook micro's schat.
+- Nieuwe kaart `<MicroDetails>` op nutrition-pagina: "Voedingsdetails — Vandaag" met de 5 rijen, exact zoals screenshot 1.
 
-1. **Horizontale fase-strip** (nieuw, bovenaan `/fasting`)
-   - 8 iconen naast elkaar met chevrons ertussen (zoals de referentie)
-   - Per fase: icoon + uurbereik-chip (`0-4h`, `4-8h`, …, `48-72h`, `72h+`)
-   - Actieve vast: huidige fase = brand-ring + pulse; bereikt = vol gekleurd; toekomstig = gedimd
-   - Auto-scrollt naar huidige fase
+### 2. AI foto-scan — beter positioneren
+Bestaat al (`food-ai.functions.ts` + `food-log-dialog.tsx`). Alleen zichtbaarheid verbeteren:
+- Prominente "Scan maaltijd" primaire actie op nutrition-pagina met camera-icoon en subtitel "AI herkent je bord".
 
-2. **Tap op fase → detail-sheet** (nieuwe component)
-   - Zelfde look als bestaande `FastingSummarySheet`
-   - Lv.N badge, titel, uurbereik, uitgebreide beschrijving, prev/next tussen fases
+### 3. Mealprepping — 7-daagse planner
+Nieuw feature.
 
-3. **Iconen** (lucide-react, geen assets)
-   - fed `Utensils` · glycogen `Droplet` · switch `ArrowRightLeft` · ketosis `Flame` · deepKeto `Flame` · autophagy `RefreshCw` · growth `Sparkles` · reset `Zap`
+- Nieuwe route `src/routes/_authenticated/meal-planner.tsx`.
+- Nieuwe tabel `meal_plans` (via migratie) met `id`, `user_id`, `day_index` (0-6), `meals jsonb` (array van `{name, kcal, protein, carbs, fat}`), timestamps, RLS owner-only + GRANTs.
+- UI: kaart met Dag 1–7, elke dag toont totaal kcal + chevron → detail sheet waar je maaltijden toevoegt (naam + kcal/macro's, of "kopiëren van eerder gelogde maaltijd").
+- Entry-point vanaf nutrition-pagina: knop "Mealprep planner".
 
-4. **Vertalingen** (6 talen: en, nl, ar, fr, de, es)
-   - Nieuwe keys per fase: `title`, `range`, `desc` (kort, gebruikt in strip + summary) en `long` (uitgebreid, gebruikt in sheet)
-   - Nieuwe key `fast.status.title` ("Status")
-   - Bestaande 6-fase keys uitgebreid naar 8
+### 4. Onboarding-slides
+Nutrition + Photo-scan + Mealprep als 3 slides toevoegen aan bestaande `src/routes/intro.tsx` carrousel. Screenshots uit user-uploads dienen als visuele inspiratie, niet als embedded images — we bouwen native versies met echte app-componenten in mini-preview stijl.
 
-### Bestanden
+### 5. i18n
+Alle nieuwe strings toegevoegd in `src/lib/i18n.tsx` voor alle 6 talen (en, nl, ar, fr, de, es).
 
-- **Nieuw**: `src/components/fasting/fasting-phase-strip.tsx`
-- **Nieuw**: `src/components/fasting/fasting-phase-sheet.tsx`
-- **Aangepast**: `src/components/fasting/fasting-summary.tsx` — `FASTING_PHASES` uitgebreid naar 8 stadia (72h)
-- **Aangepast**: `src/routes/_authenticated/fasting.tsx` — strip bovenaan renderen op basis van verstreken uren
-- **Aangepast**: `src/lib/i18n.tsx` — 8 fases × {title, range, desc, long} in 6 talen + `fast.status.title`
+## Uit scope
 
-### Wat NIET verandert
+- **Albert Heijn winkelwagen** — geen publieke AH API voor bestellen; vereist partnership. Ik kan wel een boodschappenlijst-export bouwen (kopieer/deel als tekst) als je dat later wilt.
 
-- Timer-ring, protocol-picker, geschiedenis, insight cards, streak
-- Geen backend/DB/dependencies
-- Completion-summary blijft werken (deelt `FASTING_PHASES`)
+## Bestanden
 
-### ASCII schets
+Nieuw:
+- `src/routes/_authenticated/meal-planner.tsx`
+- `src/components/nutrition/micro-details-card.tsx`
+- `src/components/nutrition/meal-plan-day-sheet.tsx`
+- migratie: `meal_plans` tabel
 
-```text
-┌────────────────────────────────────────────────┐
-│  [<]           Vasten            [•••]         │
-├────────────────────────────────────────────────┤
-│ (🍴)»(💧)»(⇄)»(🔥)»(🔥)»(♻)»(✨)»(⚡)  ← scroll →│
-│ 0-4  4-8 8-12 12-18 18-24 24-48 48-72 72+     │
-│              ▲ huidige                          │
-├────────────────────────────────────────────────┤
-│              ╭──────────╮                       │
-│              │  16 : 42  │  ← bestaande ring   │
-│              ╰──────────╯                       │
-│           [Vasten voltooien]                    │
-└────────────────────────────────────────────────┘
-```
+Gewijzigd:
+- `src/lib/food.ts` (micro-velden)
+- `src/lib/food-ai.functions.ts` (prompt met micro's)
+- `src/routes/_authenticated/nutrition.tsx` (micro-kaart + planner-knop + prominentere scan-knop)
+- `src/routes/intro.tsx` (3 nieuwe slides)
+- `src/lib/i18n.tsx` (6 talen)
+
+Zeg "ga door" en ik bouw het.
