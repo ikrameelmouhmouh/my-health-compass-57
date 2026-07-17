@@ -115,6 +115,11 @@ function mapOFFProduct(p: any): FoodItem | null {
     protein: round1(Number(n["proteins_100g"] ?? 0)),
     carbs: round1(Number(n["carbohydrates_100g"] ?? 0)),
     fat: round1(Number(n["fat_100g"] ?? 0)),
+    vitaminC: round1(num(n["vitamin-c_100g"]) * 1000),   // g -> mg
+    vitaminD: round1(vitDGrams * 1_000_000),             // g -> µg
+    potassium: Math.round(num(n["potassium_100g"]) * 1000),
+    iron: round1(num(n["iron_100g"]) * 1000),
+    calcium: Math.round(num(n["calcium_100g"]) * 1000),
   };
   const servingGrams = Number(p.serving_quantity);
   const servings: FoodServing[] = [];
