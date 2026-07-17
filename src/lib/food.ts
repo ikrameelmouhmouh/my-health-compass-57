@@ -16,6 +16,20 @@ export type Per100 = {
   protein: number;
   carbs: number;
   fat: number;
+  /** Micros — all optional, values per 100 g. mg unless noted. */
+  vitaminC?: number;   // mg
+  vitaminD?: number;   // µg
+  potassium?: number;  // mg
+  iron?: number;       // mg
+  calcium?: number;    // mg
+};
+
+export type Micros = {
+  vitaminC: number;
+  vitaminD: number;
+  potassium: number;
+  iron: number;
+  calcium: number;
 };
 
 export type FoodServing = {
