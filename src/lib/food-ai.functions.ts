@@ -11,7 +11,10 @@ export type AnalyzedMeal = {
   name: string;
   brand?: string;
   estimatedGrams: number;
-  per100: { kcal: number; protein: number; carbs: number; fat: number };
+  per100: {
+    kcal: number; protein: number; carbs: number; fat: number;
+    vitaminC?: number; vitaminD?: number; potassium?: number; iron?: number; calcium?: number;
+  };
   confidence: "low" | "medium" | "high";
   reasoning: string;
 };
