@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { NutritionSpeedDial } from "@/components/nutrition-speed-dial";
-import { MicroDetailsCard } from "@/components/nutrition/micro-details-card";
 import {
   useMeals, MEAL_TYPES,
   type MealType, type LoggedMeal,
@@ -173,23 +172,6 @@ function Nutrition() {
       )}
 
       <PaywallOverlay feature={t("nutr.title")} description={t("pay.overlay.food_desc")}>
-
-
-      <MicroDetailsCard
-        meals={dayMeals}
-        title={t("nutr.micro_title")}
-        todayLabel={isToday ? t("nutr.today") : formatDate(viewDate, lang)}
-        labels={{
-          vitaminC: t("nutr.micro.vitaminC"),
-          vitaminD: t("nutr.micro.vitaminD"),
-          potassium: t("nutr.micro.potassium"),
-          iron: t("nutr.micro.iron"),
-          calcium: t("nutr.micro.calcium"),
-        }}
-      />
-
-
-
       <section className="mt-5 space-y-3">
         {MEAL_TYPES.map((m) => (
           <MealSection
