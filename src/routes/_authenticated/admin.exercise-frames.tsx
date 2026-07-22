@@ -11,7 +11,16 @@ import { useT } from "@/lib/i18n";
 import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/exercise-frames")({
-  head: () => ({ meta: [{ title: "Exercise frames — Admin" }] }),
+  head: () => ({
+    meta: [
+      { title: "Alyva Exercise Frames Admin" },
+      { name: "description", content: "Reset and regenerate Alyva exercise motion frames with locked camera guidance." },
+      { property: "og:title", content: "Alyva Exercise Frames Admin" },
+      { property: "og:description", content: "Reset and regenerate Alyva exercise motion frames with locked camera guidance." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: AdminExerciseFramesPage,
 });
 
