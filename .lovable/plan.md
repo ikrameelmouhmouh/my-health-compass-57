@@ -1,35 +1,39 @@
 ## Doel
-De "Weergavemodus" (Premium / Gratis toggle) mag niet meer zichtbaar zijn voor gebruikers in `/settings`. Alleen jij, als admin, moet hem kunnen gebruiken via een aparte pagina `/admin/view-mode` — beveiligd op dezelfde manier als `/admin/exercise-frames`.
 
-## Wijzigingen
+Eén admin-pagina met een toggle **Edit-modus ↔ Klantweergave** (zelfde patroon als `/admin/view-mode`). In Edit-modus (standaard voor jou, tot je zelf wisselt) worden de pre-app schermen — welkomstscherm, intro/onboarding-carousel, taalkeuze — automatisch overgeslagen en land je direct in de app. Klanten zien nergens iets van dit alles.
 
-### 1. `src/routes/_authenticated/settings.tsx`
-- Verwijder de complete "View mode" sectie (regels ~99–133).
-- Verwijder de niet meer gebruikte `setOverride` uit de `usePremium()` destructuring (behoud `isPremium` — die wordt nog gebruikt in de plan-card).
+## Waarom niet ook "login overslaan"
 
-### 2. Nieuwe pagina: `src/routes/_authenticated/admin.view-mode.tsx`
-- Zelfde admin-role-check als `admin.exercise-frames.tsx` (via `has_role` / `user_roles` met `app_role = 'admin'`). Niet-admins zien een "Geen toegang" bericht.
-- Toont dezelfde Premium / Gratis toggle als nu in settings staat, gebruikmakend van `usePremium()` → `override` en `setOverride`.
-- Extra: een derde knop "Reset" die `setOverride(null)` aanroept zodat je terug kan naar de echte subscription-status.
-- Kleine uitleg-tekst: "Dit is een admin-tool. Gebruikers zien deze pagina niet."
+Supabase bewaart je sessie al persistent in localStorage. Zolang je één keer ingelogd bent en niet uitlogt, krijg je het inlogscherm niet meer te zien — óók niet in Edit-modus. Kortom: Edit-modus lost het "steeds intro/welcome zien" op; sessie-persistence lost het "steeds inloggen" op (dat werkt al). Als je écht een keer bent uitgelogd, moet je één keer inloggen — daar valt niet omheen zonder wachtwoord op te slaan (onveilig, ook op jouw apparaat).
 
-### 3. Vertalingen (`src/lib/i18n.tsx`)
-- Verwijder de nu ongebruikte `set.viewmode.*` keys niet (kunnen hergebruikt worden in nieuwe pagina), of hernoem naar `admin.viewmode.*`.
-- Nieuwe keys voor alle 6 talen (en, nl, ar, fr, de, es):
-  - `admin.viewmode.title` — "Weergavemodus"
-  - `admin.viewmode.desc` — "Bekijk de app als Premium- of gratis gebruiker."
-  - `admin.viewmode.premium` — "Premium"
-  - `admin.viewmode.free` — "Gratis"
-  - `admin.viewmode.reset` — "Reset naar echte status"
-  - `admin.viewmode.admin_only` — "Alleen zichtbaar voor admins."
-  - `admin.viewmode.no_access` — "Geen toegang."
+## Nieuwe pagina `/admin/app-mode`
 
-## Technische details
-- Route bestand: `src/routes/_authenticated/admin.view-mode.tsx` → URL `/admin/view-mode`.
-- Admin check patroon (kopie uit `admin.exercise-frames.tsx`): query op `user_roles` waar `user_id = auth.uid()` en `role = 'admin'`; render pagina alleen als match.
-- Geen wijzigingen aan `use-premium.ts` — API blijft `{ isPremium, override, setOverride, ... }`.
-- Geen navigatie-link toegevoegd in menu's (pagina blijft "verborgen", alleen bereikbaar via URL door admin).
+- Zelfde admin-guard als `/admin/view-mode` en `/admin/exercise-frames` (`user_roles.role === 'admin'`).
+- Twee-knops toggle: **Edit-modus** / **Klantweergave**.
+- "Reset naar klantweergave" knop.
+- Uitleg: "Edit-modus slaat welkomstscherm, intro en taalkeuze over. Alleen zichtbaar op dit apparaat."
 
-## Wat er NIET verandert
-- De `usePremium()` hook, localStorage-mechanisme en de sneak-peek `PaywallOverlay` blijven ongewijzigd.
-- Gewone gebruikers zien niets nieuws; voor hen verdwijnt alleen de sectie in settings.
+State in `localStorage` onder key `alyva.app_mode` = `"edit" | "customer" | null`. Default (geen key) = klantweergave, dus klanten zijn ongewijzigd. Een kleine helper `useAppMode()` (analoog aan `usePremium()`) leest de key en luistert op `storage`/custom-event.
+
+## Redirect-gedrag in Edit-modus
+
+Op deze routes: als `app_mode === "edit"`, direct `navigate({ replace: true })` naar `/profile` (de bestaande `_authenticated` gate stuurt je door naar `/login` als er toevallig geen sessie is, en anders naar de app):
+
+- `src/routes/index.tsx` — het huidige "Your personal health plan starts here"-scherm
+- `src/routes/welcome.tsx` — Welcome to Alyva + intro-carousel
+- `src/routes/intro.tsx` — intro-slides
+- Taalkeuze-scherm (onderdeel van intro/welcome flow)
+
+De redirect gebeurt in een `useEffect` bovenaan de component. Klanten (geen key) zien alles zoals nu.
+
+## Wat NIET verandert
+
+- `/login` en `/register` blijven ongewijzigd (edit-modus stuurt je alleen om die schermen heen wanneer je al een sessie hebt).
+- `_authenticated` route-gate blijft ongewijzigd.
+- `usePremium` / `/admin/view-mode` blijven zoals ze zijn — losse toggle.
+- Klant-flow: geen enkele wijziging, geen extra checks, geen extra UI.
+
+## i18n
+
+Nieuwe keys in alle 6 talen (`en`, `nl`, `ar`, `fr`, `de`, `es`):
+`admin.appmode.title`, `.desc`, `.edit`, `.customer`, `.reset`, `.admin_only`, `.current`, `.explain`.

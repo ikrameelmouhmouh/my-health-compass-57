@@ -40,6 +40,7 @@ import { Route as AuthenticatedWorkoutSessionTemplateIdRouteImport } from './rou
 import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
 import { Route as AuthenticatedAdminViewModeRouteImport } from './routes/_authenticated/admin.view-mode'
 import { Route as AuthenticatedAdminExerciseFramesRouteImport } from './routes/_authenticated/admin.exercise-frames'
+import { Route as AuthenticatedAdminAppModeRouteImport } from './routes/_authenticated/admin.app-mode'
 import { Route as AuthenticatedActivitySessionActivityIdRouteImport } from './routes/_authenticated/activity-session.$activityId'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -214,6 +215,12 @@ const AuthenticatedAdminExerciseFramesRoute =
     path: '/admin/exercise-frames',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedAdminAppModeRoute =
+  AuthenticatedAdminAppModeRouteImport.update({
+    id: '/admin/app-mode',
+    path: '/admin/app-mode',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedActivitySessionActivityIdRoute =
   AuthenticatedActivitySessionActivityIdRouteImport.update({
     id: '/activity-session/$activityId',
@@ -288,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
+  '/admin/app-mode': typeof AuthenticatedAdminAppModeRoute
   '/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
   '/admin/view-mode': typeof AuthenticatedAdminViewModeRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
@@ -328,6 +336,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
+  '/admin/app-mode': typeof AuthenticatedAdminAppModeRoute
   '/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
   '/admin/view-mode': typeof AuthenticatedAdminViewModeRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
@@ -370,6 +379,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
+  '/_authenticated/admin/app-mode': typeof AuthenticatedAdminAppModeRoute
   '/_authenticated/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
   '/_authenticated/admin/view-mode': typeof AuthenticatedAdminViewModeRoute
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
@@ -412,6 +422,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/activity-session/$activityId'
+    | '/admin/app-mode'
     | '/admin/exercise-frames'
     | '/admin/view-mode'
     | '/ai-coach/$threadId'
@@ -452,6 +463,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/activity-session/$activityId'
+    | '/admin/app-mode'
     | '/admin/exercise-frames'
     | '/admin/view-mode'
     | '/ai-coach/$threadId'
@@ -493,6 +505,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/activity-session/$activityId'
+    | '/_authenticated/admin/app-mode'
     | '/_authenticated/admin/exercise-frames'
     | '/_authenticated/admin/view-mode'
     | '/_authenticated/ai-coach/$threadId'
@@ -747,6 +760,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExerciseFramesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/app-mode': {
+      id: '/_authenticated/admin/app-mode'
+      path: '/admin/app-mode'
+      fullPath: '/admin/app-mode'
+      preLoaderRoute: typeof AuthenticatedAdminAppModeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/activity-session/$activityId': {
       id: '/_authenticated/activity-session/$activityId'
       path: '/activity-session/$activityId'
@@ -834,6 +854,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedWeightHistoryRoute: typeof AuthenticatedWeightHistoryRoute
   AuthenticatedWorkoutHistoryRoute: typeof AuthenticatedWorkoutHistoryRoute
   AuthenticatedActivitySessionActivityIdRoute: typeof AuthenticatedActivitySessionActivityIdRoute
+  AuthenticatedAdminAppModeRoute: typeof AuthenticatedAdminAppModeRoute
   AuthenticatedAdminExerciseFramesRoute: typeof AuthenticatedAdminExerciseFramesRoute
   AuthenticatedAdminViewModeRoute: typeof AuthenticatedAdminViewModeRoute
   AuthenticatedWorkoutSessionTemplateIdRoute: typeof AuthenticatedWorkoutSessionTemplateIdRoute
@@ -857,6 +878,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedWorkoutHistoryRoute: AuthenticatedWorkoutHistoryRoute,
   AuthenticatedActivitySessionActivityIdRoute:
     AuthenticatedActivitySessionActivityIdRoute,
+  AuthenticatedAdminAppModeRoute: AuthenticatedAdminAppModeRoute,
   AuthenticatedAdminExerciseFramesRoute: AuthenticatedAdminExerciseFramesRoute,
   AuthenticatedAdminViewModeRoute: AuthenticatedAdminViewModeRoute,
   AuthenticatedWorkoutSessionTemplateIdRoute:
