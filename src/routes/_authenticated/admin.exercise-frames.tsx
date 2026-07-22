@@ -255,7 +255,7 @@ function AdminExerciseFramesPage() {
                   <>
                     <button
                       type="button"
-                      aria-label="Vergroot frame 1"
+                      aria-label={t("admin.frames.lightbox.zoom_frame_1")}
                       onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 0 })}
                       className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
                     >
@@ -263,7 +263,7 @@ function AdminExerciseFramesPage() {
                     </button>
                     <button
                       type="button"
-                      aria-label="Vergroot frame 2"
+                      aria-label={t("admin.frames.lightbox.zoom_frame_2")}
                       onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 1 })}
                       className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
                     >
