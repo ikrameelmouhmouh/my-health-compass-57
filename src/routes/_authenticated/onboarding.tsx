@@ -16,7 +16,7 @@ import { useT } from "@/lib/i18n";
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Build your plan — Alyva" }] }),
   validateSearch: z.object({
-    recalc: z.number().optional(),
+    recalc: z.coerce.number().optional(),
   }),
   component: Onboarding,
 });

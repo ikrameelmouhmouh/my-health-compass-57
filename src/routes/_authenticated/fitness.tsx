@@ -21,7 +21,7 @@ import { normalizeDay, todayDayName } from "@/lib/workout-today";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
   validateSearch: z.object({
-    wizard: z.number().optional(),
+    wizard: z.coerce.number().optional(),
   }),
   component: FitnessPage,
 });
