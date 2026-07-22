@@ -11,6 +11,14 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
 import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 
+type FilmSpeed = "slow" | "normal" | "fast";
+
+const SPEED_MS: Record<FilmSpeed, number> = {
+  slow: 1500,
+  normal: 800,
+  fast: 400,
+};
+
 export const Route = createFileRoute("/_authenticated/admin/exercise-frames")({
   head: () => ({
     meta: [
