@@ -915,6 +915,8 @@ const translations: Translations = {
     "admin.appmode.no_access": "Access denied.",
     "admin.appmode.current": "Current",
     "admin.appmode.explain": "Edit mode skips the welcome, intro and language screens so you go straight into the app. Customers see the full flow.",
+    "admin.edit.title": "Edit page",
+    "admin.frames.page_title": "Edit workout page",
     "set.viewmode.free": "Free",
     "pay.feature.ai_coach": "AI Coach",
     "pay.overlay.ai_coach_desc": "Chat with your personal AI Coach with Alyva Plus.",
