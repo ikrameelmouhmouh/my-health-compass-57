@@ -314,6 +314,90 @@ function AdminExerciseFramesPage() {
           );
         })}
       </ul>
+
+      <Lightbox value={lightbox} onChange={setLightbox} />
     </main>
+  );
+}
+
+function Lightbox({
+  value,
+  onChange,
+}: {
+  value: { exerciseId: string; frameIndex: 0 | 1 } | null;
+  onChange: (v: { exerciseId: string; frameIndex: 0 | 1 } | null) => void;
+}) {
+  const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
+  const frameIndex = value?.frameIndex ?? 0;
+
+  useEffect(() => {
+    if (!value) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        onChange({ exerciseId: value.exerciseId, frameIndex: 0 });
+      } else if (e.key === "ArrowRight") {
+        onChange({ exerciseId: value.exerciseId, frameIndex: 1 });
+      } else if (e.key === "Escape") {
+        onChange(null);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [value, onChange]);
+
+  if (!exercise || !value) return null;
+
+  const url = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/${frameIndex}`;
+
+  return (
+    <Dialog open={!!value} onOpenChange={(open) => !open && onChange(null)}>
+      <DialogContent
+        hideClose
+        className="max-w-[95vw] max-h-[95vh] w-auto border-0 bg-transparent p-0 shadow-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+      >
+        <DialogTitle className="sr-only">{exercise.name}</DialogTitle>
+        <div className="relative flex items-center justify-center">
+          <button
+            type="button"
+            aria-label="Vorige frame"
+            onClick={() => onChange({ exerciseId: exercise.id, frameIndex: 0 })}
+            disabled={frameIndex === 0}
+            className="absolute left-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30 sm:left-4"
+          >
+            <ChevronLeft className="size-6" />
+          </button>
+
+          <img
+            src={url}
+            alt={`${exercise.name} frame ${frameIndex + 1}`}
+            className="max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
+          />
+
+          <button
+            type="button"
+            aria-label="Volgende frame"
+            onClick={() => onChange({ exerciseId: exercise.id, frameIndex: 1 })}
+            disabled={frameIndex === 1}
+            className="absolute right-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30 sm:right-4"
+          >
+            <ChevronRight className="size-6" />
+          </button>
+
+          <button
+            type="button"
+            aria-label="Sluiten"
+            onClick={() => onChange(null)}
+            className="absolute right-2 top-2 z-10 grid size-10 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 sm:right-4 sm:top-4"
+          >
+            <XCircle className="size-6" />
+          </button>
+        </div>
+
+        <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/60 px-4 py-2 text-center text-sm text-white backdrop-blur-sm">
+          <p className="font-semibold">{exercise.name}</p>
+          <p className="text-xs opacity-80">Frame {frameIndex + 1} van 2</p>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
