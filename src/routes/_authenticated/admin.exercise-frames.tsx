@@ -253,8 +253,22 @@ function AdminExerciseFramesPage() {
               <div className="flex shrink-0 gap-1">
                 {status === "done" ? (
                   <>
-                    <img src={url0} alt="" className="size-14 rounded-lg object-cover" />
-                    <img src={url1} alt="" className="size-14 rounded-lg object-cover" />
+                    <button
+                      type="button"
+                      aria-label="Vergroot frame 1"
+                      onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 0 })}
+                      className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                    >
+                      <img src={url0} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Vergroot frame 2"
+                      onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 1 })}
+                      className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                    >
+                      <img src={url1} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
+                    </button>
                   </>
                 ) : (
                   <div className="grid size-14 place-items-center rounded-lg bg-muted text-[10px] text-muted-foreground">
