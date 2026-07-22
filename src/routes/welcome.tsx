@@ -24,8 +24,12 @@ function Welcome() {
     (async () => {
       const { data } = await supabase.auth.getSession();
       if (cancelled) return;
-      if (data.session) navigate({ to: "/profile", replace: true });
-      else if (localStorage.getItem("vita.has_account")) navigate({ to: "/login", replace: true });
+      if (data.session) { navigate({ to: "/profile", replace: true }); return; }
+      if (localStorage.getItem("alyva.app_mode") === "edit") {
+        navigate({ to: "/login", replace: true });
+        return;
+      }
+      if (localStorage.getItem("vita.has_account")) navigate({ to: "/login", replace: true });
     })();
     return () => { cancelled = true; };
   }, [navigate]);

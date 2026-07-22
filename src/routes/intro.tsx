@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Sparkles, Target, Heart, Map, Flame, Camera, CalendarDays } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
 
@@ -13,6 +13,13 @@ function Intro() {
   const { dir } = useI18n();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem("alyva.app_mode") === "edit") {
+      navigate({ to: "/login", replace: true });
+    }
+  }, [navigate]);
 
   const slides = [
     { icon: null,        title: t("intro.s0.title"), desc: t("intro.s0.desc"), brand: true },
