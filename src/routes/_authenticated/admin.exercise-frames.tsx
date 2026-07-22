@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
-import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/exercise-frames")({
   head: () => ({
