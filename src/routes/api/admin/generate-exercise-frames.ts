@@ -1,6 +1,11 @@
 // Admin-only endpoint that generates AI frames for a list of exercises.
 // Body: { ids: string[], force?: boolean, prompts?: Record<string,string> }
 // Auth: Bearer token of a user with the `admin` role in `user_roles`.
+//
+// Generation strategy: frame 0 (start pose) is generated from text. Frame 1
+// (end pose) is generated as an IMAGE EDIT of frame 0 — same camera, lighting,
+// mannequin and background, only the body pose changes. This makes the two
+// frames read as a mini-film of the movement instead of two unrelated shots.
 
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
@@ -18,7 +23,6 @@ export const Route = createFileRoute("/api/admin/generate-exercise-frames")({
         const supaUrl = process.env.SUPABASE_URL!;
         const supaAnon = process.env.SUPABASE_PUBLISHABLE_KEY!;
 
-        // Verify user + admin role via a request-scoped client that uses the caller's JWT.
         const userClient = createClient(supaUrl, supaAnon, {
           auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
           global: { headers: { Authorization: `Bearer ${token}` } },
@@ -45,9 +49,8 @@ export const Route = createFileRoute("/api/admin/generate-exercise-frames")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Process in parallel batches of 5 to stay under Worker timeout.
         const results: Array<{ id: string; status: "done" | "failed" | "skipped"; error?: string }> = [];
-        const CHUNK = 5;
+        const CHUNK = 3;
         for (let i = 0; i < ids.length; i += CHUNK) {
           const chunk = ids.slice(i, i + CHUNK);
           const outs = await Promise.all(
@@ -80,13 +83,25 @@ async function generateForExercise(args: {
       if (job?.status === "done") return { id, status: "skipped" };
     }
 
-    const finalPrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id);
+    const basePrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id);
 
-    // Generate 2 frames in parallel (start + end position).
-    const [b0, b1] = await Promise.all([
-      generateOne(`${finalPrompt}\n\nRender the START position: neutral resting stance before the movement begins.`, apiKey),
-      generateOne(`${finalPrompt}\n\nRender the END position: peak contraction, muscles fully engaged.`, apiKey),
-    ]);
+    // Frame 0: START position (text-to-image).
+    const startPrompt = `${basePrompt}\n\nRender the START position of the movement: the ready/resting stance just before the rep begins. Full body in frame.`;
+    const b0 = await generateOne({ prompt: startPrompt, apiKey });
+
+    // Frame 1: END position (image-to-image using frame 0 as reference so
+    // camera, lighting, mannequin and background stay identical).
+    const endPrompt = [
+      "Keep this scene EXACTLY the same: same camera position and angle, same focal length, same distance, same lighting and shadows, same background, same mannequin (identical proportions, skin tone, clothing).",
+      "ONLY change the body pose: move the mannequin to the END position of the exercise — peak contraction, muscles fully engaged.",
+      "Keep the full body visible in the frame. Do not zoom, pan, rotate, or change any visual element other than the pose.",
+    ].join(" ");
+    const b64_0 = uint8ToBase64(b0);
+    const b1 = await generateOne({
+      prompt: endPrompt,
+      apiKey,
+      referenceImageB64: b64_0,
+    });
 
     const up0 = await supabaseAdmin.storage.from("exercise-frames").upload(`${id}-0.jpg`, b0, {
       contentType: "image/jpeg",
@@ -102,7 +117,7 @@ async function generateForExercise(args: {
     await supabaseAdmin.from("exercise_frame_jobs").upsert({
       exercise_id: id,
       status: "done",
-      prompt: finalPrompt,
+      prompt: basePrompt,
       error: null,
     });
     return { id, status: "done" };
@@ -117,13 +132,25 @@ async function generateForExercise(args: {
   }
 }
 
-async function generateOne(prompt: string, apiKey: string): Promise<Uint8Array> {
+async function generateOne(args: {
+  prompt: string;
+  apiKey: string;
+  referenceImageB64?: string;
+}): Promise<Uint8Array> {
+  const { prompt, apiKey, referenceImageB64 } = args;
+  const content: Array<Record<string, unknown>> = [{ type: "text", text: prompt }];
+  if (referenceImageB64) {
+    content.push({
+      type: "image_url",
+      image_url: { url: `data:image/jpeg;base64,${referenceImageB64}` },
+    });
+  }
   const res = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "google/gemini-3.1-flash-image",
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: "user", content }],
       modalities: ["image", "text"],
     }),
   });
@@ -137,15 +164,42 @@ async function generateOne(prompt: string, apiKey: string): Promise<Uint8Array> 
   return out;
 }
 
+function uint8ToBase64(bytes: Uint8Array): string {
+  let bin = "";
+  const CHUNK = 0x8000;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    bin += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+  }
+  return btoa(bin);
+}
+
 function buildDefaultPrompt(id: string): string {
+  const angle = cameraAngleFor(id);
   return [
     `Photorealistic 3D-rendered androgynous mannequin performing the "${humanize(id)}" gym exercise.`,
     "Matte medium-grey skin, no hair, no facial features, no gender markers (flat chest, generic athletic shorts).",
     "Correct anatomical form and posture for this specific exercise.",
     "If the exercise uses a machine or equipment, the equipment must be clearly visible and correctly positioned in the frame.",
-    "Studio shot on a clean off-white background with soft shadow, side-angle view, full body visible, sharp focus.",
+    `Camera: ${angle}, fixed position, 50mm equivalent focal length, full body visible, sharp focus.`,
+    "Studio shot on a clean off-white background with a single soft shadow.",
     "No text, no watermark, no logos.",
   ].join(" ");
+}
+
+function cameraAngleFor(id: string): string {
+  const s = id.toLowerCase();
+  // Vertical pulling / pressing movements read best from the front so both
+  // arms are visible symmetrically.
+  if (/(pulldown|pull-?up|chin-?up|shoulder-?press|overhead-?press|lateral-?raise|front-?raise|face-?pull|shrug|curl)/.test(s)) {
+    return "straight front view, eye level";
+  }
+  // Push-ups and planks — slight 3/4 angle reads the body line best.
+  if (/(push-?up|plank|dip)/.test(s)) {
+    return "three-quarter front view, slightly low angle";
+  }
+  // Everything else (squat, deadlift, row, hinge, lunge, bench press, leg
+  // curl/extension, hip thrust): pure side view shows the joint angles.
+  return "pure side view, eye level";
 }
 
 function humanize(id: string): string {
