@@ -185,7 +185,7 @@ function AdminExerciseFramesPage() {
       <header className="flex items-center gap-3">
         <Shield className="size-5 text-brand" />
         <div className="min-w-0">
-          <h1 className="font-display text-xl font-semibold tracking-tight">Oefening-afbeeldingen</h1>
+          <h1 className="font-display text-xl font-semibold tracking-tight">{t("admin.frames.page_title")}</h1>
           <p className="text-[12px] text-muted-foreground">
             {doneCount} van {total} klaar · {failedCount} mislukt
           </p>
