@@ -289,24 +289,35 @@ function AdminExerciseFramesPage() {
             <li key={ex.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card/50 p-2.5">
               <div className="flex shrink-0 gap-1">
                 {status === "done" ? (
-                  <>
+                  filmMode ? (
                     <button
                       type="button"
-                      aria-label={t("admin.frames.lightbox.zoom_frame_1")}
+                      aria-label={t("admin.frames.lightbox.zoom_film")}
                       onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 0 })}
-                      className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                      className="relative h-14 w-[118px] cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
                     >
-                      <img src={url0} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
+                      <FrameAnimation url0={url0} url1={url1} speed={filmSpeed} />
                     </button>
-                    <button
-                      type="button"
-                      aria-label={t("admin.frames.lightbox.zoom_frame_2")}
-                      onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 1 })}
-                      className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
-                    >
-                      <img src={url1} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
-                    </button>
-                  </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        aria-label={t("admin.frames.lightbox.zoom_frame_1")}
+                        onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 0 })}
+                        className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                      >
+                        <img src={url0} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={t("admin.frames.lightbox.zoom_frame_2")}
+                        onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 1 })}
+                        className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                      >
+                        <img src={url1} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
+                      </button>
+                    </>
+                  )
                 ) : (
                   <div className="grid size-14 place-items-center rounded-lg bg-muted text-[10px] text-muted-foreground">
                     {status === "failed" ? <XCircle className="size-5 text-destructive" /> : status === "bad" ? "slecht" : "…"}
