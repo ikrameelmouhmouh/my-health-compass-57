@@ -244,7 +244,7 @@ function AdminExerciseFramesPage() {
       <p className="mt-2 text-[11px] text-muted-foreground">{t("admin.frames.reset_hint")}</p>
       {filmMode ? (
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="text-[11px] text-muted-foreground">{t("admin.frames.film_speed_normal")}:</span>
+          <span className="text-[11px] text-muted-foreground">{t("admin.frames.film_speed_label")}</span>
           {(["slow", "normal", "fast"] as const).map((s) => (
             <button
               key={s}
