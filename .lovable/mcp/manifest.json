@@ -1,0 +1,161 @@
+{
+  "version": 1,
+  "sdk_version": "0.24.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://wnbbvkctlheqdltojbmy.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "alyva-mcp",
+      "version": "0.1.0",
+      "title": "Alyva"
+    },
+    "tools": [
+      {
+        "name": "get_profile",
+        "title": "Get my Alyva profile",
+        "description": "Return the signed-in user's Alyva profile: display name, goal, target weight, current weight, daily calorie/macro targets.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_recent_workouts",
+        "title": "List recent gym workouts",
+        "description": "Return the signed-in user's most recent completed gym workout sessions (name, date, duration, total volume, reps, RPE).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "How many sessions to return. Default 10.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_recent_activities",
+        "title": "List recent cardio activities",
+        "description": "Return the signed-in user's most recent cardio activity sessions (activity name, duration, calories, distance).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "How many activities to return. Default 10.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "log_activity",
+        "title": "Log a cardio activity",
+        "description": "Insert a completed cardio activity session for the signed-in user (e.g. a run, a swim). Duration is in seconds.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "activity_name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Human-readable activity name, e.g. 'Zwemmen' or 'Running'."
+            },
+            "activity_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Short slug, e.g. 'swim', 'run', 'cycle'."
+            },
+            "duration_seconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991,
+              "description": "Total duration in seconds."
+            },
+            "kcal": {
+              "description": "Calories burned, if known.",
+              "type": "number"
+            },
+            "distance_m": {
+              "description": "Distance in meters, if known.",
+              "type": "number"
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 500
+            }
+          },
+          "required": [
+            "activity_name",
+            "activity_id",
+            "duration_seconds"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "set_current_weight",
+        "title": "Update current weight",
+        "description": "Update the signed-in user's current body weight (in kilograms) on their Alyva profile.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "weight_kg": {
+              "type": "number",
+              "minimum": 20,
+              "maximum": 400,
+              "description": "Current body weight in kilograms."
+            }
+          },
+          "required": [
+            "weight_kg"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
