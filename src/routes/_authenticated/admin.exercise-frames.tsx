@@ -411,23 +411,47 @@ function FrameAnimation({
 function Lightbox({
   value,
   onChange,
+  filmMode,
+  filmSpeed,
+  onSpeedChange,
 }: {
   value: { exerciseId: string; frameIndex: 0 | 1 } | null;
   onChange: (v: { exerciseId: string; frameIndex: 0 | 1 } | null) => void;
+  filmMode: boolean;
+  filmSpeed: FilmSpeed;
+  onSpeedChange: (s: FilmSpeed) => void;
 }) {
   const t = useT();
   const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
   const frameIndex = value?.frameIndex ?? 0;
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    if (value) setPlaying(filmMode);
+  }, [value, filmMode]);
+
+  useEffect(() => {
+    if (!playing || !value) return;
+    const interval = setInterval(() => {
+      onChange({ exerciseId: value.exerciseId, frameIndex: frameIndex === 0 ? 1 : 0 });
+    }, SPEED_MS[filmSpeed]);
+    return () => clearInterval(interval);
+  }, [playing, value, frameIndex, filmSpeed, onChange]);
 
   useEffect(() => {
     if (!value) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
+        setPlaying(false);
         onChange({ exerciseId: value.exerciseId, frameIndex: 0 });
       } else if (e.key === "ArrowRight") {
+        setPlaying(false);
         onChange({ exerciseId: value.exerciseId, frameIndex: 1 });
       } else if (e.key === "Escape") {
         onChange(null);
+      } else if (e.key === " ") {
+        e.preventDefault();
+        setPlaying((p) => !p);
       }
     };
     window.addEventListener("keydown", handler);
@@ -436,7 +460,9 @@ function Lightbox({
 
   if (!exercise || !value) return null;
 
-  const url = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/${frameIndex}`;
+  const url0 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/0`;
+  const url1 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/1`;
+  const transitionMs = Math.min(SPEED_MS[filmSpeed] * 0.5, 600);
 
   return (
     <Dialog open={!!value} onOpenChange={(open) => !open && onChange(null)}>
@@ -449,24 +475,39 @@ function Lightbox({
           <button
             type="button"
             aria-label={t("admin.frames.lightbox.previous")}
-            onClick={() => onChange({ exerciseId: exercise.id, frameIndex: 0 })}
-            disabled={frameIndex === 0}
+            onClick={() => {
+              setPlaying(false);
+              onChange({ exerciseId: exercise.id, frameIndex: 0 });
+            }}
+            disabled={frameIndex === 0 && !playing}
             className="absolute left-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30 sm:left-4"
           >
             <ChevronLeft className="size-6" />
           </button>
 
-          <img
-            src={url}
-            alt={`${exercise.name} frame ${frameIndex + 1}`}
-            className="max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
-          />
+          <div className="relative max-h-[85vh] max-w-[90vw]">
+            <img
+              src={url0}
+              alt={`${exercise.name} frame 1`}
+              className="max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
+              style={{ opacity: frameIndex === 0 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+            />
+            <img
+              src={url1}
+              alt={`${exercise.name} frame 2`}
+              className="absolute left-0 top-0 max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
+              style={{ opacity: frameIndex === 1 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+            />
+          </div>
 
           <button
             type="button"
             aria-label={t("admin.frames.lightbox.next")}
-            onClick={() => onChange({ exerciseId: exercise.id, frameIndex: 1 })}
-            disabled={frameIndex === 1}
+            onClick={() => {
+              setPlaying(false);
+              onChange({ exerciseId: exercise.id, frameIndex: 1 });
+            }}
+            disabled={frameIndex === 1 && !playing}
             className="absolute right-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30 sm:right-4"
           >
             <ChevronRight className="size-6" />
@@ -482,9 +523,33 @@ function Lightbox({
           </button>
         </div>
 
-        <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/60 px-4 py-2 text-center text-sm text-white backdrop-blur-sm">
-          <p className="font-semibold">{exercise.name}</p>
-          <p className="text-xs opacity-80">{t("admin.frames.lightbox.frame_of", { current: frameIndex + 1, total: 2 })}</p>
+        <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3 rounded-full bg-black/60 px-4 py-2 text-sm text-white backdrop-blur-sm">
+          <button
+            type="button"
+            onClick={() => setPlaying((p) => !p)}
+            className="grid size-7 place-items-center rounded-full bg-white/20 hover:bg-white/30"
+            aria-label={playing ? t("admin.frames.film_stop") : t("admin.frames.film_play")}
+          >
+            {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
+          </button>
+          <div className="text-center">
+            <p className="font-semibold">{exercise.name}</p>
+            <p className="text-xs opacity-80">{t("admin.frames.lightbox.frame_of", { current: frameIndex + 1, total: 2 })}</p>
+          </div>
+          <div className="flex gap-1">
+            {(["slow", "normal", "fast"] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => onSpeedChange(s)}
+                className={`rounded-full px-2 py-0.5 text-[10px] transition ${
+                  filmSpeed === s ? "bg-white/40 text-white" : "bg-white/20 text-white/80 hover:bg-white/30"
+                }`}
+              >
+                {t(`admin.frames.film_speed_${s}`)}
+              </button>
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
