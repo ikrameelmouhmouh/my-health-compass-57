@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { EXERCISES } from "@/lib/exercise-library";
+import { getCameraHint, hasExplicitCameraHint } from "@/lib/exercise-camera-hints";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search } from "lucide-react";
@@ -82,13 +83,20 @@ function AdminExerciseFramesPage() {
     if (ids.length === 0) return;
     setRunning(true);
     try {
+      const exerciseData = Object.fromEntries(
+        ids.map((id) => {
+          const ex = EXERCISES.find((e) => e.id === id);
+          return [id, { name: ex?.name, equipment: ex?.equipment }];
+        }),
+      );
       // Split into chunks of 20 for the endpoint.
       for (let i = 0; i < ids.length; i += 20) {
         const chunk = ids.slice(i, i + 20);
+        const chunkData = Object.fromEntries(chunk.map((id) => [id, exerciseData[id]]));
         const res = await fetch("/api/admin/generate-exercise-frames", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
-          body: JSON.stringify({ ids: chunk, force }),
+          body: JSON.stringify({ ids: chunk, force, exerciseData: chunkData }),
         });
         if (!res.ok) throw new Error(await res.text());
         await qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
@@ -180,6 +188,8 @@ function AdminExerciseFramesPage() {
           const status = job?.status ?? "pending";
           const url0 = `/api/exercise-frame/${encodeURIComponent(ex.id)}/0`;
           const url1 = `/api/exercise-frame/${encodeURIComponent(ex.id)}/1`;
+          const hint = getCameraHint(ex.id, ex.equipment, ex.name);
+          const explicit = hasExplicitCameraHint(ex.id);
           return (
             <li key={ex.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card/50 p-2.5">
               <div className="flex shrink-0 gap-1">
@@ -198,8 +208,12 @@ function AdminExerciseFramesPage() {
                 <p className="truncate text-sm font-semibold">{ex.name}</p>
                 <p className="truncate text-[11px] text-muted-foreground">
                   {ex.equipment} · {status}
-                  {job?.error ? ` · ${job.error.slice(0, 60)}` : ""}
+                  {explicit ? " · expliciet" : " · fallback"}
                 </p>
+                <p className="truncate text-[11px] text-muted-foreground/80" title={hint.label}>
+                  {hint.label}
+                </p>
+                {job?.error ? <p className="truncate text-[11px] text-destructive">{job.error.slice(0, 60)}</p> : null}
               </div>
               <div className="flex shrink-0 gap-1">
                 {status === "done" ? (

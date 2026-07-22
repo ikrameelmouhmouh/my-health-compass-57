@@ -1,16 +1,27 @@
 // Admin-only endpoint that generates AI frames for a list of exercises.
-// Body: { ids: string[], force?: boolean, prompts?: Record<string,string> }
+// Body: {
+//   ids: string[],
+//   force?: boolean,
+//   prompts?: Record<string,string>,
+//   exerciseData?: Record<string, { name: string; equipment: string }>
+// }
 // Auth: Bearer token of a user with the `admin` role in `user_roles`.
 //
 // Generation strategy: frame 0 (start pose) is generated from text. Frame 1
 // (end pose) is generated as an IMAGE EDIT of frame 0 — same camera, lighting,
-// mannequin and background, only the body pose changes. This makes the two
-// frames read as a mini-film of the movement instead of two unrelated shots.
+// mannequin, machine and background, only the body pose changes. This makes the
+// two frames read as a mini-film of the movement instead of two unrelated shots.
 
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { getCameraHint } from "@/lib/exercise-camera-hints";
 
-type Body = { ids?: unknown; force?: unknown; prompts?: unknown };
+type Body = {
+  ids?: unknown;
+  force?: unknown;
+  prompts?: unknown;
+  exerciseData?: unknown;
+};
 
 export const Route = createFileRoute("/api/admin/generate-exercise-frames")({
   server: {
@@ -41,6 +52,10 @@ export const Route = createFileRoute("/api/admin/generate-exercise-frames")({
         const ids = Array.isArray(body.ids) ? (body.ids as unknown[]).filter((x): x is string => typeof x === "string") : [];
         const force = Boolean(body.force);
         const prompts = (body.prompts && typeof body.prompts === "object" ? body.prompts : {}) as Record<string, string>;
+        const exerciseData = (body.exerciseData && typeof body.exerciseData === "object" ? body.exerciseData : {}) as Record<
+          string,
+          { name?: string; equipment?: string }
+        >;
         if (ids.length === 0) return Response.json({ ok: true, results: [] });
         if (ids.length > 25) return new Response("Too many ids (max 25)", { status: 400 });
 
@@ -54,7 +69,17 @@ export const Route = createFileRoute("/api/admin/generate-exercise-frames")({
         for (let i = 0; i < ids.length; i += CHUNK) {
           const chunk = ids.slice(i, i + CHUNK);
           const outs = await Promise.all(
-            chunk.map((id) => generateForExercise({ id, force, prompt: prompts[id], apiKey: key, supabaseAdmin })),
+            chunk.map((id) =>
+              generateForExercise({
+                id,
+                force,
+                prompt: prompts[id],
+                name: exerciseData[id]?.name,
+                equipment: exerciseData[id]?.equipment,
+                apiKey: key,
+                supabaseAdmin,
+              }),
+            ),
           );
           results.push(...outs);
         }
@@ -68,11 +93,13 @@ async function generateForExercise(args: {
   id: string;
   force: boolean;
   prompt?: string;
+  name?: string;
+  equipment?: string;
   apiKey: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabaseAdmin: any;
 }): Promise<{ id: string; status: "done" | "failed" | "skipped"; error?: string }> {
-  const { id, force, prompt, apiKey, supabaseAdmin } = args;
+  const { id, force, prompt, name, equipment, apiKey, supabaseAdmin } = args;
   try {
     if (!force) {
       const { data: job } = await supabaseAdmin
@@ -83,26 +110,39 @@ async function generateForExercise(args: {
       if (job?.status === "done") return { id, status: "skipped" };
     }
 
-    const basePrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id);
+    const hint = getCameraHint(id, equipment, name);
+    const basePrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id, name, hint);
 
     // Frame 0: START position (text-to-image).
-    const startPrompt = `${basePrompt}\n\nThis is FRAME 1 of a 2-frame exercise animation. Render the START position of the movement: the ready/resting stance just before the rep begins. Full body in frame, feet visible, head visible.`;
+    const startPrompt = [
+      basePrompt,
+      "",
+      "This is FRAME 1 of a 2-frame exercise animation.",
+      `Render the START position of the movement: ${hint.startPose}.`,
+      "Full body in frame, feet visible, head visible. The camera, lighting, room, equipment and mannequin must be locked-off for both frames.",
+    ].join("\n");
     const b0 = await generateOne({ prompt: startPrompt, apiKey });
 
     // Frame 1: END position (image-to-image using frame 0 as reference so
-    // camera, lighting, mannequin and background stay identical).
+    // camera, lighting, mannequin, machine and background stay identical).
     const endPrompt = [
       "This is FRAME 2 of a 2-frame exercise animation. The reference image is FRAME 1.",
+      "",
       "CRITICAL — keep IDENTICAL to the reference image:",
-      "- exact same room, background, floor and wall",
-      "- exact same camera position, angle, height, distance and focal length (do NOT rotate around the subject)",
-      "- exact same viewing side of the body: if FRAME 1 shows the FRONT of the body, FRAME 2 MUST also show the front; if side view, keep side view; if 3/4 view, keep 3/4 view. NEVER flip to the back or a different side.",
-      "- exact same lighting, shadows and color grading",
-      "- exact same mannequin: identical body proportions, identical matte grey skin, no hair, no facial features, no gender markers, identical clothing",
-      "- exact same equipment in the exact same position",
-      "ONLY change: move the mannequin's limbs and torso to the END position of the exercise (peak contraction, muscles fully engaged).",
-      "Do not zoom, pan, tilt, rotate, crop or restyle. Treat this like the very next video frame from the same locked-off camera.",
-    ].join(" ");
+      "- exact same room, background, floor, wall and ceiling",
+      "- exact same camera position, angle, height, distance and focal length (do NOT rotate, pan, tilt, zoom or dolly around the subject)",
+      `- exact same viewing side of the body: ${hint.angle}. NEVER flip to the back, the opposite side, or a different angle.`,
+      hint.machineView ? `- exact same machine and equipment framing: ${hint.machineView}. The machine must not disappear, slide, or rotate in the frame.` : "",
+      "- exact same lighting, shadows, color grading and reflections",
+      "- exact same mannequin: identical body proportions, identical matte grey skin, no hair, no facial features, no gender markers, identical black athletic shorts",
+      "- exact same equipment placement (barbell, dumbbells, machine, cable, bench) — if it is visible in frame 1 it must be in the exact same spot in frame 2",
+      "",
+      "ONLY change:",
+      `- move the mannequin's limbs and torso to the END position: ${hint.endPose}.`,
+      "Do not zoom, pan, tilt, rotate, crop, restyle or change the background. Treat this like the very next video frame from the same locked-off camera.",
+    ]
+      .filter(Boolean)
+      .join("\n");
     const b64_0 = uint8ToBase64(b0);
     const b1 = await generateOne({
       prompt: endPrompt,
@@ -180,33 +220,18 @@ function uint8ToBase64(bytes: Uint8Array): string {
   return btoa(bin);
 }
 
-function buildDefaultPrompt(id: string): string {
-  const angle = cameraAngleFor(id);
+function buildDefaultPrompt(id: string, name: string | undefined, hint: ReturnType<typeof getCameraHint>): string {
   return [
-    `Photorealistic 3D-rendered androgynous mannequin performing the "${humanize(id)}" gym exercise.`,
+    `Photorealistic 3D-rendered androgynous mannequin performing the "${name ?? humanize(id)}" gym exercise.`,
     "Mannequin: smooth matte medium-grey skin, no hair, no facial features, completely flat chest, generic black athletic shorts, no gender markers of any kind.",
     "Correct anatomical form and posture for this specific exercise.",
-    "If the exercise uses a machine or equipment, the equipment must be clearly visible and correctly positioned in the frame.",
-    `Camera: ${angle}. Locked-off tripod, 50mm equivalent focal length, subject centered, full body visible from head to feet.`,
+    hint.machineView
+      ? `Equipment framing: ${hint.machineView}. The machine must be clearly visible and consistently positioned in both frames.`
+      : "If the exercise uses equipment, it must be clearly visible and correctly positioned in the frame.",
+    `Camera: ${hint.angle}. Locked-off tripod, 50mm equivalent focal length, subject centered, full body visible from head to feet.`,
     "Scene: plain seamless off-white studio cyclorama background, matte light-grey floor, one soft key light from upper-left, one soft fill light, single soft shadow on the floor. Keep this exact scene identical across all frames.",
     "No text, no watermark, no logos, no other people, no props besides the required equipment.",
-  ].join(" ");
-}
-
-function cameraAngleFor(id: string): string {
-  const s = id.toLowerCase();
-  // Vertical pulling / pressing movements read best from the front so both
-  // arms are visible symmetrically.
-  if (/(pulldown|pull-?up|chin-?up|shoulder-?press|overhead-?press|lateral-?raise|front-?raise|face-?pull|shrug|curl)/.test(s)) {
-    return "straight front view, eye level";
-  }
-  // Push-ups and planks — slight 3/4 angle reads the body line best.
-  if (/(push-?up|plank|dip)/.test(s)) {
-    return "three-quarter front view, slightly low angle";
-  }
-  // Everything else (squat, deadlift, row, hinge, lunge, bench press, leg
-  // curl/extension, hip thrust): pure side view shows the joint angles.
-  return "pure side view, eye level";
+  ].join("\n");
 }
 
 function humanize(id: string): string {
