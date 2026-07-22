@@ -2947,6 +2947,8 @@ const translations: Translations = {
     "admin.appmode.no_access": "الوصول مرفوض.",
     "admin.appmode.current": "الحالي",
     "admin.appmode.explain": "يتخطى وضع التحرير شاشات الترحيب والمقدمة واختيار اللغة لتدخل التطبيق مباشرة. يرى العملاء التدفق الكامل.",
+    "admin.edit.title": "صفحة التحرير",
+    "admin.frames.page_title": "صفحة تحرير التمرين",
     "set.viewmode.free": "مجاني",
     "pay.feature.ai_coach": "مدرب الذكاء الاصطناعي",
     "pay.overlay.ai_coach_desc": "تحدث مع مدربك الشخصي بالذكاء الاصطناعي مع Alyva Plus.",
