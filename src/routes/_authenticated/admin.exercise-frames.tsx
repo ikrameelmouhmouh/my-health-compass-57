@@ -231,8 +231,35 @@ function AdminExerciseFramesPage() {
           <RotateCcw className="mr-2 size-4" />
           {t("admin.frames.reset_all")}
         </Button>
+        <Button
+          size="sm"
+          variant={filmMode ? "default" : "outline"}
+          onClick={() => setFilmMode((v) => !v)}
+          disabled={running}
+        >
+          {filmMode ? <Pause className="mr-2 size-4" /> : <Play className="mr-2 size-4" />}
+          {filmMode ? t("admin.frames.film_stop") : t("admin.frames.film_play")}
+        </Button>
       </div>
       <p className="mt-2 text-[11px] text-muted-foreground">{t("admin.frames.reset_hint")}</p>
+      {filmMode ? (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="text-[11px] text-muted-foreground">{t("admin.frames.film_speed_normal")}:</span>
+          {(["slow", "normal", "fast"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setFilmSpeed(s)}
+              className={`rounded-full px-2.5 py-1 text-[11px] transition ${
+                filmSpeed === s
+                  ? "bg-brand text-white"
+                  : "border border-border bg-card text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {t(`admin.frames.film_speed_${s}`)}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
         {(["all", "pending", "done", "failed", "bad"] as const).map((k) => (
