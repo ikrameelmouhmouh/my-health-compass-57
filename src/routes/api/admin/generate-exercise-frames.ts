@@ -86,15 +86,22 @@ async function generateForExercise(args: {
     const basePrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id);
 
     // Frame 0: START position (text-to-image).
-    const startPrompt = `${basePrompt}\n\nRender the START position of the movement: the ready/resting stance just before the rep begins. Full body in frame.`;
+    const startPrompt = `${basePrompt}\n\nThis is FRAME 1 of a 2-frame exercise animation. Render the START position of the movement: the ready/resting stance just before the rep begins. Full body in frame, feet visible, head visible.`;
     const b0 = await generateOne({ prompt: startPrompt, apiKey });
 
     // Frame 1: END position (image-to-image using frame 0 as reference so
     // camera, lighting, mannequin and background stay identical).
     const endPrompt = [
-      "Keep this scene EXACTLY the same: same camera position and angle, same focal length, same distance, same lighting and shadows, same background, same mannequin (identical proportions, skin tone, clothing).",
-      "ONLY change the body pose: move the mannequin to the END position of the exercise — peak contraction, muscles fully engaged.",
-      "Keep the full body visible in the frame. Do not zoom, pan, rotate, or change any visual element other than the pose.",
+      "This is FRAME 2 of a 2-frame exercise animation. The reference image is FRAME 1.",
+      "CRITICAL — keep IDENTICAL to the reference image:",
+      "- exact same room, background, floor and wall",
+      "- exact same camera position, angle, height, distance and focal length (do NOT rotate around the subject)",
+      "- exact same viewing side of the body: if FRAME 1 shows the FRONT of the body, FRAME 2 MUST also show the front; if side view, keep side view; if 3/4 view, keep 3/4 view. NEVER flip to the back or a different side.",
+      "- exact same lighting, shadows and color grading",
+      "- exact same mannequin: identical body proportions, identical matte grey skin, no hair, no facial features, no gender markers, identical clothing",
+      "- exact same equipment in the exact same position",
+      "ONLY change: move the mannequin's limbs and torso to the END position of the exercise (peak contraction, muscles fully engaged).",
+      "Do not zoom, pan, tilt, rotate, crop or restyle. Treat this like the very next video frame from the same locked-off camera.",
     ].join(" ");
     const b64_0 = uint8ToBase64(b0);
     const b1 = await generateOne({
