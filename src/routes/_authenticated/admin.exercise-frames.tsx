@@ -360,7 +360,7 @@ function Lightbox({
         <div className="relative flex items-center justify-center">
           <button
             type="button"
-            aria-label="Vorige frame"
+            aria-label={t("admin.frames.lightbox.previous")}
             onClick={() => onChange({ exerciseId: exercise.id, frameIndex: 0 })}
             disabled={frameIndex === 0}
             className="absolute left-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30 sm:left-4"
@@ -376,7 +376,7 @@ function Lightbox({
 
           <button
             type="button"
-            aria-label="Volgende frame"
+            aria-label={t("admin.frames.lightbox.next")}
             onClick={() => onChange({ exerciseId: exercise.id, frameIndex: 1 })}
             disabled={frameIndex === 1}
             className="absolute right-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30 sm:right-4"
@@ -386,7 +386,7 @@ function Lightbox({
 
           <button
             type="button"
-            aria-label="Sluiten"
+            aria-label={t("admin.frames.lightbox.close")}
             onClick={() => onChange(null)}
             className="absolute right-2 top-2 z-10 grid size-10 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 sm:right-4 sm:top-4"
           >
@@ -396,7 +396,7 @@ function Lightbox({
 
         <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/60 px-4 py-2 text-center text-sm text-white backdrop-blur-sm">
           <p className="font-semibold">{exercise.name}</p>
-          <p className="text-xs opacity-80">Frame {frameIndex + 1} van 2</p>
+          <p className="text-xs opacity-80">{t("admin.frames.lightbox.frame_of", { current: frameIndex + 1, total: 2 })}</p>
         </div>
       </DialogContent>
     </Dialog>
