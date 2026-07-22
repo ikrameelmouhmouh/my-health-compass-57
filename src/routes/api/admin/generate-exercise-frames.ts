@@ -25,8 +25,6 @@ type Body = {
   exerciseData?: unknown;
 };
 
-type AdminClient = Awaited<typeof import("@/integrations/supabase/client.server")>["supabaseAdmin"];
-
 export const Route = createFileRoute("/api/admin/generate-exercise-frames")({
   server: {
     handlers: {
@@ -107,7 +105,8 @@ async function generateForExercise(args: {
   name?: string;
   equipment?: string;
   apiKey: string;
-  supabaseAdmin: AdminClient;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabaseAdmin: any;
 }): Promise<{ id: string; status: "done" | "failed" | "skipped"; error?: string }> {
   const { id, force, prompt, name, equipment, apiKey, supabaseAdmin } = args;
   try {
@@ -198,7 +197,8 @@ async function generateForExercise(args: {
   }
 }
 
-async function resetFrameJobs(ids: string[], supabaseAdmin: AdminClient): Promise<void> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function resetFrameJobs(ids: string[], supabaseAdmin: any): Promise<void> {
   const rows = ids.map((id) => ({ exercise_id: id, status: "pending", prompt: null, error: null }));
   for (let i = 0; i < rows.length; i += 250) {
     const { error } = await supabaseAdmin.from("exercise_frame_jobs").upsert(rows.slice(i, i + 250));
