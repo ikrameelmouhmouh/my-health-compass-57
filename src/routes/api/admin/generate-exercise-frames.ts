@@ -184,12 +184,12 @@ function buildDefaultPrompt(id: string): string {
   const angle = cameraAngleFor(id);
   return [
     `Photorealistic 3D-rendered androgynous mannequin performing the "${humanize(id)}" gym exercise.`,
-    "Matte medium-grey skin, no hair, no facial features, no gender markers (flat chest, generic athletic shorts).",
+    "Mannequin: smooth matte medium-grey skin, no hair, no facial features, completely flat chest, generic black athletic shorts, no gender markers of any kind.",
     "Correct anatomical form and posture for this specific exercise.",
     "If the exercise uses a machine or equipment, the equipment must be clearly visible and correctly positioned in the frame.",
-    `Camera: ${angle}, fixed position, 50mm equivalent focal length, full body visible, sharp focus.`,
-    "Studio shot on a clean off-white background with a single soft shadow.",
-    "No text, no watermark, no logos.",
+    `Camera: ${angle}. Locked-off tripod, 50mm equivalent focal length, subject centered, full body visible from head to feet.`,
+    "Scene: plain seamless off-white studio cyclorama background, matte light-grey floor, one soft key light from upper-left, one soft fill light, single soft shadow on the floor. Keep this exact scene identical across all frames.",
+    "No text, no watermark, no logos, no other people, no props besides the required equipment.",
   ].join(" ");
 }
 
