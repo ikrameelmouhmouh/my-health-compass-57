@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -14,8 +15,8 @@ import { useT } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Build your plan — Alyva" }] }),
-  validateSearch: (s: Record<string, unknown>) => ({
-    recalc: s.recalc === "1" || s.recalc === 1 || s.recalc === true ? 1 : undefined,
+  validateSearch: z.object({
+    recalc: z.number().optional(),
   }),
   component: Onboarding,
 });
