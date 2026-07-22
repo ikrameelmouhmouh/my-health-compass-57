@@ -74,6 +74,8 @@ function AdminExerciseFramesPage() {
   const [filter, setFilter] = useState<"all" | "pending" | "done" | "failed" | "bad">("all");
   const [q, setQ] = useState("");
   const [running, setRunning] = useState(false);
+  const [filmMode, setFilmMode] = useState(false);
+  const [filmSpeed, setFilmSpeed] = useState<FilmSpeed>("normal");
   const [lightbox, setLightbox] = useState<{ exerciseId: string; frameIndex: 0 | 1 } | null>(null);
 
   const jobsById = useMemo(() => {
