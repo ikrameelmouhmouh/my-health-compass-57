@@ -5,11 +5,12 @@ const STORAGE_KEY = "alyva.app_mode";
 const EVENT = "alyva:app-mode";
 
 export function readAppMode(): AppMode {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") return "edit";
   const v = window.localStorage.getItem(STORAGE_KEY);
   if (v === "edit") return "edit";
   if (v === "customer") return "customer";
-  return null;
+  // Default when nothing is stored: edit mode.
+  return "edit";
 }
 
 export function useAppMode() {
