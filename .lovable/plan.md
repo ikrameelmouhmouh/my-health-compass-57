@@ -1,69 +1,35 @@
-## Plan: oefenframes resetten en opnieuw goed opbouwen
+Doel: In `/_authenticated/admin/exercise-frames` kunnen de twee kleine preview-afbeeldingen (huidig `size-14`) worden aangeklikt/tikken om ze groot te bekijken, zodat de gebruiker de gegenereerde frames beter kan controleren op consistentie.
 
-We resetten niet de hele app, maar wel het systeem voor oefen-afbeeldingen zodat het vanaf nu consistenter werkt als een korte 2-frame oefenfilm.
+## Wijzigingen
 
-### 1. Oude/betrouwbare status opschonen
-- Alle bestaande `exercise_frame_jobs` terugzetten naar een schone staat, of minimaal alle `bad`, `pending` en verkeerd gegenereerde jobs resetten.
-- Oude frame-bestanden overschrijven bij nieuwe generatie, zodat je geen mix krijgt van oude en nieuwe stijl.
-- De adminpagina duidelijk laten tonen of een oefening `nieuw`, `bezig`, `klaar`, `slecht` of `fout` is.
+1. **Lightbox-component in admin route**
+   - Voeg een lokale modal/lightbox toe in `src/routes/_authenticated/admin.exercise-frames.tsx`.
+   - Gebruik bestaande dialog/overlay patronen of een eenvoudige `AnimatePresence`/`framer-motion` overlay als die al in het project gebruikt wordt; anders een lichte CSS-only overlay.
+   - Onthoudt de index (0 of 1) van het aangeklikte frame.
 
-### 2. Eén vaste visuele stijl afdwingen
-- Alle oefeningen krijgen dezelfde studio:
-  - witte/off-white ruimte
-  - zelfde vloer en achtergrond
-  - zelfde licht
-  - zelfde genderneutrale 3D-mannequin
-- Beide frames moeten eruitzien alsof ze uit dezelfde camera-opname komen.
-- Frame 2 mag alleen de houding veranderen, niet de camera, ruimte, machine of het poppetje.
+2. **Klikgedrag thumbnails**
+   - Maak de twee `<img>`-thumbnails klikbaar (`cursor-pointer`).
+   - Open de lightbox bij click/tap.
+   - Behoud huidige layout, afmetingen en statusicons.
 
-### 3. Machine-oefeningen apart behandelen
-Voor oefeningen zoals leg press, chest press, lat pulldown, leg extension en cable row gebruik ik geen algemene prompt meer.
+3. **Lightbox UI**
+   - Toon het geselecteerde frame groot (bijv. max 80vw / 80vh).
+   - Voeg pijlknoppen of swipe/klik-links-rechts toe om tussen frame 0 en 1 te wisselen binnen dezelfde oefening.
+   - Sluit-knop (ESC en klik buiten de afbeelding).
 
-Daarvoor maak ik vaste regels per machine-type:
-- welke kant de camera op kijkt
-- hoe het lichaam ligt/zit/staat
-- waar het apparaat zichtbaar moet blijven
-- wat de startpositie is
-- wat de eindpositie is
+4. **Toegankelijkheid / i18n**
+   - Voeg `aria-label` toe voor openen/sluiten/volgende/vorige.
+   - Geen nieuwe zichtbare UI-strings nodig behalve eventuele `alt`- en `title`-teksten; indien wel nieuwe strings ontstaan, vertalen naar alle 6 talen in `src/lib/i18n.tsx`.
 
-Voorbeeld Wide Leg Press:
-- vaste 3/4-zijaanzicht camera
-- volledige leg press machine blijft zichtbaar
-- mannequin blijft op dezelfde stoel/rugleuning
-- voeten blijven op dezelfde voetplaat
-- alleen knieën/heuphoek verandert tussen frame 1 en frame 2
+5. **Testen**
+   - Bouw controle (`bun run build`) of typecheck (`tsgo`).
+   - Open de admin-pagina, klik op een klaar oefening en controleer of beide frames vergroot zijn te bekijken en te wisselen.
 
-### 4. Vrije gewicht/bodyweight-oefeningen eenvoudiger houden
-Voor squats, push-ups, pull-ups, curls, planks enzovoort gebruiken we vaste categorie-regels:
-- squat/deadlift: zijaanzicht
-- pull-up/pulldown: vooraanzicht
-- row: schuin zijaanzicht
-- curl/raise: vooraanzicht of 3/4-aanzicht
-- plank/core: zijaanzicht
+## Niet in scope
+- Generatie-prompts wijzigen.
+- Storage- of database-schema wijzigen.
+- Gedrag van reset/generatie-knoppen aanpassen.
 
-### 5. Generatie veiliger maken
-- Eerst frame 1 genereren als duidelijke startpositie.
-- Daarna frame 2 genereren met frame 1 als referentie.
-- Als frame 2 toch machine/camera/mannequin verandert, krijgt de job een duidelijke foutstatus in plaats van stil mislukken.
-- De adminpagina krijgt een betere “opnieuw genereren” flow voor individuele oefeningen.
-
-### 6. Testen met probleemgevallen
-Ik test eerst met een kleine set voordat alles opnieuw wordt gegenereerd:
-- Wide Leg Press
-- Seated Cable Row
-- Lat Pulldown
-- Chest Press
-- Leg Extension
-- Pull-up
-- Squat
-
-Pas als deze goed genoeg zijn, kun je daarna de rest batchgewijs opnieuw laten genereren.
-
-### Technisch
-- Bestaande camera-hints uitbreiden en strenger maken.
-- De generatie-API aanpassen zodat machine-hints leidend zijn.
-- Adminpagina aanpassen om reset/regenerate betrouwbaarder te maken.
-- Database/statussen opschonen via een gecontroleerde backend-migratie of admin-resetactie.
-
-### Belangrijk
-Dit geeft nog steeds geen 100% garantie dat AI-afbeeldingen altijd perfect zijn, maar het maakt de kans op consistente 2-frame oefenfilmpjes veel groter dan de huidige losse generatie-aanpak.
+## Technische details
+- Bestand: `src/routes/_authenticated/admin.exercise-frames.tsx`.
+- Afhankelijkheden: waarschijnlijk geen nieuwe packages; hergebruik bestaande UI-primitives indien beschikbaar (Dialog, Portal, etc.).

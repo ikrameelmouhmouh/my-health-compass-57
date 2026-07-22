@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -7,8 +7,9 @@ import { EXERCISES } from "@/lib/exercise-library";
 import { getCameraHint, hasExplicitCameraHint } from "@/lib/exercise-camera-hints";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
-import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/exercise-frames")({
   head: () => ({
@@ -65,6 +66,7 @@ function AdminExerciseFramesPage() {
   const [filter, setFilter] = useState<"all" | "pending" | "done" | "failed" | "bad">("all");
   const [q, setQ] = useState("");
   const [running, setRunning] = useState(false);
+  const [lightbox, setLightbox] = useState<{ exerciseId: string; frameIndex: 0 | 1 } | null>(null);
 
   const jobsById = useMemo(() => {
     const m = new Map<string, JobRow>();
@@ -251,8 +253,22 @@ function AdminExerciseFramesPage() {
               <div className="flex shrink-0 gap-1">
                 {status === "done" ? (
                   <>
-                    <img src={url0} alt="" className="size-14 rounded-lg object-cover" />
-                    <img src={url1} alt="" className="size-14 rounded-lg object-cover" />
+                    <button
+                      type="button"
+                      aria-label={t("admin.frames.lightbox.zoom_frame_1")}
+                      onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 0 })}
+                      className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                    >
+                      <img src={url0} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={t("admin.frames.lightbox.zoom_frame_2")}
+                      onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 1 })}
+                      className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                    >
+                      <img src={url1} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
+                    </button>
                   </>
                 ) : (
                   <div className="grid size-14 place-items-center rounded-lg bg-muted text-[10px] text-muted-foreground">
@@ -298,6 +314,91 @@ function AdminExerciseFramesPage() {
           );
         })}
       </ul>
+
+      <Lightbox value={lightbox} onChange={setLightbox} />
     </main>
+  );
+}
+
+function Lightbox({
+  value,
+  onChange,
+}: {
+  value: { exerciseId: string; frameIndex: 0 | 1 } | null;
+  onChange: (v: { exerciseId: string; frameIndex: 0 | 1 } | null) => void;
+}) {
+  const t = useT();
+  const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
+  const frameIndex = value?.frameIndex ?? 0;
+
+  useEffect(() => {
+    if (!value) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        onChange({ exerciseId: value.exerciseId, frameIndex: 0 });
+      } else if (e.key === "ArrowRight") {
+        onChange({ exerciseId: value.exerciseId, frameIndex: 1 });
+      } else if (e.key === "Escape") {
+        onChange(null);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [value, onChange]);
+
+  if (!exercise || !value) return null;
+
+  const url = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/${frameIndex}`;
+
+  return (
+    <Dialog open={!!value} onOpenChange={(open) => !open && onChange(null)}>
+      <DialogContent
+        hideClose
+        className="max-w-[95vw] max-h-[95vh] w-auto border-0 bg-transparent p-0 shadow-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+      >
+        <DialogTitle className="sr-only">{exercise.name}</DialogTitle>
+        <div className="relative flex items-center justify-center">
+          <button
+            type="button"
+            aria-label={t("admin.frames.lightbox.previous")}
+            onClick={() => onChange({ exerciseId: exercise.id, frameIndex: 0 })}
+            disabled={frameIndex === 0}
+            className="absolute left-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30 sm:left-4"
+          >
+            <ChevronLeft className="size-6" />
+          </button>
+
+          <img
+            src={url}
+            alt={`${exercise.name} frame ${frameIndex + 1}`}
+            className="max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
+          />
+
+          <button
+            type="button"
+            aria-label={t("admin.frames.lightbox.next")}
+            onClick={() => onChange({ exerciseId: exercise.id, frameIndex: 1 })}
+            disabled={frameIndex === 1}
+            className="absolute right-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30 sm:right-4"
+          >
+            <ChevronRight className="size-6" />
+          </button>
+
+          <button
+            type="button"
+            aria-label={t("admin.frames.lightbox.close")}
+            onClick={() => onChange(null)}
+            className="absolute right-2 top-2 z-10 grid size-10 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 sm:right-4 sm:top-4"
+          >
+            <XCircle className="size-6" />
+          </button>
+        </div>
+
+        <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/60 px-4 py-2 text-center text-sm text-white backdrop-blur-sm">
+          <p className="font-semibold">{exercise.name}</p>
+          <p className="text-xs opacity-80">{t("admin.frames.lightbox.frame_of", { current: frameIndex + 1, total: 2 })}</p>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
