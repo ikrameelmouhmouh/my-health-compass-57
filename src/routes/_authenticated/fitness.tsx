@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
 import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Lock, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,8 +20,8 @@ import { useTodayWorkout } from "@/lib/dashboard-prefs";
 import { normalizeDay, todayDayName } from "@/lib/workout-today";
 
 export const Route = createFileRoute("/_authenticated/fitness")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    wizard: s.wizard === 1 || s.wizard === "1" ? 1 : undefined,
+  validateSearch: z.object({
+    wizard: z.coerce.number().optional(),
   }),
   component: FitnessPage,
 });

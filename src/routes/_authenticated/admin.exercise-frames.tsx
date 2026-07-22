@@ -9,7 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
-import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
+
+type FilmSpeed = "slow" | "normal" | "fast";
+
+const SPEED_MS: Record<FilmSpeed, number> = {
+  slow: 1500,
+  normal: 800,
+  fast: 400,
+};
 
 export const Route = createFileRoute("/_authenticated/admin/exercise-frames")({
   head: () => ({
@@ -66,6 +74,8 @@ function AdminExerciseFramesPage() {
   const [filter, setFilter] = useState<"all" | "pending" | "done" | "failed" | "bad">("all");
   const [q, setQ] = useState("");
   const [running, setRunning] = useState(false);
+  const [filmMode, setFilmMode] = useState(false);
+  const [filmSpeed, setFilmSpeed] = useState<FilmSpeed>("normal");
   const [lightbox, setLightbox] = useState<{ exerciseId: string; frameIndex: 0 | 1 } | null>(null);
 
   const jobsById = useMemo(() => {
@@ -221,8 +231,35 @@ function AdminExerciseFramesPage() {
           <RotateCcw className="mr-2 size-4" />
           {t("admin.frames.reset_all")}
         </Button>
+        <Button
+          size="sm"
+          variant={filmMode ? "default" : "outline"}
+          onClick={() => setFilmMode((v) => !v)}
+          disabled={running}
+        >
+          {filmMode ? <Pause className="mr-2 size-4" /> : <Play className="mr-2 size-4" />}
+          {filmMode ? t("admin.frames.film_stop") : t("admin.frames.film_play")}
+        </Button>
       </div>
       <p className="mt-2 text-[11px] text-muted-foreground">{t("admin.frames.reset_hint")}</p>
+      {filmMode ? (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="text-[11px] text-muted-foreground">{t("admin.frames.film_speed_label")}</span>
+          {(["slow", "normal", "fast"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setFilmSpeed(s)}
+              className={`rounded-full px-2.5 py-1 text-[11px] transition ${
+                filmSpeed === s
+                  ? "bg-brand text-white"
+                  : "border border-border bg-card text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {t(`admin.frames.film_speed_${s}`)}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
         {(["all", "pending", "done", "failed", "bad"] as const).map((k) => (
@@ -252,24 +289,35 @@ function AdminExerciseFramesPage() {
             <li key={ex.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card/50 p-2.5">
               <div className="flex shrink-0 gap-1">
                 {status === "done" ? (
-                  <>
+                  filmMode ? (
                     <button
                       type="button"
-                      aria-label={t("admin.frames.lightbox.zoom_frame_1")}
+                      aria-label={t("admin.frames.lightbox.zoom_film")}
                       onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 0 })}
-                      className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                      className="relative h-14 w-[118px] cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
                     >
-                      <img src={url0} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
+                      <FrameAnimation url0={url0} url1={url1} speed={filmSpeed} />
                     </button>
-                    <button
-                      type="button"
-                      aria-label={t("admin.frames.lightbox.zoom_frame_2")}
-                      onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 1 })}
-                      className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
-                    >
-                      <img src={url1} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
-                    </button>
-                  </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        aria-label={t("admin.frames.lightbox.zoom_frame_1")}
+                        onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 0 })}
+                        className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                      >
+                        <img src={url0} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={t("admin.frames.lightbox.zoom_frame_2")}
+                        onClick={() => setLightbox({ exerciseId: ex.id, frameIndex: 1 })}
+                        className="cursor-pointer overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2"
+                      >
+                        <img src={url1} alt="" className="size-14 rounded-lg object-cover transition hover:opacity-90" />
+                      </button>
+                    </>
+                  )
                 ) : (
                   <div className="grid size-14 place-items-center rounded-lg bg-muted text-[10px] text-muted-foreground">
                     {status === "failed" ? <XCircle className="size-5 text-destructive" /> : status === "bad" ? "slecht" : "…"}
@@ -315,31 +363,95 @@ function AdminExerciseFramesPage() {
         })}
       </ul>
 
-      <Lightbox value={lightbox} onChange={setLightbox} />
+      <Lightbox value={lightbox} onChange={setLightbox} filmMode={filmMode} filmSpeed={filmSpeed} onSpeedChange={setFilmSpeed} />
     </main>
+  );
+}
+
+function FrameAnimation({
+  url0,
+  url1,
+  speed = "normal",
+  playing = true,
+}: {
+  url0: string;
+  url1: string;
+  speed?: FilmSpeed;
+  playing?: boolean;
+}) {
+  const [frame, setFrame] = useState<0 | 1>(0);
+  const transitionMs = Math.min(SPEED_MS[speed] * 0.5, 600);
+
+  useEffect(() => {
+    if (!playing) return;
+    const interval = setInterval(() => {
+      setFrame((f) => (f === 0 ? 1 : 0));
+    }, SPEED_MS[speed]);
+    return () => clearInterval(interval);
+  }, [playing, speed]);
+
+  return (
+    <div className="relative h-full w-full">
+      <img
+        src={url0}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ opacity: frame === 0 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+      />
+      <img
+        src={url1}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ opacity: frame === 1 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+      />
+    </div>
   );
 }
 
 function Lightbox({
   value,
   onChange,
+  filmMode,
+  filmSpeed,
+  onSpeedChange,
 }: {
   value: { exerciseId: string; frameIndex: 0 | 1 } | null;
   onChange: (v: { exerciseId: string; frameIndex: 0 | 1 } | null) => void;
+  filmMode: boolean;
+  filmSpeed: FilmSpeed;
+  onSpeedChange: (s: FilmSpeed) => void;
 }) {
   const t = useT();
   const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
   const frameIndex = value?.frameIndex ?? 0;
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    if (value) setPlaying(filmMode);
+  }, [value, filmMode]);
+
+  useEffect(() => {
+    if (!playing || !value) return;
+    const interval = setInterval(() => {
+      onChange({ exerciseId: value.exerciseId, frameIndex: frameIndex === 0 ? 1 : 0 });
+    }, SPEED_MS[filmSpeed]);
+    return () => clearInterval(interval);
+  }, [playing, value, frameIndex, filmSpeed, onChange]);
 
   useEffect(() => {
     if (!value) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
+        setPlaying(false);
         onChange({ exerciseId: value.exerciseId, frameIndex: 0 });
       } else if (e.key === "ArrowRight") {
+        setPlaying(false);
         onChange({ exerciseId: value.exerciseId, frameIndex: 1 });
       } else if (e.key === "Escape") {
         onChange(null);
+      } else if (e.key === " ") {
+        e.preventDefault();
+        setPlaying((p) => !p);
       }
     };
     window.addEventListener("keydown", handler);
@@ -348,7 +460,9 @@ function Lightbox({
 
   if (!exercise || !value) return null;
 
-  const url = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/${frameIndex}`;
+  const url0 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/0`;
+  const url1 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/1`;
+  const transitionMs = Math.min(SPEED_MS[filmSpeed] * 0.5, 600);
 
   return (
     <Dialog open={!!value} onOpenChange={(open) => !open && onChange(null)}>
@@ -361,24 +475,39 @@ function Lightbox({
           <button
             type="button"
             aria-label={t("admin.frames.lightbox.previous")}
-            onClick={() => onChange({ exerciseId: exercise.id, frameIndex: 0 })}
-            disabled={frameIndex === 0}
+            onClick={() => {
+              setPlaying(false);
+              onChange({ exerciseId: exercise.id, frameIndex: 0 });
+            }}
+            disabled={frameIndex === 0 && !playing}
             className="absolute left-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30 sm:left-4"
           >
             <ChevronLeft className="size-6" />
           </button>
 
-          <img
-            src={url}
-            alt={`${exercise.name} frame ${frameIndex + 1}`}
-            className="max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
-          />
+          <div className="relative max-h-[85vh] max-w-[90vw]">
+            <img
+              src={url0}
+              alt={`${exercise.name} frame 1`}
+              className="max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
+              style={{ opacity: frameIndex === 0 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+            />
+            <img
+              src={url1}
+              alt={`${exercise.name} frame 2`}
+              className="absolute left-0 top-0 max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
+              style={{ opacity: frameIndex === 1 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+            />
+          </div>
 
           <button
             type="button"
             aria-label={t("admin.frames.lightbox.next")}
-            onClick={() => onChange({ exerciseId: exercise.id, frameIndex: 1 })}
-            disabled={frameIndex === 1}
+            onClick={() => {
+              setPlaying(false);
+              onChange({ exerciseId: exercise.id, frameIndex: 1 });
+            }}
+            disabled={frameIndex === 1 && !playing}
             className="absolute right-2 top-1/2 z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/70 disabled:opacity-30 sm:right-4"
           >
             <ChevronRight className="size-6" />
@@ -394,9 +523,33 @@ function Lightbox({
           </button>
         </div>
 
-        <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/60 px-4 py-2 text-center text-sm text-white backdrop-blur-sm">
-          <p className="font-semibold">{exercise.name}</p>
-          <p className="text-xs opacity-80">{t("admin.frames.lightbox.frame_of", { current: frameIndex + 1, total: 2 })}</p>
+        <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3 rounded-full bg-black/60 px-4 py-2 text-sm text-white backdrop-blur-sm">
+          <button
+            type="button"
+            onClick={() => setPlaying((p) => !p)}
+            className="grid size-7 place-items-center rounded-full bg-white/20 hover:bg-white/30"
+            aria-label={playing ? t("admin.frames.film_stop") : t("admin.frames.film_play")}
+          >
+            {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
+          </button>
+          <div className="text-center">
+            <p className="font-semibold">{exercise.name}</p>
+            <p className="text-xs opacity-80">{t("admin.frames.lightbox.frame_of", { current: frameIndex + 1, total: 2 })}</p>
+          </div>
+          <div className="flex gap-1">
+            {(["slow", "normal", "fast"] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => onSpeedChange(s)}
+                className={`rounded-full px-2 py-0.5 text-[10px] transition ${
+                  filmSpeed === s ? "bg-white/40 text-white" : "bg-white/20 text-white/80 hover:bg-white/30"
+                }`}
+              >
+                {t(`admin.frames.film_speed_${s}`)}
+              </button>
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
