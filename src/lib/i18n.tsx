@@ -3963,6 +3963,8 @@ const translations: Translations = {
     "admin.appmode.no_access": "Accès refusé.",
     "admin.appmode.current": "Actuel",
     "admin.appmode.explain": "Le mode édition saute les écrans d'accueil, d'intro et de choix de langue pour entrer directement dans l'app. Les clients voient le parcours complet.",
+    "admin.edit.title": "Page d'édition",
+    "admin.frames.page_title": "Page d'édition workout",
     "set.viewmode.free": "Gratuit",
     "pay.feature.ai_coach": "Coach IA",
     "pay.overlay.ai_coach_desc": "Discutez avec votre coach IA personnel avec Alyva Plus.",
