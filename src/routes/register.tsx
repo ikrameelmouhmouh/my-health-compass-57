@@ -35,6 +35,7 @@ function Register() {
   const t = useT();
   const { lang } = useI18n();
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const [form, setForm] = useState({ displayName: "", email: "", password: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
   const [loading, setLoading] = useState(false);
@@ -53,11 +54,12 @@ function Register() {
     }
     setErrors({});
     setLoading(true);
+    const target = safeNext(next);
     const { data, error } = await supabase.auth.signUp({
       email: result.data.email,
       password: result.data.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/onboarding`,
+        emailRedirectTo: `${window.location.origin}${target ?? "/onboarding"}`,
         data: { display_name: result.data.displayName },
       },
     });
@@ -69,6 +71,10 @@ function Register() {
     }
     try { localStorage.setItem("vita.has_account", "1"); } catch {}
     setLoading(false);
+    if (target) {
+      window.location.href = target;
+      return;
+    }
     navigate({ to: "/onboarding" });
   }
 
