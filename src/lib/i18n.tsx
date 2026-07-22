@@ -1931,6 +1931,8 @@ const translations: Translations = {
     "admin.appmode.no_access": "Geen toegang.",
     "admin.appmode.current": "Huidig",
     "admin.appmode.explain": "Edit-modus slaat het welkomstscherm, de intro en de taalkeuze over zodat je direct in de app komt. Klanten zien de volledige flow.",
+    "admin.edit.title": "Edit pagina",
+    "admin.frames.page_title": "Edit workout pagina",
     "set.viewmode.free": "Gratis",
     "pay.feature.ai_coach": "AI Coach",
     "pay.overlay.ai_coach_desc": "Chat met je persoonlijke AI Coach met Alyva Plus.",
