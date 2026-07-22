@@ -34,6 +34,7 @@ const schema = z.object({
 function Login() {
   const t = useT();
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
   const [loading, setLoading] = useState(false);
@@ -55,6 +56,11 @@ function Login() {
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     try { localStorage.setItem("vita.has_account", "1"); } catch {}
+    const target = safeNext(next);
+    if (target) {
+      window.location.href = target;
+      return;
+    }
     navigate({ to: "/profile", replace: true });
   }
 
