@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IntroRouteImport } from './routes/intro'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
@@ -31,12 +32,16 @@ import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedBadgesRouteImport } from './routes/_authenticated/badges'
 import { Route as AuthenticatedAiCoachRouteImport } from './routes/_authenticated/ai-coach'
 import { Route as AuthenticatedActivityHistoryRouteImport } from './routes/_authenticated/activity-history'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiAdminGenerateExerciseFramesRouteImport } from './routes/api/admin/generate-exercise-frames'
 import { Route as ApiAdminBootstrapAdminRouteImport } from './routes/api/admin/bootstrap-admin'
 import { Route as AuthenticatedWorkoutSessionTemplateIdRouteImport } from './routes/_authenticated/workout-session.$templateId'
 import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
 import { Route as AuthenticatedAdminExerciseFramesRouteImport } from './routes/_authenticated/admin.exercise-frames'
 import { Route as AuthenticatedActivitySessionActivityIdRouteImport } from './routes/_authenticated/activity-session.$activityId'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicWidgetAuraRouteImport } from './routes/api/public/widget/aura'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
@@ -51,6 +56,11 @@ const WelcomeRoute = WelcomeRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -156,6 +166,18 @@ const AuthenticatedActivityHistoryRoute =
     path: '/activity-history',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAdminGenerateExerciseFramesRoute =
   ApiAdminGenerateExerciseFramesRouteImport.update({
     id: '/api/admin/generate-exercise-frames',
@@ -191,6 +213,17 @@ const AuthenticatedActivitySessionActivityIdRoute =
     path: '/activity-session/$activityId',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWidgetAuraRoute = ApiPublicWidgetAuraRouteImport.update({
   id: '/api/public/widget/aura',
   path: '/api/public/widget/aura',
@@ -224,8 +257,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/intro': typeof IntroRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/activity-history': typeof AuthenticatedActivityHistoryRoute
   '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/badges': typeof AuthenticatedBadgesRoute
@@ -242,6 +278,8 @@ export interface FileRoutesByFullPath {
   '/weight-history': typeof AuthenticatedWeightHistoryRoute
   '/workout-history': typeof AuthenticatedWorkoutHistoryRoute
   '/api/chat': typeof ApiChatRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
@@ -258,8 +296,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/intro': typeof IntroRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/activity-history': typeof AuthenticatedActivityHistoryRoute
   '/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/badges': typeof AuthenticatedBadgesRoute
@@ -276,6 +317,8 @@ export interface FileRoutesByTo {
   '/weight-history': typeof AuthenticatedWeightHistoryRoute
   '/workout-history': typeof AuthenticatedWorkoutHistoryRoute
   '/api/chat': typeof ApiChatRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
@@ -294,8 +337,11 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/intro': typeof IntroRoute
   '/login': typeof LoginRoute
+  '/mcp': typeof McpRoute
   '/register': typeof RegisterRoute
   '/welcome': typeof WelcomeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/activity-history': typeof AuthenticatedActivityHistoryRoute
   '/_authenticated/ai-coach': typeof AuthenticatedAiCoachRouteWithChildren
   '/_authenticated/badges': typeof AuthenticatedBadgesRoute
@@ -312,6 +358,8 @@ export interface FileRoutesById {
   '/_authenticated/weight-history': typeof AuthenticatedWeightHistoryRoute
   '/_authenticated/workout-history': typeof AuthenticatedWorkoutHistoryRoute
   '/api/chat': typeof ApiChatRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/_authenticated/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
@@ -330,8 +378,11 @@ export interface FileRouteTypes {
     | '/'
     | '/intro'
     | '/login'
+    | '/mcp'
     | '/register'
     | '/welcome'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/activity-history'
     | '/ai-coach'
     | '/badges'
@@ -348,6 +399,8 @@ export interface FileRouteTypes {
     | '/weight-history'
     | '/workout-history'
     | '/api/chat'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/activity-session/$activityId'
     | '/admin/exercise-frames'
     | '/ai-coach/$threadId'
@@ -364,8 +417,11 @@ export interface FileRouteTypes {
     | '/'
     | '/intro'
     | '/login'
+    | '/mcp'
     | '/register'
     | '/welcome'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/activity-history'
     | '/ai-coach'
     | '/badges'
@@ -382,6 +438,8 @@ export interface FileRouteTypes {
     | '/weight-history'
     | '/workout-history'
     | '/api/chat'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/activity-session/$activityId'
     | '/admin/exercise-frames'
     | '/ai-coach/$threadId'
@@ -399,8 +457,11 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/intro'
     | '/login'
+    | '/mcp'
     | '/register'
     | '/welcome'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/activity-history'
     | '/_authenticated/ai-coach'
     | '/_authenticated/badges'
@@ -417,6 +478,8 @@ export interface FileRouteTypes {
     | '/_authenticated/weight-history'
     | '/_authenticated/workout-history'
     | '/api/chat'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/activity-session/$activityId'
     | '/_authenticated/admin/exercise-frames'
     | '/_authenticated/ai-coach/$threadId'
@@ -435,9 +498,14 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   IntroRoute: typeof IntroRoute
   LoginRoute: typeof LoginRoute
+  McpRoute: typeof McpRoute
   RegisterRoute: typeof RegisterRoute
   WelcomeRoute: typeof WelcomeRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiChatRoute: typeof ApiChatRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAdminBootstrapAdminRoute: typeof ApiAdminBootstrapAdminRoute
   ApiAdminGenerateExerciseFramesRoute: typeof ApiAdminGenerateExerciseFramesRoute
   ApiExerciseFrameIdIRoute: typeof ApiExerciseFrameIdIRoute
@@ -461,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -603,6 +678,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedActivityHistoryRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/generate-exercise-frames': {
       id: '/api/admin/generate-exercise-frames'
       path: '/api/admin/generate-exercise-frames'
@@ -644,6 +733,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/activity-session/$activityId'
       preLoaderRoute: typeof AuthenticatedActivitySessionActivityIdRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/widget/aura': {
       id: '/api/public/widget/aura'
@@ -747,9 +850,15 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   IntroRoute: IntroRoute,
   LoginRoute: LoginRoute,
+  McpRoute: McpRoute,
   RegisterRoute: RegisterRoute,
   WelcomeRoute: WelcomeRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiChatRoute: ApiChatRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAdminBootstrapAdminRoute: ApiAdminBootstrapAdminRoute,
   ApiAdminGenerateExerciseFramesRoute: ApiAdminGenerateExerciseFramesRoute,
   ApiExerciseFrameIdIRoute: ApiExerciseFrameIdIRoute,

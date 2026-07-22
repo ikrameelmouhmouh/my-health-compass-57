@@ -7,7 +7,16 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Field } from "./register";
 import { useT } from "@/lib/i18n";
 
+function safeNext(next: string | undefined): string | null {
+  if (!next) return null;
+  if (!next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
+
 export const Route = createFileRoute("/login")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" ? s.next : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Sign in — Alyva" },
@@ -25,6 +34,7 @@ const schema = z.object({
 function Login() {
   const t = useT();
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
   const [loading, setLoading] = useState(false);
@@ -46,6 +56,11 @@ function Login() {
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     try { localStorage.setItem("vita.has_account", "1"); } catch {}
+    const target = safeNext(next);
+    if (target) {
+      window.location.href = target;
+      return;
+    }
     navigate({ to: "/profile", replace: true });
   }
 
@@ -94,7 +109,7 @@ function Login() {
 
       <p className="mt-auto pt-8 text-center text-sm text-muted-foreground">
         {t("auth.login.switch")}{" "}
-        <Link to="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link to="/register" search={{ next: safeNext(next) ?? undefined }} className="font-medium text-foreground underline-offset-4 hover:underline">
           {t("auth.create_account")}
         </Link>
       </p>

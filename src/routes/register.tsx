@@ -6,7 +6,16 @@ import { toast } from "sonner";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
 
+function safeNext(next: string | undefined): string | null {
+  if (!next) return null;
+  if (!next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
+
 export const Route = createFileRoute("/register")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" ? s.next : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Create your account — Alyva" },
@@ -26,6 +35,7 @@ function Register() {
   const t = useT();
   const { lang } = useI18n();
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
   const [form, setForm] = useState({ displayName: "", email: "", password: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof typeof form, string>>>({});
   const [loading, setLoading] = useState(false);
@@ -44,11 +54,12 @@ function Register() {
     }
     setErrors({});
     setLoading(true);
+    const target = safeNext(next);
     const { data, error } = await supabase.auth.signUp({
       email: result.data.email,
       password: result.data.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/onboarding`,
+        emailRedirectTo: `${window.location.origin}${target ?? "/onboarding"}`,
         data: { display_name: result.data.displayName },
       },
     });
@@ -60,6 +71,10 @@ function Register() {
     }
     try { localStorage.setItem("vita.has_account", "1"); } catch {}
     setLoading(false);
+    if (target) {
+      window.location.href = target;
+      return;
+    }
     navigate({ to: "/onboarding" });
   }
 
