@@ -109,7 +109,7 @@ function Login() {
 
       <p className="mt-auto pt-8 text-center text-sm text-muted-foreground">
         {t("auth.login.switch")}{" "}
-        <Link to="/register" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link to="/register" search={{ next: safeNext(next) ?? undefined }} className="font-medium text-foreground underline-offset-4 hover:underline">
           {t("auth.create_account")}
         </Link>
       </p>
