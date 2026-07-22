@@ -7,10 +7,20 @@ import { EXERCISES } from "@/lib/exercise-library";
 import { getCameraHint, hasExplicitCameraHint } from "@/lib/exercise-camera-hints";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search } from "lucide-react";
+import { useT } from "@/lib/i18n";
+import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/exercise-frames")({
-  head: () => ({ meta: [{ title: "Exercise frames — Admin" }] }),
+  head: () => ({
+    meta: [
+      { title: "Alyva Exercise Frames Admin" },
+      { name: "description", content: "Reset and regenerate Alyva exercise motion frames with locked camera guidance." },
+      { property: "og:title", content: "Alyva Exercise Frames Admin" },
+      { property: "og:description", content: "Reset and regenerate Alyva exercise motion frames with locked camera guidance." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: AdminExerciseFramesPage,
 });
 
@@ -19,6 +29,7 @@ type JobRow = { exercise_id: string; status: "pending" | "done" | "failed" | "ba
 function AdminExerciseFramesPage() {
   const { session, user } = useAuth();
   const qc = useQueryClient();
+  const t = useT();
 
   const roleQ = useQuery({
     queryKey: ["user-role", user?.id],
@@ -108,6 +119,30 @@ function AdminExerciseFramesPage() {
     }
   }
 
+  async function resetJobs(ids: string[], scope: "visible" | "all") {
+    if (ids.length === 0) return;
+    const message = scope === "all" ? t("admin.frames.reset_confirm_all", { n: ids.length }) : t("admin.frames.reset_confirm_visible", { n: ids.length });
+    if (!window.confirm(message)) return;
+    setRunning(true);
+    try {
+      for (let i = 0; i < ids.length; i += 500) {
+        const chunk = ids.slice(i, i + 500);
+        const res = await fetch("/api/admin/generate-exercise-frames", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
+          body: JSON.stringify({ action: "reset", ids: chunk }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+      }
+      await qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+      alert(t("admin.frames.reset_done"));
+    } catch (e) {
+      alert(`Fout: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setRunning(false);
+    }
+  }
+
   if (roleQ.isLoading) {
     return <div className="grid min-h-[100dvh] place-items-center"><Loader2 className="size-6 animate-spin" /></div>;
   }
@@ -130,6 +165,8 @@ function AdminExerciseFramesPage() {
   }
 
   const pendingIds = (rows.filter(({ job }) => !job || job.status === "pending" || job.status === "failed" || job.status === "bad")).map(({ ex }) => ex.id);
+  const visibleIds = rows.map(({ ex }) => ex.id);
+  const allIds = EXERCISES.map((ex) => ex.id);
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-2xl bg-background px-5 pb-32 pt-8">
@@ -164,7 +201,26 @@ function AdminExerciseFramesPage() {
         >
           Alles resterend ({pendingIds.length})
         </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => resetJobs(visibleIds, "visible")}
+          disabled={running || visibleIds.length === 0}
+        >
+          <RotateCcw className="mr-2 size-4" />
+          {t("admin.frames.reset_visible", { n: visibleIds.length })}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => resetJobs(allIds, "all")}
+          disabled={running || allIds.length === 0}
+        >
+          <RotateCcw className="mr-2 size-4" />
+          {t("admin.frames.reset_all")}
+        </Button>
       </div>
+      <p className="mt-2 text-[11px] text-muted-foreground">{t("admin.frames.reset_hint")}</p>
 
       <div className="mt-4 flex flex-wrap gap-2">
         {(["all", "pending", "done", "failed", "bad"] as const).map((k) => (

@@ -28,13 +28,13 @@ export type CameraHint = {
 const HINTS: Record<string, CameraHint> = {
   // ===== LEGS =====
   "wide-leg-press": {
-    label: "Machine: vanaf voetplaat, liggend op rug",
-    angle: "straight side view, eye level, camera perpendicular to the seated mannequin's sagittal plane",
+    label: "Machine: vaste zijkant, hele leg press zichtbaar",
+    angle: "perfect locked-off pure side view from the mannequin's left side, eye level with the seat, camera perpendicular to the leg press rails; never front view, never rear view, never from the opposite side",
     machineView:
-      "camera positioned at the foot-plate end of the leg press machine looking toward the seat; the entire sled/carriage, the foot plate and the seat frame must be fully visible in both frames",
-    bodyOrientation: "mannequin lying on its back on the seat, head near the top of the frame, feet on the foot plate lower in the frame",
-    startPose: "knees bent about 90°, feet flat and wide on the foot plate, ready to press",
-    endPose: "legs almost fully extended, knees still slightly bent, feet still wide on the foot plate; the sled has moved away from the body",
+      "45-degree leg press machine viewed from one fixed side: complete rectangular base frame, inclined rails, sled/carriage, large foot plate, back pad, seat pad and safety handles all visible from the same side in both frames; the machine occupies the same left-to-right position and must not be replaced by a generic chair or disappear",
+    bodyOrientation: "mannequin reclined on its back against the angled back pad, head and torso on the seat at frame-left, hips low, feet placed wide on the foot plate at frame-right; the same left side of the body is visible in both frames",
+    startPose: "knees deeply bent about 90°, hips flexed, feet flat and wide on the foot plate, hands on side handles, back pressed into the pad",
+    endPose: "legs pressed almost straight while knees remain slightly soft, feet still wide on the same foot plate, back still pressed into the same pad; only the sled/leg angle changes along the rails",
   },
   "barbell-squat": {
     label: "Zijkant, barbell op rug",
@@ -239,10 +239,10 @@ function fallbackHint(id: string, equipment?: string, name?: string): CameraHint
   // Machine lower-body: leg press, extension, curl, calf, etc. — side view usually reads the joint motion best.
   if (equipment === "Machine" && /(leg|press|extension|curl|calf|glute|adductor|abductor|hip)/.test(s)) {
     return {
-      label: "Machine onderlichaam: zijkant, hele machine in beeld",
-      angle: "pure side view, eye level, locked-off tripod, full machine in frame",
-      machineView: "the entire machine must be visible from the same side in both frames; do not rotate around the subject",
-      bodyOrientation: "subject positioned according to the machine (seated or lying), full body visible from head to feet",
+      label: "Machine onderlichaam: vaste zijkant, hele machine zichtbaar",
+      angle: "perfect locked-off pure side view, eye level, full machine in frame; never rotate, never switch to the back or opposite side",
+      machineView: "the entire machine, base, pads, rails, handles, rollers and weight stack must be visible from the exact same side in both frames; the machine stays anchored in the same position and does not disappear or transform",
+      bodyOrientation: "subject positioned according to the machine (seated or lying), full body visible from head to feet, same side of the body visible in both frames",
       startPose: "ready/start position at the beginning of the range of motion",
       endPose: "end of the range of motion with limbs fully engaged; the machine and camera stay identical",
     };
@@ -251,10 +251,10 @@ function fallbackHint(id: string, equipment?: string, name?: string): CameraHint
   // Machine upper-body: chest press, shoulder press, row, pulldown, etc.
   if (equipment === "Machine") {
     return {
-      label: "Machine bovenlichaam: schuine zijkant, hele machine in beeld",
-      angle: "three-quarter front-side view, eye level, locked-off tripod, full machine in frame",
-      machineView: "the entire machine and weight stack must be visible from the same angle in both frames; do not rotate around the subject",
-      bodyOrientation: "subject seated or standing facing slightly toward the camera, full body visible from head to feet",
+      label: "Machine bovenlichaam: vaste hoek, hele machine zichtbaar",
+      angle: "locked-off three-quarter front-side view, eye level, full machine in frame; never rotate, never switch to rear view or the opposite side",
+      machineView: "the entire machine frame, seat or bench, handles or bar, cables or arms, and weight stack must be visible from the exact same angle in both frames; the machine stays anchored and does not disappear, slide or transform",
+      bodyOrientation: "subject seated or standing facing slightly toward the camera, full body visible from head to feet, same side of the body visible in both frames",
       startPose: "ready/start position at the beginning of the range of motion",
       endPose: "end of the range of motion with arms fully engaged; the machine and camera stay identical",
     };

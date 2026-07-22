@@ -940,7 +940,6 @@ export const EXERCISES: LibraryExercise[] = [
   mk("roeien-bw", "Roeien", "Bodyweight", ["Back"], ["Full body"]),
   mk("reverse-grip-lat-pulldown-cable", "Reverse Grip Lat Pulldown", "Cable", ["Back"], ["Biceps"]),
   // ===== S =====
-  mk("seated-cable-row", "Seated Cable Row", "Cable", ["Back"], ["Biceps"]),
   mk("shoulder-shrug-machine", "Shoulder Shrug", "Machine", ["Shoulders"], ["Back"]),
   mk("single-leg-clean-kb", "Single Leg Clean", "Kettlebell", ["Full body"]),
   mk("snatch-deadlift-barbell", "Snatch Deadlift", "Barbell", ["Hamstrings"], ["Back", "Glutes"]),
