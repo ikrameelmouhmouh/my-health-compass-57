@@ -39,7 +39,7 @@ function SettingsPage() {
     },
   });
 
-  const { isPremium, override, setOverride } = usePremium();
+  const { isPremium } = usePremium();
 
   async function changeLanguage(code: Language) {
     setLang(code);
@@ -96,41 +96,6 @@ function SettingsPage() {
         </div>
       </section>
 
-      {/* View mode */}
-      <section className="mt-4">
-        <div className="rounded-3xl border border-dashed border-border bg-card p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="font-display text-[13px] font-semibold tracking-tight">
-                {t("set.viewmode.title")}
-              </p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                {t("set.viewmode.desc")}
-              </p>
-            </div>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-1.5 rounded-full bg-background p-1">
-            {(["premium", "free"] as const).map((mode) => {
-              const active = isPremium === (mode === "premium");
-              const label =
-                mode === "premium" ? t("set.viewmode.premium") : t("set.viewmode.free");
-              return (
-                <button
-                  key={mode}
-                  onClick={() => setOverride(mode)}
-                  className={`rounded-full px-2 py-1.5 text-[11px] font-semibold transition ${
-                    active
-                      ? "bg-brand text-brand-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
       {/* Preferences */}
       <SectionLabel>{t("set.section.prefs")}</SectionLabel>

@@ -38,6 +38,7 @@ import { Route as ApiAdminGenerateExerciseFramesRouteImport } from './routes/api
 import { Route as ApiAdminBootstrapAdminRouteImport } from './routes/api/admin/bootstrap-admin'
 import { Route as AuthenticatedWorkoutSessionTemplateIdRouteImport } from './routes/_authenticated/workout-session.$templateId'
 import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
+import { Route as AuthenticatedAdminViewModeRouteImport } from './routes/_authenticated/admin.view-mode'
 import { Route as AuthenticatedAdminExerciseFramesRouteImport } from './routes/_authenticated/admin.exercise-frames'
 import { Route as AuthenticatedActivitySessionActivityIdRouteImport } from './routes/_authenticated/activity-session.$activityId'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -201,6 +202,12 @@ const AuthenticatedAiCoachThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedAiCoachRoute,
   } as any)
+const AuthenticatedAdminViewModeRoute =
+  AuthenticatedAdminViewModeRouteImport.update({
+    id: '/admin/view-mode',
+    path: '/admin/view-mode',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedAdminExerciseFramesRoute =
   AuthenticatedAdminExerciseFramesRouteImport.update({
     id: '/admin/exercise-frames',
@@ -282,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
+  '/admin/view-mode': typeof AuthenticatedAdminViewModeRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/admin/bootstrap-admin': typeof ApiAdminBootstrapAdminRoute
@@ -321,6 +329,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
+  '/admin/view-mode': typeof AuthenticatedAdminViewModeRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/admin/bootstrap-admin': typeof ApiAdminBootstrapAdminRoute
@@ -362,6 +371,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
   '/_authenticated/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
+  '/_authenticated/admin/view-mode': typeof AuthenticatedAdminViewModeRoute
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/_authenticated/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/admin/bootstrap-admin': typeof ApiAdminBootstrapAdminRoute
@@ -403,6 +413,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/activity-session/$activityId'
     | '/admin/exercise-frames'
+    | '/admin/view-mode'
     | '/ai-coach/$threadId'
     | '/workout-session/$templateId'
     | '/api/admin/bootstrap-admin'
@@ -442,6 +453,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/activity-session/$activityId'
     | '/admin/exercise-frames'
+    | '/admin/view-mode'
     | '/ai-coach/$threadId'
     | '/workout-session/$templateId'
     | '/api/admin/bootstrap-admin'
@@ -482,6 +494,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/activity-session/$activityId'
     | '/_authenticated/admin/exercise-frames'
+    | '/_authenticated/admin/view-mode'
     | '/_authenticated/ai-coach/$threadId'
     | '/_authenticated/workout-session/$templateId'
     | '/api/admin/bootstrap-admin'
@@ -720,6 +733,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiCoachThreadIdRouteImport
       parentRoute: typeof AuthenticatedAiCoachRoute
     }
+    '/_authenticated/admin/view-mode': {
+      id: '/_authenticated/admin/view-mode'
+      path: '/admin/view-mode'
+      fullPath: '/admin/view-mode'
+      preLoaderRoute: typeof AuthenticatedAdminViewModeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/admin/exercise-frames': {
       id: '/_authenticated/admin/exercise-frames'
       path: '/admin/exercise-frames'
@@ -815,6 +835,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedWorkoutHistoryRoute: typeof AuthenticatedWorkoutHistoryRoute
   AuthenticatedActivitySessionActivityIdRoute: typeof AuthenticatedActivitySessionActivityIdRoute
   AuthenticatedAdminExerciseFramesRoute: typeof AuthenticatedAdminExerciseFramesRoute
+  AuthenticatedAdminViewModeRoute: typeof AuthenticatedAdminViewModeRoute
   AuthenticatedWorkoutSessionTemplateIdRoute: typeof AuthenticatedWorkoutSessionTemplateIdRoute
 }
 
@@ -837,6 +858,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedActivitySessionActivityIdRoute:
     AuthenticatedActivitySessionActivityIdRoute,
   AuthenticatedAdminExerciseFramesRoute: AuthenticatedAdminExerciseFramesRoute,
+  AuthenticatedAdminViewModeRoute: AuthenticatedAdminViewModeRoute,
   AuthenticatedWorkoutSessionTemplateIdRoute:
     AuthenticatedWorkoutSessionTemplateIdRoute,
 }
