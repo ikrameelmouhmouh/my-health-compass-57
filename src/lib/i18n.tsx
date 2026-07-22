@@ -4979,6 +4979,8 @@ const translations: Translations = {
     "admin.appmode.no_access": "Zugriff verweigert.",
     "admin.appmode.current": "Aktuell",
     "admin.appmode.explain": "Der Bearbeitungsmodus überspringt die Willkommens-, Intro- und Sprachauswahl-Bildschirme, sodass du direkt in die App kommst. Kunden sehen den vollständigen Ablauf.",
+    "admin.edit.title": "Bearbeitungsseite",
+    "admin.frames.page_title": "Workout-Bearbeitungsseite",
     "set.viewmode.free": "Gratis",
     "pay.feature.ai_coach": "KI-Coach",
     "pay.overlay.ai_coach_desc": "Chatte mit deinem persönlichen KI-Coach mit Alyva Plus.",
