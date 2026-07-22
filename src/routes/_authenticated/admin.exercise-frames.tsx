@@ -368,6 +368,46 @@ function AdminExerciseFramesPage() {
   );
 }
 
+function FrameAnimation({
+  url0,
+  url1,
+  speed = "normal",
+  playing = true,
+}: {
+  url0: string;
+  url1: string;
+  speed?: FilmSpeed;
+  playing?: boolean;
+}) {
+  const [frame, setFrame] = useState<0 | 1>(0);
+  const transitionMs = Math.min(SPEED_MS[speed] * 0.5, 600);
+
+  useEffect(() => {
+    if (!playing) return;
+    const interval = setInterval(() => {
+      setFrame((f) => (f === 0 ? 1 : 0));
+    }, SPEED_MS[speed]);
+    return () => clearInterval(interval);
+  }, [playing, speed]);
+
+  return (
+    <div className="relative h-full w-full">
+      <img
+        src={url0}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ opacity: frame === 0 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+      />
+      <img
+        src={url1}
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+        style={{ opacity: frame === 1 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+      />
+    </div>
+  );
+}
+
 function Lightbox({
   value,
   onChange,
