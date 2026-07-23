@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -37,7 +38,7 @@ export const BADGES: Badge[] = [
 
 function ymd(d: Date | string): string {
   const dt = typeof d === "string" ? new Date(d) : d;
-  return dt.toISOString().slice(0, 10);
+  return localDayKey(dt);
 }
 
 function startOfWeek(d = new Date()): Date {

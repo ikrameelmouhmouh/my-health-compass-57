@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
@@ -167,7 +168,7 @@ function Profile() {
   const ensuredRef = useRef<string | null>(null);
   useEffect(() => {
     if (isLoading || !p?.onboarding_completed) return;
-    const today = new Date().toISOString().slice(0, 10);
+    const today = todayLocalKey();
     if (ensuredRef.current === today) return;
     ensuredRef.current = today;
     ensureAuraFn({ data: { title: aura.title, body: aura.body, advice: aura.advice } }).catch(() => {

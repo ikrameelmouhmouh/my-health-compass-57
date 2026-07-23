@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { Flame, Trophy, Calendar, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { BADGES, useRetention } from "@/lib/retention";
@@ -60,7 +61,7 @@ export function RetentionSection() {
         <div className="flex h-24 items-end gap-2">
           {weekDays.map((d) => {
             const h = (d.workouts / maxWorkouts) * 100;
-            const today = d.date === new Date().toISOString().slice(0, 10);
+            const today = d.date === todayLocalKey();
             return (
               <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
                 <div className="flex h-full w-full items-end">

@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import {
@@ -486,7 +487,7 @@ function ChallengesTab() {
       />
     );
   }
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayLocalKey();
 
   return (
     <>
@@ -544,8 +545,8 @@ function ChallengesTab() {
 function CreateChallengeDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t } = useI18n();
   const { create } = useChallenges();
-  const today = new Date().toISOString().slice(0, 10);
-  const inWeek = new Date(Date.now() + 7 * 86400_000).toISOString().slice(0, 10);
+  const today = todayLocalKey();
+  const inWeek = localDayKey(new Date(Date.now() + 7 * 86400_000));
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [metric, setMetric] = useState<Challenge["metric"]>("workouts");
