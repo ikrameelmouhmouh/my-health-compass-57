@@ -415,12 +415,14 @@ function Lightbox({
   filmMode,
   filmSpeed,
   onSpeedChange,
+  versions,
 }: {
   value: { exerciseId: string; frameIndex: 0 | 1 } | null;
   onChange: (v: { exerciseId: string; frameIndex: 0 | 1 } | null) => void;
   filmMode: boolean;
   filmSpeed: FilmSpeed;
   onSpeedChange: (s: FilmSpeed) => void;
+  versions: Map<string, { updated_at: string }>;
 }) {
   const t = useT();
   const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
