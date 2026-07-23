@@ -624,6 +624,17 @@ function Lightbox({
           >
             <ChevronRight className="size-6" />
           </button>
+          <button
+            type="button"
+            aria-label={t("admin.frames.lightbox.next_exercise")}
+            onClick={() => gotoExercise(nextExerciseId)}
+            disabled={!nextExerciseId}
+            className="absolute right-2 top-[calc(50%+3rem)] z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-brand/70 text-white backdrop-blur-sm transition hover:bg-brand disabled:opacity-30 sm:right-4"
+            title={t("admin.frames.lightbox.next_exercise")}
+          >
+            <ChevronsRight className="size-6" />
+          </button>
+
 
           <button
             type="button"
