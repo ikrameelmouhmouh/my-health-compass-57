@@ -2151,7 +2151,7 @@ const translations: Translations = {
     "admin.frames.film_speed_fast": "سريع",
     "admin.frames.feedback.title": "لماذا تم رفض هذا؟",
     "admin.frames.feedback.desc": "اختياري — صِف الخطأ حتى تتمكن الجولة التالية من الذكاء الاصطناعي من إصلاحه (مثلاً \"العارض في الإطار 1 بدون ملابس داخلية\").",
-    "admin.frames.feedback.placeholder": "مثال: الإطار 1 يفتقد الملابس الداخلية؛ الإطار 2 زاوية الكاميرا مائلة.",
+    "admin.frames.feedback.placeholder": "مثال: يفتقد الإطار 1 الملابس الداخلية…",
     "admin.frames.feedback.skip": "تخطّي، فقط ضع علامة سيّئ",
     "admin.frames.feedback.save": "حفظ ووضع علامة سيّئ",
     "admin.frames.feedback.cancel": "إلغاء",
