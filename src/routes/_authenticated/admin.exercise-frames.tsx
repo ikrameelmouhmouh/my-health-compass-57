@@ -683,9 +683,22 @@ function Lightbox({
             <button
               type="button"
               onClick={async () => {
+                await onRegenerate(exercise.id);
+              }}
+              disabled={regenerating}
+              className="grid size-8 place-items-center rounded-full bg-white/20 text-white transition hover:bg-white/30 disabled:opacity-50"
+              aria-label="Genereer opnieuw"
+              title="Genereer opnieuw"
+            >
+              <RefreshCw className={`size-4 ${regenerating ? "animate-spin" : ""}`} />
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
                 await onApprove(exercise.id);
                 if (nextExerciseId) gotoExercise(nextExerciseId);
               }}
+
               className="grid size-8 place-items-center rounded-full bg-green-500/80 text-white transition hover:bg-green-500"
               aria-label={t("admin.frames.lightbox.approve")}
               title={t("admin.frames.lightbox.approve")}
