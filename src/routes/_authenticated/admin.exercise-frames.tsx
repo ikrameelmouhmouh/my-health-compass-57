@@ -479,7 +479,7 @@ function Lightbox({
 
   if (!exercise || !value) return null;
 
-  const jobVersion = value?.exerciseId ? jobsForVersion.get(value.exerciseId) : undefined;
+  const jobVersion = value?.exerciseId ? versions.get(value.exerciseId)?.updated_at : undefined;
   const v = jobVersion ? `?v=${encodeURIComponent(jobVersion)}` : "";
   const url0 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/0${v}`;
   const url1 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/1${v}`;
