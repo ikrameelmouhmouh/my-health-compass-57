@@ -673,7 +673,39 @@ function Lightbox({
               </button>
             ))}
           </div>
+          <div className="ml-2 flex items-center gap-1 border-l border-white/20 pl-3">
+            <button
+              type="button"
+              onClick={() => {
+                onReject(exercise.id);
+              }}
+              className="grid size-8 place-items-center rounded-full bg-red-500/80 text-white transition hover:bg-red-500"
+              aria-label={t("admin.frames.lightbox.reject")}
+              title={t("admin.frames.lightbox.reject")}
+            >
+              <X className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                await onApprove(exercise.id);
+                if (nextExerciseId) gotoExercise(nextExerciseId);
+              }}
+              className="grid size-8 place-items-center rounded-full bg-green-500/80 text-white transition hover:bg-green-500"
+              aria-label={t("admin.frames.lightbox.approve")}
+              title={t("admin.frames.lightbox.approve")}
+            >
+              <Check className="size-4" />
+            </button>
+          </div>
+          {jobs.get(exercise.id)?.feedback ? (
+            <div className="ml-1 flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-100" title={jobs.get(exercise.id)?.feedback ?? ""}>
+              <MessageSquareWarning className="size-3" />
+              <span className="max-w-[10rem] truncate">{jobs.get(exercise.id)?.feedback}</span>
+            </div>
+          ) : null}
         </div>
+
       </DialogContent>
     </Dialog>
   );
