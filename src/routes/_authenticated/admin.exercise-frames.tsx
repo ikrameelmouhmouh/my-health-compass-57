@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
-import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight, Play, Pause, MessageSquareWarning, X } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Play, Pause, MessageSquareWarning, X, Check } from "lucide-react";
 
 
 type FilmSpeed = "slow" | "normal" | "fast";
@@ -385,7 +385,26 @@ function AdminExerciseFramesPage() {
         })}
       </ul>
 
-      <Lightbox value={lightbox} onChange={setLightbox} filmMode={filmMode} filmSpeed={filmSpeed} onSpeedChange={setFilmSpeed} versions={jobsById} />
+      <Lightbox
+        value={lightbox}
+        onChange={setLightbox}
+        filmMode={filmMode}
+        filmSpeed={filmSpeed}
+        onSpeedChange={setFilmSpeed}
+        versions={jobsById}
+        visibleIds={visibleIds}
+        jobs={jobsById as unknown as Map<string, JobRow>}
+        onApprove={async (exerciseId) => {
+          await supabase.from("exercise_frame_jobs").upsert({ exercise_id: exerciseId, status: "done", feedback: null });
+          qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+        }}
+        onReject={(exerciseId) => {
+          const ex = EXERCISES.find((e) => e.id === exerciseId);
+          const job = jobsById.get(exerciseId) as JobRow | undefined;
+          setFeedbackTarget({ exerciseId, exerciseName: ex?.name ?? exerciseId, current: job?.feedback ?? "" });
+        }}
+      />
+
       <FeedbackDialog
         target={feedbackTarget}
         onClose={() => setFeedbackTarget(null)}
@@ -452,6 +471,10 @@ function Lightbox({
   filmSpeed,
   onSpeedChange,
   versions,
+  visibleIds,
+  jobs,
+  onApprove,
+  onReject,
 }: {
   value: { exerciseId: string; frameIndex: 0 | 1 } | null;
   onChange: (v: { exerciseId: string; frameIndex: 0 | 1 } | null) => void;
@@ -459,7 +482,12 @@ function Lightbox({
   filmSpeed: FilmSpeed;
   onSpeedChange: (s: FilmSpeed) => void;
   versions: Map<string, { updated_at: string }>;
+  visibleIds: string[];
+  jobs: Map<string, JobRow>;
+  onApprove: (exerciseId: string) => void | Promise<void>;
+  onReject: (exerciseId: string) => void;
 }) {
+
   const t = useT();
   const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
   const frameIndex = value?.frameIndex ?? 0;
@@ -493,6 +521,15 @@ function Lightbox({
     return () => clearInterval(interval);
   }, [playing, filmSpeed, value?.exerciseId]);
 
+  const currentIndex = value ? visibleIds.indexOf(value.exerciseId) : -1;
+  const prevExerciseId = currentIndex > 0 ? visibleIds[currentIndex - 1] : null;
+  const nextExerciseId = currentIndex >= 0 && currentIndex < visibleIds.length - 1 ? visibleIds[currentIndex + 1] : null;
+  const gotoExercise = (id: string | null) => {
+    if (!id) return;
+    setPlaying(false);
+    onChange({ exerciseId: id, frameIndex: 0 });
+  };
+
   useEffect(() => {
     if (!value) return;
     const handler = (e: KeyboardEvent) => {
@@ -502,6 +539,12 @@ function Lightbox({
       } else if (e.key === "ArrowRight") {
         setPlaying(false);
         onChange({ exerciseId: value.exerciseId, frameIndex: 1 });
+      } else if (e.key === "ArrowUp" || e.key === "PageUp") {
+        e.preventDefault();
+        gotoExercise(prevExerciseId);
+      } else if (e.key === "ArrowDown" || e.key === "PageDown") {
+        e.preventDefault();
+        gotoExercise(nextExerciseId);
       } else if (e.key === "Escape") {
         onChange(null);
       } else if (e.key === " ") {
@@ -511,7 +554,8 @@ function Lightbox({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [value, onChange]);
+  }, [value, onChange, prevExerciseId, nextExerciseId]);
+
 
   if (!exercise || !value) return null;
 
@@ -541,6 +585,17 @@ function Lightbox({
           >
             <ChevronLeft className="size-6" />
           </button>
+          <button
+            type="button"
+            aria-label={t("admin.frames.lightbox.previous_exercise")}
+            onClick={() => gotoExercise(prevExerciseId)}
+            disabled={!prevExerciseId}
+            className="absolute left-2 top-[calc(50%+3rem)] z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-brand/70 text-white backdrop-blur-sm transition hover:bg-brand disabled:opacity-30 sm:left-4"
+            title={t("admin.frames.lightbox.previous_exercise")}
+          >
+            <ChevronsLeft className="size-6" />
+          </button>
+
 
           <div className="relative max-h-[85vh] max-w-[90vw]">
             <img
@@ -569,6 +624,17 @@ function Lightbox({
           >
             <ChevronRight className="size-6" />
           </button>
+          <button
+            type="button"
+            aria-label={t("admin.frames.lightbox.next_exercise")}
+            onClick={() => gotoExercise(nextExerciseId)}
+            disabled={!nextExerciseId}
+            className="absolute right-2 top-[calc(50%+3rem)] z-10 grid size-10 -translate-y-1/2 place-items-center rounded-full bg-brand/70 text-white backdrop-blur-sm transition hover:bg-brand disabled:opacity-30 sm:right-4"
+            title={t("admin.frames.lightbox.next_exercise")}
+          >
+            <ChevronsRight className="size-6" />
+          </button>
+
 
           <button
             type="button"
@@ -607,7 +673,39 @@ function Lightbox({
               </button>
             ))}
           </div>
+          <div className="ml-2 flex items-center gap-1 border-l border-white/20 pl-3">
+            <button
+              type="button"
+              onClick={() => {
+                onReject(exercise.id);
+              }}
+              className="grid size-8 place-items-center rounded-full bg-red-500/80 text-white transition hover:bg-red-500"
+              aria-label={t("admin.frames.lightbox.reject")}
+              title={t("admin.frames.lightbox.reject")}
+            >
+              <X className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                await onApprove(exercise.id);
+                if (nextExerciseId) gotoExercise(nextExerciseId);
+              }}
+              className="grid size-8 place-items-center rounded-full bg-green-500/80 text-white transition hover:bg-green-500"
+              aria-label={t("admin.frames.lightbox.approve")}
+              title={t("admin.frames.lightbox.approve")}
+            >
+              <Check className="size-4" />
+            </button>
+          </div>
+          {jobs.get(exercise.id)?.feedback ? (
+            <div className="ml-1 flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-100" title={jobs.get(exercise.id)?.feedback ?? ""}>
+              <MessageSquareWarning className="size-3" />
+              <span className="max-w-[10rem] truncate">{jobs.get(exercise.id)?.feedback}</span>
+            </div>
+          ) : null}
         </div>
+
       </DialogContent>
     </Dialog>
   );
