@@ -438,7 +438,10 @@ function Lightbox({
 
   useEffect(() => {
     if (value) setPlaying(filmMode);
-  }, [value, filmMode]);
+    // Only re-sync playing state on exercise switch or filmMode toggle,
+    // NOT on every frame tick (which changes `value`).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value?.exerciseId, filmMode]);
 
   useEffect(() => {
     if (!playing || !value) return;
