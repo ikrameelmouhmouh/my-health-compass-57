@@ -7,9 +7,11 @@ import { EXERCISES } from "@/lib/exercise-library";
 import { getCameraHint, hasExplicitCameraHint } from "@/lib/exercise-camera-hints";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
-import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight, Play, Pause, MessageSquareWarning, X } from "lucide-react";
+
 
 type FilmSpeed = "slow" | "normal" | "fast";
 
