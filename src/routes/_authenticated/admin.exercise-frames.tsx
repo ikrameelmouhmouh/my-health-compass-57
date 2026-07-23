@@ -226,44 +226,9 @@ function AdminExerciseFramesPage() {
           <RotateCcw className="mr-2 size-4" />
           {t("admin.frames.reset_visible", { n: visibleIds.length })}
         </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => resetJobs(allIds, "all")}
-          disabled={running || allIds.length === 0}
-        >
-          <RotateCcw className="mr-2 size-4" />
-          {t("admin.frames.reset_all")}
-        </Button>
-        <Button
-          size="sm"
-          variant={filmMode ? "default" : "outline"}
-          onClick={() => setFilmMode((v) => !v)}
-          disabled={running}
-        >
-          {filmMode ? <Pause className="mr-2 size-4" /> : <Play className="mr-2 size-4" />}
-          {filmMode ? t("admin.frames.film_stop") : t("admin.frames.film_play")}
-        </Button>
       </div>
       <p className="mt-2 text-[11px] text-muted-foreground">{t("admin.frames.reset_hint")}</p>
-      {filmMode ? (
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="text-[11px] text-muted-foreground">{t("admin.frames.film_speed_label")}</span>
-          {(["slow", "normal", "fast"] as const).map((s) => (
-            <button
-              key={s}
-              onClick={() => setFilmSpeed(s)}
-              className={`rounded-full px-2.5 py-1 text-[11px] transition ${
-                filmSpeed === s
-                  ? "bg-brand text-white"
-                  : "border border-border bg-card text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              {t(`admin.frames.film_speed_${s}`)}
-            </button>
-          ))}
-        </div>
-      ) : null}
+
 
       <div className="mt-4 flex flex-wrap gap-2">
         {(["all", "pending", "done", "failed", "bad"] as const).map((k) => (
@@ -359,27 +324,34 @@ function AdminExerciseFramesPage() {
                   </div>
                 ) : null}
               </div>
-              <div className="flex shrink-0 gap-1">
-                {status === "done" ? (
-                  <button
-                    title="Markeer als slecht"
-                    onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "" })}
-                    className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-muted"
-                  >
-                    <XCircle className="size-4" />
-                  </button>
-                ) : null}
-
+              <div className="flex shrink-0 items-center gap-1.5">
+                <button
+                  title={t("admin.frames.lightbox.reject")}
+                  onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "" })}
+                  className="grid size-8 place-items-center rounded-full bg-red-500/80 text-white transition hover:bg-red-500"
+                >
+                  <X className="size-4" />
+                </button>
                 <button
                   title="Genereer opnieuw"
                   onClick={() => runBatch([ex.id], true)}
                   disabled={running}
-                  className="grid size-8 place-items-center rounded-full text-brand hover:bg-brand/15 disabled:opacity-50"
+                  className="grid size-8 place-items-center rounded-full bg-brand/80 text-white transition hover:bg-brand disabled:opacity-50"
                 >
                   <RefreshCw className="size-4" />
                 </button>
-                {status === "done" ? <CheckCircle2 className="size-4 text-green-500" /> : null}
+                <button
+                  title={t("admin.frames.lightbox.approve")}
+                  onClick={async () => {
+                    await supabase.from("exercise_frame_jobs").upsert({ exercise_id: ex.id, status: "done", feedback: null });
+                    qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+                  }}
+                  className="grid size-8 place-items-center rounded-full bg-green-500/80 text-white transition hover:bg-green-500"
+                >
+                  <Check className="size-4" />
+                </button>
               </div>
+
             </li>
           );
         })}
@@ -746,7 +718,9 @@ function FeedbackDialog({
           rows={4}
           maxLength={800}
           autoFocus
+          className="w-full resize-none"
         />
+
         <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button
             variant="ghost"
