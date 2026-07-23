@@ -314,7 +314,7 @@ function Profile() {
   }
 
   return (
-    <main className="home-forest mx-auto min-h-[100dvh] w-full max-w-md px-4 pb-32 pt-4">
+    <main className="mx-auto min-h-[100dvh] w-full max-w-md px-4 pb-32 pt-4">
       <header className="flex items-start justify-between gap-3 px-1">
         <div className="min-w-0 flex-1">
           <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand/80">
