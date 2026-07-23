@@ -1123,7 +1123,7 @@ const translations: Translations = {
     "admin.frames.film_speed_fast": "Snel",
     "admin.frames.feedback.title": "Waarom keur je dit af?",
     "admin.frames.feedback.desc": "Optioneel — beschrijf wat er mis is zodat de volgende AI-generatie dit kan oplossen (bv. \"frame 1 mannequin heeft geen ondergoed\").",
-    "admin.frames.feedback.placeholder": "Bv. Frame 1 mannequin mist ondergoed; frame 2 camerahoek gedraaid.",
+    "admin.frames.feedback.placeholder": "Bv. mannequin mist ondergoed op frame 1…",
     "admin.frames.feedback.skip": "Overslaan, markeer alleen slecht",
     "admin.frames.feedback.save": "Opslaan & markeer slecht",
     "admin.frames.feedback.cancel": "Annuleren",
