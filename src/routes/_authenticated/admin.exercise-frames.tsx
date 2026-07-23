@@ -281,8 +281,9 @@ function AdminExerciseFramesPage() {
       <ul className="mt-4 space-y-2">
         {rows.map(({ ex, job }) => {
           const status = job?.status ?? "pending";
-          const url0 = `/api/exercise-frame/${encodeURIComponent(ex.id)}/0`;
-          const url1 = `/api/exercise-frame/${encodeURIComponent(ex.id)}/1`;
+          const v = job?.updated_at ? `?v=${encodeURIComponent(job.updated_at)}` : "";
+          const url0 = `/api/exercise-frame/${encodeURIComponent(ex.id)}/0${v}`;
+          const url1 = `/api/exercise-frame/${encodeURIComponent(ex.id)}/1${v}`;
           const hint = getCameraHint(ex.id, ex.equipment, ex.name);
           const explicit = hasExplicitCameraHint(ex.id);
           return (
@@ -363,7 +364,7 @@ function AdminExerciseFramesPage() {
         })}
       </ul>
 
-      <Lightbox value={lightbox} onChange={setLightbox} filmMode={filmMode} filmSpeed={filmSpeed} onSpeedChange={setFilmSpeed} />
+      <Lightbox value={lightbox} onChange={setLightbox} filmMode={filmMode} filmSpeed={filmSpeed} onSpeedChange={setFilmSpeed} versions={jobsById} />
     </main>
   );
 }
@@ -414,12 +415,14 @@ function Lightbox({
   filmMode,
   filmSpeed,
   onSpeedChange,
+  versions,
 }: {
   value: { exerciseId: string; frameIndex: 0 | 1 } | null;
   onChange: (v: { exerciseId: string; frameIndex: 0 | 1 } | null) => void;
   filmMode: boolean;
   filmSpeed: FilmSpeed;
   onSpeedChange: (s: FilmSpeed) => void;
+  versions: Map<string, { updated_at: string }>;
 }) {
   const t = useT();
   const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
@@ -438,7 +441,10 @@ function Lightbox({
 
   useEffect(() => {
     if (value) setPlaying(filmMode);
-  }, [value, filmMode]);
+    // Only re-sync playing state on exercise switch or filmMode toggle,
+    // NOT on every frame tick (which changes `value`).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value?.exerciseId, filmMode]);
 
   useEffect(() => {
     if (!playing || !value) return;
@@ -473,8 +479,10 @@ function Lightbox({
 
   if (!exercise || !value) return null;
 
-  const url0 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/0`;
-  const url1 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/1`;
+  const jobVersion = value?.exerciseId ? versions.get(value.exerciseId)?.updated_at : undefined;
+  const v = jobVersion ? `?v=${encodeURIComponent(jobVersion)}` : "";
+  const url0 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/0${v}`;
+  const url1 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/1${v}`;
   const transitionMs = Math.min(SPEED_MS[filmSpeed] * 0.5, 600);
 
   return (
