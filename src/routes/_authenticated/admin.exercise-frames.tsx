@@ -477,8 +477,10 @@ function Lightbox({
 
   if (!exercise || !value) return null;
 
-  const url0 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/0`;
-  const url1 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/1`;
+  const jobVersion = value?.exerciseId ? jobsForVersion.get(value.exerciseId) : undefined;
+  const v = jobVersion ? `?v=${encodeURIComponent(jobVersion)}` : "";
+  const url0 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/0${v}`;
+  const url1 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/1${v}`;
   const transitionMs = Math.min(SPEED_MS[filmSpeed] * 0.5, 600);
 
   return (
