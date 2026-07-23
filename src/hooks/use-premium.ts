@@ -9,12 +9,11 @@ const STORAGE_KEY = "vita.premiumOverride";
 const EVENT = "vita:premium-override";
 
 function readOverride(): PremiumOverride {
-  if (typeof window === "undefined") return "premium";
+  if (typeof window === "undefined") return null;
   const v = window.localStorage.getItem(STORAGE_KEY);
   if (v === "premium" || v === "on") return "premium";
   if (v === "free" || v === "off") return "free";
-  // Default when nothing is stored: premium.
-  return "premium";
+  return null;
 }
 
 export function usePremium() {
