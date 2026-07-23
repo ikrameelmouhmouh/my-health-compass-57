@@ -57,7 +57,7 @@ export const Route = createFileRoute("/api/admin/generate-exercise-frames")({
         const prompts = (body.prompts && typeof body.prompts === "object" ? body.prompts : {}) as Record<string, string>;
         const exerciseData = (body.exerciseData && typeof body.exerciseData === "object" ? body.exerciseData : {}) as Record<
           string,
-          { name?: string; equipment?: string }
+          { name?: string; equipment?: string; primary?: string[]; secondary?: string[] }
         >;
         if (ids.length === 0) return Response.json({ ok: true, results: [] });
         if (action === "generate" && ids.length > 25) return new Response("Too many ids (max 25)", { status: 400 });
