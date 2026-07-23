@@ -386,6 +386,21 @@ function AdminExerciseFramesPage() {
       </ul>
 
       <Lightbox value={lightbox} onChange={setLightbox} filmMode={filmMode} filmSpeed={filmSpeed} onSpeedChange={setFilmSpeed} versions={jobsById} />
+      <FeedbackDialog
+        target={feedbackTarget}
+        onClose={() => setFeedbackTarget(null)}
+        onSubmit={async (feedback) => {
+          if (!feedbackTarget) return;
+          await supabase.from("exercise_frame_jobs").upsert({
+            exercise_id: feedbackTarget.exerciseId,
+            status: "bad",
+            feedback: feedback && feedback.trim().length > 0 ? feedback.trim() : null,
+          });
+          qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+          setFeedbackTarget(null);
+        }}
+      />
+
     </main>
   );
 }
