@@ -151,6 +151,7 @@ async function generateForExercise(args: {
     // Frame 1: END position (image-to-image using frame 0 as reference so
     // camera, lighting, mannequin, machine and background stay identical).
     const endPrompt = [
+      correctionsBlock,
       "This is FRAME 2 of a 2-frame exercise animation. The reference image is FRAME 1.",
       "",
       "CRITICAL — keep IDENTICAL to the reference image:",
@@ -169,6 +170,7 @@ async function generateForExercise(args: {
     ]
       .filter(Boolean)
       .join("\n");
+
     const b64_0 = uint8ToBase64(b0);
     const b1 = await generateOne({
       prompt: endPrompt,
