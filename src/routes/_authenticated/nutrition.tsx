@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -49,7 +50,7 @@ function Nutrition() {
   const viewDate = useMemo(() => {
     const d = new Date();
     d.setDate(d.getDate() + dateOffset);
-    return d.toISOString().slice(0, 10);
+    return localDayKey(d);
   }, [dateOffset]);
   const isToday = dateOffset === 0;
 

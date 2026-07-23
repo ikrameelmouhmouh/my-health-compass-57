@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -154,7 +155,7 @@ function ProgressPage() {
     for (let i = 6; i >= 0; i--) {
       const d = new Date(Date.now() - i * 86_400_000);
       labels.push(d.toLocaleDateString(lang, { weekday: "narrow" }));
-      const key = d.toISOString().slice(0, 10);
+      const key = localDayKey(d);
       const sum = fasting.history
         .filter((e) => e.endedAt.slice(0, 10) === key)
         .reduce((a, b) => a + b.durationMs / 3_600_000, 0);
@@ -375,7 +376,7 @@ function ProgressPage() {
 }
 
 // ---------- dialogs ----------
-const todayISO = () => new Date().toISOString().slice(0, 10);
+const todayISO = () => todayLocalKey();
 const dateToISO = (d: string) => {
   const now = new Date();
   const [y, m, dd] = d.split("-").map(Number);

@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
@@ -240,7 +241,7 @@ function Dashboard({
     [plan],
   );
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayLocalKey();
   const todayName = DAY_ORDER[(new Date().getDay() + 6) % 7];
   const nextWorkout = useMemo(() => {
     for (let i = 0; i < 7; i++) {
@@ -257,7 +258,7 @@ function Dashboard({
   const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6);
   const completedWeek = completedDays.filter((k) => {
     const date = k.split(":")[0];
-    return date >= weekStart.toISOString().slice(0, 10);
+    return date >= localDayKey(weekStart);
   }).length;
   const progressPct = trainingDays > 0 ? Math.min(100, Math.round((completedWeek / trainingDays) * 100)) : 0;
 

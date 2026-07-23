@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { useCallback, useEffect, useState } from "react";
 
 // ============ Types ============
@@ -69,7 +70,7 @@ export type LoggedMeal = {
 };
 
 // ============ Helpers ============
-export const todayKey = () => new Date().toISOString().slice(0, 10);
+export const todayKey = () => todayLocalKey();
 
 export function computeNutrition(per100: Per100, grams: number) {
   const f = grams / 100;

@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { useEffect, useState, useCallback, useRef } from "react";
 
 export type DashCardId =
@@ -140,7 +141,7 @@ export function useDashboardPrefs() {
 }
 
 // ----- Local daily tracking (placeholder until backend tracking ships) -----
-const todayKey = () => new Date().toISOString().slice(0, 10);
+const todayKey = () => todayLocalKey();
 
 type DayLog = {
   date: string;

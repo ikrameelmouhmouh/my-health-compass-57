@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { useCallback, useEffect, useState } from "react";
 import type { Exercise, WizardInputT, WorkoutPlan } from "./workout.functions";
 
@@ -69,7 +70,7 @@ export function useWorkoutPlan() {
   const toggleCompleted = useCallback((dayName: string) => {
     setStored((cur) => {
       if (!cur) return cur;
-      const today = new Date().toISOString().slice(0, 10);
+      const today = todayLocalKey();
       const key = `${today}:${dayName}`;
       const next = cur.completedDays.includes(key)
         ? { ...cur, completedDays: cur.completedDays.filter((k) => k !== key) }

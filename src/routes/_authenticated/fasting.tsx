@@ -1,3 +1,4 @@
+import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -483,7 +484,7 @@ function bucketByDay(history: FastEntry[], days: number, lang: string) {
   const out: { label: string; date: string; hours: number }[] = [];
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today.getTime() - i * 86_400_000);
-    const key = d.toISOString().slice(0, 10);
+    const key = localDayKey(d);
     const label = d.toLocaleDateString(lang, { weekday: "short" }).slice(0, 1);
     let hours = 0;
     for (const e of history) {
