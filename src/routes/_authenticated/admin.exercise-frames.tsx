@@ -364,7 +364,7 @@ function AdminExerciseFramesPage() {
         })}
       </ul>
 
-      <Lightbox value={lightbox} onChange={setLightbox} filmMode={filmMode} filmSpeed={filmSpeed} onSpeedChange={setFilmSpeed} />
+      <Lightbox value={lightbox} onChange={setLightbox} filmMode={filmMode} filmSpeed={filmSpeed} onSpeedChange={setFilmSpeed} versions={jobsById} />
     </main>
   );
 }
