@@ -79,7 +79,7 @@ function AdminExerciseFramesPage() {
   const [filmMode, setFilmMode] = useState(false);
   const [filmSpeed, setFilmSpeed] = useState<FilmSpeed>("normal");
   const [lightbox, setLightbox] = useState<{ exerciseId: string; frameIndex: 0 | 1 } | null>(null);
-  const [feedbackTarget, setFeedbackTarget] = useState<{ exerciseId: string; exerciseName: string; current: string } | null>(null);
+  const [feedbackTarget, setFeedbackTarget] = useState<{ exerciseId: string; exerciseName: string; current: string; mode: "reject" | "regenerate" } | null>(null);
 
 
   const jobsById = useMemo(() => {
@@ -346,7 +346,7 @@ function AdminExerciseFramesPage() {
                 {status === "done" ? (
                   <button
                     title="Markeer als slecht"
-                    onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "" })}
+                    onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "", mode: "reject" })}
                     className="grid size-9 place-items-center rounded-full bg-destructive text-destructive-foreground shadow-sm transition hover:opacity-90 active:scale-95"
                   >
                     <X className="size-4" strokeWidth={2.5} />
@@ -355,7 +355,7 @@ function AdminExerciseFramesPage() {
 
                 <button
                   title="Genereer opnieuw"
-                  onClick={() => runBatch([ex.id], true)}
+                  onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "", mode: "regenerate" })}
                   disabled={running}
                   className="grid size-9 place-items-center rounded-full bg-muted text-foreground transition hover:bg-accent active:scale-95 disabled:opacity-50"
                 >
@@ -388,9 +388,13 @@ function AdminExerciseFramesPage() {
         onReject={(exerciseId) => {
           const ex = EXERCISES.find((e) => e.id === exerciseId);
           const job = jobsById.get(exerciseId) as JobRow | undefined;
-          setFeedbackTarget({ exerciseId, exerciseName: ex?.name ?? exerciseId, current: job?.feedback ?? "" });
+          setFeedbackTarget({ exerciseId, exerciseName: ex?.name ?? exerciseId, current: job?.feedback ?? "", mode: "reject" });
         }}
-        onRegenerate={(exerciseId) => runBatch([exerciseId], true)}
+        onRegenerate={(exerciseId) => {
+          const ex = EXERCISES.find((e) => e.id === exerciseId);
+          const job = jobsById.get(exerciseId) as JobRow | undefined;
+          setFeedbackTarget({ exerciseId, exerciseName: ex?.name ?? exerciseId, current: job?.feedback ?? "", mode: "regenerate" });
+        }}
         regenerating={running}
 
       />
@@ -400,10 +404,23 @@ function AdminExerciseFramesPage() {
         onClose={() => setFeedbackTarget(null)}
         onSubmit={async (feedback) => {
           if (!feedbackTarget) return;
+          const trimmed = feedback && feedback.trim().length > 0 ? feedback.trim() : null;
+          if (feedbackTarget.mode === "regenerate") {
+            if (trimmed) {
+              await supabase.from("exercise_frame_jobs").upsert({
+                exercise_id: feedbackTarget.exerciseId,
+                feedback: trimmed,
+              });
+            }
+            const id = feedbackTarget.exerciseId;
+            setFeedbackTarget(null);
+            await runBatch([id], true);
+            return;
+          }
           await supabase.from("exercise_frame_jobs").upsert({
             exercise_id: feedbackTarget.exerciseId,
             status: "bad",
-            feedback: feedback && feedback.trim().length > 0 ? feedback.trim() : null,
+            feedback: trimmed,
           });
           qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
           setFeedbackTarget(null);
@@ -724,7 +741,7 @@ function FeedbackDialog({
   onClose,
   onSubmit,
 }: {
-  target: { exerciseId: string; exerciseName: string; current: string } | null;
+  target: { exerciseId: string; exerciseName: string; current: string; mode: "reject" | "regenerate" } | null;
   onClose: () => void;
   onSubmit: (feedback: string) => void | Promise<void>;
 }) {
@@ -737,12 +754,19 @@ function FeedbackDialog({
   }, [target?.exerciseId, target?.current]);
 
   const open = !!target;
+  const isRegen = target?.mode === "regenerate";
+  const title = isRegen ? "Genereer opnieuw" : t("admin.frames.feedback.title");
+  const desc = isRegen
+    ? "Optioneel — beschrijf wat er fout was, zodat de nieuwe render dit meteen corrigeert."
+    : t("admin.frames.feedback.desc");
+  const primaryLabel = isRegen ? "Genereer opnieuw" : t("admin.frames.feedback.save");
+  const skipLabel = isRegen ? "Genereer zonder notitie" : t("admin.frames.feedback.skip");
   return (
     <Dialog open={open} onOpenChange={(v) => !v && !saving && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{t("admin.frames.feedback.title")}</DialogTitle>
-          <DialogDescription>{t("admin.frames.feedback.desc")}</DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{desc}</DialogDescription>
         </DialogHeader>
         {target ? (
           <p className="text-xs text-muted-foreground">{target.exerciseName}</p>
@@ -780,7 +804,7 @@ function FeedbackDialog({
             }}
             disabled={saving}
           >
-            {t("admin.frames.feedback.skip")}
+            {skipLabel}
           </Button>
           <Button
             onClick={async () => {
@@ -794,7 +818,7 @@ function FeedbackDialog({
             disabled={saving}
           >
             {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-            {t("admin.frames.feedback.save")}
+            {primaryLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
