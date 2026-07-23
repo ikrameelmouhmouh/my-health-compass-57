@@ -5235,7 +5235,7 @@ const translations: Translations = {
     "admin.frames.film_speed_fast": "Rápido",
     "admin.frames.feedback.title": "¿Por qué rechazas esto?",
     "admin.frames.feedback.desc": "Opcional — describe qué está mal para que la próxima generación de IA lo corrija (por ejemplo, 'el maniquí del frame 1 no lleva ropa interior').",
-    "admin.frames.feedback.placeholder": "Ej. Frame 1: al maniquí le falta ropa interior; frame 2: ángulo de cámara girado.",
+    "admin.frames.feedback.placeholder": "Ej. al maniquí le falta ropa interior en frame 1…",
     "admin.frames.feedback.skip": "Omitir, solo marcar como malo",
     "admin.frames.feedback.save": "Guardar y marcar como malo",
     "admin.frames.feedback.cancel": "Cancelar",
