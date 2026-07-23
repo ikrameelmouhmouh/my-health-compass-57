@@ -390,6 +390,9 @@ function AdminExerciseFramesPage() {
           const job = jobsById.get(exerciseId) as JobRow | undefined;
           setFeedbackTarget({ exerciseId, exerciseName: ex?.name ?? exerciseId, current: job?.feedback ?? "" });
         }}
+        onRegenerate={(exerciseId) => runBatch([exerciseId], true)}
+        regenerating={running}
+
       />
 
       <FeedbackDialog
