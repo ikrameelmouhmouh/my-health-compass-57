@@ -733,7 +733,9 @@ function FeedbackDialog({
           rows={4}
           maxLength={800}
           autoFocus
+          className="w-full resize-none box-border"
         />
+
         <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button
             variant="ghost"
