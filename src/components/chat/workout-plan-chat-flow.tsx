@@ -75,7 +75,7 @@ export function WorkoutPlanChatFlow({
   onPersisted: (threadId: string) => void;
 }) {
 
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const generate = useServerFn(generateWorkoutPlan);
   const [step, setStep] = useState<FlowStep>("goal");
   const [answers, setAnswers] = useState<FlowAnswers>(initialAnswers);
