@@ -123,7 +123,7 @@ async function generateForExercise(args: {
     const feedback: string | null = (existingJob?.feedback ?? null) as string | null;
 
     const hint = getCameraHint(id, equipment, name);
-    const basePrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id, name, hint);
+    const basePrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id, name, hint, primary, secondary);
     const correctionsBlock = feedback && feedback.trim().length > 0
       ? [
           "USER CORRECTIONS (highest priority — you MUST fix these in this render):",
