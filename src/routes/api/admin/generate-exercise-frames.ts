@@ -110,17 +110,23 @@ async function generateForExercise(args: {
 }): Promise<{ id: string; status: "done" | "failed" | "skipped"; error?: string }> {
   const { id, force, prompt, name, equipment, apiKey, supabaseAdmin } = args;
   try {
-    if (!force) {
-      const { data: job } = await supabaseAdmin
-        .from("exercise_frame_jobs")
-        .select("status")
-        .eq("exercise_id", id)
-        .maybeSingle();
-      if (job?.status === "done") return { id, status: "skipped" };
-    }
+    const { data: existingJob } = await supabaseAdmin
+      .from("exercise_frame_jobs")
+      .select("status, feedback")
+      .eq("exercise_id", id)
+      .maybeSingle();
+    if (!force && existingJob?.status === "done") return { id, status: "skipped" };
+    const feedback: string | null = (existingJob?.feedback ?? null) as string | null;
 
     const hint = getCameraHint(id, equipment, name);
     const basePrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id, name, hint);
+    const correctionsBlock = feedback && feedback.trim().length > 0
+      ? [
+          "USER CORRECTIONS (highest priority — you MUST fix these in this render):",
+          feedback.trim(),
+          "",
+        ].join("\n")
+      : "";
 
     await supabaseAdmin.from("exercise_frame_jobs").upsert({
       exercise_id: id,
@@ -131,13 +137,15 @@ async function generateForExercise(args: {
 
     // Frame 0: START position (text-to-image).
     const startPrompt = [
+      correctionsBlock,
       basePrompt,
       "",
       "This is FRAME 1 of a 2-frame exercise animation.",
       `Render the START position of the movement: ${hint.startPose}.`,
       "The result must look like the first still of a locked-off training video: full body in frame, feet visible, head visible, no cropped limbs.",
       "Do not choose a dramatic angle. Do not rotate to the back. Do not hide, crop or simplify the machine. Keep the full apparatus visible when equipment is used.",
-    ].join("\n");
+    ].filter(Boolean).join("\n");
+
     const b0 = await generateOne({ prompt: startPrompt, apiKey });
 
     // Frame 1: END position (image-to-image using frame 0 as reference so
