@@ -612,3 +612,85 @@ function Lightbox({
     </Dialog>
   );
 }
+
+function FeedbackDialog({
+  target,
+  onClose,
+  onSubmit,
+}: {
+  target: { exerciseId: string; exerciseName: string; current: string } | null;
+  onClose: () => void;
+  onSubmit: (feedback: string) => void | Promise<void>;
+}) {
+  const t = useT();
+  const [value, setValue] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setValue(target?.current ?? "");
+  }, [target?.exerciseId, target?.current]);
+
+  const open = !!target;
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && !saving && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("admin.frames.feedback.title")}</DialogTitle>
+          <DialogDescription>{t("admin.frames.feedback.desc")}</DialogDescription>
+        </DialogHeader>
+        {target ? (
+          <p className="text-xs text-muted-foreground">{target.exerciseName}</p>
+        ) : null}
+        <Textarea
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder={t("admin.frames.feedback.placeholder")}
+          rows={4}
+          maxLength={800}
+          autoFocus
+        />
+        <DialogFooter className="flex-col gap-2 sm:flex-row">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              if (saving) return;
+              onClose();
+            }}
+            disabled={saving}
+          >
+            {t("admin.frames.feedback.cancel")}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              setSaving(true);
+              try {
+                await onSubmit("");
+              } finally {
+                setSaving(false);
+              }
+            }}
+            disabled={saving}
+          >
+            {t("admin.frames.feedback.skip")}
+          </Button>
+          <Button
+            onClick={async () => {
+              setSaving(true);
+              try {
+                await onSubmit(value);
+              } finally {
+                setSaving(false);
+              }
+            }}
+            disabled={saving}
+          >
+            {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+            {t("admin.frames.feedback.save")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
