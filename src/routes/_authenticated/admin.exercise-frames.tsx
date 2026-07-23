@@ -471,6 +471,10 @@ function Lightbox({
   filmSpeed,
   onSpeedChange,
   versions,
+  visibleIds,
+  jobs,
+  onApprove,
+  onReject,
 }: {
   value: { exerciseId: string; frameIndex: 0 | 1 } | null;
   onChange: (v: { exerciseId: string; frameIndex: 0 | 1 } | null) => void;
@@ -478,7 +482,12 @@ function Lightbox({
   filmSpeed: FilmSpeed;
   onSpeedChange: (s: FilmSpeed) => void;
   versions: Map<string, { updated_at: string }>;
+  visibleIds: string[];
+  jobs: Map<string, JobRow>;
+  onApprove: (exerciseId: string) => void | Promise<void>;
+  onReject: (exerciseId: string) => void;
 }) {
+
   const t = useT();
   const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
   const frameIndex = value?.frameIndex ?? 0;
