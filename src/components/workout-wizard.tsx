@@ -92,6 +92,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
         injuries: injuries || undefined,
         avoid: avoid || undefined,
         favorites: favorites || undefined,
+        locale: lang as WizardInputT["locale"],
       };
       const plan = await generate({ data: wizard });
       onComplete(wizard, plan);
