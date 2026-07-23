@@ -85,6 +85,8 @@ export const Route = createFileRoute("/api/admin/generate-exercise-frames")({
                 prompt: prompts[id],
                 name: exerciseData[id]?.name,
                 equipment: exerciseData[id]?.equipment,
+                primary: exerciseData[id]?.primary,
+                secondary: exerciseData[id]?.secondary,
                 apiKey: key,
                 supabaseAdmin,
               }),
