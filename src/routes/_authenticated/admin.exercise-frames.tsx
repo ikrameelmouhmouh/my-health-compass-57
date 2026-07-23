@@ -339,20 +339,37 @@ function AdminExerciseFramesPage() {
                   {hint.label}
                 </p>
                 {job?.error ? <p className="truncate text-[11px] text-destructive">{job.error.slice(0, 60)}</p> : null}
+                {job?.feedback ? (
+                  <div className="mt-1 flex items-center gap-1 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[11px] text-amber-700 dark:text-amber-400">
+                    <MessageSquareWarning className="size-3 shrink-0" />
+                    <span className="truncate" title={job.feedback}>
+                      <span className="font-medium">{t("admin.frames.feedback.badge_prefix")}</span> {job.feedback}
+                    </span>
+                    <button
+                      type="button"
+                      title={t("admin.frames.feedback.clear")}
+                      onClick={async () => {
+                        await supabase.from("exercise_frame_jobs").upsert({ exercise_id: ex.id, feedback: null });
+                        qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+                      }}
+                      className="grid size-4 shrink-0 place-items-center rounded-full hover:bg-amber-500/20"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </div>
+                ) : null}
               </div>
               <div className="flex shrink-0 gap-1">
                 {status === "done" ? (
                   <button
                     title="Markeer als slecht"
-                    onClick={async () => {
-                      await supabase.from("exercise_frame_jobs").upsert({ exercise_id: ex.id, status: "bad" });
-                      qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
-                    }}
+                    onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "" })}
                     className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-muted"
                   >
                     <XCircle className="size-4" />
                   </button>
                 ) : null}
+
                 <button
                   title="Genereer opnieuw"
                   onClick={() => runBatch([ex.id], true)}
