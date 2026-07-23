@@ -4207,7 +4207,7 @@ const translations: Translations = {
     "admin.frames.film_speed_fast": "Schnell",
     "admin.frames.feedback.title": "Warum wird dies abgelehnt?",
     "admin.frames.feedback.desc": "Optional — beschreibe, was falsch ist, damit die nächste KI-Generierung es beheben kann (z. B. 'Mannequin in Frame 1 trägt keine Unterwäsche').",
-    "admin.frames.feedback.placeholder": "Z. B. Frame 1: Mannequin trägt keine Unterwäsche; Frame 2: Kamerawinkel gedreht.",
+    "admin.frames.feedback.placeholder": "Z. B. Mannequin ohne Unterwäsche auf Frame 1…",
     "admin.frames.feedback.skip": "Überspringen, nur als schlecht markieren",
     "admin.frames.feedback.save": "Speichern & als schlecht markieren",
     "admin.frames.feedback.cancel": "Abbrechen",
