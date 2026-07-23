@@ -414,7 +414,7 @@ export function useFasting() {
       completed,
       protocol: s.protocol,
     };
-    const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+    const yesterday = localDayKey(new Date(Date.now() - 86_400_000));
     const sameDay = s.lastCompletedDate === today;
     const consecutive = s.lastCompletedDate === yesterday;
     const newStreak = completed
