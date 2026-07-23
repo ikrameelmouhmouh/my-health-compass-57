@@ -314,16 +314,16 @@ function Profile() {
   }
 
   return (
-    <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-4 pb-32 pt-4">
+    <main className="home-forest mx-auto min-h-[100dvh] w-full max-w-md px-4 pb-32 pt-4">
       <header className="flex items-start justify-between gap-3 px-1">
         <div className="min-w-0 flex-1">
-          <p className="text-[13px] font-medium uppercase tracking-wide text-muted-foreground">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand/80">
             {greeting}
           </p>
-          <h1 className="mt-0.5 truncate text-[34px] font-bold leading-[1.05] tracking-tight">
+          <h1 className="mt-1 truncate text-[36px] font-bold leading-[1.02] tracking-tight text-foreground">
             {p.display_name || "—"}
           </h1>
-          <p className="mt-1 text-[13px] font-medium text-muted-foreground">
+          <p className="mt-1 text-[13px] font-medium text-muted-foreground/80">
             {formatToday(lang)}
           </p>
         </div>
@@ -342,7 +342,7 @@ function Profile() {
           <Link
             to="/settings"
             aria-label={t("today.settings")}
-            className="ios-press inline-flex size-9 items-center justify-center rounded-full bg-secondary text-foreground"
+            className="ios-press inline-flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground"
           >
             <Settings className="size-[18px]" strokeWidth={2} />
           </Link>
@@ -352,14 +352,14 @@ function Profile() {
       {!isPremium ? (
         <Link
           to="/pricing"
-          className="mt-3 flex items-center justify-between rounded-2xl border border-brand/30 bg-gradient-to-r from-brand/10 to-brand/5 px-3.5 py-2.5 ios-press"
+          className="mt-3 flex items-center justify-between rounded-2xl border border-brand/40 bg-brand/10 px-3.5 py-2.5 ios-press"
         >
           <div className="flex items-center gap-2">
-            <span className="grid size-7 place-items-center rounded-full bg-brand/15 text-brand">
+            <span className="grid size-7 place-items-center rounded-full bg-brand/25 text-brand">
               <ArrowUpRight className="size-4" />
             </span>
             <div>
-              <div className="text-[12px] font-semibold leading-tight">{t("today.upgrade.title")}</div>
+              <div className="text-[12px] font-semibold leading-tight text-foreground">{t("today.upgrade.title")}</div>
               <div className="text-[10px] text-muted-foreground">{t("today.upgrade.sub")}</div>
             </div>
           </div>
@@ -367,12 +367,13 @@ function Profile() {
         </Link>
       ) : (
         <div className="mt-3 flex items-center px-1">
-          <div className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1">
-            <span className="size-1.5 rounded-full bg-brand" />
-            <span className="text-[12px] font-semibold uppercase tracking-wider">Alyva {t("profile.plus")}</span>
+          <div className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/15 px-3 py-1">
+            <span className="size-1.5 animate-pulse rounded-full bg-brand" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand">Alyva {t("profile.plus")}</span>
           </div>
         </div>
       )}
+
 
       
 
