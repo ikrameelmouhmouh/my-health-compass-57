@@ -15,7 +15,17 @@ const WizardInput = z.object({
   injuries: z.string().optional(),
   avoid: z.string().optional(),
   favorites: z.string().optional(),
+  locale: z.enum(["en", "nl", "ar", "fr", "de", "es"]).optional(),
 });
+
+const LOCALE_NAMES: Record<string, string> = {
+  en: "English",
+  nl: "Dutch (Nederlands)",
+  ar: "Arabic (العربية)",
+  fr: "French (Français)",
+  de: "German (Deutsch)",
+  es: "Spanish (Español)",
+};
 
 export type WizardInputT = z.infer<typeof WizardInput>;
 
