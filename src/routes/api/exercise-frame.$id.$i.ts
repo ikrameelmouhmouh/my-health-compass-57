@@ -19,7 +19,7 @@ export const Route = createFileRoute("/api/exercise-frame/$id/$i")({
           status: 200,
           headers: {
             "Content-Type": "image/jpeg",
-            "Cache-Control": "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400",
+            "Cache-Control": "public, max-age=60, s-maxage=60, must-revalidate",
           },
         });
       },
