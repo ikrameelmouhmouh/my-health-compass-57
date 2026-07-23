@@ -521,6 +521,15 @@ function Lightbox({
     return () => clearInterval(interval);
   }, [playing, filmSpeed, value?.exerciseId]);
 
+  const currentIndex = value ? visibleIds.indexOf(value.exerciseId) : -1;
+  const prevExerciseId = currentIndex > 0 ? visibleIds[currentIndex - 1] : null;
+  const nextExerciseId = currentIndex >= 0 && currentIndex < visibleIds.length - 1 ? visibleIds[currentIndex + 1] : null;
+  const gotoExercise = (id: string | null) => {
+    if (!id) return;
+    setPlaying(false);
+    onChange({ exerciseId: id, frameIndex: 0 });
+  };
+
   useEffect(() => {
     if (!value) return;
     const handler = (e: KeyboardEvent) => {
@@ -530,6 +539,12 @@ function Lightbox({
       } else if (e.key === "ArrowRight") {
         setPlaying(false);
         onChange({ exerciseId: value.exerciseId, frameIndex: 1 });
+      } else if (e.key === "ArrowUp" || e.key === "PageUp") {
+        e.preventDefault();
+        gotoExercise(prevExerciseId);
+      } else if (e.key === "ArrowDown" || e.key === "PageDown") {
+        e.preventDefault();
+        gotoExercise(nextExerciseId);
       } else if (e.key === "Escape") {
         onChange(null);
       } else if (e.key === " ") {
@@ -539,7 +554,8 @@ function Lightbox({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [value, onChange]);
+  }, [value, onChange, prevExerciseId, nextExerciseId]);
+
 
   if (!exercise || !value) return null;
 
