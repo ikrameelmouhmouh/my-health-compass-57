@@ -209,7 +209,7 @@ async function generateForExercise(args: {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function resetFrameJobs(ids: string[], supabaseAdmin: any): Promise<void> {
-  const rows = ids.map((id) => ({ exercise_id: id, status: "pending", prompt: null, error: null }));
+  const rows = ids.map((id) => ({ exercise_id: id, status: "pending", prompt: null, error: null, feedback: null }));
   for (let i = 0; i < rows.length; i += 250) {
     const { error } = await supabaseAdmin.from("exercise_frame_jobs").upsert(rows.slice(i, i + 250));
     if (error) throw new Error(error.message);
