@@ -3179,7 +3179,7 @@ const translations: Translations = {
     "admin.frames.film_speed_fast": "Rapide",
     "admin.frames.feedback.title": "Pourquoi rejeter cette image ?",
     "admin.frames.feedback.desc": "Optionnel — décrivez le problème pour que la prochaine génération IA puisse le corriger (ex. « le mannequin de la frame 1 n'a pas de sous-vêtements »).",
-    "admin.frames.feedback.placeholder": "Ex. Frame 1 : le mannequin n'a pas de sous-vêtements ; frame 2 : angle de caméra tourné.",
+    "admin.frames.feedback.placeholder": "Ex. mannequin sans sous-vêtements sur frame 1…",
     "admin.frames.feedback.skip": "Ignorer, marquer seulement mauvais",
     "admin.frames.feedback.save": "Enregistrer & marquer mauvais",
     "admin.frames.feedback.cancel": "Annuler",
