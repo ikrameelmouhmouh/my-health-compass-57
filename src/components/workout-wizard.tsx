@@ -29,7 +29,7 @@ type Props = {
 };
 
 export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [step, setStep] = useState(1);
   const [goal, setGoal] = useState(initial?.goal ?? "");
   const [experience, setExperience] = useState(initial?.experience ?? "");
