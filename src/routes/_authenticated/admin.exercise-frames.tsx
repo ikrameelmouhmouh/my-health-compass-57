@@ -741,7 +741,7 @@ function FeedbackDialog({
   onClose,
   onSubmit,
 }: {
-  target: { exerciseId: string; exerciseName: string; current: string } | null;
+  target: { exerciseId: string; exerciseName: string; current: string; mode: "reject" | "regenerate" } | null;
   onClose: () => void;
   onSubmit: (feedback: string) => void | Promise<void>;
 }) {
@@ -754,12 +754,19 @@ function FeedbackDialog({
   }, [target?.exerciseId, target?.current]);
 
   const open = !!target;
+  const isRegen = target?.mode === "regenerate";
+  const title = isRegen ? "Genereer opnieuw" : t("admin.frames.feedback.title");
+  const desc = isRegen
+    ? "Optioneel — beschrijf wat er fout was, zodat de nieuwe render dit meteen corrigeert."
+    : t("admin.frames.feedback.desc");
+  const primaryLabel = isRegen ? "Genereer opnieuw" : t("admin.frames.feedback.save");
+  const skipLabel = isRegen ? "Genereer zonder notitie" : t("admin.frames.feedback.skip");
   return (
     <Dialog open={open} onOpenChange={(v) => !v && !saving && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{t("admin.frames.feedback.title")}</DialogTitle>
-          <DialogDescription>{t("admin.frames.feedback.desc")}</DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{desc}</DialogDescription>
         </DialogHeader>
         {target ? (
           <p className="text-xs text-muted-foreground">{target.exerciseName}</p>
@@ -797,7 +804,7 @@ function FeedbackDialog({
             }}
             disabled={saving}
           >
-            {t("admin.frames.feedback.skip")}
+            {skipLabel}
           </Button>
           <Button
             onClick={async () => {
@@ -811,7 +818,7 @@ function FeedbackDialog({
             disabled={saving}
           >
             {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-            {t("admin.frames.feedback.save")}
+            {primaryLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
