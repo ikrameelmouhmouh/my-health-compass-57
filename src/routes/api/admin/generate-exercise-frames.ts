@@ -106,11 +106,13 @@ async function generateForExercise(args: {
   prompt?: string;
   name?: string;
   equipment?: string;
+  primary?: string[];
+  secondary?: string[];
   apiKey: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabaseAdmin: any;
 }): Promise<{ id: string; status: "done" | "failed" | "skipped"; error?: string }> {
-  const { id, force, prompt, name, equipment, apiKey, supabaseAdmin } = args;
+  const { id, force, prompt, name, equipment, primary, secondary, apiKey, supabaseAdmin } = args;
   try {
     const { data: existingJob } = await supabaseAdmin
       .from("exercise_frame_jobs")
