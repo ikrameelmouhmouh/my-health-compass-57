@@ -281,7 +281,7 @@ function buildDefaultPrompt(
           "Muscle activation highlight (CRITICAL — apply to the mannequin's anatomy):",
           `- Primary working muscles (${primaryList.join(", ")}): render in a vivid, saturated warm red (approximately #E23A2E), clearly visible as an anatomical overlay on the exact muscle bellies. The red must show through the black athletic shorts if the primary muscle is under the shorts (glutes, quads, hamstrings).`,
           secondaryList.length > 0
-            ? `- Secondary assisting muscles (${secondaryList.join(", ")}): render in a softer, lighter orange-red (approximately #F28C6A), less saturated than the primary red.`,
+            ? `- Secondary assisting muscles (${secondaryList.join(", ")}): render in a softer, lighter orange-red (approximately #F28C6A), less saturated than the primary red.`
             : "",
           "- All other body parts stay the normal matte medium-grey mannequin skin. Do not tint the whole body red.",
           "- The red coloring must follow real anatomy (muscle shape, not rectangles or stickers), like a medical/fitness anatomy diagram painted onto a 3D mannequin.",
