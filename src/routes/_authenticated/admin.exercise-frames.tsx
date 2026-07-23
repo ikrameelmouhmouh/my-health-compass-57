@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/admin/exercise-frames")({
   component: AdminExerciseFramesPage,
 });
 
-type JobRow = { exercise_id: string; status: "pending" | "done" | "failed" | "bad"; error: string | null; updated_at: string };
+type JobRow = { exercise_id: string; status: "pending" | "done" | "failed" | "bad"; error: string | null; updated_at: string; feedback: string | null };
 
 function AdminExerciseFramesPage() {
   const { session, user } = useAuth();
