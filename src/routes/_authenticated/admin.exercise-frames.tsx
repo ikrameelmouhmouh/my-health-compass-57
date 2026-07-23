@@ -465,6 +465,8 @@ function Lightbox({
   jobs,
   onApprove,
   onReject,
+  onRegenerate,
+  regenerating,
 }: {
   value: { exerciseId: string; frameIndex: 0 | 1 } | null;
   onChange: (v: { exerciseId: string; frameIndex: 0 | 1 } | null) => void;
@@ -476,6 +478,9 @@ function Lightbox({
   jobs: Map<string, JobRow>;
   onApprove: (exerciseId: string) => void | Promise<void>;
   onReject: (exerciseId: string) => void;
+  onRegenerate: (exerciseId: string) => void | Promise<void>;
+  regenerating: boolean;
+
 }) {
 
   const t = useT();
