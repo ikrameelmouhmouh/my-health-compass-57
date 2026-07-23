@@ -79,7 +79,7 @@ function AdminExerciseFramesPage() {
   const [filmMode, setFilmMode] = useState(false);
   const [filmSpeed, setFilmSpeed] = useState<FilmSpeed>("normal");
   const [lightbox, setLightbox] = useState<{ exerciseId: string; frameIndex: 0 | 1 } | null>(null);
-  const [feedbackTarget, setFeedbackTarget] = useState<{ exerciseId: string; exerciseName: string; current: string } | null>(null);
+  const [feedbackTarget, setFeedbackTarget] = useState<{ exerciseId: string; exerciseName: string; current: string; mode: "reject" | "regenerate" } | null>(null);
 
 
   const jobsById = useMemo(() => {
