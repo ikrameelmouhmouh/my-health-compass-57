@@ -346,7 +346,7 @@ function AdminExerciseFramesPage() {
                 {status === "done" ? (
                   <button
                     title="Markeer als slecht"
-                    onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "" })}
+                    onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "", mode: "reject" })}
                     className="grid size-9 place-items-center rounded-full bg-destructive text-destructive-foreground shadow-sm transition hover:opacity-90 active:scale-95"
                   >
                     <X className="size-4" strokeWidth={2.5} />
@@ -355,7 +355,7 @@ function AdminExerciseFramesPage() {
 
                 <button
                   title="Genereer opnieuw"
-                  onClick={() => runBatch([ex.id], true)}
+                  onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "", mode: "regenerate" })}
                   disabled={running}
                   className="grid size-9 place-items-center rounded-full bg-muted text-foreground transition hover:bg-accent active:scale-95 disabled:opacity-50"
                 >
