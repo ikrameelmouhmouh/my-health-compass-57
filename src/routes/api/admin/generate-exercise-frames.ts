@@ -57,7 +57,7 @@ export const Route = createFileRoute("/api/admin/generate-exercise-frames")({
         const prompts = (body.prompts && typeof body.prompts === "object" ? body.prompts : {}) as Record<string, string>;
         const exerciseData = (body.exerciseData && typeof body.exerciseData === "object" ? body.exerciseData : {}) as Record<
           string,
-          { name?: string; equipment?: string }
+          { name?: string; equipment?: string; primary?: string[]; secondary?: string[] }
         >;
         if (ids.length === 0) return Response.json({ ok: true, results: [] });
         if (action === "generate" && ids.length > 25) return new Response("Too many ids (max 25)", { status: 400 });
@@ -85,6 +85,8 @@ export const Route = createFileRoute("/api/admin/generate-exercise-frames")({
                 prompt: prompts[id],
                 name: exerciseData[id]?.name,
                 equipment: exerciseData[id]?.equipment,
+                primary: exerciseData[id]?.primary,
+                secondary: exerciseData[id]?.secondary,
                 apiKey: key,
                 supabaseAdmin,
               }),
@@ -104,11 +106,13 @@ async function generateForExercise(args: {
   prompt?: string;
   name?: string;
   equipment?: string;
+  primary?: string[];
+  secondary?: string[];
   apiKey: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabaseAdmin: any;
 }): Promise<{ id: string; status: "done" | "failed" | "skipped"; error?: string }> {
-  const { id, force, prompt, name, equipment, apiKey, supabaseAdmin } = args;
+  const { id, force, prompt, name, equipment, primary, secondary, apiKey, supabaseAdmin } = args;
   try {
     const { data: existingJob } = await supabaseAdmin
       .from("exercise_frame_jobs")
@@ -119,7 +123,7 @@ async function generateForExercise(args: {
     const feedback: string | null = (existingJob?.feedback ?? null) as string | null;
 
     const hint = getCameraHint(id, equipment, name);
-    const basePrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id, name, hint);
+    const basePrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id, name, hint, primary, secondary);
     const correctionsBlock = feedback && feedback.trim().length > 0
       ? [
           "USER CORRECTIONS (highest priority — you MUST fix these in this render):",
@@ -262,7 +266,32 @@ function uint8ToBase64(bytes: Uint8Array): string {
   return btoa(bin);
 }
 
-function buildDefaultPrompt(id: string, name: string | undefined, hint: ReturnType<typeof getCameraHint>): string {
+function buildDefaultPrompt(
+  id: string,
+  name: string | undefined,
+  hint: ReturnType<typeof getCameraHint>,
+  primary?: string[],
+  secondary?: string[],
+): string {
+  const primaryList = (primary ?? []).filter((s) => s && s.trim().length > 0);
+  const secondaryList = (secondary ?? []).filter((s) => s && s.trim().length > 0);
+  const highlightBlock =
+    primaryList.length > 0
+      ? [
+          "Muscle activation highlight (CRITICAL — apply to the mannequin's anatomy):",
+          `- Primary working muscles (${primaryList.join(", ")}): render in a vivid, saturated warm red (approximately #E23A2E), clearly visible as an anatomical overlay on the exact muscle bellies. The red must show through the black athletic shorts if the primary muscle is under the shorts (glutes, quads, hamstrings).`,
+          secondaryList.length > 0
+            ? `- Secondary assisting muscles (${secondaryList.join(", ")}): render in a softer, lighter orange-red (approximately #F28C6A), less saturated than the primary red.`
+            : "",
+          "- All other body parts stay the normal matte medium-grey mannequin skin. Do not tint the whole body red.",
+          "- The red coloring must follow real anatomy (muscle shape, not rectangles or stickers), like a medical/fitness anatomy diagram painted onto a 3D mannequin.",
+          "- The exact same red areas must appear in BOTH the start frame and the end frame, in the same intensity and position on the body.",
+          "- No text labels, no arrows, no legend, no glow, no outline — just the colored muscle areas.",
+        ]
+          .filter(Boolean)
+          .join("\n")
+      : "";
+
   return [
     `Alyva Motion Lab reference render: photorealistic 3D androgynous mannequin performing the "${name ?? humanize(id)}" gym exercise.`,
     "Mannequin: smooth matte medium-grey skin, no hair, no facial features, completely flat chest, generic black athletic shorts, no gender markers of any kind.",
@@ -273,8 +302,11 @@ function buildDefaultPrompt(id: string, name: string | undefined, hint: ReturnTy
       : "If the exercise uses equipment, it must be clearly visible and correctly positioned in the frame.",
     `Camera: ${hint.angle}. Locked-off tripod, 50mm equivalent focal length, fixed camera height and distance, subject centered, full body visible from head to feet.`,
     "Scene: Alyva Motion Lab — plain seamless off-white studio cyclorama, matte light-grey floor, one soft key light from upper-left, one soft fill light, single soft shadow on the floor. Keep this exact scene identical across all frames.",
+    highlightBlock,
     "No text, no watermark, no logos, no other people, no props besides the required equipment.",
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function humanize(id: string): string {
