@@ -7,8 +7,9 @@ import type { AppGender } from "@/lib/gender";
 
 // ===== AI-rendered 3D anatomy frames (neutral mannequin) =====
 // Legs
-import wlp0 from "@/assets/exercises/wide-leg-press-0.jpg";
-import wlp1 from "@/assets/exercises/wide-leg-press-1.jpg";
+// wide-leg-press: intentionally NOT bundled — served from Cloud Storage via
+// /api/exercise-frame so admin regenerations are always the source of truth.
+
 import sq0 from "@/assets/exercises/barbell-squat-0.jpg";
 import sq1 from "@/assets/exercises/barbell-squat-1.jpg";
 import rdl0 from "@/assets/exercises/romanian-deadlift-0.jpg";
@@ -149,16 +150,20 @@ export function getExerciseFrames(
   _gender?: AppGender,
   generatedIds?: ReadonlySet<string>,
 ): string[] {
-  const frames = resolveFrames(ex);
-  if (frames && frames.length > 0) return frames;
+  // ALWAYS prefer freshly-generated storage frames when available, so
+  // regenerated/approved frames override any legacy bundled assets. This
+  // prevents "old picture reappears after refresh" bugs (e.g. wide-leg-press).
   if (generatedIds?.has(ex.id)) {
     return [
       `/api/exercise-frame/${encodeURIComponent(ex.id)}/0`,
       `/api/exercise-frame/${encodeURIComponent(ex.id)}/1`,
     ];
   }
+  const frames = resolveFrames(ex);
+  if (frames && frames.length > 0) return frames;
   return [ex.image];
 }
+
 
 /** Returns true when the exercise has AI-rendered demo frames available. */
 export function hasGenderVariants(ex: LibraryExercise, generatedIds?: ReadonlySet<string>): boolean {
@@ -176,9 +181,9 @@ export const EXERCISES: LibraryExercise[] = [
     equipment: "Machine",
     primary: ["Quads"],
     secondary: ["Glutes", "Hamstrings", "Calves"],
-    image: wlp0,
-    frames: pair(wlp0, wlp1),
+    image: PLACEHOLDER_IMG,
     steps: [
+
       "Ga zitten in de machine met je voeten breed op het platform.",
       "Duw het gewicht weg tot je benen bijna gestrekt zijn (knie licht gebogen).",
       "Laat het gewicht langzaam zakken tot 90°.",
