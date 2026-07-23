@@ -385,7 +385,26 @@ function AdminExerciseFramesPage() {
         })}
       </ul>
 
-      <Lightbox value={lightbox} onChange={setLightbox} filmMode={filmMode} filmSpeed={filmSpeed} onSpeedChange={setFilmSpeed} versions={jobsById} />
+      <Lightbox
+        value={lightbox}
+        onChange={setLightbox}
+        filmMode={filmMode}
+        filmSpeed={filmSpeed}
+        onSpeedChange={setFilmSpeed}
+        versions={jobsById}
+        visibleIds={visibleIds}
+        jobs={jobsById as unknown as Map<string, JobRow>}
+        onApprove={async (exerciseId) => {
+          await supabase.from("exercise_frame_jobs").upsert({ exercise_id: exerciseId, status: "done", feedback: null });
+          qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+        }}
+        onReject={(exerciseId) => {
+          const ex = EXERCISES.find((e) => e.id === exerciseId);
+          const job = jobsById.get(exerciseId) as JobRow | undefined;
+          setFeedbackTarget({ exerciseId, exerciseName: ex?.name ?? exerciseId, current: job?.feedback ?? "" });
+        }}
+      />
+
       <FeedbackDialog
         target={feedbackTarget}
         onClose={() => setFeedbackTarget(null)}
