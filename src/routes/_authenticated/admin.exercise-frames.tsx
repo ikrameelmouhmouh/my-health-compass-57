@@ -22,9 +22,9 @@ const SPEED_MS: Record<FilmSpeed, number> = {
 export const Route = createFileRoute("/_authenticated/admin/exercise-frames")({
   head: () => ({
     meta: [
-      { title: "Alyva Exercise Frames Admin" },
+      { title: "Alyva Edit workout pagina" },
       { name: "description", content: "Reset and regenerate Alyva exercise motion frames with locked camera guidance." },
-      { property: "og:title", content: "Alyva Exercise Frames Admin" },
+      { property: "og:title", content: "Alyva Edit workout pagina" },
       { property: "og:description", content: "Reset and regenerate Alyva exercise motion frames with locked camera guidance." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -185,7 +185,7 @@ function AdminExerciseFramesPage() {
       <header className="flex items-center gap-3">
         <Shield className="size-5 text-brand" />
         <div className="min-w-0">
-          <h1 className="font-display text-xl font-semibold tracking-tight">Oefening-afbeeldingen</h1>
+          <h1 className="font-display text-xl font-semibold tracking-tight">{t("admin.frames.page_title")}</h1>
           <p className="text-[12px] text-muted-foreground">
             {doneCount} van {total} klaar · {failedCount} mislukt
           </p>

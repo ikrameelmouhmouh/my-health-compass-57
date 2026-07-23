@@ -3,29 +3,31 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { usePremium } from "@/hooks/use-premium";
+import { useAppMode } from "@/hooks/use-app-mode";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
-import { ChevronLeft, Loader2, Shield, RotateCcw } from "lucide-react";
+import { ChevronLeft, Loader2, Shield, RotateCcw, Pencil, Eye } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/admin/view-mode")({
+export const Route = createFileRoute("/_authenticated/admin/edit")({
   head: () => ({
     meta: [
-      { title: "Alyva View Mode Admin" },
-      { name: "description", content: "Admin-only toggle to preview Alyva as a Premium or free user." },
-      { property: "og:title", content: "Alyva View Mode Admin" },
-      { property: "og:description", content: "Admin-only toggle to preview Alyva as a Premium or free user." },
+      { title: "Alyva Edit pagina" },
+      { name: "description", content: "Admin-only edit page: toggle app mode and display mode." },
+      { property: "og:title", content: "Alyva Edit pagina" },
+      { property: "og:description", content: "Admin-only edit page: toggle app mode and display mode." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: AdminViewModePage,
+  component: AdminEditPage,
 });
 
-function AdminViewModePage() {
+function AdminEditPage() {
   const { user } = useAuth();
   const t = useT();
   const navigate = useNavigate();
   const { isPremium, realIsPremium, override, setOverride } = usePremium();
+  const { mode, setMode } = useAppMode();
 
   const roleQ = useQuery({
     queryKey: ["user-role", user?.id],
@@ -58,6 +60,8 @@ function AdminViewModePage() {
     );
   }
 
+  const activeAppMode: "edit" | "customer" = mode === "customer" ? "customer" : "edit";
+
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
       <header className="flex items-center gap-3">
@@ -71,29 +75,67 @@ function AdminViewModePage() {
         <div className="min-w-0 flex items-center gap-2">
           <Shield className="size-5 text-brand" />
           <h1 className="font-display text-[22px] font-semibold tracking-tight">
-            {t("admin.viewmode.title")}
+            {t("admin.edit.title")}
           </h1>
         </div>
       </header>
 
+      {/* App mode */}
       <section className="mt-6">
         <div className="rounded-3xl border border-dashed border-border bg-card p-5">
           <p className="font-display text-[13px] font-semibold tracking-tight">
-            {t("admin.viewmode.desc")}
+            {t("admin.appmode.title")}
           </p>
           <p className="mt-1 text-[11px] text-muted-foreground">
-            {t("admin.viewmode.admin_only")}
+            {t("admin.appmode.desc")}
           </p>
 
           <div className="mt-4 grid grid-cols-2 gap-1.5 rounded-full bg-background p-1">
-            {(["premium", "free"] as const).map((mode) => {
-              const active = isPremium === (mode === "premium");
-              const label =
-                mode === "premium" ? t("admin.viewmode.premium") : t("admin.viewmode.free");
+            {(["edit", "customer"] as const).map((m) => {
+              const isActive = activeAppMode === m;
+              const Icon = m === "edit" ? Pencil : Eye;
+              const label = m === "edit" ? t("admin.appmode.edit") : t("admin.appmode.customer");
               return (
                 <button
-                  key={mode}
-                  onClick={() => setOverride(mode)}
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className={`inline-flex items-center justify-center gap-1.5 rounded-full px-2 py-2 text-[12px] font-semibold transition ${
+                    isActive
+                      ? "bg-brand text-brand-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="size-3.5" />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
+            {t("admin.appmode.explain")}
+          </p>
+        </div>
+      </section>
+
+      {/* View mode */}
+      <section className="mt-4">
+        <div className="rounded-3xl border border-dashed border-border bg-card p-5">
+          <p className="font-display text-[13px] font-semibold tracking-tight">
+            {t("admin.viewmode.title")}
+          </p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {t("admin.viewmode.desc")}
+          </p>
+
+          <div className="mt-4 grid grid-cols-2 gap-1.5 rounded-full bg-background p-1">
+            {(["premium", "free"] as const).map((m) => {
+              const active = isPremium === (m === "premium");
+              const label = m === "premium" ? t("admin.viewmode.premium") : t("admin.viewmode.free");
+              return (
+                <button
+                  key={m}
+                  onClick={() => setOverride(m)}
                   className={`rounded-full px-2 py-2 text-[12px] font-semibold transition ${
                     active
                       ? "bg-brand text-brand-foreground shadow-sm"

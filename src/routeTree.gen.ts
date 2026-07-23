@@ -38,9 +38,8 @@ import { Route as ApiAdminGenerateExerciseFramesRouteImport } from './routes/api
 import { Route as ApiAdminBootstrapAdminRouteImport } from './routes/api/admin/bootstrap-admin'
 import { Route as AuthenticatedWorkoutSessionTemplateIdRouteImport } from './routes/_authenticated/workout-session.$templateId'
 import { Route as AuthenticatedAiCoachThreadIdRouteImport } from './routes/_authenticated/ai-coach.$threadId'
-import { Route as AuthenticatedAdminViewModeRouteImport } from './routes/_authenticated/admin.view-mode'
 import { Route as AuthenticatedAdminExerciseFramesRouteImport } from './routes/_authenticated/admin.exercise-frames'
-import { Route as AuthenticatedAdminAppModeRouteImport } from './routes/_authenticated/admin.app-mode'
+import { Route as AuthenticatedAdminEditRouteImport } from './routes/_authenticated/admin.edit'
 import { Route as AuthenticatedActivitySessionActivityIdRouteImport } from './routes/_authenticated/activity-session.$activityId'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -203,24 +202,17 @@ const AuthenticatedAiCoachThreadIdRoute =
     path: '/$threadId',
     getParentRoute: () => AuthenticatedAiCoachRoute,
   } as any)
-const AuthenticatedAdminViewModeRoute =
-  AuthenticatedAdminViewModeRouteImport.update({
-    id: '/admin/view-mode',
-    path: '/admin/view-mode',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedAdminExerciseFramesRoute =
   AuthenticatedAdminExerciseFramesRouteImport.update({
     id: '/admin/exercise-frames',
     path: '/admin/exercise-frames',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedAdminAppModeRoute =
-  AuthenticatedAdminAppModeRouteImport.update({
-    id: '/admin/app-mode',
-    path: '/admin/app-mode',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
+const AuthenticatedAdminEditRoute = AuthenticatedAdminEditRouteImport.update({
+  id: '/admin/edit',
+  path: '/admin/edit',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedActivitySessionActivityIdRoute =
   AuthenticatedActivitySessionActivityIdRouteImport.update({
     id: '/activity-session/$activityId',
@@ -295,9 +287,8 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
-  '/admin/app-mode': typeof AuthenticatedAdminAppModeRoute
+  '/admin/edit': typeof AuthenticatedAdminEditRoute
   '/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
-  '/admin/view-mode': typeof AuthenticatedAdminViewModeRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/admin/bootstrap-admin': typeof ApiAdminBootstrapAdminRoute
@@ -336,9 +327,8 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
-  '/admin/app-mode': typeof AuthenticatedAdminAppModeRoute
+  '/admin/edit': typeof AuthenticatedAdminEditRoute
   '/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
-  '/admin/view-mode': typeof AuthenticatedAdminViewModeRoute
   '/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/admin/bootstrap-admin': typeof ApiAdminBootstrapAdminRoute
@@ -379,9 +369,8 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/activity-session/$activityId': typeof AuthenticatedActivitySessionActivityIdRoute
-  '/_authenticated/admin/app-mode': typeof AuthenticatedAdminAppModeRoute
+  '/_authenticated/admin/edit': typeof AuthenticatedAdminEditRoute
   '/_authenticated/admin/exercise-frames': typeof AuthenticatedAdminExerciseFramesRoute
-  '/_authenticated/admin/view-mode': typeof AuthenticatedAdminViewModeRoute
   '/_authenticated/ai-coach/$threadId': typeof AuthenticatedAiCoachThreadIdRoute
   '/_authenticated/workout-session/$templateId': typeof AuthenticatedWorkoutSessionTemplateIdRoute
   '/api/admin/bootstrap-admin': typeof ApiAdminBootstrapAdminRoute
@@ -422,9 +411,8 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/activity-session/$activityId'
-    | '/admin/app-mode'
+    | '/admin/edit'
     | '/admin/exercise-frames'
-    | '/admin/view-mode'
     | '/ai-coach/$threadId'
     | '/workout-session/$templateId'
     | '/api/admin/bootstrap-admin'
@@ -463,9 +451,8 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/activity-session/$activityId'
-    | '/admin/app-mode'
+    | '/admin/edit'
     | '/admin/exercise-frames'
-    | '/admin/view-mode'
     | '/ai-coach/$threadId'
     | '/workout-session/$templateId'
     | '/api/admin/bootstrap-admin'
@@ -505,9 +492,8 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/activity-session/$activityId'
-    | '/_authenticated/admin/app-mode'
+    | '/_authenticated/admin/edit'
     | '/_authenticated/admin/exercise-frames'
-    | '/_authenticated/admin/view-mode'
     | '/_authenticated/ai-coach/$threadId'
     | '/_authenticated/workout-session/$templateId'
     | '/api/admin/bootstrap-admin'
@@ -746,13 +732,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAiCoachThreadIdRouteImport
       parentRoute: typeof AuthenticatedAiCoachRoute
     }
-    '/_authenticated/admin/view-mode': {
-      id: '/_authenticated/admin/view-mode'
-      path: '/admin/view-mode'
-      fullPath: '/admin/view-mode'
-      preLoaderRoute: typeof AuthenticatedAdminViewModeRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/admin/exercise-frames': {
       id: '/_authenticated/admin/exercise-frames'
       path: '/admin/exercise-frames'
@@ -760,11 +739,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminExerciseFramesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/admin/app-mode': {
-      id: '/_authenticated/admin/app-mode'
-      path: '/admin/app-mode'
-      fullPath: '/admin/app-mode'
-      preLoaderRoute: typeof AuthenticatedAdminAppModeRouteImport
+    '/_authenticated/admin/edit': {
+      id: '/_authenticated/admin/edit'
+      path: '/admin/edit'
+      fullPath: '/admin/edit'
+      preLoaderRoute: typeof AuthenticatedAdminEditRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/activity-session/$activityId': {
@@ -854,9 +833,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedWeightHistoryRoute: typeof AuthenticatedWeightHistoryRoute
   AuthenticatedWorkoutHistoryRoute: typeof AuthenticatedWorkoutHistoryRoute
   AuthenticatedActivitySessionActivityIdRoute: typeof AuthenticatedActivitySessionActivityIdRoute
-  AuthenticatedAdminAppModeRoute: typeof AuthenticatedAdminAppModeRoute
+  AuthenticatedAdminEditRoute: typeof AuthenticatedAdminEditRoute
   AuthenticatedAdminExerciseFramesRoute: typeof AuthenticatedAdminExerciseFramesRoute
-  AuthenticatedAdminViewModeRoute: typeof AuthenticatedAdminViewModeRoute
   AuthenticatedWorkoutSessionTemplateIdRoute: typeof AuthenticatedWorkoutSessionTemplateIdRoute
 }
 
@@ -878,9 +856,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedWorkoutHistoryRoute: AuthenticatedWorkoutHistoryRoute,
   AuthenticatedActivitySessionActivityIdRoute:
     AuthenticatedActivitySessionActivityIdRoute,
-  AuthenticatedAdminAppModeRoute: AuthenticatedAdminAppModeRoute,
+  AuthenticatedAdminEditRoute: AuthenticatedAdminEditRoute,
   AuthenticatedAdminExerciseFramesRoute: AuthenticatedAdminExerciseFramesRoute,
-  AuthenticatedAdminViewModeRoute: AuthenticatedAdminViewModeRoute,
   AuthenticatedWorkoutSessionTemplateIdRoute:
     AuthenticatedWorkoutSessionTemplateIdRoute,
 }
