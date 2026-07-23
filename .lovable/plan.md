@@ -1,32 +1,20 @@
 ## Doel
-1. Standaardwaarden aanpassen zodat jij niet meer hoeft te schakelen bij een verse install/browser.
-2. De twee admin-schermen (`/admin/view-mode` en `/admin/app-mode`) samenvoegen tot één "Edit pagina".
-3. `/admin/exercise-frames` hernoemen naar "Edit workout pagina".
+Als je in de lightbox op ▶ (of op de "Speel film"-thumbnail) drukt, blijft de crossfade tussen frame 1 en 2 oneindig doorloopen — heen en weer, zonder te stoppen — tot je op pauze drukt, met de pijltjes naar een specifiek frame springt, of de lightbox sluit.
 
-## Wijzigingen
+## Wat er nu misgaat
+In `Lightbox` (src/routes/_authenticated/admin.exercise-frames.tsx) hangt de loop-interval af van `frameIndex` en `onChange` in de effect-deps. Elke tick verandert `frameIndex` in de parent-state, waardoor de effect direct opnieuw wordt opgezet en de timer opnieuw begint — dat voelt onregelmatig en stopt soms zichtbaar na één crossfade. De tile-versie (`FrameAnimation`) loopt al correct met interne state; dat patroon trekken we door naar de lightbox.
 
-### 1. Defaults omdraaien
-- **Weergavemodus**: standaard `premium` (nu: `free`). Alleen wanneer jij expliciet op "Gratis" klikt wordt dat opgeslagen in `localStorage`. Klanten zonder de key krijgen nog steeds hun echte abonnementsstatus — de default geldt alleen als er niks in `localStorage` staat, dus dit raakt echte gebruikers niet.
-- **App-modus**: standaard `edit` (nu: `customer`). Alleen wanneer jij expliciet op "Klantweergave" klikt wordt dat opgeslagen. Klanten hebben de key niet en zien dus gewoon de volledige flow (taal → intro → welkom → login).
+## Wijziging
+Alleen in `src/routes/_authenticated/admin.exercise-frames.tsx`, component `Lightbox`:
 
-Bestanden: `src/hooks/use-app-mode.ts` en de view-mode hook — alleen de default omdraaien.
+1. Loop-interval loskoppelen van `frameIndex`/`onChange`:
+   - Effect-deps worden `[playing, filmSpeed, value?.exerciseId]` (dus alleen bij oefening-wissel / play-toggle / snelheidswissel opnieuw opzetten, niet elke tick).
+   - Binnen de interval de nieuwe frame afleiden uit de vorige tick via een lokale ref (`currentFrameRef`) i.p.v. uit de gesloten `frameIndex`, zodat de loop 0→1→0→1… blijft doorgaan.
+2. Bij pijltje-klik (`ChevronLeft` / `ChevronRight`): `setPlaying(false)` blijft, en de ref wordt bijgewerkt zodat de loop bij volgende play verder gaat vanaf het gekozen frame.
+3. Bij oefening-wissel / lightbox openen: ref resetten naar het huidige `frameIndex`, `playing` blijft `filmMode` volgen zoals nu.
+4. Geen wijzigingen aan de tile-`FrameAnimation` (die loopt al goed), aan i18n, of aan andere schermen.
 
-### 2. Samenvoegen tot één "Edit pagina"
-- Nieuwe route: `/admin/edit` met titel **"Edit pagina"**, twee secties onder elkaar:
-  - **App-modus** — toggle Edit ⇄ Klantweergave + korte uitleg
-  - **Weergavemodus** — toggle Premium ⇄ Gratis + reset-knop
-- Oude routes `/admin/view-mode` en `/admin/app-mode` worden verwijderd.
-- i18n-keys hergebruikt; nieuwe titel-key "Edit pagina" toegevoegd voor alle 6 talen (en, nl, ar, fr, de, es).
-
-### 3. Hernoemen `/admin/exercise-frames`
-- Paginatitel en eventuele navigatielabels worden **"Edit workout pagina"**.
-- Route-pad blijft `/admin/exercise-frames` (interne URL ongewijzigd om bookmarks/links niet te breken); alleen de zichtbare naam verandert.
-- Titel-key toegevoegd voor alle 6 talen.
-
-### 4. Admin-links bijwerken
-- Bestaande links/knoppen die naar `/admin/view-mode` of `/admin/app-mode` verwijzen wijzen voortaan naar `/admin/edit`.
-
-## Wat NIET verandert
-- De klantflow (taalkeuze, intro, welkom, login) blijft exact hetzelfde voor iedereen zonder de admin-keys.
-- Echte betaalde/gratis logica voor klanten wordt niet aangeraakt — dit is alleen de lokale dev-override.
-- De functionaliteit van de exercise-frames pagina blijft identiek; alleen de naam wijzigt.
+## Verificatie
+- Open een klaar-oefening in de lightbox, druk op ▶: crossfade heen-en-weer moet minstens 5 volledige loops draaien zonder haperen bij Langzaam/Normaal/Snel.
+- Klik op ⏸: stopt onmiddellijk op huidig frame.
+- Klik pijltje: springt naar frame, blijft gepauzeerd tot je weer ▶ drukt.
