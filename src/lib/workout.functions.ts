@@ -15,7 +15,17 @@ const WizardInput = z.object({
   injuries: z.string().optional(),
   avoid: z.string().optional(),
   favorites: z.string().optional(),
+  locale: z.enum(["en", "nl", "ar", "fr", "de", "es"]).optional(),
 });
+
+const LOCALE_NAMES: Record<string, string> = {
+  en: "English",
+  nl: "Dutch (Nederlands)",
+  ar: "Arabic (العربية)",
+  fr: "French (Français)",
+  de: "German (Deutsch)",
+  es: "Spanish (Español)",
+};
 
 export type WizardInputT = z.infer<typeof WizardInput>;
 
@@ -54,6 +64,8 @@ export const generateWorkoutPlan = createServerFn({ method: "POST" })
 
     const gateway = createLovableAiGatewayProvider(key);
 
+    const languageName = LOCALE_NAMES[data.locale ?? "en"] ?? "English";
+
     const sys = `You are a certified strength coach. Output ONLY valid JSON, no prose, no markdown fences.
 Generate a personalized weekly workout plan as JSON matching this shape:
 {
@@ -68,7 +80,12 @@ Generate a personalized weekly workout plan as JSON matching this shape:
 }
 Include all 7 days (Monday-Sunday). Rest days have rest:true and exercises:[].
 Match the user's frequency exactly (number of non-rest days).
-Suggested weight: use bodyweight, RPE, or relative descriptors (e.g. "moderate, RPE 7", "bodyweight", "~60% 1RM").`;
+Suggested weight: use bodyweight, RPE, or relative descriptors (e.g. "moderate, RPE 7", "bodyweight", "~60% 1RM").
+
+LANGUAGE: Write ALL user-facing text fields in ${languageName}. This includes "name", "split", "focus", "progressionNotes", "notes", and "suggestedWeight" descriptors.
+EXCEPTIONS that MUST stay in English:
+- The "day" enum values (Monday..Sunday) — these are keys, not display text.
+- Exercise "name" values — use the standard English exercise name (e.g. "Bench Press", "Barbell Squat", "Lat Pulldown") so they match the exercise library.`;
 
     const trainingDaysLine = data.trainingDays && data.trainingDays.length > 0
       ? `Training days (use EXACTLY these as non-rest days, rest on all others): ${data.trainingDays.join(", ")}`
