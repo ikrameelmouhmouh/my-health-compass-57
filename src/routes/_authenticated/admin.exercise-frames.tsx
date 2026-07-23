@@ -226,25 +226,8 @@ function AdminExerciseFramesPage() {
           <RotateCcw className="mr-2 size-4" />
           {t("admin.frames.reset_visible", { n: visibleIds.length })}
         </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => resetJobs(allIds, "all")}
-          disabled={running || allIds.length === 0}
-        >
-          <RotateCcw className="mr-2 size-4" />
-          {t("admin.frames.reset_all")}
-        </Button>
-        <Button
-          size="sm"
-          variant={filmMode ? "default" : "outline"}
-          onClick={() => setFilmMode((v) => !v)}
-          disabled={running}
-        >
-          {filmMode ? <Pause className="mr-2 size-4" /> : <Play className="mr-2 size-4" />}
-          {filmMode ? t("admin.frames.film_stop") : t("admin.frames.film_play")}
-        </Button>
       </div>
+
       <p className="mt-2 text-[11px] text-muted-foreground">{t("admin.frames.reset_hint")}</p>
       {filmMode ? (
         <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -750,7 +733,9 @@ function FeedbackDialog({
           rows={4}
           maxLength={800}
           autoFocus
+          className="w-full resize-none box-border"
         />
+
         <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button
             variant="ghost"
