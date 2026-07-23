@@ -149,16 +149,20 @@ export function getExerciseFrames(
   _gender?: AppGender,
   generatedIds?: ReadonlySet<string>,
 ): string[] {
-  const frames = resolveFrames(ex);
-  if (frames && frames.length > 0) return frames;
+  // ALWAYS prefer freshly-generated storage frames when available, so
+  // regenerated/approved frames override any legacy bundled assets. This
+  // prevents "old picture reappears after refresh" bugs (e.g. wide-leg-press).
   if (generatedIds?.has(ex.id)) {
     return [
       `/api/exercise-frame/${encodeURIComponent(ex.id)}/0`,
       `/api/exercise-frame/${encodeURIComponent(ex.id)}/1`,
     ];
   }
+  const frames = resolveFrames(ex);
+  if (frames && frames.length > 0) return frames;
   return [ex.image];
 }
+
 
 /** Returns true when the exercise has AI-rendered demo frames available. */
 export function hasGenderVariants(ex: LibraryExercise, generatedIds?: ReadonlySet<string>): boolean {
