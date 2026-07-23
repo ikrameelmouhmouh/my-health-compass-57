@@ -7,9 +7,11 @@ import { EXERCISES } from "@/lib/exercise-library";
 import { getCameraHint, hasExplicitCameraHint } from "@/lib/exercise-camera-hints";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "@/components/ui/dialog";
 import { useT } from "@/lib/i18n";
-import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight, Play, Pause } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, ChevronLeft, ChevronRight, Play, Pause, MessageSquareWarning, X } from "lucide-react";
+
 
 type FilmSpeed = "slow" | "normal" | "fast";
 
@@ -33,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/admin/exercise-frames")({
   component: AdminExerciseFramesPage,
 });
 
-type JobRow = { exercise_id: string; status: "pending" | "done" | "failed" | "bad"; error: string | null; updated_at: string };
+type JobRow = { exercise_id: string; status: "pending" | "done" | "failed" | "bad"; error: string | null; updated_at: string; feedback: string | null };
 
 function AdminExerciseFramesPage() {
   const { session, user } = useAuth();
@@ -77,6 +79,8 @@ function AdminExerciseFramesPage() {
   const [filmMode, setFilmMode] = useState(false);
   const [filmSpeed, setFilmSpeed] = useState<FilmSpeed>("normal");
   const [lightbox, setLightbox] = useState<{ exerciseId: string; frameIndex: 0 | 1 } | null>(null);
+  const [feedbackTarget, setFeedbackTarget] = useState<{ exerciseId: string; exerciseName: string; current: string } | null>(null);
+
 
   const jobsById = useMemo(() => {
     const m = new Map<string, JobRow>();
@@ -335,20 +339,37 @@ function AdminExerciseFramesPage() {
                   {hint.label}
                 </p>
                 {job?.error ? <p className="truncate text-[11px] text-destructive">{job.error.slice(0, 60)}</p> : null}
+                {job?.feedback ? (
+                  <div className="mt-1 flex items-center gap-1 rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[11px] text-amber-700 dark:text-amber-400">
+                    <MessageSquareWarning className="size-3 shrink-0" />
+                    <span className="truncate" title={job.feedback}>
+                      <span className="font-medium">{t("admin.frames.feedback.badge_prefix")}</span> {job.feedback}
+                    </span>
+                    <button
+                      type="button"
+                      title={t("admin.frames.feedback.clear")}
+                      onClick={async () => {
+                        await supabase.from("exercise_frame_jobs").upsert({ exercise_id: ex.id, feedback: null });
+                        qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+                      }}
+                      className="grid size-4 shrink-0 place-items-center rounded-full hover:bg-amber-500/20"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </div>
+                ) : null}
               </div>
               <div className="flex shrink-0 gap-1">
                 {status === "done" ? (
                   <button
                     title="Markeer als slecht"
-                    onClick={async () => {
-                      await supabase.from("exercise_frame_jobs").upsert({ exercise_id: ex.id, status: "bad" });
-                      qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
-                    }}
+                    onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "" })}
                     className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-muted"
                   >
                     <XCircle className="size-4" />
                   </button>
                 ) : null}
+
                 <button
                   title="Genereer opnieuw"
                   onClick={() => runBatch([ex.id], true)}
@@ -365,6 +386,21 @@ function AdminExerciseFramesPage() {
       </ul>
 
       <Lightbox value={lightbox} onChange={setLightbox} filmMode={filmMode} filmSpeed={filmSpeed} onSpeedChange={setFilmSpeed} versions={jobsById} />
+      <FeedbackDialog
+        target={feedbackTarget}
+        onClose={() => setFeedbackTarget(null)}
+        onSubmit={async (feedback) => {
+          if (!feedbackTarget) return;
+          await supabase.from("exercise_frame_jobs").upsert({
+            exercise_id: feedbackTarget.exerciseId,
+            status: "bad",
+            feedback: feedback && feedback.trim().length > 0 ? feedback.trim() : null,
+          });
+          qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+          setFeedbackTarget(null);
+        }}
+      />
+
     </main>
   );
 }
@@ -576,3 +612,85 @@ function Lightbox({
     </Dialog>
   );
 }
+
+function FeedbackDialog({
+  target,
+  onClose,
+  onSubmit,
+}: {
+  target: { exerciseId: string; exerciseName: string; current: string } | null;
+  onClose: () => void;
+  onSubmit: (feedback: string) => void | Promise<void>;
+}) {
+  const t = useT();
+  const [value, setValue] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setValue(target?.current ?? "");
+  }, [target?.exerciseId, target?.current]);
+
+  const open = !!target;
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && !saving && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{t("admin.frames.feedback.title")}</DialogTitle>
+          <DialogDescription>{t("admin.frames.feedback.desc")}</DialogDescription>
+        </DialogHeader>
+        {target ? (
+          <p className="text-xs text-muted-foreground">{target.exerciseName}</p>
+        ) : null}
+        <Textarea
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder={t("admin.frames.feedback.placeholder")}
+          rows={4}
+          maxLength={800}
+          autoFocus
+        />
+        <DialogFooter className="flex-col gap-2 sm:flex-row">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              if (saving) return;
+              onClose();
+            }}
+            disabled={saving}
+          >
+            {t("admin.frames.feedback.cancel")}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              setSaving(true);
+              try {
+                await onSubmit("");
+              } finally {
+                setSaving(false);
+              }
+            }}
+            disabled={saving}
+          >
+            {t("admin.frames.feedback.skip")}
+          </Button>
+          <Button
+            onClick={async () => {
+              setSaving(true);
+              try {
+                await onSubmit(value);
+              } finally {
+                setSaving(false);
+              }
+            }}
+            disabled={saving}
+          >
+            {saving ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+            {t("admin.frames.feedback.save")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+

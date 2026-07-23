@@ -110,17 +110,23 @@ async function generateForExercise(args: {
 }): Promise<{ id: string; status: "done" | "failed" | "skipped"; error?: string }> {
   const { id, force, prompt, name, equipment, apiKey, supabaseAdmin } = args;
   try {
-    if (!force) {
-      const { data: job } = await supabaseAdmin
-        .from("exercise_frame_jobs")
-        .select("status")
-        .eq("exercise_id", id)
-        .maybeSingle();
-      if (job?.status === "done") return { id, status: "skipped" };
-    }
+    const { data: existingJob } = await supabaseAdmin
+      .from("exercise_frame_jobs")
+      .select("status, feedback")
+      .eq("exercise_id", id)
+      .maybeSingle();
+    if (!force && existingJob?.status === "done") return { id, status: "skipped" };
+    const feedback: string | null = (existingJob?.feedback ?? null) as string | null;
 
     const hint = getCameraHint(id, equipment, name);
     const basePrompt = prompt && prompt.trim().length > 0 ? prompt : buildDefaultPrompt(id, name, hint);
+    const correctionsBlock = feedback && feedback.trim().length > 0
+      ? [
+          "USER CORRECTIONS (highest priority — you MUST fix these in this render):",
+          feedback.trim(),
+          "",
+        ].join("\n")
+      : "";
 
     await supabaseAdmin.from("exercise_frame_jobs").upsert({
       exercise_id: id,
@@ -131,18 +137,21 @@ async function generateForExercise(args: {
 
     // Frame 0: START position (text-to-image).
     const startPrompt = [
+      correctionsBlock,
       basePrompt,
       "",
       "This is FRAME 1 of a 2-frame exercise animation.",
       `Render the START position of the movement: ${hint.startPose}.`,
       "The result must look like the first still of a locked-off training video: full body in frame, feet visible, head visible, no cropped limbs.",
       "Do not choose a dramatic angle. Do not rotate to the back. Do not hide, crop or simplify the machine. Keep the full apparatus visible when equipment is used.",
-    ].join("\n");
+    ].filter(Boolean).join("\n");
+
     const b0 = await generateOne({ prompt: startPrompt, apiKey });
 
     // Frame 1: END position (image-to-image using frame 0 as reference so
     // camera, lighting, mannequin, machine and background stay identical).
     const endPrompt = [
+      correctionsBlock,
       "This is FRAME 2 of a 2-frame exercise animation. The reference image is FRAME 1.",
       "",
       "CRITICAL — keep IDENTICAL to the reference image:",
@@ -161,6 +170,7 @@ async function generateForExercise(args: {
     ]
       .filter(Boolean)
       .join("\n");
+
     const b64_0 = uint8ToBase64(b0);
     const b1 = await generateOne({
       prompt: endPrompt,
@@ -199,7 +209,7 @@ async function generateForExercise(args: {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function resetFrameJobs(ids: string[], supabaseAdmin: any): Promise<void> {
-  const rows = ids.map((id) => ({ exercise_id: id, status: "pending", prompt: null, error: null }));
+  const rows = ids.map((id) => ({ exercise_id: id, status: "pending", prompt: null, error: null, feedback: null }));
   for (let i = 0; i < rows.length; i += 250) {
     const { error } = await supabaseAdmin.from("exercise_frame_jobs").upsert(rows.slice(i, i + 250));
     if (error) throw new Error(error.message);
