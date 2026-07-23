@@ -7,8 +7,9 @@ import type { AppGender } from "@/lib/gender";
 
 // ===== AI-rendered 3D anatomy frames (neutral mannequin) =====
 // Legs
-import wlp0 from "@/assets/exercises/wide-leg-press-0.jpg";
-import wlp1 from "@/assets/exercises/wide-leg-press-1.jpg";
+// wide-leg-press: intentionally NOT bundled — served from Cloud Storage via
+// /api/exercise-frame so admin regenerations are always the source of truth.
+
 import sq0 from "@/assets/exercises/barbell-squat-0.jpg";
 import sq1 from "@/assets/exercises/barbell-squat-1.jpg";
 import rdl0 from "@/assets/exercises/romanian-deadlift-0.jpg";
