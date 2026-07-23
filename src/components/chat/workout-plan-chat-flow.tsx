@@ -143,6 +143,7 @@ export function WorkoutPlanChatFlow({
       frequency: answers.frequency!,
       trainingDays: answers.trainingDays as WizardInputT["trainingDays"],
       focusAreas: answers.focusAreas,
+      locale: lang as WizardInputT["locale"],
     };
     setStep("generating");
     setError(null);
