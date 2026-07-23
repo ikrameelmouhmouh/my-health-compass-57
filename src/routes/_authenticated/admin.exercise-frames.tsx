@@ -359,14 +359,14 @@ function AdminExerciseFramesPage() {
                   </div>
                 ) : null}
               </div>
-              <div className="flex shrink-0 gap-1">
+              <div className="flex shrink-0 items-center gap-1.5">
                 {status === "done" ? (
                   <button
                     title="Markeer als slecht"
                     onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "" })}
-                    className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-muted"
+                    className="grid size-9 place-items-center rounded-full bg-destructive text-destructive-foreground shadow-sm transition hover:opacity-90 active:scale-95"
                   >
-                    <XCircle className="size-4" />
+                    <X className="size-4" strokeWidth={2.5} />
                   </button>
                 ) : null}
 
@@ -374,11 +374,15 @@ function AdminExerciseFramesPage() {
                   title="Genereer opnieuw"
                   onClick={() => runBatch([ex.id], true)}
                   disabled={running}
-                  className="grid size-8 place-items-center rounded-full text-brand hover:bg-brand/15 disabled:opacity-50"
+                  className="grid size-9 place-items-center rounded-full bg-muted text-foreground transition hover:bg-accent active:scale-95 disabled:opacity-50"
                 >
-                  <RefreshCw className="size-4" />
+                  <RefreshCw className="size-4" strokeWidth={2.5} />
                 </button>
-                {status === "done" ? <CheckCircle2 className="size-4 text-green-500" /> : null}
+                {status === "done" ? (
+                  <div className="grid size-9 place-items-center rounded-full bg-emerald-500 text-white shadow-sm">
+                    <Check className="size-4" strokeWidth={2.5} />
+                  </div>
+                ) : null}
               </div>
             </li>
           );
