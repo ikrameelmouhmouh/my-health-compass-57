@@ -113,7 +113,7 @@ function AdminExerciseFramesPage() {
       const exerciseData = Object.fromEntries(
         ids.map((id) => {
           const ex = EXERCISES.find((e) => e.id === id);
-          return [id, { name: ex?.name, equipment: ex?.equipment }];
+          return [id, { name: ex?.name, equipment: ex?.equipment, primary: ex?.primary, secondary: ex?.secondary }];
         }),
       );
       // Split into chunks of 20 for the endpoint.
