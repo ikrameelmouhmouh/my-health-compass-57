@@ -425,6 +425,16 @@ function Lightbox({
   const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
   const frameIndex = value?.frameIndex ?? 0;
   const [playing, setPlaying] = useState(false);
+  const currentFrameRef = useRef<0 | 1>(frameIndex);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    currentFrameRef.current = frameIndex;
+  }, [frameIndex]);
 
   useEffect(() => {
     if (value) setPlaying(filmMode);
@@ -432,11 +442,14 @@ function Lightbox({
 
   useEffect(() => {
     if (!playing || !value) return;
+    const exerciseId = value.exerciseId;
     const interval = setInterval(() => {
-      onChange({ exerciseId: value.exerciseId, frameIndex: frameIndex === 0 ? 1 : 0 });
+      const next: 0 | 1 = currentFrameRef.current === 0 ? 1 : 0;
+      currentFrameRef.current = next;
+      onChangeRef.current({ exerciseId, frameIndex: next });
     }, SPEED_MS[filmSpeed]);
     return () => clearInterval(interval);
-  }, [playing, value, frameIndex, filmSpeed, onChange]);
+  }, [playing, filmSpeed, value?.exerciseId]);
 
   useEffect(() => {
     if (!value) return;
