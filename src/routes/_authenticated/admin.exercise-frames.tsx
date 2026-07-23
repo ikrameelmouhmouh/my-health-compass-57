@@ -390,6 +390,9 @@ function AdminExerciseFramesPage() {
           const job = jobsById.get(exerciseId) as JobRow | undefined;
           setFeedbackTarget({ exerciseId, exerciseName: ex?.name ?? exerciseId, current: job?.feedback ?? "" });
         }}
+        onRegenerate={(exerciseId) => runBatch([exerciseId], true)}
+        regenerating={running}
+
       />
 
       <FeedbackDialog
@@ -462,6 +465,8 @@ function Lightbox({
   jobs,
   onApprove,
   onReject,
+  onRegenerate,
+  regenerating,
 }: {
   value: { exerciseId: string; frameIndex: 0 | 1 } | null;
   onChange: (v: { exerciseId: string; frameIndex: 0 | 1 } | null) => void;
@@ -473,6 +478,9 @@ function Lightbox({
   jobs: Map<string, JobRow>;
   onApprove: (exerciseId: string) => void | Promise<void>;
   onReject: (exerciseId: string) => void;
+  onRegenerate: (exerciseId: string) => void | Promise<void>;
+  regenerating: boolean;
+
 }) {
 
   const t = useT();
@@ -675,9 +683,22 @@ function Lightbox({
             <button
               type="button"
               onClick={async () => {
+                await onRegenerate(exercise.id);
+              }}
+              disabled={regenerating}
+              className="grid size-8 place-items-center rounded-full bg-white/20 text-white transition hover:bg-white/30 disabled:opacity-50"
+              aria-label="Genereer opnieuw"
+              title="Genereer opnieuw"
+            >
+              <RefreshCw className={`size-4 ${regenerating ? "animate-spin" : ""}`} />
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
                 await onApprove(exercise.id);
                 if (nextExerciseId) gotoExercise(nextExerciseId);
               }}
+
               className="grid size-8 place-items-center rounded-full bg-green-500/80 text-white transition hover:bg-green-500"
               aria-label={t("admin.frames.lightbox.approve")}
               title={t("admin.frames.lightbox.approve")}
