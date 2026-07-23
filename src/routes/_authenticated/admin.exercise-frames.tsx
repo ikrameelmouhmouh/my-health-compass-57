@@ -324,27 +324,34 @@ function AdminExerciseFramesPage() {
                   </div>
                 ) : null}
               </div>
-              <div className="flex shrink-0 gap-1">
-                {status === "done" ? (
-                  <button
-                    title="Markeer als slecht"
-                    onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "" })}
-                    className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-muted"
-                  >
-                    <XCircle className="size-4" />
-                  </button>
-                ) : null}
-
+              <div className="flex shrink-0 items-center gap-1.5">
+                <button
+                  title={t("admin.frames.lightbox.reject")}
+                  onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "" })}
+                  className="grid size-8 place-items-center rounded-full bg-red-500/80 text-white transition hover:bg-red-500"
+                >
+                  <X className="size-4" />
+                </button>
                 <button
                   title="Genereer opnieuw"
                   onClick={() => runBatch([ex.id], true)}
                   disabled={running}
-                  className="grid size-8 place-items-center rounded-full text-brand hover:bg-brand/15 disabled:opacity-50"
+                  className="grid size-8 place-items-center rounded-full bg-brand/80 text-white transition hover:bg-brand disabled:opacity-50"
                 >
                   <RefreshCw className="size-4" />
                 </button>
-                {status === "done" ? <CheckCircle2 className="size-4 text-green-500" /> : null}
+                <button
+                  title={t("admin.frames.lightbox.approve")}
+                  onClick={async () => {
+                    await supabase.from("exercise_frame_jobs").upsert({ exercise_id: ex.id, status: "done", feedback: null });
+                    qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+                  }}
+                  className="grid size-8 place-items-center rounded-full bg-green-500/80 text-white transition hover:bg-green-500"
+                >
+                  <Check className="size-4" />
+                </button>
               </div>
+
             </li>
           );
         })}
