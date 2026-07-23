@@ -388,9 +388,13 @@ function AdminExerciseFramesPage() {
         onReject={(exerciseId) => {
           const ex = EXERCISES.find((e) => e.id === exerciseId);
           const job = jobsById.get(exerciseId) as JobRow | undefined;
-          setFeedbackTarget({ exerciseId, exerciseName: ex?.name ?? exerciseId, current: job?.feedback ?? "" });
+          setFeedbackTarget({ exerciseId, exerciseName: ex?.name ?? exerciseId, current: job?.feedback ?? "", mode: "reject" });
         }}
-        onRegenerate={(exerciseId) => runBatch([exerciseId], true)}
+        onRegenerate={(exerciseId) => {
+          const ex = EXERCISES.find((e) => e.id === exerciseId);
+          const job = jobsById.get(exerciseId) as JobRow | undefined;
+          setFeedbackTarget({ exerciseId, exerciseName: ex?.name ?? exerciseId, current: job?.feedback ?? "", mode: "regenerate" });
+        }}
         regenerating={running}
 
       />
@@ -400,10 +404,23 @@ function AdminExerciseFramesPage() {
         onClose={() => setFeedbackTarget(null)}
         onSubmit={async (feedback) => {
           if (!feedbackTarget) return;
+          const trimmed = feedback && feedback.trim().length > 0 ? feedback.trim() : null;
+          if (feedbackTarget.mode === "regenerate") {
+            if (trimmed) {
+              await supabase.from("exercise_frame_jobs").upsert({
+                exercise_id: feedbackTarget.exerciseId,
+                feedback: trimmed,
+              });
+            }
+            const id = feedbackTarget.exerciseId;
+            setFeedbackTarget(null);
+            await runBatch([id], true);
+            return;
+          }
           await supabase.from("exercise_frame_jobs").upsert({
             exercise_id: feedbackTarget.exerciseId,
             status: "bad",
-            feedback: feedback && feedback.trim().length > 0 ? feedback.trim() : null,
+            feedback: trimmed,
           });
           qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
           setFeedbackTarget(null);
