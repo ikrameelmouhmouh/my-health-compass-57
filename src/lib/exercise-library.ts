@@ -181,9 +181,9 @@ export const EXERCISES: LibraryExercise[] = [
     equipment: "Machine",
     primary: ["Quads"],
     secondary: ["Glutes", "Hamstrings", "Calves"],
-    image: wlp0,
-    frames: pair(wlp0, wlp1),
+    image: PLACEHOLDER_IMG,
     steps: [
+
       "Ga zitten in de machine met je voeten breed op het platform.",
       "Duw het gewicht weg tot je benen bijna gestrekt zijn (knie licht gebogen).",
       "Laat het gewicht langzaam zakken tot 90°.",
