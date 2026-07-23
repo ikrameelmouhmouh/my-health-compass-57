@@ -1,0 +1,1 @@
+ALTER TABLE public.exercise_frame_jobs ADD COLUMN IF NOT EXISTS feedback text;

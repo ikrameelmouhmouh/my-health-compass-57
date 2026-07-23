@@ -202,6 +202,7 @@ export type Database = {
         Row: {
           error: string | null
           exercise_id: string
+          feedback: string | null
           prompt: string | null
           status: string
           updated_at: string
@@ -209,6 +210,7 @@ export type Database = {
         Insert: {
           error?: string | null
           exercise_id: string
+          feedback?: string | null
           prompt?: string | null
           status?: string
           updated_at?: string
@@ -216,6 +218,7 @@ export type Database = {
         Update: {
           error?: string | null
           exercise_id?: string
+          feedback?: string | null
           prompt?: string | null
           status?: string
           updated_at?: string
