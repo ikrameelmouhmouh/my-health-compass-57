@@ -73,7 +73,7 @@ function AdminExerciseFramesPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["user-role"] }),
   });
 
-  const [filter, setFilter] = useState<"all" | "pending" | "done" | "failed" | "bad">("all");
+  const [filter, setFilter] = useState<"pending" | "bad" | "done">("pending");
   const [q, setQ] = useState("");
   const [running, setRunning] = useState(false);
   const [filmMode, setFilmMode] = useState(false);
@@ -89,15 +89,12 @@ function AdminExerciseFramesPage() {
   }, [jobsQ.data]);
 
   const doneCount = (jobsQ.data ?? []).filter((j) => j.status === "done").length;
-  const failedCount = (jobsQ.data ?? []).filter((j) => j.status === "failed").length;
   const badCount = (jobsQ.data ?? []).filter((j) => j.status === "bad").length;
   const total = EXERCISES.length;
   const counts = {
-    all: total,
-    pending: total - doneCount,
-    done: doneCount,
-    failed: failedCount,
+    pending: total - doneCount - badCount,
     bad: badCount,
+    done: doneCount,
   } as const;
 
   const rows = useMemo(() => {
@@ -105,11 +102,10 @@ function AdminExerciseFramesPage() {
     return EXERCISES
       .map((ex) => ({ ex, job: jobsById.get(ex.id) }))
       .filter(({ ex, job }) => {
-        // "Nog te doen" = alles wat nog aandacht nodig heeft: nooit gegenereerd,
-        // mislukt of als slecht gemarkeerd. Goedgekeurd verdwijnt hier direct uit.
-        if (filter === "pending" && job?.status === "done") return false;
+        // "Nog te doen" = alles wat nog aandacht nodig heeft. Goedgekeurd (klaar)
+        // en afgekeurd (slecht) verdwijnen hier direct uit.
+        if (filter === "pending" && (job?.status === "done" || job?.status === "bad")) return false;
         if (filter === "done" && job?.status !== "done") return false;
-        if (filter === "failed" && job?.status !== "failed") return false;
         if (filter === "bad" && job?.status !== "bad") return false;
         if (needle && !ex.name.toLowerCase().includes(needle) && !ex.id.toLowerCase().includes(needle)) return false;
         return true;
@@ -201,7 +197,7 @@ function AdminExerciseFramesPage() {
         <div className="min-w-0">
           <h1 className="font-display text-xl font-semibold tracking-tight">{t("admin.frames.page_title")}</h1>
           <p className="text-[12px] text-muted-foreground">
-            {doneCount} van {total} klaar · {failedCount} mislukt
+            {doneCount} van {total} klaar · {badCount} slecht
           </p>
         </div>
       </header>
@@ -259,13 +255,13 @@ function AdminExerciseFramesPage() {
       ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {(["all", "pending", "done", "failed", "bad"] as const).map((k) => (
+        {(["pending", "bad", "done"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setFilter(k)}
             className={`rounded-full border px-3 py-1 text-xs transition ${filter === k ? "border-brand bg-brand/15 text-brand" : "border-border text-muted-foreground"}`}
           >
-            {k === "all" ? "Alle" : k === "pending" ? "Nog te doen" : k === "done" ? "Klaar" : k === "failed" ? "Mislukt" : "Slecht"}
+            {k === "pending" ? "Nog te doen" : k === "bad" ? "Slecht" : "Klaar"}
             <span className={`ml-1.5 tabular-nums ${filter === k ? "opacity-80" : "opacity-60"}`}>{counts[k]}</span>
           </button>
         ))}
@@ -446,6 +442,12 @@ function AdminExerciseFramesPage() {
             feedback: trimmed,
           });
           qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+          // Afgekeurd verhuist naar "Slecht" — schuif in de lightbox door naar de volgende.
+          if (lightbox && lightbox.exerciseId === feedbackTarget.exerciseId) {
+            const idx = visibleIds.indexOf(feedbackTarget.exerciseId);
+            const nextId = idx >= 0 ? (visibleIds[idx + 1] ?? visibleIds[idx - 1] ?? null) : null;
+            setLightbox(nextId ? { exerciseId: nextId, frameIndex: 0 } : null);
+          }
           setFeedbackTarget(null);
         }}
       />

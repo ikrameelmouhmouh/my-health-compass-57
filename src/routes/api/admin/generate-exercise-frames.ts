@@ -147,6 +147,7 @@ async function generateForExercise(args: {
       "This is FRAME 1 of a 2-frame exercise animation.",
       `Render the START position of the movement: ${hint.startPose}.`,
       "The result must look like the first still of a locked-off training video: full body in frame, feet visible, head visible, no cropped limbs.",
+      "Exactly ONE mannequin in ONE single panel — never a split screen, side-by-side pair, diptych, collage or before/after comparison.",
       "Do not choose a dramatic angle. Do not rotate to the back. Do not hide, crop or simplify the machine. Keep the full apparatus visible when equipment is used.",
     ].filter(Boolean).join("\n");
 
@@ -171,6 +172,7 @@ async function generateForExercise(args: {
       `- move the mannequin's limbs and torso to the END position: ${hint.endPose}.`,
       "Keep all machine pads, rails, cables, handles, benches, plates and weight stacks in the same visible positions unless that exact moving part is mechanically supposed to move.",
       "Do not zoom, pan, tilt, rotate, crop, restyle, change perspective, change the machine, change the background, or switch from front to back. Treat this like the very next video frame from the same locked-off camera.",
+      "Output exactly ONE mannequin in ONE single panel — never a split screen, side-by-side pair, diptych or before/after comparison image.",
     ]
       .filter(Boolean)
       .join("\n");
@@ -303,6 +305,7 @@ function buildDefaultPrompt(
     `Camera: ${hint.angle}. Locked-off tripod, 50mm equivalent focal length, fixed camera height and distance, subject centered, full body visible from head to feet.`,
     "Scene: Alyva Motion Lab — plain seamless off-white studio cyclorama, matte light-grey floor, one soft key light from upper-left, one soft fill light, single soft shadow on the floor. Keep this exact scene identical across all frames.",
     highlightBlock,
+    "CRITICAL OUTPUT FORMAT: one single photo containing exactly ONE mannequin in ONE panel. Absolutely no split screen, no side-by-side comparison, no diptych, no collage, no grid, no before/after panels, no mirrored duplicate, no dividing seam or border in the image.",
     "No text, no watermark, no logos, no other people, no props besides the required equipment.",
   ]
     .filter(Boolean)
