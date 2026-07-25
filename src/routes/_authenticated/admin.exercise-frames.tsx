@@ -528,9 +528,17 @@ function Lightbox({
   const t = useT();
   const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
   const frameIndex = value?.frameIndex ?? 0;
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  // Onthoudt of de gebruiker bewust heeft gepauzeerd. Zolang dit true is,
+  // start elke volgende oefening automatisch met afspelen.
+  const autoPlayRef = useRef(true);
   const currentFrameRef = useRef<0 | 1>(frameIndex);
   const onChangeRef = useRef(onChange);
+
+  const setPlayingManual = (next: boolean) => {
+    autoPlayRef.current = next;
+    setPlaying(next);
+  };
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -541,11 +549,11 @@ function Lightbox({
   }, [frameIndex]);
 
   useEffect(() => {
-    if (value) setPlaying(filmMode);
-    // Only re-sync playing state on exercise switch or filmMode toggle,
+    if (value) setPlaying(autoPlayRef.current);
+    // Only re-sync playing state on exercise switch,
     // NOT on every frame tick (which changes `value`).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value?.exerciseId, filmMode]);
+  }, [value?.exerciseId]);
 
   useEffect(() => {
     if (!playing || !value) return;
