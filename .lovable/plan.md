@@ -1,22 +1,15 @@
 ## Doel
+In de "Edit workout pagina" lightbox moet het filmpje blijven doorlopen. Zodra je op het groene vinkje drukt (of naar een andere oefening navigeert) start de volgende oefening automatisch met afspelen — tenzij je zelf op pauze hebt gedrukt.
 
-Op de Edit workout pagina (`/admin/exercise-frames`) wil je opnieuw alles handmatig doorlopen. Dus: standaardweergave weer op **Alle**, en het mapje **Klaar** leeg — terwijl álle bestaande frames/afbeeldingen precies blijven zoals ze nu zijn.
+## Wat er nu gebeurt
+In `src/routes/_authenticated/admin.exercise-frames.tsx`:
+- Bij het wisselen van oefening wordt `playing` gereset naar de waarde van `filmMode` (vaak `false`), dus staat hij stil.
+- `gotoExercise()` en de pijltjestoetsen zetten `playing` expliciet op `false`.
 
-## Wat er gebeurt
-
-1. **Standaardfilter terug naar "Alle"**
-   De pagina opent weer op het tabje "Alle" in plaats van "Nog te doen". De aantallen-badges per mapje blijven staan.
-
-2. **Goedkeuringen wissen (status reset)**
-   Alle oefeningen die nu op `done` (Klaar) staan, worden teruggezet naar `pending`. Daardoor is het mapje "Klaar" leeg en staat alles weer in je werklijst om opnieuw te beoordelen. Eerder gegeven afkeur-notities blijven bewaard.
-
-3. **Afbeeldingen blijven ongemoeid**
-   Er wordt niets opnieuw gegenereerd, niets verwijderd en niets overschreven in de frame-opslag. Alleen de goedkeur-status verandert.
-
-4. **Lightbox-gedrag**
-   Het groene vinkje blijft werken zoals nu (goedkeuren en doorschuiven naar de volgende), maar omdat je op "Alle" staat verdwijnt een goedgekeurde oefening niet meteen uit de lijst — je kunt gewoon door de hele set heen lopen. Wil je later weer alleen het openstaande werk zien, dan klik je zelf op "Nog te doen".
-
-## Technisch
-
-- `src/routes/_authenticated/admin.exercise-frames.tsx`: initiële `filter`-state van `"pending"` naar `"all"`.
-- Eenmalige database-update op `exercise_frame_jobs`: `status = 'pending'` waar `status = 'done'` (geen wijziging aan storage-bestanden of `updated_at`-frames).
+## Aanpassing
+1. Een `autoPlayRef` (of state `autoPlay`) bijhouden die onthoudt of de gebruiker bewust heeft gepauzeerd:
+   - Standaard `true` zodra de lightbox opent.
+   - Klik op de play/pauze-knop of spatiebalk zet deze op de nieuwe waarde.
+2. Bij wisselen van oefening (groene vinkje, rode kruis, pijlen vooruit/achteruit, exercise-navigatieknoppen) `playing` weer op `autoPlay` zetten in plaats van hard op `false`.
+3. Handmatig door frames stappen (pijl links/rechts, frame-knoppen) blijft pauzeren — dat is bewuste bediening — maar het pauzeert alleen die oefening; bij de volgende oefening speelt hij weer door omdat `autoPlay` niet is uitgezet. Alleen de expliciete pauzeknop/spatiebalk zet `autoPlay` uit.
+4. Alleen deze lightbox-logica wijzigen; geen andere UI, prompts of data-aanpassingen.
