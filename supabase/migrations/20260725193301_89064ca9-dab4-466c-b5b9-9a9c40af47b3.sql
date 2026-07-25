@@ -1,0 +1,2 @@
+ALTER TABLE public.exercise_frame_jobs DROP CONSTRAINT IF EXISTS exercise_frame_jobs_status_check;
+ALTER TABLE public.exercise_frame_jobs ADD CONSTRAINT exercise_frame_jobs_status_check CHECK (status IN ('pending','review','done','failed','bad'));
