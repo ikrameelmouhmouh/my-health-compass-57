@@ -303,6 +303,7 @@ function buildDefaultPrompt(
     `Camera: ${hint.angle}. Locked-off tripod, 50mm equivalent focal length, fixed camera height and distance, subject centered, full body visible from head to feet.`,
     "Scene: Alyva Motion Lab — plain seamless off-white studio cyclorama, matte light-grey floor, one soft key light from upper-left, one soft fill light, single soft shadow on the floor. Keep this exact scene identical across all frames.",
     highlightBlock,
+    "CRITICAL OUTPUT FORMAT: one single photo containing exactly ONE mannequin in ONE panel. Absolutely no split screen, no side-by-side comparison, no diptych, no collage, no grid, no before/after panels, no mirrored duplicate, no dividing seam or border in the image.",
     "No text, no watermark, no logos, no other people, no props besides the required equipment.",
   ]
     .filter(Boolean)
