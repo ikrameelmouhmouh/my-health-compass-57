@@ -279,6 +279,7 @@ function AdminExerciseFramesPage() {
       <ul className="mt-4 space-y-2">
         {rows.map(({ ex, job }) => {
           const status = job?.status ?? "pending";
+          const hasFrames = status === "done" || status === "review";
           const v = job?.updated_at ? `?v=${encodeURIComponent(job.updated_at)}` : "";
           const url0 = `/api/exercise-frame/${encodeURIComponent(ex.id)}/0${v}`;
           const url1 = `/api/exercise-frame/${encodeURIComponent(ex.id)}/1${v}`;
