@@ -355,7 +355,7 @@ function AdminExerciseFramesPage() {
                 ) : null}
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
-                {status === "done" ? (
+                {hasFrames ? (
                   <button
                     title="Markeer als slecht"
                     onClick={() => setFeedbackTarget({ exerciseId: ex.id, exerciseName: ex.name, current: job?.feedback ?? "", mode: "reject" })}
@@ -377,6 +377,17 @@ function AdminExerciseFramesPage() {
                   <div className="grid size-9 place-items-center rounded-full bg-emerald-500 text-white shadow-sm">
                     <Check className="size-4" strokeWidth={2.5} />
                   </div>
+                ) : status === "review" ? (
+                  <button
+                    title="Goedkeuren"
+                    onClick={async () => {
+                      await supabase.from("exercise_frame_jobs").upsert({ exercise_id: ex.id, status: "done", feedback: null });
+                      qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+                    }}
+                    className="grid size-9 place-items-center rounded-full bg-emerald-500 text-white shadow-sm transition hover:opacity-90 active:scale-95"
+                  >
+                    <Check className="size-4" strokeWidth={2.5} />
+                  </button>
                 ) : null}
               </div>
             </li>
