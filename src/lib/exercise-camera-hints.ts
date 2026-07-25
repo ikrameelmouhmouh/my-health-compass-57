@@ -213,12 +213,13 @@ const HINTS: Record<string, CameraHint> = {
 
   // ===== CORE =====
   plank: {
-    label: "Zijkant, plank",
+    label: "Zijkant, plank op onderarmen",
     angle: "pure side view, eye level, camera perpendicular to the body line",
-    bodyOrientation: "mannequin in a straight line from head to heels, supported on forearms and toes",
-    startPose: "body straight, hips in line with shoulders and heels, core braced",
-    endPose: "same straight plank position with a very slight hip dip or brace emphasis — keep it subtle; do not collapse the body",
+    bodyOrientation: "mannequin face-down on the floor, supported on the forearms with elbows under the shoulders and on the toes; never on the hands, never with the knees on the floor in the end position",
+    startPose: "set-up position: forearms flat on the floor with elbows under the shoulders, knees still resting on the floor, hips slightly higher than the shoulder line",
+    endPose: "full forearm plank: knees lifted off the floor, weight on forearms and toes, body one straight line from head through hips to heels, core braced",
   },
+
   "hanging-leg-raise": {
     label: "Vooraanzicht, hangend",
     angle: "straight front view, eye level, camera facing the chest and legs",
