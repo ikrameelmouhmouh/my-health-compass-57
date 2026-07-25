@@ -1,0 +1,1 @@
+UPDATE public.exercise_frame_jobs SET status = 'done', updated_at = now(), error = NULL WHERE exercise_id = 'wide-leg-press';
