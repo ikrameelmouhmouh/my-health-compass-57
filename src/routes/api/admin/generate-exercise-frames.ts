@@ -165,7 +165,7 @@ async function generateForExercise(args: {
       `- exact same viewing side of the body: ${hint.angle}. NEVER flip to the back, the opposite side, or a different angle.`,
       hint.machineView ? `- exact same machine and equipment framing: ${hint.machineView}. The machine must not disappear, slide, or rotate in the frame.` : "",
       "- exact same lighting, shadows, color grading and reflections",
-      "- exact same mannequin: identical body proportions, identical matte grey skin, no hair, no facial features, no gender markers, identical loose-fitting plain matte black gym shorts with a relaxed draping fit ending just above the knee (never tight, never compression, never leggings, never short briefs)",
+      "- exact same mannequin: identical body proportions, identical matte grey skin, no hair, no facial features, no gender markers, identical SHORT loose-fitting plain matte black gym shorts with a relaxed draping fit and a hem high on the thigh, clearly well above the knee (mid-thigh) (never tight, never compression, never leggings, never knee-length, never long)",
       "- exact same equipment placement (barbell, dumbbells, machine, cable, bench) — if it is visible in frame 1 it must be in the exact same spot in frame 2",
       "",
       "ONLY change:",
@@ -296,9 +296,9 @@ function buildDefaultPrompt(
 
   return [
     `Alyva Motion Lab reference render: photorealistic 3D androgynous mannequin performing the "${name ?? humanize(id)}" gym exercise.`,
-    "Mannequin: smooth matte medium-grey skin, no hair, no facial features, completely flat chest, generic loose-fitting plain matte black gym shorts with a relaxed draping fit ending just above the knee (never tight, never compression, never leggings, never short briefs), no gender markers of any kind.",
+    "Mannequin: smooth matte medium-grey skin, no hair, no facial features, completely flat chest, generic SHORT loose-fitting plain matte black gym shorts with a relaxed draping fit and a hem high on the thigh (mid-thigh, clearly well above the knee), no gender markers of any kind.",
     "Correct anatomical form and posture for this specific exercise.",
-    "CLOTHING STANDARD (mandatory, identical in every frame and every exercise): the mannequin wears ONLY loose-fitting plain matte black gym shorts. Relaxed, draping fabric with soft folds and a wide straight leg opening that does not cling to the thighs, hem ending just above the knee. Never tight shorts, compression shorts, boxer briefs, leggings, tights or long pants. No logos, no text, no patterns.",
+    "CLOTHING STANDARD (mandatory, identical in every frame and every exercise): the mannequin wears ONLY short, loose-fitting plain matte black gym shorts. Relaxed, draping fabric with soft folds and a wide, open straight leg opening that does not cling to the thighs; the hem sits high on the thigh (mid-thigh), clearly well above the knee, so as much of the upper leg as possible stays visible and thigh/hip muscle highlights are not covered by clothing. Never knee-length or long shorts, never tight or compression shorts, never leggings, tights or long pants. No logos, no text, no patterns.",
     `Body orientation: ${hint.bodyOrientation}. This body orientation may not change between frames.`,
     hint.machineView
       ? `Equipment framing: ${hint.machineView}. The machine must be clearly visible, complete, anchored to the floor, and consistently positioned in both frames.`
