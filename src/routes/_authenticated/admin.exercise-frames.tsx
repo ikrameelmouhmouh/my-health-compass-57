@@ -73,7 +73,7 @@ function AdminExerciseFramesPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["user-role"] }),
   });
 
-  const [filter, setFilter] = useState<"all" | "pending" | "done" | "failed" | "bad">("all");
+  const [filter, setFilter] = useState<"all" | "pending" | "done" | "failed" | "bad">("pending");
   const [q, setQ] = useState("");
   const [running, setRunning] = useState(false);
   const [filmMode, setFilmMode] = useState(false);
@@ -90,14 +90,24 @@ function AdminExerciseFramesPage() {
 
   const doneCount = (jobsQ.data ?? []).filter((j) => j.status === "done").length;
   const failedCount = (jobsQ.data ?? []).filter((j) => j.status === "failed").length;
+  const badCount = (jobsQ.data ?? []).filter((j) => j.status === "bad").length;
   const total = EXERCISES.length;
+  const counts = {
+    all: total,
+    pending: total - doneCount,
+    done: doneCount,
+    failed: failedCount,
+    bad: badCount,
+  } as const;
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return EXERCISES
       .map((ex) => ({ ex, job: jobsById.get(ex.id) }))
       .filter(({ ex, job }) => {
-        if (filter === "pending" && (job?.status === "done" || job?.status === "failed")) return false;
+        // "Nog te doen" = alles wat nog aandacht nodig heeft: nooit gegenereerd,
+        // mislukt of als slecht gemarkeerd. Goedgekeurd verdwijnt hier direct uit.
+        if (filter === "pending" && job?.status === "done") return false;
         if (filter === "done" && job?.status !== "done") return false;
         if (filter === "failed" && job?.status !== "failed") return false;
         if (filter === "bad" && job?.status !== "bad") return false;
@@ -256,6 +266,7 @@ function AdminExerciseFramesPage() {
             className={`rounded-full border px-3 py-1 text-xs transition ${filter === k ? "border-brand bg-brand/15 text-brand" : "border-border text-muted-foreground"}`}
           >
             {k === "all" ? "Alle" : k === "pending" ? "Nog te doen" : k === "done" ? "Klaar" : k === "failed" ? "Mislukt" : "Slecht"}
+            <span className={`ml-1.5 tabular-nums ${filter === k ? "opacity-80" : "opacity-60"}`}>{counts[k]}</span>
           </button>
         ))}
       </div>
@@ -714,6 +725,8 @@ function Lightbox({
               onClick={async () => {
                 await onApprove(exercise.id);
                 if (nextExerciseId) gotoExercise(nextExerciseId);
+                else if (prevExerciseId) gotoExercise(prevExerciseId);
+                else onChange(null);
               }}
 
               className="grid size-8 place-items-center rounded-full bg-green-500/80 text-white transition hover:bg-green-500"
