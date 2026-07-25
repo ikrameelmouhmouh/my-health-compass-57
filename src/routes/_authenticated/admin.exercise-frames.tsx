@@ -288,7 +288,7 @@ function AdminExerciseFramesPage() {
           return (
             <li key={ex.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card/50 p-2.5">
               <div className="flex shrink-0 gap-1">
-                {status === "done" ? (
+                {hasFrames ? (
                   filmMode ? (
                     <button
                       type="button"
