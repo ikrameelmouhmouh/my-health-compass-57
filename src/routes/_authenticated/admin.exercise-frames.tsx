@@ -255,13 +255,13 @@ function AdminExerciseFramesPage() {
       ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {(["all", "pending", "done", "failed", "bad"] as const).map((k) => (
+        {(["pending", "bad", "done"] as const).map((k) => (
           <button
             key={k}
             onClick={() => setFilter(k)}
             className={`rounded-full border px-3 py-1 text-xs transition ${filter === k ? "border-brand bg-brand/15 text-brand" : "border-border text-muted-foreground"}`}
           >
-            {k === "all" ? "Alle" : k === "pending" ? "Nog te doen" : k === "done" ? "Klaar" : k === "failed" ? "Mislukt" : "Slecht"}
+            {k === "pending" ? "Nog te doen" : k === "bad" ? "Slecht" : "Klaar"}
             <span className={`ml-1.5 tabular-nums ${filter === k ? "opacity-80" : "opacity-60"}`}>{counts[k]}</span>
           </button>
         ))}
