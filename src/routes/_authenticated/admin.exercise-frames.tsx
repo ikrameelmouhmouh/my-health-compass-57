@@ -571,7 +571,7 @@ function Lightbox({
   const nextExerciseId = currentIndex >= 0 && currentIndex < visibleIds.length - 1 ? visibleIds[currentIndex + 1] : null;
   const gotoExercise = (id: string | null) => {
     if (!id) return;
-    setPlaying(false);
+    setPlaying(autoPlayRef.current);
     onChange({ exerciseId: id, frameIndex: 0 });
   };
 
