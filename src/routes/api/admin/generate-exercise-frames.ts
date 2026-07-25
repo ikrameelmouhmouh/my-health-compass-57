@@ -147,6 +147,7 @@ async function generateForExercise(args: {
       "This is FRAME 1 of a 2-frame exercise animation.",
       `Render the START position of the movement: ${hint.startPose}.`,
       "The result must look like the first still of a locked-off training video: full body in frame, feet visible, head visible, no cropped limbs.",
+      "Exactly ONE mannequin in ONE single panel — never a split screen, side-by-side pair, diptych, collage or before/after comparison.",
       "Do not choose a dramatic angle. Do not rotate to the back. Do not hide, crop or simplify the machine. Keep the full apparatus visible when equipment is used.",
     ].filter(Boolean).join("\n");
 
