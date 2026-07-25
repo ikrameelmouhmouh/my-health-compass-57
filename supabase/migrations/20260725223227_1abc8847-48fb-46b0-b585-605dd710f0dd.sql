@@ -1,0 +1,1 @@
+UPDATE public.exercise_frame_jobs SET status = 'review', updated_at = now();
