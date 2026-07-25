@@ -89,15 +89,12 @@ function AdminExerciseFramesPage() {
   }, [jobsQ.data]);
 
   const doneCount = (jobsQ.data ?? []).filter((j) => j.status === "done").length;
-  const failedCount = (jobsQ.data ?? []).filter((j) => j.status === "failed").length;
   const badCount = (jobsQ.data ?? []).filter((j) => j.status === "bad").length;
   const total = EXERCISES.length;
   const counts = {
-    all: total,
-    pending: total - doneCount,
-    done: doneCount,
-    failed: failedCount,
+    pending: total - doneCount - badCount,
     bad: badCount,
+    done: doneCount,
   } as const;
 
   const rows = useMemo(() => {
@@ -105,11 +102,10 @@ function AdminExerciseFramesPage() {
     return EXERCISES
       .map((ex) => ({ ex, job: jobsById.get(ex.id) }))
       .filter(({ ex, job }) => {
-        // "Nog te doen" = alles wat nog aandacht nodig heeft: nooit gegenereerd,
-        // mislukt of als slecht gemarkeerd. Goedgekeurd verdwijnt hier direct uit.
-        if (filter === "pending" && job?.status === "done") return false;
+        // "Nog te doen" = alles wat nog aandacht nodig heeft. Goedgekeurd (klaar)
+        // en afgekeurd (slecht) verdwijnen hier direct uit.
+        if (filter === "pending" && (job?.status === "done" || job?.status === "bad")) return false;
         if (filter === "done" && job?.status !== "done") return false;
-        if (filter === "failed" && job?.status !== "failed") return false;
         if (filter === "bad" && job?.status !== "bad") return false;
         if (needle && !ex.name.toLowerCase().includes(needle) && !ex.id.toLowerCase().includes(needle)) return false;
         return true;
