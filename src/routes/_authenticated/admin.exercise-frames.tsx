@@ -90,14 +90,24 @@ function AdminExerciseFramesPage() {
 
   const doneCount = (jobsQ.data ?? []).filter((j) => j.status === "done").length;
   const failedCount = (jobsQ.data ?? []).filter((j) => j.status === "failed").length;
+  const badCount = (jobsQ.data ?? []).filter((j) => j.status === "bad").length;
   const total = EXERCISES.length;
+  const counts = {
+    all: total,
+    pending: total - doneCount,
+    done: doneCount,
+    failed: failedCount,
+    bad: badCount,
+  } as const;
 
   const rows = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return EXERCISES
       .map((ex) => ({ ex, job: jobsById.get(ex.id) }))
       .filter(({ ex, job }) => {
-        if (filter === "pending" && (job?.status === "done" || job?.status === "failed")) return false;
+        // "Nog te doen" = alles wat nog aandacht nodig heeft: nooit gegenereerd,
+        // mislukt of als slecht gemarkeerd. Goedgekeurd verdwijnt hier direct uit.
+        if (filter === "pending" && job?.status === "done") return false;
         if (filter === "done" && job?.status !== "done") return false;
         if (filter === "failed" && job?.status !== "failed") return false;
         if (filter === "bad" && job?.status !== "bad") return false;
