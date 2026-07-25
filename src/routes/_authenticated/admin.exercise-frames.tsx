@@ -528,9 +528,17 @@ function Lightbox({
   const t = useT();
   const exercise = useMemo(() => EXERCISES.find((e) => e.id === value?.exerciseId), [value?.exerciseId]);
   const frameIndex = value?.frameIndex ?? 0;
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  // Onthoudt of de gebruiker bewust heeft gepauzeerd. Zolang dit true is,
+  // start elke volgende oefening automatisch met afspelen.
+  const autoPlayRef = useRef(true);
   const currentFrameRef = useRef<0 | 1>(frameIndex);
   const onChangeRef = useRef(onChange);
+
+  const setPlayingManual = (next: boolean) => {
+    autoPlayRef.current = next;
+    setPlaying(next);
+  };
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -541,11 +549,11 @@ function Lightbox({
   }, [frameIndex]);
 
   useEffect(() => {
-    if (value) setPlaying(filmMode);
-    // Only re-sync playing state on exercise switch or filmMode toggle,
+    if (value) setPlaying(autoPlayRef.current);
+    // Only re-sync playing state on exercise switch,
     // NOT on every frame tick (which changes `value`).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value?.exerciseId, filmMode]);
+  }, [value?.exerciseId]);
 
   useEffect(() => {
     if (!playing || !value) return;
@@ -563,7 +571,7 @@ function Lightbox({
   const nextExerciseId = currentIndex >= 0 && currentIndex < visibleIds.length - 1 ? visibleIds[currentIndex + 1] : null;
   const gotoExercise = (id: string | null) => {
     if (!id) return;
-    setPlaying(false);
+    setPlaying(autoPlayRef.current);
     onChange({ exerciseId: id, frameIndex: 0 });
   };
 
@@ -586,12 +594,13 @@ function Lightbox({
         onChange(null);
       } else if (e.key === " ") {
         e.preventDefault();
-        setPlaying((p) => !p);
+        setPlayingManual(!playing);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [value, onChange, prevExerciseId, nextExerciseId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, onChange, prevExerciseId, nextExerciseId, playing]);
 
 
   if (!exercise || !value) return null;
@@ -686,7 +695,7 @@ function Lightbox({
         <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3 rounded-full bg-black/60 px-4 py-2 text-sm text-white backdrop-blur-sm">
           <button
             type="button"
-            onClick={() => setPlaying((p) => !p)}
+            onClick={() => setPlayingManual(!playing)}
             className="grid size-7 place-items-center rounded-full bg-white/20 hover:bg-white/30"
             aria-label={playing ? t("admin.frames.film_stop") : t("admin.frames.film_play")}
           >
