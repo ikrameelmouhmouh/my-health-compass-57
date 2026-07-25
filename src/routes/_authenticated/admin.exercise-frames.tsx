@@ -442,6 +442,12 @@ function AdminExerciseFramesPage() {
             feedback: trimmed,
           });
           qc.invalidateQueries({ queryKey: ["exercise-frame-jobs"] });
+          // Afgekeurd verhuist naar "Slecht" — schuif in de lightbox door naar de volgende.
+          if (lightbox && lightbox.exerciseId === feedbackTarget.exerciseId) {
+            const idx = visibleIds.indexOf(feedbackTarget.exerciseId);
+            const nextId = idx >= 0 ? (visibleIds[idx + 1] ?? visibleIds[idx - 1] ?? null) : null;
+            setLightbox(nextId ? { exerciseId: nextId, frameIndex: 0 } : null);
+          }
           setFeedbackTarget(null);
         }}
       />
