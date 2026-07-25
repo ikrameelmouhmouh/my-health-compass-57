@@ -86,12 +86,16 @@ const HINTS: Record<string, CameraHint> = {
 
   // ===== CHEST =====
   "barbell-bench-press": {
-    label: "Bovenaanzicht, liggen op bank",
-    angle: "straight top-down view from above the bench, camera centered on the chest",
-    bodyOrientation: "mannequin lying flat on its back on a bench, head at the top of the frame, feet at the bottom",
-    startPose: "arms bent, barbell hovering just above the lower chest, elbows tucked",
-    endPose: "arms straight, barbell pressed directly above the chest, elbows locked",
+    label: "Zijkant, liggend op vlakke bank",
+    angle: "pure side view, eye level, camera perpendicular to the flat bench",
+    machineView:
+      "full flat bench visible from the side with its legs on the floor, plus the barbell with plates; the bench must never be replaced by a wall, chair or standing position",
+    bodyOrientation:
+      "mannequin lying flat on its back on a horizontal flat bench, head to the left, feet on the floor to the right, knees bent",
+    startPose: "arms bent, barbell lowered until it touches the mid-chest, elbows down at about 45°",
+    endPose: "arms straight up, barbell pressed vertically above the chest, elbows extended; body stays lying on the same bench",
   },
+
   "incline-db-press": {
     label: "Schuine zijkant, bank 45°",
     angle: "three-quarter front-side view, eye level, looking at the upper body from the right side of the bench",
