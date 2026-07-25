@@ -1,36 +1,27 @@
-## Doel
-Bij de bestaande oefening-afbeeldingen (grijze mannequin, Alyva Motion Lab stijl) de getrainde spiergroepen fel rood inkleuren — zoals het Lyfta-voorbeeld — met dezelfde camerahoek, achtergrond en set-opbouw. Geen nieuwe stijl, alleen kleuraccent op de actieve spieren.
+## Probleem
 
-## Aanpak
+Twee dingen mis in de huidige twee frames van Wide Leg Press:
 
-**1. Spierdata meesturen naar de generator**
+1. **Geen beweging** — in beide frames staan de benen vrijwel in dezelfde gebogen positie, dus het "filmpje" (crossfade tussen frame 1 en 2) lijkt stil te staan.
+2. **Short klopt niet** — de zwarte short in frame 2 is langer/anders van vorm dan in frame 1, waardoor het in de loop lijkt of de kleding verandert.
 
-`src/routes/_authenticated/admin.exercise-frames.tsx` stuurt nu alleen `{ name, equipment }` per oefening. Uitbreiden met `primary` en `secondary` uit `EXERCISES` (die staan al in `exercise-library.ts` als `MuscleGroup[]`).
+Oorzaak van 2: frame 2 is bijgewerkt met een losse image-edit waarbij de short opnieuw is getekend in plaats van exact overgenomen.
 
-`src/routes/api/admin/generate-exercise-frames.ts`:
-- `exerciseData` type uitbreiden met `primary?: string[]; secondary?: string[]`.
-- Doorgeven aan `generateForExercise` → `buildDefaultPrompt`.
+## Aanpak (alleen Wide Leg Press)
 
-**2. Prompt aanpassen zodat spieren rood worden**
+**1. Frame 1 blijft ongewijzigd** — dat is de goedgekeurde startpositie (benen gebogen, knieën ~90°, short kort en zwart, rode quads/glutes/hamstrings).
 
-In `buildDefaultPrompt` een muscle-highlight blok toevoegen dat de modellen instrueert:
-- Primaire spieren (bv. "Chest", "Quads"): fel warm rood, duidelijk verzadigd, alsof anatomische overlay.
-- Secundaire spieren: zachter oranje-rood, lichter.
-- Rest van de mannequin blijft matte medium-grey.
-- Kleuring zichtbaar door de kleding heen (net als in Lyfta) — geen tattoo/print effect, geen tekstlabels.
-- Zelfde rode gebieden in start- én eindframe (consistent tussen frames).
+**2. Frame 2 opnieuw genereren als image-edit van frame 1**, met één expliciete instructie-set:
+- Identiek: kamer, vloer, licht, camerahoek/afstand, machine (frame, rails, voetplaat, handgrepen, rugleuning), mannequin-proporties, grijze huid.
+- Identiek: de **korte** zwarte short — zelfde lengte, zelfde zoomlijn hoog op het bovenbeen, zelfde vorm als frame 1.
+- Identiek: rode/oranje spiermarkering op quads (primair, fel rood) en glutes/hamstrings (secundair, zachter oranje-rood), op dezelfde plekken.
+- Enige verandering: **benen gestrekt** — de eindpositie van de leg press. Voeten blijven op de voetplaat, de slede/rugleuning schuift weg van de voetplaat zoals mechanisch klopt, knieën bijna volledig gestrekt (niet doorgedrukt), heupen/rug blijven tegen de leuning.
 
-Alleen toepassen als `primary.length > 0`; anders valt de oefening terug op de huidige prompt.
+**3. Controle in twee stappen**
+- Beide frames naast elkaar visueel checken: zelfde short-lengte, zelfde camerahoek, duidelijk verschil in kniehoek.
+- Pas als beide punten kloppen wordt frame 2 opgeslagen; anders opnieuw met bijgestelde instructie (max een paar pogingen).
 
-**3. Bestaande frames**
-
-Nieuwe kleuren komen alleen op nieuw-gegenereerde frames. Op de Edit workout pagina staat al de per-oefening "regenerate" en de bulk-generator, dus jij kan zelf per oefening opnieuw draaien wanneer je wil (geen automatische mass-regeneratie — dat zou credits kosten en je huidige goedgekeurde frames overschrijven).
+**4. Cache verversen** zodat je in de Edit workout pagina direct de nieuwe versie ziet in plaats van de oude uit de cache.
 
 ## Buiten scope
-- Geen apart "Target muscles" front/back body-diagram onderaan de oefeningkaart (zoals in het Lyfta-screenshot). Als je dat er ook bij wil, laat het weten — dat is een aparte feature met eigen SVG-assets per spiergroep.
-- Geen wijziging aan de UI-layout van de oefeningen zelf.
-
-## Technische details
-- Bestanden: `src/routes/_authenticated/admin.exercise-frames.tsx` (payload uitbreiden), `src/routes/api/admin/generate-exercise-frames.ts` (type + prompt).
-- Geen DB-migratie nodig.
-- `MuscleGroup` waarden zoals "Chest", "Back", "Quads" gaan als klare tekst mee in de prompt; het beeldmodel begrijpt anatomische termen.
+- Geen andere oefeningen, geen wijziging aan de generator-prompt, geen UI-wijzigingen.
