@@ -1,28 +1,22 @@
-## Wat je wil
+## Doel
 
-Op de Edit workout pagina: zodra je een oefening goedkeurt met het groene vinkje, moet die uit de lijst verdwijnen die je aan het doorwerken bent, en alleen nog te zien zijn onder het mapje "Klaar". Zo blijft de lijst een echte to-do-lijst.
+Op de Edit workout pagina (`/admin/exercise-frames`) wil je opnieuw alles handmatig doorlopen. Dus: standaardweergave weer op **Alle**, en het mapje **Klaar** leeg — terwijl álle bestaande frames/afbeeldingen precies blijven zoals ze nu zijn.
 
-## Huidige situatie (gecheckt)
+## Wat er gebeurt
 
-De filterchips (Alle / Nog te doen / Klaar / Mislukt / Slecht) bestaan al, maar:
-- De pagina start standaard op **Alle**, dus goedgekeurde oefeningen blijven gewoon tussen de rest staan.
-- De chips laten niet zien hoeveel oefeningen in elk mapje zitten.
-- "Nog te doen" laat nu ook "Slecht" gemarkeerde oefeningen zien (dat is eigenlijk wel logisch, want die moet je nog aanpassen) maar dat is nergens duidelijk.
+1. **Standaardfilter terug naar "Alle"**
+   De pagina opent weer op het tabje "Alle" in plaats van "Nog te doen". De aantallen-badges per mapje blijven staan.
 
-## Wat ik ga doen
+2. **Goedkeuringen wissen (status reset)**
+   Alle oefeningen die nu op `done` (Klaar) staan, worden teruggezet naar `pending`. Daardoor is het mapje "Klaar" leeg en staat alles weer in je werklijst om opnieuw te beoordelen. Eerder gegeven afkeur-notities blijven bewaard.
 
-1. **Standaardfilter wordt "Nog te doen"** in plaats van "Alle". Bij openen van de pagina zie je dus alleen wat nog aandacht nodig heeft: nooit gegenereerd, mislukt en als "slecht" gemarkeerd. Goedgekeurde oefeningen zijn direct uit het zicht.
-2. **Goedkeuren = direct weg uit de lijst.** Als je in de lijst of in de lightbox op het groene vinkje drukt, wordt de status "Klaar" en verdwijnt de rij meteen uit "Nog te doen" (de lijst verschuift dus door naar de volgende oefening die je nog moet checken). Onder de chip "Klaar" blijft hij gewoon terug te vinden, met de mogelijkheid om hem weer af te keuren of opnieuw te genereren.
-3. **Aantallen op de chips**, bijv. `Alle 120 · Nog te doen 34 · Klaar 80 · Mislukt 4 · Slecht 2`, zodat je in één blik ziet hoeveel werk er nog ligt.
-4. **Pijltjes in de lightbox volgen dezelfde lijst.** Nu je met de standaardfilter door "Nog te doen" loopt, springen de vorige/volgende pijltjes alleen langs oefeningen die nog beoordeeld moeten worden. Na goedkeuren gaat de lightbox automatisch naar de volgende oefening in plaats van te sluiten of leeg te blijven.
+3. **Afbeeldingen blijven ongemoeid**
+   Er wordt niets opnieuw gegenereerd, niets verwijderd en niets overschreven in de frame-opslag. Alleen de goedkeur-status verandert.
+
+4. **Lightbox-gedrag**
+   Het groene vinkje blijft werken zoals nu (goedkeuren en doorschuiven naar de volgende), maar omdat je op "Alle" staat verdwijnt een goedgekeurde oefening niet meteen uit de lijst — je kunt gewoon door de hele set heen lopen. Wil je later weer alleen het openstaande werk zien, dan klik je zelf op "Nog te doen".
 
 ## Technisch
 
-- `src/routes/_authenticated/admin.exercise-frames.tsx`:
-  - `useState<...>("all")` → `"pending"` als startwaarde van `filter`.
-  - Filterlogica van `pending` expliciet maken: alles behalve `status === "done"`.
-  - Per-status tellingen (`all/pending/done/failed/bad`) uit `jobsById` berekenen en als badge in de chiplabels renderen.
-  - Bij de goedkeur-mutatie (`status: "done"`) de query invalidatie behouden; in de lightbox na goedkeuren doorschuiven naar de volgende `rows`-index (en sluiten als er geen volgende meer is).
-- Nieuwe/gewijzigde UI-teksten voor de chiplabels toevoegen in alle 6 talen in `src/lib/i18n.tsx`.
-
-Geen wijzigingen aan de generatielogica, prompts of bestaande frames.
+- `src/routes/_authenticated/admin.exercise-frames.tsx`: initiële `filter`-state van `"pending"` naar `"all"`.
+- Eenmalige database-update op `exercise_frame_jobs`: `status = 'pending'` waar `status = 'done'` (geen wijziging aan storage-bestanden of `updated_at`-frames).
