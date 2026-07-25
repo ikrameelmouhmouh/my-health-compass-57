@@ -725,6 +725,8 @@ function Lightbox({
               onClick={async () => {
                 await onApprove(exercise.id);
                 if (nextExerciseId) gotoExercise(nextExerciseId);
+                else if (prevExerciseId) gotoExercise(prevExerciseId);
+                else onChange(null);
               }}
 
               className="grid size-8 place-items-center rounded-full bg-green-500/80 text-white transition hover:bg-green-500"
