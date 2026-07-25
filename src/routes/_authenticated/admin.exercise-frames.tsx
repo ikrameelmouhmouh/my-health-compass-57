@@ -594,7 +594,7 @@ function Lightbox({
         onChange(null);
       } else if (e.key === " ") {
         e.preventDefault();
-        setPlaying((p) => !p);
+        setPlayingManual(!playing);
       }
     };
     window.addEventListener("keydown", handler);
@@ -694,7 +694,7 @@ function Lightbox({
         <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3 rounded-full bg-black/60 px-4 py-2 text-sm text-white backdrop-blur-sm">
           <button
             type="button"
-            onClick={() => setPlaying((p) => !p)}
+            onClick={() => setPlayingManual(!playing)}
             className="grid size-7 place-items-center rounded-full bg-white/20 hover:bg-white/30"
             aria-label={playing ? t("admin.frames.film_stop") : t("admin.frames.film_play")}
           >
