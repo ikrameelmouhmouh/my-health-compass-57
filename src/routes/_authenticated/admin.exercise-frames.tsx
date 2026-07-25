@@ -599,7 +599,8 @@ function Lightbox({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [value, onChange, prevExerciseId, nextExerciseId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, onChange, prevExerciseId, nextExerciseId, playing]);
 
 
   if (!exercise || !value) return null;
