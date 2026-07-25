@@ -172,6 +172,7 @@ async function generateForExercise(args: {
       `- move the mannequin's limbs and torso to the END position: ${hint.endPose}.`,
       "Keep all machine pads, rails, cables, handles, benches, plates and weight stacks in the same visible positions unless that exact moving part is mechanically supposed to move.",
       "Do not zoom, pan, tilt, rotate, crop, restyle, change perspective, change the machine, change the background, or switch from front to back. Treat this like the very next video frame from the same locked-off camera.",
+      "Output exactly ONE mannequin in ONE single panel — never a split screen, side-by-side pair, diptych or before/after comparison image.",
     ]
       .filter(Boolean)
       .join("\n");
