@@ -292,13 +292,14 @@ const HINTS: Record<string, CameraHint> = {
     endPose: "a LARGE lowering movement: the elbows are now deeply bent to roughly 90° and flared out to the sides, the hands are back beside the chest and the whole body has travelled clearly forward and downward between the handles so the chest is deep between the straps, straps angled backwards; body still one straight line",
   },
   "chin-up": {
-    label: "Vooraanzicht, hangend aan pull-up bar",
-    angle: "camera placed directly IN FRONT of the mannequin at chest height: the mannequin's face, chest and abdomen point straight at the lens and the pectorals are the surface facing the camera. The full pull-up bar and its uprights are visible in the same position in both frames. NEVER photograph the back, shoulder blades or spine; a rear view is completely forbidden",
-    machineView: "fixed horizontal pull-up bar mounted on a frame, visible in the same position in both frames",
-    bodyOrientation: "mannequin facing the camera, hanging from the bar with a supinated (underhand) shoulder-width grip, palms facing towards itself, knees slightly bent and ankles crossed; the chest and front of the body always face the camera",
-    startPose: "arms fully extended, body hanging straight down from the bar, shoulders stretched, chest facing the camera",
-    endPose: "a LARGE upward movement: the body has travelled far up so the chin is clearly above the bar and the elbows are bent and driven down beside the ribs; the mannequin still faces the camera with its chest towards the lens with the chest towards the lens and the whole head stays inside the frame",
+    label: "Schuin vooraanzicht, hangend aan pull-up bar",
+    angle: "locked-off three-quarter FRONT-SIDE view from the mannequin's left front, eye level with the chest: the camera sees the face, the chest and the side of the torso, so the lats are visible along the flank. The full pull-up bar and its uprights stay in the same position in both frames. A straight rear view of the back and spine is forbidden",
+    machineView: "fixed horizontal pull-up bar mounted on a floor-standing frame, visible in the same position in both frames",
+    bodyOrientation: "mannequin hanging from the bar with a supinated (underhand) shoulder-width grip, palms facing back towards its own face, knees slightly bent and ankles crossed, chest and face turned towards the camera",
+    startPose: "arms completely straight, body hanging at the lowest point far below the bar, shoulders stretched up beside the ears, chest and face towards the camera",
+    endPose: "a LARGE upward movement: the whole body has travelled far up so the chin is clearly above the bar, elbows bent and driven down beside the ribs, chest close to the bar; the chest and face still point towards the camera",
   },
+
 };
 
 /** Fallback rules for any exercise id that is not in the explicit HINTS map. */
