@@ -242,7 +242,7 @@ const HINTS: Record<string, CameraHint> = {
     machineView: "a real dip station seen from the side: TWO parallel horizontal handle bars (one on each side of the body, the near bar and the far bar both visible) mounted on a sturdy floor base frame, in the same position in both frames",
     bodyOrientation: "mannequin supported between the two parallel bars, torso leaned clearly forward, knees bent and ankles crossed behind",
     startPose: "arms completely straight and locked out, shoulders high above the bars, hips at the highest point of the range, torso leaning forward",
-    endPose: "body lowered deep between the bars so the shoulders drop clearly BELOW the elbows, elbows bent past 90° and flared slightly back, chest stretched at the very bottom of the range",
+    endPose: "a LARGE downward movement: the whole body has travelled far down between the bars, shoulders now dropped clearly BELOW the elbow height, elbows bent well past 90° and flared back, chest stretched at the very bottom of the range",
   },
   "chest-fly-dumbbell": {
     label: "Zijkant/schuin, liggend op vlakke bank",
@@ -273,7 +273,7 @@ const HINTS: Record<string, CameraHint> = {
     angle: "locked-off pure side view, eye level, the full resistance band visible from its anchor behind the mannequin to both hands in both frames",
     bodyOrientation: "mannequin standing in a split stance facing away from the band anchor; a clearly visible bright coloured elastic resistance band runs from a fixed anchor point behind the mannequin, passes around the back under the armpits, and ends in both hands. The band must be fully visible in BOTH frames",
     startPose: "elbows bent and pulled back beside the chest, hands at chest height, the coloured band clearly visible running from the anchor behind the body into both hands (band already present, only lightly stretched)",
-    endPose: "both arms pressed straight forward at chest height, elbows nearly locked, the same coloured band now strongly stretched behind the back and clearly visible",
+    endPose: "a LARGE forward pressing movement: both arms now reach COMPLETELY straight forward at chest height with elbows fully locked, hands far in front of the chest, the same coloured band pulled much longer and strongly stretched behind the back",
   },
   "chest-press-machine": {
     label: "Machine: schuin zijaanzicht, hele chest press zichtbaar",
@@ -281,7 +281,7 @@ const HINTS: Record<string, CameraHint> = {
     machineView: "complete seated chest press machine: upright frame, seat and back pad, both horizontal handles, guide rails and weight stack visible from the exact same angle in both frames",
     bodyOrientation: "mannequin seated upright on the machine, back flat against the pad, feet flat on the floor, hands on the horizontal handles at chest height",
     startPose: "elbows bent sharply past 90° and pulled far back behind the torso, handles all the way back at the chest, chest fully stretched, weight stack resting down",
-    endPose: "arms pressed COMPLETELY straight forward, elbows fully locked out, handles pushed as far away from the chest as the machine allows, the machine's pressing arms visibly travelled forward and the weight stack visibly lifted high",
+    endPose: "a LARGE pressing movement: the arms now reach COMPLETELY straight forward with elbows fully locked out, hands and handles far away from the chest at maximum reach, the machine's pressing arms visibly travelled forward and the weight stack visibly lifted high",
   },
   "chest-press-trx": {
     label: "Schuin zijaanzicht, TRX-bandjes",
@@ -289,15 +289,15 @@ const HINTS: Record<string, CameraHint> = {
     machineView: "TRX suspension trainer: two straps hanging from a fixed overhead anchor point, both handles gripped by the mannequin, anchor stays in the exact same spot in both frames",
     bodyOrientation: "mannequin leaning forward at an angle facing away from the anchor, body in one straight line from head to heels, arms holding the TRX handles",
     startPose: "arms completely straight and locked out in front of the chest, body high and angled forward in one straight plank line, straps hanging almost vertically",
-    endPose: "elbows deeply bent to roughly 90° and flared out to the sides, hands beside the chest, the whole body clearly lowered and moved forward between the handles so the chest is deep between the straps, straps angled backwards; body still one straight line",
+    endPose: "a LARGE lowering movement: the elbows are now deeply bent to roughly 90° and flared out to the sides, the hands are back beside the chest and the whole body has travelled clearly forward and downward between the handles so the chest is deep between the straps, straps angled backwards; body still one straight line",
   },
   "chin-up": {
     label: "Vooraanzicht, hangend aan pull-up bar",
-    angle: "straight FRONT view of the mannequin's chest and face-side, eye level, the full pull-up bar and its uprights visible in the same position in both frames; NEVER show the back of the body, never rotate to a rear view",
+    angle: "camera placed directly IN FRONT of the mannequin at chest height: the mannequin's face, chest and abdomen point straight at the lens and the pectorals are the surface facing the camera. The full pull-up bar and its uprights are visible in the same position in both frames. NEVER photograph the back, shoulder blades or spine; a rear view is completely forbidden",
     machineView: "fixed horizontal pull-up bar mounted on a frame, visible in the same position in both frames",
     bodyOrientation: "mannequin facing the camera, hanging from the bar with a supinated (underhand) shoulder-width grip, palms facing towards itself, knees slightly bent and ankles crossed; the chest and front of the body always face the camera",
     startPose: "arms fully extended, body hanging straight down from the bar, shoulders stretched, chest facing the camera",
-    endPose: "body pulled up until the chin is above the bar, elbows bent and driven down beside the ribs; the mannequin still faces the camera with the chest towards the lens and the whole head stays inside the frame",
+    endPose: "a LARGE upward movement: the body has travelled far up so the chin is clearly above the bar and the elbows are bent and driven down beside the ribs; the mannequin still faces the camera with its chest towards the lens with the chest towards the lens and the whole head stays inside the frame",
   },
 };
 
