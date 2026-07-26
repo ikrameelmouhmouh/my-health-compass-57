@@ -35,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/admin/exercise-frames")({
   component: AdminExerciseFramesPage,
 });
 
-type JobRow = { exercise_id: string; status: "pending" | "review" | "done" | "failed" | "bad"; error: string | null; updated_at: string; feedback: string | null };
+type JobRow = { exercise_id: string; status: "pending" | "review" | "done" | "failed" | "bad"; error: string | null; updated_at: string; feedback: string | null; prompt: string | null };
 
 function AdminExerciseFramesPage() {
   const { session, user } = useAuth();
@@ -275,7 +275,8 @@ function AdminExerciseFramesPage() {
       <ul className="mt-4 space-y-2">
         {rows.map(({ ex, job }) => {
           const status = job?.status ?? "pending";
-          const hasFrames = status === "done" || status === "review";
+          const hasGeneratedFrames = Boolean(job?.prompt) && status !== "failed";
+          const hasFrames = status === "done" || status === "review" || hasGeneratedFrames;
           const v = job?.updated_at ? `?v=${encodeURIComponent(job.updated_at)}` : "";
           const url0 = `/api/exercise-frame/${encodeURIComponent(ex.id)}/0${v}`;
           const url1 = `/api/exercise-frame/${encodeURIComponent(ex.id)}/1${v}`;
