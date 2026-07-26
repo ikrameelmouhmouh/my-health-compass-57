@@ -239,10 +239,10 @@ const HINTS: Record<string, CameraHint> = {
   "chest-dip": {
     label: "Zijkant, dip bars",
     angle: "locked-off pure side view, eye level with the chest, full parallel dip bars visible from the same side in both frames",
-    machineView: "sturdy parallel dip bars / dip station: TWO parallel horizontal handles at hip-to-chest height with a full floor base frame, both bars clearly visible in the same position in both frames",
+    machineView: "a real dip station seen from the side: TWO parallel horizontal handle bars (one on each side of the body, the near bar and the far bar both visible) mounted on a sturdy floor base frame, in the same position in both frames",
     bodyOrientation: "mannequin supported between the two parallel bars, torso leaned clearly forward, knees bent and ankles crossed behind",
     startPose: "arms completely straight and locked out, shoulders high above the bars, hips at the highest point of the range, torso leaning forward",
-    endPose: "body lowered deep between the bars so the shoulders drop clearly BELOW the elbows, elbows bent past 90° and flared slightly back, chest stretched at the very bottom of the range; the whole body is visibly much lower in the frame than in frame 1",
+    endPose: "body lowered deep between the bars so the shoulders drop clearly BELOW the elbows, elbows bent past 90° and flared slightly back, chest stretched at the very bottom of the range",
   },
   "chest-fly-dumbbell": {
     label: "Zijkant/schuin, liggend op vlakke bank",
@@ -281,7 +281,7 @@ const HINTS: Record<string, CameraHint> = {
     machineView: "complete seated chest press machine: upright frame, seat and back pad, both horizontal handles, guide rails and weight stack visible from the exact same angle in both frames",
     bodyOrientation: "mannequin seated upright on the machine, back flat against the pad, feet flat on the floor, hands on the horizontal handles at chest height",
     startPose: "elbows bent sharply past 90° and pulled far back behind the torso, handles all the way back at the chest, chest fully stretched, weight stack resting down",
-    endPose: "arms pressed COMPLETELY straight forward, elbows fully locked out, handles pushed as far away from the chest as the machine allows, the machine's pressing arms visibly travelled forward and the weight stack visibly lifted high; the arm position must look dramatically different from frame 1",
+    endPose: "arms pressed COMPLETELY straight forward, elbows fully locked out, handles pushed as far away from the chest as the machine allows, the machine's pressing arms visibly travelled forward and the weight stack visibly lifted high",
   },
   "chest-press-trx": {
     label: "Schuin zijaanzicht, TRX-bandjes",
@@ -289,7 +289,7 @@ const HINTS: Record<string, CameraHint> = {
     machineView: "TRX suspension trainer: two straps hanging from a fixed overhead anchor point, both handles gripped by the mannequin, anchor stays in the exact same spot in both frames",
     bodyOrientation: "mannequin leaning forward at an angle facing away from the anchor, body in one straight line from head to heels, arms holding the TRX handles",
     startPose: "arms completely straight and locked out in front of the chest, body high and angled forward in one straight plank line, straps hanging almost vertically",
-    endPose: "elbows deeply bent to roughly 90° and flared out to the sides, hands beside the chest, the whole body clearly lowered and moved forward between the handles so the chest is deep between the straps, straps angled backwards; body still one straight line. The bent-elbow bottom position must look clearly different from frame 1",
+    endPose: "elbows deeply bent to roughly 90° and flared out to the sides, hands beside the chest, the whole body clearly lowered and moved forward between the handles so the chest is deep between the straps, straps angled backwards; body still one straight line",
   },
   "chin-up": {
     label: "Vooraanzicht, hangend aan pull-up bar",
