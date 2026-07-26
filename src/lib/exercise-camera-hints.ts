@@ -235,6 +235,71 @@ const HINTS: Record<string, CameraHint> = {
     startPose: "torso upright, arms holding the rope near the head, hips extended",
     endPose: "torso crunched forward, elbows near the knees, back rounded",
   },
+  // ===== CHEST / BACK BATCH =====
+  "chest-dip": {
+    label: "Zijkant, dip bars",
+    angle: "locked-off pure side view, eye level with the chest, full parallel dip bars visible from the same side in both frames",
+    machineView: "a real dip station seen from the side: TWO parallel horizontal handle bars (one on each side of the body, the near bar and the far bar both visible) mounted on a sturdy floor base frame, in the same position in both frames",
+    bodyOrientation: "mannequin supported between the two parallel bars, torso leaned clearly forward, knees bent and ankles crossed behind",
+    startPose: "arms completely straight and locked out, shoulders high above the bars, hips at the highest point of the range, torso leaning forward",
+    endPose: "a LARGE downward movement: the whole body has travelled far down between the bars, shoulders now dropped clearly BELOW the elbow height, elbows bent well past 90° and flared back, chest stretched at the very bottom of the range",
+  },
+  "chest-fly-dumbbell": {
+    label: "Zijkant/schuin, liggend op vlakke bank",
+    angle: "locked-off three-quarter side view slightly above eye level of the bench, whole flat bench and both dumbbells visible in both frames",
+    machineView: "flat weight bench fully visible from the same side, anchored in the same spot in both frames",
+    bodyOrientation: "mannequin lying face up on a flat bench, feet flat on the floor, dumbbells held above the chest with palms facing each other",
+    startPose: "arms opened wide out to the sides in a big arc, elbows slightly bent, dumbbells level with or just below the chest, chest stretched",
+    endPose: "arms brought together in a wide arc directly above the chest, dumbbells nearly touching, elbows still slightly bent",
+  },
+  "chest-fly-machine": {
+    label: "Machine: schuin vooraanzicht, pec deck volledig zichtbaar",
+    angle: "locked-off three-quarter front view, eye level, the complete pec deck machine visible in the same position in both frames",
+    machineView: "complete pec deck / chest fly machine: seat, back pad, both pivoting arms with handles or pads, frame and weight stack all visible from the same angle in both frames",
+    bodyOrientation: "mannequin seated upright on the machine, back against the pad, feet flat on the floor, forearms against the pads or hands on the handles",
+    startPose: "machine arms opened wide to the sides, chest stretched, elbows level with the shoulders",
+    endPose: "machine arms brought together in front of the chest, handles or pads almost touching, chest fully contracted",
+  },
+  "chest-press-dumbbell": {
+    label: "Zijkant, liggend op vlakke bank",
+    angle: "locked-off pure side view, eye level with the bench, full flat bench and both dumbbells visible from the same side in both frames",
+    machineView: "flat weight bench fully visible from the same side and anchored in the same position in both frames",
+    bodyOrientation: "mannequin lying face up on a flat bench, feet flat on the floor, dumbbells held over the chest with palms facing forward",
+    startPose: "elbows bent about 90°, dumbbells lowered to chest level beside the ribcage, upper arms at roughly 45° from the torso",
+    endPose: "arms pressed straight up above the chest, elbows nearly locked, dumbbells close together over the sternum",
+  },
+  "chest-press-band": {
+    label: "Zijkant, staand met weerstandsband",
+    angle: "locked-off pure side view, eye level, the full resistance band visible from its anchor behind the mannequin to both hands in both frames",
+    bodyOrientation: "mannequin standing in a split stance facing away from the band anchor; a clearly visible bright coloured elastic resistance band runs from a fixed anchor point behind the mannequin, passes around the back under the armpits, and ends in both hands. The band must be fully visible in BOTH frames",
+    startPose: "elbows bent and pulled back beside the chest, hands at chest height, the coloured band clearly visible running from the anchor behind the body into both hands (band already present, only lightly stretched)",
+    endPose: "a LARGE forward pressing movement: both arms now reach COMPLETELY straight forward at chest height with elbows fully locked, hands far in front of the chest, the same coloured band pulled much longer and strongly stretched behind the back",
+  },
+  "chest-press-machine": {
+    label: "Machine: schuin zijaanzicht, hele chest press zichtbaar",
+    angle: "locked-off three-quarter front-side view, eye level, the complete seated chest press machine visible in the same position in both frames",
+    machineView: "complete seated chest press machine: upright frame, seat and back pad, both horizontal handles, guide rails and weight stack visible from the exact same angle in both frames",
+    bodyOrientation: "mannequin seated upright on the machine, back flat against the pad, feet flat on the floor, hands on the horizontal handles at chest height",
+    startPose: "elbows bent sharply past 90° and pulled far back behind the torso, handles all the way back at the chest, chest fully stretched, weight stack resting down",
+    endPose: "a LARGE pressing movement: the arms now reach COMPLETELY straight forward with elbows fully locked out, hands and handles far away from the chest at maximum reach, the machine's pressing arms visibly travelled forward and the weight stack visibly lifted high",
+  },
+  "chest-press-trx": {
+    label: "Schuin zijaanzicht, TRX-bandjes",
+    angle: "locked-off three-quarter side view, eye level, both suspension straps visible from their overhead anchor down to the handles in both frames",
+    machineView: "TRX suspension trainer: two straps hanging from a fixed overhead anchor point, both handles gripped by the mannequin, anchor stays in the exact same spot in both frames",
+    bodyOrientation: "mannequin leaning forward at an angle facing away from the anchor, body in one straight line from head to heels, arms holding the TRX handles",
+    startPose: "arms completely straight and locked out in front of the chest, body high and angled forward in one straight plank line, straps hanging almost vertically",
+    endPose: "a LARGE lowering movement: the elbows are now deeply bent to roughly 90° and flared out to the sides, the hands are back beside the chest and the whole body has travelled clearly forward and downward between the handles so the chest is deep between the straps, straps angled backwards; body still one straight line",
+  },
+  "chin-up": {
+    label: "Schuin vooraanzicht, hangend aan pull-up bar",
+    angle: "locked-off three-quarter FRONT-SIDE view from the mannequin's left front, eye level with the chest: the camera sees the face, the chest and the side of the torso, so the lats are visible along the flank. The full pull-up bar and its uprights stay in the same position in both frames. A straight rear view of the back and spine is forbidden",
+    machineView: "fixed horizontal pull-up bar mounted on a floor-standing frame, visible in the same position in both frames",
+    bodyOrientation: "mannequin hanging from the bar with a supinated (underhand) shoulder-width grip, palms facing back towards its own face, knees slightly bent and ankles crossed, chest and face turned towards the camera",
+    startPose: "arms completely straight, body hanging at the lowest point far below the bar, shoulders stretched up beside the ears, chest and face towards the camera",
+    endPose: "a LARGE upward movement: the whole body has travelled far up so the chin is clearly above the bar, elbows bent and driven down beside the ribs, chest close to the bar; the chest and face still point towards the camera",
+  },
+
 };
 
 /** Fallback rules for any exercise id that is not in the explicit HINTS map. */
