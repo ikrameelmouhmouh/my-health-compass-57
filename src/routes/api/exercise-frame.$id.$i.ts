@@ -14,11 +14,12 @@ export const Route = createFileRoute("/api/exercise-frame/$id/$i")({
         if (error || !data) {
           return new Response("Not found", { status: 404 });
         }
+        const contentType = data.type || "image/png";
         const buf = await data.arrayBuffer();
         return new Response(buf, {
           status: 200,
           headers: {
-            "Content-Type": "image/jpeg",
+            "Content-Type": contentType,
             "Cache-Control": "public, max-age=60, s-maxage=60, must-revalidate",
           },
         });
