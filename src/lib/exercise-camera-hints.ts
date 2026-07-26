@@ -239,10 +239,10 @@ const HINTS: Record<string, CameraHint> = {
   "chest-dip": {
     label: "Zijkant, dip bars",
     angle: "locked-off pure side view, eye level with the chest, full parallel dip bars visible from the same side in both frames",
-    machineView: "sturdy parallel dip bars / dip station with both handles and the floor base clearly visible in the same position in both frames",
-    bodyOrientation: "mannequin supported on straight arms between the parallel bars, torso leaned slightly forward, knees bent and ankles crossed behind",
-    startPose: "arms fully extended, body supported high above the bars, torso leaning slightly forward",
-    endPose: "body lowered until the upper arms are roughly parallel to the floor, elbows bent and flared slightly back, chest stretched, torso still leaning forward",
+    machineView: "sturdy parallel dip bars / dip station: TWO parallel horizontal handles at hip-to-chest height with a full floor base frame, both bars clearly visible in the same position in both frames",
+    bodyOrientation: "mannequin supported between the two parallel bars, torso leaned clearly forward, knees bent and ankles crossed behind",
+    startPose: "arms completely straight and locked out, shoulders high above the bars, hips at the highest point of the range, torso leaning forward",
+    endPose: "body lowered deep between the bars so the shoulders drop clearly BELOW the elbows, elbows bent past 90° and flared slightly back, chest stretched at the very bottom of the range; the whole body is visibly much lower in the frame than in frame 1",
   },
   "chest-fly-dumbbell": {
     label: "Zijkant/schuin, liggend op vlakke bank",
