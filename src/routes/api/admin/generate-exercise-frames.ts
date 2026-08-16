@@ -305,6 +305,7 @@ function buildDefaultPrompt(
       : "If the exercise uses equipment, it must be clearly visible and correctly positioned in the frame.",
     `Camera: ${hint.angle}. Locked-off tripod, 50mm equivalent focal length, fixed camera height and distance, subject centered, full body visible from head to feet.`,
     "Scene: Alyva Motion Lab — plain seamless off-white studio cyclorama, matte light-grey floor, one soft key light from upper-left, one soft fill light, single soft shadow on the floor. Keep this exact scene identical across all frames.",
+    "BACKGROUND & LIGHTING STANDARD (mandatory, must match the already approved Alyva frames exactly): the background is a bright, light off-white (approximately #F5F4F1) and the overall exposure is bright and even. Never a dark, grey, dim, moody, tinted or gradient-heavy background, never a dark studio or shadowed room. Same bright lighting, same 3D anatomical mannequin style and same short loose black gym shorts as the existing approved frames.",
     highlightBlock,
     "CRITICAL OUTPUT FORMAT: one single photo containing exactly ONE mannequin in ONE panel. Absolutely no split screen, no side-by-side comparison, no diptych, no collage, no grid, no before/after panels, no mirrored duplicate, no dividing seam or border in the image.",
     "No text, no watermark, no logos, no other people, no props besides the required equipment.",
