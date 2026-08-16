@@ -332,7 +332,101 @@ function Dashboard({
   );
 }
 
+/** Calm vertical week list: one day per row, one expandable at a time. */
+function WeekList({
+  days, todayName, completedDays, todayKey, toggleCompleted, openDay, setOpenDay,
+}: {
+  days: WorkoutPlan["days"];
+  todayName: string;
+  completedDays: string[];
+  todayKey: string;
+  toggleCompleted: (d: string) => void;
+  openDay: string | null;
+  setOpenDay: (d: string | null) => void;
+}) {
+  const { t } = useI18n();
+  const { templates } = useTemplates();
+  const startWorkout = useStartWorkout();
+
+  const templateFor = (d: WorkoutPlan["days"][number]): WorkoutTemplate => {
+    const own = templates.find((tpl) => normalizeDay(tpl.day) === normalizeDay(d.day) && tpl.exercises.length > 0);
+    return own ?? {
+      id: `plan-${d.day}`,
+      name: d.focus || t(`day.${d.day}`),
+      day: d.day,
+      focus: d.focus,
+      exercises: d.exercises,
+      createdAt: new Date().toISOString(),
+    };
+  };
+
+  return (
+    <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card/50">
+      {days.map((d) => {
+        const done = completedDays.includes(`${todayKey}:${d.day}`);
+        const isToday = d.day === todayName;
+        const isOpen = openDay === d.day;
+        const sets = d.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0);
+        const estMin = Math.max(15, Math.min(120, Math.round(sets * 3) || 30));
+        return (
+          <div key={d.day} className={isToday ? "bg-brand/5" : ""}>
+            <button
+              type="button"
+              onClick={() => !d.rest && setOpenDay(isOpen ? null : d.day)}
+              className="flex w-full items-center gap-3 px-3 py-2.5 text-left"
+            >
+              <div className="min-w-0 flex-1">
+                <p className={`truncate text-sm ${isToday ? "font-semibold text-brand" : "font-medium"}`}>
+                  {t(`day.${d.day}`)}
+                </p>
+                <p className="truncate text-[11px] text-muted-foreground">
+                  {d.rest
+                    ? t("fit.rest")
+                    : `${d.focus} · ${t("fit.exercises_count", { n: d.exercises.length })} · ${t("fit.today.est_min", { n: estMin })}`}
+                </p>
+              </div>
+              {!d.rest && (
+                <>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); toggleCompleted(d.day); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); toggleCompleted(d.day); } }}
+                    className={`grid size-6 shrink-0 place-items-center rounded-full border-2 ${done ? "border-brand bg-brand text-white" : "border-border"}`}
+                    aria-label={t("fit.mark_complete")}
+                  >
+                    {done && <Check className="size-3" />}
+                  </span>
+                  <ChevronRight className={`size-4 shrink-0 text-muted-foreground transition ${isOpen ? "rotate-90" : ""}`} />
+                </>
+              )}
+            </button>
+
+            {isOpen && !d.rest && (
+              <div className="space-y-1.5 px-3 pb-3">
+                {d.exercises.map((ex, i) => (
+                  <div key={i} className="rounded-lg bg-background/60 p-2">
+                    <p className="text-sm font-medium">{ex.name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {ex.sets} × {ex.reps} · {t("fit.rest_short")} {ex.restSec}s{ex.suggestedWeight ? ` · ${ex.suggestedWeight}` : ""}
+                    </p>
+                    {ex.notes && <p className="text-[11px] text-muted-foreground">{ex.notes}</p>}
+                  </div>
+                ))}
+                <Button size="sm" className="mt-1 w-full" onClick={() => startWorkout(templateFor(d))}>
+                  <Play className="mr-2 size-3.5 fill-current" /> {t("session.start")}
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function Stat({ icon: Icon, label, value }: { icon: typeof Calendar; label: string; value: string }) {
+
   return (
     <div className="rounded-xl bg-background/50 p-2">
       <Icon className="mx-auto size-4 text-brand" />
