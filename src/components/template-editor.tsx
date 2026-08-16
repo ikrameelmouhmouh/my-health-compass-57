@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import {
-  X, MoreHorizontal, Search, Camera, ImagePlus, TextCursorInput, Plus, Trash2,
+  X, MoreHorizontal, Search, Camera, ImagePlus, TextCursorInput, Plus, Trash2, ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Exercise } from "@/lib/workout.functions";
