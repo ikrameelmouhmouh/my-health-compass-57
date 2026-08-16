@@ -489,7 +489,6 @@ function FrameAnimation({
   playing?: boolean;
 }) {
   const [frame, setFrame] = useState<0 | 1>(0);
-  const transitionMs = Math.min(SPEED_MS[speed] * 0.5, 600);
 
   useEffect(() => {
     if (!playing) return;
@@ -501,21 +500,23 @@ function FrameAnimation({
 
   return (
     <div className="relative h-full w-full">
+      {/* Harde cut: exact één frame is zichtbaar, geen crossfade/ghosting. */}
       <img
         src={url0}
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
-        style={{ opacity: frame === 0 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+        style={{ visibility: frame === 0 ? "visible" : "hidden" }}
       />
       <img
         src={url1}
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
-        style={{ opacity: frame === 1 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+        style={{ visibility: frame === 1 ? "visible" : "hidden" }}
       />
     </div>
   );
 }
+
 
 function Lightbox({
   value,
