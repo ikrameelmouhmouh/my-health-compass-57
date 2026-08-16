@@ -182,8 +182,8 @@ function Header() {
       </div>
       <div className="min-w-0">
         <h1 className="truncate font-display text-2xl font-semibold tracking-tight">{t("fit.title")}</h1>
-        <p className="truncate text-[12px] text-muted-foreground">{t("fit.subtitle")}</p>
       </div>
+
     </div>
   );
 }
@@ -241,14 +241,8 @@ function Dashboard({
 
   const today = todayLocalKey();
   const todayName = DAY_ORDER[(new Date().getDay() + 6) % 7];
-  const nextWorkout = useMemo(() => {
-    for (let i = 0; i < 7; i++) {
-      const idx = (DAY_ORDER.indexOf(todayName) + i) % 7;
-      const d = sortedDays.find((x) => x.day === DAY_ORDER[idx]);
-      if (d && !d.rest) return { ...d, when: i === 0 ? t("fit.today") : i === 1 ? t("fit.tomorrow") : t(`day.${d.day}`) };
-    }
-    return null;
-  }, [sortedDays, todayName, t]);
+
+
 
   if (!stored || !plan || !wizard) return null;
 
@@ -281,55 +275,23 @@ function Dashboard({
           </button>
         </div>
         <div className="mt-3">
-          <div className="mb-1 flex items-center justify-between text-[11px]">
-            <span className="text-muted-foreground">{t("fit.weekly_progress")}</span>
-            <span className="font-medium">{completedWeek}/{trainingDays} · {progressPct}%</span>
-          </div>
+          <p className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">{t("fit.weekly_progress")}</p>
           <Progress value={progressPct} />
         </div>
       </div>
 
-      <h3 className="mt-6 mb-3 text-sm font-semibold">{t("fit.weekly_split")}</h3>
+      <h3 className="mt-6 mb-2 text-sm font-semibold">{t("fit.this_week")}</h3>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {sortedDays.map((d) => {
-          const done = completedDays.includes(`${today}:${d.day}`);
-          const isToday = d.day === todayName;
-          const isOpen = openDay === d.day;
-          return (
-            <div key={d.day} className={`rounded-2xl border p-2 transition ${isToday ? "border-brand/50 bg-brand/5" : "border-border bg-card/50"} ${isOpen ? "col-span-2 sm:col-span-3" : ""}`}>
-              <button onClick={() => !d.rest && setOpenDay(isOpen ? null : d.day)} className="flex w-full items-center justify-between gap-2 text-left">
-                <div className="min-w-0">
-                  <p className="text-[10px] text-muted-foreground">{t(`day.${d.day}`)}{isToday && ` · ${t("fit.today")}`}</p>
-                  <p className="truncate text-sm font-medium leading-tight">{d.rest ? t("fit.rest") : d.focus}</p>
-                </div>
-                {!d.rest && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); toggleCompleted(d.day); }}
-                    className={`grid size-7 shrink-0 place-items-center rounded-full border-2 ${done ? "border-brand bg-brand text-white" : "border-border"}`}
-                    aria-label={t("fit.mark_complete")}
-                  >
-                    {done && <Check className="size-3.5" />}
-                  </button>
-                )}
-              </button>
-              {isOpen && !d.rest && (
-                <div className="mt-2 space-y-1.5 border-t border-border pt-2">
-                  {d.exercises.map((ex, i) => (
-                    <div key={i} className="rounded-lg bg-background/60 p-2">
-                      <p className="text-sm font-medium">{ex.name}</p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {ex.sets} × {ex.reps} · {t("fit.rest_short")} {ex.restSec}s{ex.suggestedWeight ? ` · ${ex.suggestedWeight}` : ""}
-                      </p>
-                      {ex.notes && <p className="text-[11px] text-muted-foreground">{ex.notes}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <WeekList
+        days={sortedDays}
+        todayName={todayName}
+        completedDays={completedDays}
+        todayKey={today}
+        toggleCompleted={toggleCompleted}
+        openDay={openDay}
+        setOpenDay={setOpenDay}
+      />
+
 
       <TemplatesSection />
 
@@ -371,7 +333,101 @@ function Dashboard({
   );
 }
 
+/** Calm vertical week list: one day per row, one expandable at a time. */
+function WeekList({
+  days, todayName, completedDays, todayKey, toggleCompleted, openDay, setOpenDay,
+}: {
+  days: WorkoutPlan["days"];
+  todayName: string;
+  completedDays: string[];
+  todayKey: string;
+  toggleCompleted: (d: string) => void;
+  openDay: string | null;
+  setOpenDay: (d: string | null) => void;
+}) {
+  const { t } = useI18n();
+  const { templates } = useTemplates();
+  const startWorkout = useStartWorkout();
+
+  const templateFor = (d: WorkoutPlan["days"][number]): WorkoutTemplate => {
+    const own = templates.find((tpl) => normalizeDay(tpl.day) === normalizeDay(d.day) && tpl.exercises.length > 0);
+    return own ?? {
+      id: `plan-${d.day}`,
+      name: d.focus || t(`day.${d.day}`),
+      day: d.day,
+      focus: d.focus,
+      exercises: d.exercises,
+      createdAt: new Date().toISOString(),
+    };
+  };
+
+  return (
+    <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card/50">
+      {days.map((d) => {
+        const done = completedDays.includes(`${todayKey}:${d.day}`);
+        const isToday = d.day === todayName;
+        const isOpen = openDay === d.day;
+        const sets = d.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0);
+        const estMin = Math.max(15, Math.min(120, Math.round(sets * 3) || 30));
+        return (
+          <div key={d.day} className={isToday ? "bg-brand/5" : ""}>
+            <button
+              type="button"
+              onClick={() => !d.rest && setOpenDay(isOpen ? null : d.day)}
+              className="flex w-full items-center gap-3 px-3 py-2.5 text-left"
+            >
+              <div className="min-w-0 flex-1">
+                <p className={`truncate text-sm ${isToday ? "font-semibold text-brand" : "font-medium"}`}>
+                  {t(`day.${d.day}`)}
+                </p>
+                <p className="truncate text-[11px] text-muted-foreground">
+                  {d.rest
+                    ? t("fit.rest")
+                    : `${d.focus} · ${t("fit.exercises_count", { n: d.exercises.length })} · ${t("fit.today.est_min", { n: estMin })}`}
+                </p>
+              </div>
+              {!d.rest && (
+                <>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    onClick={(e) => { e.stopPropagation(); toggleCompleted(d.day); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); toggleCompleted(d.day); } }}
+                    className={`grid size-6 shrink-0 place-items-center rounded-full border-2 ${done ? "border-brand bg-brand text-white" : "border-border"}`}
+                    aria-label={t("fit.mark_complete")}
+                  >
+                    {done && <Check className="size-3" />}
+                  </span>
+                  <ChevronRight className={`size-4 shrink-0 text-muted-foreground transition ${isOpen ? "rotate-90" : ""}`} />
+                </>
+              )}
+            </button>
+
+            {isOpen && !d.rest && (
+              <div className="space-y-1.5 px-3 pb-3">
+                {d.exercises.map((ex, i) => (
+                  <div key={i} className="rounded-lg bg-background/60 p-2">
+                    <p className="text-sm font-medium">{ex.name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {ex.sets} × {ex.reps} · {t("fit.rest_short")} {ex.restSec}s{ex.suggestedWeight ? ` · ${ex.suggestedWeight}` : ""}
+                    </p>
+                    {ex.notes && <p className="text-[11px] text-muted-foreground">{ex.notes}</p>}
+                  </div>
+                ))}
+                <Button size="sm" className="mt-1 w-full" onClick={() => startWorkout(templateFor(d))}>
+                  <Play className="mr-2 size-3.5 fill-current" /> {t("session.start")}
+                </Button>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function Stat({ icon: Icon, label, value }: { icon: typeof Calendar; label: string; value: string }) {
+
   return (
     <div className="rounded-xl bg-background/50 p-2">
       <Icon className="mx-auto size-4 text-brand" />
@@ -512,21 +568,9 @@ function TodayCard({
   const today = todayDayName();
   const todayTpl = forDay(today);
 
-  let next: { tpl: WorkoutTemplate; when: string } | null = null;
-  if (!todayTpl) {
-    for (let i = 1; i < 8; i++) {
-      const name = DAY_ORDER[(DAY_ORDER.indexOf(today) + i) % 7];
-      const tpl = forDay(name);
-      if (tpl) {
-        next = { tpl, when: i === 1 ? t("fit.tomorrow") : t(`day.${name}`) };
-        break;
-      }
-    }
-  }
-
   if (!loaded) return null;
 
-  const active = todayTpl ?? next?.tpl ?? null;
+  const active = todayTpl;
   const sets = active ? active.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0) : 0;
   const estMin = Math.max(15, Math.min(120, Math.round(sets * 3) || 30));
 
@@ -534,7 +578,7 @@ function TodayCard({
     <section className="mt-6">
       <div className="rounded-3xl border border-border bg-gradient-to-br from-brand/15 to-card p-5">
         <p className="text-[11px] uppercase tracking-wider text-brand">
-          {todayTpl || !next ? t("fit.today") : `${t("fit.today")} — ${t("fit.rest")}`}
+          {active || !plan ? t("fit.today") : `${t("fit.today")} — ${t("fit.rest")}`}
         </p>
 
         {active ? (
@@ -542,11 +586,7 @@ function TodayCard({
             <h2 className="mt-1 font-display text-xl font-semibold leading-tight">{active.name}</h2>
             <p className="mt-1 text-xs text-muted-foreground">
               {t("fit.exercises_count", { n: active.exercises.length })} · {t("fit.today.est_min", { n: estMin })}
-              {!todayTpl && next ? ` · ${t("fit.today.next_label", { d: next.when })}` : ""}
             </p>
-            {plan && (
-              <p className="mt-0.5 text-[11px] text-muted-foreground">{plan.name} · {plan.split}</p>
-            )}
             <Button className="mt-4 w-full" size="lg" onClick={() => startWorkout(active)}>
               <Play className="mr-2 size-4 fill-current" /> {t("session.start")}
             </Button>
@@ -557,6 +597,8 @@ function TodayCard({
               {t("fit.view_workout")} <ChevronRight className="size-3" />
             </button>
           </>
+        ) : plan ? (
+          <h2 className="mt-1 font-display text-xl font-semibold leading-tight">{t("fit.rest")}</h2>
         ) : (
           <>
             <h2 className="mt-1 font-display text-xl font-semibold leading-tight">{t("fit.today.none")}</h2>
@@ -569,6 +611,7 @@ function TodayCard({
           </>
         )}
       </div>
+
 
       <SessionStartSheet template={preview} open={!!preview} onClose={() => setPreview(null)} />
     </section>
