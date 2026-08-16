@@ -1,23 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { oauth } from "@/lib/lovable-oauth";
 
-// Beta namespace; type it locally so TS is happy without grepping node_modules.
-type OAuthDetails = {
-  client?: { name?: string; client_id?: string };
-  redirect_url?: string;
-  redirect_to?: string;
-  scope?: string;
-  scopes?: string[];
-};
-type OAuthResp<T> = { data: T | null; error: { message: string } | null };
-const oauth = supabase.auth as unknown as {
-  oauth: {
-    getAuthorizationDetails: (id: string) => Promise<OAuthResp<OAuthDetails>>;
-    approveAuthorization: (id: string) => Promise<OAuthResp<OAuthDetails>>;
-    denyAuthorization: (id: string) => Promise<OAuthResp<OAuthDetails>>;
-  };
-};
 
 export const Route = createFileRoute("/.lovable/oauth/consent")({
   ssr: false,
