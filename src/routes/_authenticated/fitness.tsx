@@ -19,6 +19,7 @@ import { usePremium } from "@/hooks/use-premium";
 import { toast } from "sonner";
 import { useTodayWorkout } from "@/lib/dashboard-prefs";
 import { normalizeDay, todayDayName } from "@/lib/workout-today";
+import { useSessionHistory } from "@/lib/workout-session";
 
 
 export const Route = createFileRoute("/_authenticated/fitness")({
@@ -114,6 +115,7 @@ function FitnessPage() {
           {!stored && !showWizard ? (
             <>
               <TodayCard plan={null} onCreate={openWizard} isPremium={isPremium} />
+              <OwnProgramCard />
               <TemplatesSection />
               <EmptyState onStart={openWizard} isPremium={isPremium} />
             </>
@@ -266,9 +268,6 @@ function Dashboard({
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{plan.name}</p>
-            <p className="truncate text-[11px] text-muted-foreground">
-              {plan.split} · {wizard.goal} · {t("fit.days_wk")}: {trainingDays}
-            </p>
           </div>
           <button onClick={onRegenerate} className="rounded-full bg-background/60 p-2" aria-label={t("fit.regenerate_aria")}>
             <RotateCcw className="size-4" />
@@ -330,6 +329,32 @@ function Dashboard({
       </button>
       </PaywallOverlay>
     </main>
+  );
+}
+
+/** Progress card for users who build their own schedule (no AI plan). */
+function OwnProgramCard() {
+  const { t } = useI18n();
+  const { templates, loaded } = useTemplates();
+  const { history, loaded: histLoaded } = useSessionHistory();
+
+  if (!loaded || !histLoaded) return null;
+  const planned = templates.filter((tpl) => !!tpl.day).length;
+  if (planned === 0) return null;
+
+  const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6);
+  const since = localDayKey(weekStart);
+  const done = history.filter((s) => localDayKey(new Date(s.endedAt ?? s.startedAt)) >= since).length;
+  const pct = Math.min(100, Math.round((done / planned) * 100));
+
+  return (
+    <div className="mt-4 rounded-2xl border border-border bg-card/50 p-3">
+      <p className="truncate text-sm font-medium">{t("fit.own_program")}</p>
+      <div className="mt-3">
+        <p className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">{t("fit.weekly_progress")}</p>
+        <Progress value={pct} />
+      </div>
+    </div>
   );
 }
 
