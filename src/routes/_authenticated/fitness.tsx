@@ -188,32 +188,28 @@ function Header() {
 
 function EmptyState({ onStart, isPremium }: { onStart: () => void; isPremium: boolean }) {
   const { t } = useI18n();
-  const bullets = [t("fit.empty.b1"), t("fit.empty.b2"), t("fit.empty.b3"), t("fit.empty.b4")];
   return (
-    <div className="mt-8 space-y-6 text-center">
-      <div className="mx-auto grid size-20 place-items-center rounded-3xl bg-gradient-to-br from-brand/30 to-brand/10">
-        <Sparkles className="size-10 text-brand" />
-      </div>
-      <div>
-        <h2 className="font-display text-2xl font-semibold tracking-tight">{t("fit.empty.title")}</h2>
-        <p className="mx-auto mt-2 max-w-xs text-sm text-muted-foreground">{t("fit.empty.desc")}</p>
-      </div>
-      <ul className="mx-auto max-w-xs space-y-2 text-left text-sm text-muted-foreground">
-        {bullets.map((b) => (
-          <li key={b} className="flex items-center gap-2"><Check className="size-4 text-brand" />{b}</li>
-        ))}
-      </ul>
-      {isPremium ? (
-        <Button size="lg" className="w-full" onClick={onStart}>
-          <Sparkles className="mr-2 size-4" /> {t("fit.empty.cta")}
-        </Button>
-      ) : (
-        <Link to="/pricing" className="block">
-          <Button size="lg" variant="outline" className="w-full">
-            <Lock className="mr-2 size-4" /> {t("wiz.premium.locked")} · {t("wiz.premium.upgrade")}
+    <div className="mt-6 rounded-2xl border border-border bg-card/50 p-3">
+      <div className="flex items-center gap-3">
+        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand/15 text-brand">
+          <Sparkles className="size-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium">{t("fit.empty.title")}</p>
+          <p className="text-xs text-muted-foreground">{isPremium ? t("fit.empty.desc") : t("wiz.premium.locked")}</p>
+        </div>
+        {isPremium ? (
+          <Button size="sm" onClick={onStart}>
+            <Sparkles className="mr-1 size-3.5" /> {t("fit.empty.cta")}
           </Button>
-        </Link>
-      )}
+        ) : (
+          <Link to="/pricing">
+            <Button size="sm" variant="outline">
+              <Lock className="mr-1 size-3.5" /> {t("wiz.premium.upgrade")}
+            </Button>
+          </Link>
+        )}
+      </div>
     </div>
   );
 }
