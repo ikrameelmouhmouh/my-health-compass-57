@@ -31,8 +31,10 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
   const DAYS = DAY_KEYS.map((k) => t(`tpl.days.${k}`));
   const [name, setName] = useState(initial.name);
   const [day, setDay] = useState(initial.day ?? "");
-  const [focus, setFocus] = useState(initial.focus ?? "");
+  const [selectedFocus, setSelectedFocus] = useState<FocusOption[]>(() => parseFocus(initial.focus));
+  const focus = useMemo(() => formatFocus(selectedFocus, t), [selectedFocus, t]);
   const [exercises, setExercises] = useState<Exercise[]>(initial.exercises);
+
   const [coachOpen, setCoachOpen] = useState(false);
   const [libOpen, setLibOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
