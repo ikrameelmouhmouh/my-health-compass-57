@@ -195,9 +195,11 @@ async function generateForExercise(args: {
     });
     if (up1.error) throw new Error(up1.error.message);
 
+    // Nieuw gegenereerde frames gaan altijd naar "Te controleren" (review),
+    // nooit direct naar "Klaar".
     await supabaseAdmin.from("exercise_frame_jobs").upsert({
       exercise_id: id,
-      status: "done",
+      status: "review",
       prompt: basePrompt,
       error: null,
     });
