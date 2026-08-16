@@ -88,11 +88,27 @@ function AdminExerciseFramesPage() {
     return m;
   }, [jobsQ.data]);
 
+  // Categorie-indeling:
+  // - done  -> Klaar
+  // - bad   -> Slecht
+  // - frames aanwezig maar nog niet beoordeeld -> Te controleren
+  // - nog geen frames -> Nog te doen
+  const categoryOf = (job?: JobRow): "pending" | "review" | "bad" | "done" => {
+    if (!job) return "pending";
+    if (job.status === "done") return "done";
+    if (job.status === "bad") return "bad";
+    if (job.status === "review") return "review";
+    if (job.prompt && job.status !== "failed") return "review";
+    return "pending";
+  };
+
   const doneCount = (jobsQ.data ?? []).filter((j) => j.status === "done").length;
   const badCount = (jobsQ.data ?? []).filter((j) => j.status === "bad").length;
+  const reviewCount = (jobsQ.data ?? []).filter((j) => categoryOf(j) === "review").length;
   const total = EXERCISES.length;
   const counts = {
-    pending: total - doneCount - badCount,
+    pending: total - doneCount - badCount - reviewCount,
+    review: reviewCount,
     bad: badCount,
     done: doneCount,
   } as const;
@@ -102,11 +118,7 @@ function AdminExerciseFramesPage() {
     return EXERCISES
       .map((ex) => ({ ex, job: jobsById.get(ex.id) }))
       .filter(({ ex, job }) => {
-        // "Nog te doen" = alles wat nog aandacht nodig heeft. Goedgekeurd (klaar)
-        // en afgekeurd (slecht) verdwijnen hier direct uit.
-        if (filter === "pending" && (job?.status === "done" || job?.status === "bad")) return false;
-        if (filter === "done" && job?.status !== "done") return false;
-        if (filter === "bad" && job?.status !== "bad") return false;
+        if (categoryOf(job) !== filter) return false;
         if (needle && !ex.name.toLowerCase().includes(needle) && !ex.id.toLowerCase().includes(needle)) return false;
         return true;
       });
