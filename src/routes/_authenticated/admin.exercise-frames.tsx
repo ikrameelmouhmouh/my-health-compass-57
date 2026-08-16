@@ -374,7 +374,7 @@ function AdminExerciseFramesPage() {
                   <div className="grid size-9 place-items-center rounded-full bg-emerald-500 text-white shadow-sm">
                     <Check className="size-4" strokeWidth={2.5} />
                   </div>
-                ) : status === "review" ? (
+                ) : hasFrames ? (
                   <button
                     title="Goedkeuren"
                     onClick={async () => {
