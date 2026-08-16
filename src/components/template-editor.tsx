@@ -13,6 +13,8 @@ import { type WorkoutTemplate } from "@/lib/workout-prefs";
 import { CoachSuggestDialog } from "./coach-suggest-dialog";
 import { ExerciseLibraryDialog } from "./exercise-library-dialog";
 import { useT } from "@/lib/i18n";
+import { FOCUS_OPTIONS, formatFocus, parseFocus, type FocusOption } from "@/lib/focus-areas";
+
 
 const DAY_KEYS = ["mon","tue","wed","thu","fri","sat","sun"] as const;
 
@@ -29,8 +31,10 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
   const DAYS = DAY_KEYS.map((k) => t(`tpl.days.${k}`));
   const [name, setName] = useState(initial.name);
   const [day, setDay] = useState(initial.day ?? "");
-  const [focus, setFocus] = useState(initial.focus ?? "");
+  const [selectedFocus, setSelectedFocus] = useState<FocusOption[]>(() => parseFocus(initial.focus));
+  const focus = useMemo(() => formatFocus(selectedFocus, t), [selectedFocus, t]);
   const [exercises, setExercises] = useState<Exercise[]>(initial.exercises);
+
   const [coachOpen, setCoachOpen] = useState(false);
   const [libOpen, setLibOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -113,8 +117,9 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
                   {DAYS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <Input value={focus} onChange={(e) => setFocus(e.target.value)} placeholder={t("tpl.focus_ph")} />
+              <Input value={focus} readOnly placeholder={t("tpl.focus_ph")} />
             </div>
+            <FocusPicker selected={selectedFocus} onChange={setSelectedFocus} />
           </div>
         )}
 
@@ -273,6 +278,37 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     <div>
       <p className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
       {children}
+    </div>
+  );
+}
+
+function FocusPicker({ selected, onChange }: { selected: FocusOption[]; onChange: (s: FocusOption[]) => void }) {
+  const t = useT();
+  const toggle = (option: FocusOption) => {
+    if (selected.includes(option)) {
+      onChange(selected.filter((o) => o !== option));
+    } else if (selected.length < 2) {
+      onChange([...selected, option]);
+    } else {
+      toast.info(t("tpl.focus_max"));
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {FOCUS_OPTIONS.map((option) => {
+        const active = selected.includes(option);
+        return (
+          <button
+            key={option}
+            type="button"
+            onClick={() => toggle(option)}
+            className={`rounded-xl border px-2 py-2 text-xs font-medium transition ${active ? "border-brand bg-brand text-white" : "border-border bg-background text-foreground hover:bg-muted"}`}
+          >
+            {t(`wiz.focus.${option}`)}
+          </button>
+        );
+      })}
     </div>
   );
 }
