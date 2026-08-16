@@ -567,21 +567,9 @@ function TodayCard({
   const today = todayDayName();
   const todayTpl = forDay(today);
 
-  let next: { tpl: WorkoutTemplate; when: string } | null = null;
-  if (!todayTpl) {
-    for (let i = 1; i < 8; i++) {
-      const name = DAY_ORDER[(DAY_ORDER.indexOf(today) + i) % 7];
-      const tpl = forDay(name);
-      if (tpl) {
-        next = { tpl, when: i === 1 ? t("fit.tomorrow") : t(`day.${name}`) };
-        break;
-      }
-    }
-  }
-
   if (!loaded) return null;
 
-  const active = todayTpl ?? next?.tpl ?? null;
+  const active = todayTpl;
   const sets = active ? active.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0) : 0;
   const estMin = Math.max(15, Math.min(120, Math.round(sets * 3) || 30));
 
@@ -589,7 +577,7 @@ function TodayCard({
     <section className="mt-6">
       <div className="rounded-3xl border border-border bg-gradient-to-br from-brand/15 to-card p-5">
         <p className="text-[11px] uppercase tracking-wider text-brand">
-          {todayTpl || !next ? t("fit.today") : `${t("fit.today")} — ${t("fit.rest")}`}
+          {active || !plan ? t("fit.today") : `${t("fit.today")} — ${t("fit.rest")}`}
         </p>
 
         {active ? (
@@ -597,11 +585,7 @@ function TodayCard({
             <h2 className="mt-1 font-display text-xl font-semibold leading-tight">{active.name}</h2>
             <p className="mt-1 text-xs text-muted-foreground">
               {t("fit.exercises_count", { n: active.exercises.length })} · {t("fit.today.est_min", { n: estMin })}
-              {!todayTpl && next ? ` · ${t("fit.today.next_label", { d: next.when })}` : ""}
             </p>
-            {plan && (
-              <p className="mt-0.5 text-[11px] text-muted-foreground">{plan.name} · {plan.split}</p>
-            )}
             <Button className="mt-4 w-full" size="lg" onClick={() => startWorkout(active)}>
               <Play className="mr-2 size-4 fill-current" /> {t("session.start")}
             </Button>
@@ -612,6 +596,8 @@ function TodayCard({
               {t("fit.view_workout")} <ChevronRight className="size-3" />
             </button>
           </>
+        ) : plan ? (
+          <h2 className="mt-1 font-display text-xl font-semibold leading-tight">{t("fit.rest")}</h2>
         ) : (
           <>
             <h2 className="mt-1 font-display text-xl font-semibold leading-tight">{t("fit.today.none")}</h2>
@@ -624,6 +610,7 @@ function TodayCard({
           </>
         )}
       </div>
+
 
       <SessionStartSheet template={preview} open={!!preview} onClose={() => setPreview(null)} />
     </section>
