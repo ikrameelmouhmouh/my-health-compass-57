@@ -73,7 +73,7 @@ function AdminExerciseFramesPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["user-role"] }),
   });
 
-  const [filter, setFilter] = useState<"pending" | "bad" | "done">("pending");
+  const [filter, setFilter] = useState<"pending" | "review" | "bad" | "done">("pending");
   const [q, setQ] = useState("");
   const [running, setRunning] = useState(false);
   const [filmMode, setFilmMode] = useState(false);
