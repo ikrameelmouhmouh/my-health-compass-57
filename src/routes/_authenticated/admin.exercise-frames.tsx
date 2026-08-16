@@ -842,7 +842,7 @@ function FeedbackDialog({
           className="w-full max-w-full resize-none box-border"
         />
 
-        <DialogFooter className="flex-col gap-2 lg:flex-row lg:space-x-2">
+        <DialogFooter className="flex-col gap-2 md:flex-row md:space-x-2">
           <Button
             variant="ghost"
             onClick={() => {
