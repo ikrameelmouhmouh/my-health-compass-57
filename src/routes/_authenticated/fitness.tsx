@@ -2,23 +2,24 @@ import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, BookOpen, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Lock, Play } from "lucide-react";
+import { Dumbbell, Sparkles, RotateCcw, Check, Calendar, Trophy, Clock, Plus, Trash2, Pencil, ChevronRight, Waves, Bike, Footprints, Trees, Mountain, HeartPulse, Activity, Lock, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { WorkoutWizard } from "@/components/workout-wizard";
 import { TemplateEditor } from "@/components/template-editor";
 import { TemplateSyncDialog } from "@/components/template-sync-dialog";
-import { ExerciseLibraryDialog } from "@/components/exercise-library-dialog";
 import { SessionStartSheet } from "@/components/workout/session-start-sheet";
+import { useStartWorkout } from "@/components/workout/use-start-workout";
 import { useWorkoutPlan, useTemplates, newTemplate, templatesFromPlan, type WorkoutTemplate } from "@/lib/workout-prefs";
-import { EXERCISES } from "@/lib/exercise-library";
+import type { WorkoutPlan } from "@/lib/workout.functions";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
 import { usePremium } from "@/hooks/use-premium";
 import { toast } from "sonner";
 import { useTodayWorkout } from "@/lib/dashboard-prefs";
 import { normalizeDay, todayDayName } from "@/lib/workout-today";
+
 
 export const Route = createFileRoute("/_authenticated/fitness")({
   validateSearch: z.object({
@@ -112,10 +113,11 @@ function FitnessPage() {
         <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
           {!stored && !showWizard ? (
             <>
-              <LibrarySection />
+              <TodayCard plan={null} onCreate={openWizard} isPremium={isPremium} />
               <TemplatesSection />
               <EmptyState onStart={openWizard} isPremium={isPremium} />
             </>
+
           ) : (
             <div className="mt-6">
               <WorkoutWizard
@@ -264,43 +266,31 @@ function Dashboard({
       <ViewTabs view={view} setView={setView} />
 
       <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
-      <div className="mt-6 rounded-3xl border border-border bg-gradient-to-br from-brand/15 to-card p-5">
-        <div className="flex items-start justify-between gap-3">
+      <TodayCard plan={plan} onCreate={onRegenerate} isPremium={isPremium} />
+
+      <div className="mt-4 rounded-2xl border border-border bg-card/50 p-3">
+        <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("fit.current_program")}</p>
-            <h2 className="mt-1 font-display text-lg font-semibold leading-tight">{plan.name}</h2>
-            <p className="mt-1 text-xs text-muted-foreground">{plan.split} · {wizard.goal}</p>
+            <p className="truncate text-sm font-medium">{plan.name}</p>
+            <p className="truncate text-[11px] text-muted-foreground">
+              {plan.split} · {wizard.goal} · {t("fit.days_wk")}: {trainingDays}
+            </p>
           </div>
-          <button onClick={onRegenerate} className="rounded-full bg-background/60 p-2 backdrop-blur" aria-label={t("fit.regenerate_aria")}>
+          <button onClick={onRegenerate} className="rounded-full bg-background/60 p-2" aria-label={t("fit.regenerate_aria")}>
             <RotateCcw className="size-4" />
           </button>
         </div>
-
-        <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-          <Stat icon={Calendar} label={t("fit.days_wk")} value={String(trainingDays)} />
-          <Stat icon={Clock} label={t("fit.weeks")} value={String(plan.durationWeeks)} />
-          <Stat icon={Trophy} label={t("fit.done")} value={`${completedWeek}/${trainingDays}`} />
-        </div>
-
-        <div className="mt-4">
-          <div className="mb-1 flex items-center justify-between text-xs">
+        <div className="mt-3">
+          <div className="mb-1 flex items-center justify-between text-[11px]">
             <span className="text-muted-foreground">{t("fit.weekly_progress")}</span>
-            <span className="font-medium">{progressPct}%</span>
+            <span className="font-medium">{completedWeek}/{trainingDays} · {progressPct}%</span>
           </div>
           <Progress value={progressPct} />
         </div>
       </div>
 
-      {nextWorkout && (
-        <div className="mt-4 rounded-2xl border border-brand/40 bg-brand/5 p-4">
-          <p className="text-[11px] uppercase tracking-wider text-brand">{t("fit.next_workout")} · {nextWorkout.when}</p>
-          <p className="mt-1 font-semibold">{nextWorkout.focus}</p>
-          <p className="text-xs text-muted-foreground">{t("fit.exercises_count", { n: nextWorkout.exercises.length })}</p>
-          <Button size="sm" className="mt-3 w-full" onClick={() => setOpenDay(nextWorkout.day)}>{t("fit.view_workout")}</Button>
-        </div>
-      )}
-
       <h3 className="mt-6 mb-3 text-sm font-semibold">{t("fit.weekly_split")}</h3>
+
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {sortedDays.map((d) => {
           const done = completedDays.includes(`${today}:${d.day}`);
@@ -341,8 +331,8 @@ function Dashboard({
         })}
       </div>
 
-      <LibrarySection />
       <TemplatesSection />
+
 
       {plan.progressionNotes && (
         <div className="mt-6 rounded-2xl border border-border bg-card/50 p-4">
@@ -432,7 +422,13 @@ function TemplatesSection() {
             const dayLabel = tpl.day ? t(`day.${tpl.day}`) : "";
             return (
               <div key={tpl.id} className="rounded-2xl border border-border bg-card/50 p-3">
-                <button onClick={() => setStarting(tpl)} className="flex w-full items-start justify-between gap-2 text-left">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setStarting(tpl)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setStarting(tpl); }}
+                  className="flex w-full cursor-pointer items-start justify-between gap-2 text-left"
+                >
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{tpl.name}</p>
                     <p className="text-xs text-muted-foreground">
@@ -456,7 +452,7 @@ function TemplatesSection() {
                       <Trash2 className="size-4" />
                     </button>
                   </div>
-                </button>
+                </div>
               </div>
             );
           })}
@@ -482,56 +478,103 @@ function TemplatesSection() {
   );
 }
 
-function LibrarySection() {
+/** Today's workout — the most important card on the Gym home. */
+function TodayCard({
+  plan,
+  onCreate,
+  isPremium,
+}: {
+  plan: WorkoutPlan | null;
+  onCreate: () => void;
+  isPremium: boolean;
+}) {
   const { t } = useI18n();
-  const [open, setOpen] = useState(false);
-  const FEATURED: ReadonlyArray<{ id: string; label: string }> = [
-    { id: "barbell-squat", label: "Squat" },
-    { id: "barbell-bench-press", label: "Bench Press" },
-    { id: "deadlift", label: "Deadlift" },
-    { id: "lat-pulldown", label: "Lat Pulldown" },
-    { id: "wide-leg-press", label: "Leg Press" },
-    { id: "overhead-press", label: "Shoulder Press" },
-  ];
-  const preview = FEATURED
-    .map((f) => {
-      const ex = EXERCISES.find((e) => e.id === f.id);
-      return ex ? { ...ex, name: f.label } : null;
-    })
-    .filter((e): e is (typeof EXERCISES)[number] => Boolean(e));
+  const { templates, loaded } = useTemplates();
+  const startWorkout = useStartWorkout();
+  const [preview, setPreview] = useState<WorkoutTemplate | null>(null);
+
+  const planTemplate = (dayName: string): WorkoutTemplate | null => {
+    const d = plan?.days.find((x) => normalizeDay(x.day) === dayName && !x.rest && x.exercises.length > 0);
+    if (!d) return null;
+    return {
+      id: `plan-${d.day}`,
+      name: d.focus || d.day,
+      day: d.day,
+      focus: d.focus,
+      exercises: d.exercises,
+      createdAt: new Date().toISOString(),
+    };
+  };
+
+  const forDay = (dayName: string): WorkoutTemplate | null =>
+    templates.find((tpl) => normalizeDay(tpl.day) === dayName && tpl.exercises.length > 0) ?? planTemplate(dayName);
+
+  const today = todayDayName();
+  const todayTpl = forDay(today);
+
+  let next: { tpl: WorkoutTemplate; when: string } | null = null;
+  if (!todayTpl) {
+    for (let i = 1; i < 8; i++) {
+      const name = DAY_ORDER[(DAY_ORDER.indexOf(today) + i) % 7];
+      const tpl = forDay(name);
+      if (tpl) {
+        next = { tpl, when: i === 1 ? t("fit.tomorrow") : t(`day.${name}`) };
+        break;
+      }
+    }
+  }
+
+  if (!loaded) return null;
+
+  const active = todayTpl ?? next?.tpl ?? null;
+  const sets = active ? active.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0) : 0;
+  const estMin = Math.max(15, Math.min(120, Math.round(sets * 3) || 30));
+
   return (
-    <section className="mt-8">
-      <div className="mb-3 flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-semibold">{t("fit.lib.title")}</h3>
-          <p className="text-xs text-muted-foreground">{t("fit.lib.desc")}</p>
-        </div>
-        <Button size="sm" variant="outline" onClick={() => setOpen(true)}>
-          <BookOpen className="mr-1 size-4" /> {t("fit.lib.all")}
-        </Button>
+    <section className="mt-6">
+      <div className="rounded-3xl border border-border bg-gradient-to-br from-brand/15 to-card p-5">
+        <p className="text-[11px] uppercase tracking-wider text-brand">
+          {todayTpl || !next ? t("fit.today") : `${t("fit.today")} — ${t("fit.rest")}`}
+        </p>
+
+        {active ? (
+          <>
+            <h2 className="mt-1 font-display text-xl font-semibold leading-tight">{active.name}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t("fit.exercises_count", { n: active.exercises.length })} · {t("fit.today.est_min", { n: estMin })}
+              {!todayTpl && next ? ` · ${t("fit.today.next_label", { d: next.when })}` : ""}
+            </p>
+            {plan && (
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{plan.name} · {plan.split}</p>
+            )}
+            <Button className="mt-4 w-full" size="lg" onClick={() => startWorkout(active)}>
+              <Play className="mr-2 size-4 fill-current" /> {t("session.start")}
+            </Button>
+            <button
+              onClick={() => setPreview(active)}
+              className="mt-2 flex w-full items-center justify-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              {t("fit.view_workout")} <ChevronRight className="size-3" />
+            </button>
+          </>
+        ) : (
+          <>
+            <h2 className="mt-1 font-display text-xl font-semibold leading-tight">{t("fit.today.none")}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">{t("fit.empty.desc")}</p>
+            {isPremium && (
+              <Button className="mt-4 w-full" onClick={onCreate}>
+                <Sparkles className="mr-2 size-4" /> {t("fit.empty.cta")}
+              </Button>
+            )}
+          </>
+        )}
       </div>
 
-      <button
-        onClick={() => setOpen(true)}
-        className="grid w-full grid-cols-3 gap-2 rounded-2xl border border-border bg-card/50 p-3 text-left transition hover:bg-card"
-      >
-        {preview.map((ex) => (
-          <div key={ex.id} className="space-y-1">
-            <div className="aspect-square overflow-hidden rounded-xl bg-muted">
-              <img src={ex.image} alt={ex.name} loading="lazy" className="size-full object-cover" />
-            </div>
-            <p className="truncate text-[10px] text-muted-foreground">{ex.name}</p>
-          </div>
-        ))}
-        <div className="col-span-3 mt-1 flex items-center justify-end text-xs text-muted-foreground">
-          {t("fit.lib.count", { n: EXERCISES.length })} <ChevronRight className="ml-1 size-3" />
-        </div>
-      </button>
-
-      <ExerciseLibraryDialog open={open} onClose={() => setOpen(false)} />
+      <SessionStartSheet template={preview} open={!!preview} onClose={() => setPreview(null)} />
     </section>
   );
 }
+
 
 export type ActivityCategory = "Cardio" | "Outdoor" | "Sport" | "Wellness";
 export type ActivityItem = {

@@ -17,6 +17,7 @@ import { useGender } from "@/lib/gender";
 import { useT } from "@/lib/i18n";
 import { useExerciseT } from "@/lib/exercise-i18n";
 import { useGeneratedExerciseFrameIds } from "@/lib/exercise-frames-availability";
+import { AnimatedFrames } from "@/components/workout/animated-frames";
 
 type Props = {
   open: boolean;
@@ -278,33 +279,6 @@ function DetailView({
   );
 }
 
-
-/** Cross-fades through a series of frames to mimic a short looping demo video. */
-function AnimatedFrames({
-  frames, alt, className, intervalMs = 650,
-}: { frames: string[]; alt: string; className?: string; intervalMs?: number }) {
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    if (frames.length < 2) return;
-    const t = window.setInterval(() => setI((v) => (v + 1) % frames.length), intervalMs);
-    return () => window.clearInterval(t);
-  }, [frames, intervalMs]);
-  return (
-    <div className={`relative ${className?.includes("aspect-") ? "" : ""}`}>
-      <div className="relative w-full overflow-hidden">
-        {frames.map((src, idx) => (
-          <img
-            key={src}
-            src={src}
-            alt={alt}
-            loading="lazy"
-            className={`${className ?? ""} ${idx === 0 ? "" : "absolute inset-0"} transition-opacity duration-300 ${idx === i ? "opacity-100" : "opacity-0"}`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function Lightbox({ frames, title, onClose }: { frames: string[]; title: string; onClose: () => void }) {
   const t = useT();

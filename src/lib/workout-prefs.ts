@@ -45,10 +45,14 @@ function readTemplates(): WorkoutTemplate[] {
     return [];
   }
 }
+const TEMPLATES_EVENT = "alyva:templates-changed";
+
 function writeTemplates(v: WorkoutTemplate[]) {
   if (typeof window === "undefined") return;
   localStorage.setItem(TKEY, JSON.stringify(v));
+  window.dispatchEvent(new CustomEvent(TEMPLATES_EVENT));
 }
+
 
 export function useWorkoutPlan() {
   const [stored, setStored] = useState<StoredPlan | null>(null);
@@ -90,7 +94,15 @@ export function useTemplates() {
   useEffect(() => {
     setTemplates(readTemplates());
     setLoaded(true);
+    const sync = () => setTemplates(readTemplates());
+    window.addEventListener(TEMPLATES_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(TEMPLATES_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
   }, []);
+
 
   const upsert = useCallback((t: WorkoutTemplate) => {
     setTemplates((cur) => {

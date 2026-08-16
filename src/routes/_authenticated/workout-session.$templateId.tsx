@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   Pause,
   Play,
@@ -25,6 +26,8 @@ import {
   type FinishedSession,
 } from "@/lib/workout-session";
 import { SessionSummary } from "@/components/workout/session-summary";
+import { ExerciseDetailSheet, ExerciseThumb } from "@/components/workout/exercise-detail-sheet";
+
 
 export const Route = createFileRoute("/_authenticated/workout-session/$templateId")({
   component: SessionPage,
@@ -38,6 +41,8 @@ function SessionPage() {
   const { session, loaded, update, pause, resume, finish, cancel } = useActiveSession();
   const [now, setNow] = useState(() => Date.now());
   const [summary, setSummary] = useState<FinishedSession | null>(null);
+  const [detail, setDetail] = useState<{ name: string } | null>(null);
+
 
   // Rest timer state
   const [restEndAt, setRestEndAt] = useState<number | null>(null);
@@ -189,6 +194,13 @@ function SessionPage() {
   const restProgress = restEndAt && restDuration > 0
     ? Math.min(1, Math.max(0, 1 - restRemaining / restDuration))
     : 0;
+  void restProgress;
+
+  const totalSets = session.exercises.reduce((n, e) => n + e.sets.length, 0);
+  const doneSets = session.exercises.reduce((n, e) => n + e.sets.filter((s) => s.done).length, 0);
+  const progressPct = totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0;
+  const nextExercise = session.exercises.find((e) => e.sets.some((s) => !s.done))?.name ?? null;
+
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-40 pt-6">
@@ -220,6 +232,23 @@ function SessionPage() {
         </Button>
       </div>
 
+      <div className="mt-3">
+        <div className="mb-1 flex items-center justify-between text-[11px] text-muted-foreground">
+          <span>{t("session.progress")}</span>
+          <span className="font-medium tabular-nums">{doneSets}/{totalSets}</span>
+        </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-card">
+          <div className="h-full rounded-full bg-brand transition-[width]" style={{ width: `${progressPct}%` }} />
+        </div>
+        {nextExercise && (
+          <p className="mt-1.5 truncate text-[11px] text-muted-foreground">
+            {t("session.next_up")}: {nextExercise}
+          </p>
+        )}
+      </div>
+
+
+
 
       <div className="mt-5 space-y-5">
         {session.exercises.map((ex, exIdx) => {
@@ -227,17 +256,21 @@ function SessionPage() {
           const open = !!notesOpen[exIdx];
           return (
             <div key={exIdx} className="rounded-2xl border border-border bg-card/60 p-3">
-              <div className="flex items-center gap-3">
-                <div className="size-11 shrink-0 overflow-hidden rounded-lg bg-muted">
-                  {ex.image && <img src={ex.image} alt="" className="size-full object-cover" loading="lazy" />}
-                </div>
+              <button
+                type="button"
+                onClick={() => setDetail({ name: ex.name })}
+                className="flex w-full items-center gap-3 text-left"
+              >
+                <ExerciseThumb name={ex.name} className="size-11" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium">{ex.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {ex.equipment ?? "—"} · {ex.sets.length} {t("fit.tpl.sets_short")}
                   </p>
                 </div>
-              </div>
+                <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+              </button>
+
 
               {prev && (
                 <p className="mt-2 flex items-center gap-1 text-[11px] text-muted-foreground">
@@ -396,6 +429,10 @@ function SessionPage() {
             </Button>
           </div>
         </div>
+      )}
+
+      {detail && (
+        <ExerciseDetailSheet open onClose={() => setDetail(null)} name={detail.name} />
       )}
     </main>
   );
