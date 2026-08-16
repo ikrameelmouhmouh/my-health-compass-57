@@ -259,7 +259,20 @@ function Dashboard({
 
 
 
-  if (!stored || !plan || !wizard) return null;
+  if (!stored || !plan || !wizard) {
+    return (
+      <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
+        <Header />
+        <ViewTabs view={view} setView={setView} />
+        <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
+          <TodayCard plan={plan ?? null} onCreate={onRegenerate} isPremium={isPremium} />
+          <OwnProgramCard />
+          <TemplatesSection />
+          <EmptyState onStart={onRegenerate} isPremium={isPremium} />
+        </PaywallOverlay>
+      </main>
+    );
+  }
 
   const trainingDays = sortedDays.filter((d) => !d.rest).length;
   const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6);
