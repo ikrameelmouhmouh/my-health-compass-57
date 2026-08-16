@@ -674,13 +674,14 @@ function Lightbox({
               src={url0}
               alt={`${exercise.name} frame 1`}
               className="max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
-              style={{ opacity: frameIndex === 0 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+              style={{ visibility: frameIndex === 0 ? "visible" : "hidden" }}
             />
             <img
               src={url1}
               alt={`${exercise.name} frame 2`}
               className="absolute left-0 top-0 max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
-              style={{ opacity: frameIndex === 1 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+              style={{ visibility: frameIndex === 1 ? "visible" : "hidden" }}
+
             />
           </div>
 
