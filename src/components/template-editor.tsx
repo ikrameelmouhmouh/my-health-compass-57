@@ -13,6 +13,8 @@ import { type WorkoutTemplate } from "@/lib/workout-prefs";
 import { CoachSuggestDialog } from "./coach-suggest-dialog";
 import { ExerciseLibraryDialog } from "./exercise-library-dialog";
 import { useT } from "@/lib/i18n";
+import { FOCUS_OPTIONS, formatFocus, parseFocus, type FocusOption } from "@/lib/focus-areas";
+
 
 const DAY_KEYS = ["mon","tue","wed","thu","fri","sat","sun"] as const;
 
