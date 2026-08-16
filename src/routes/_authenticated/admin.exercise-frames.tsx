@@ -273,7 +273,7 @@ function AdminExerciseFramesPage() {
             onClick={() => setFilter(k)}
             className={`rounded-full border px-3 py-1 text-xs transition ${filter === k ? "border-brand bg-brand/15 text-brand" : "border-border text-muted-foreground"}`}
           >
-            {k === "pending" ? "Nog te doen" : k === "review" ? "Te controleren" : k === "bad" ? "Slecht" : "Klaar"}
+            {k === "pending" ? "Nog te doen" : k === "review" ? "Ter controle" : k === "bad" ? "Slecht" : "Klaar"}
             <span className={`ml-1.5 tabular-nums ${filter === k ? "opacity-80" : "opacity-60"}`}>{counts[k]}</span>
           </button>
         ))}

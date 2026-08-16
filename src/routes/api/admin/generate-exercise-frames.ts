@@ -302,6 +302,7 @@ function buildDefaultPrompt(
     "Correct anatomical form and posture for this specific exercise.",
     "CLOTHING STANDARD (mandatory, identical in every frame and every exercise): the mannequin wears ONLY short, loose-fitting plain matte black gym shorts. Relaxed, draping fabric with soft folds and a wide, open straight leg opening that does not cling to the thighs; the hem sits high on the thigh (mid-thigh), clearly well above the knee, so as much of the upper leg as possible stays visible and thigh/hip muscle highlights are not covered by clothing. Never knee-length or long shorts, never tight or compression shorts, never leggings, tights or long pants. No logos, no text, no patterns.",
     `Body orientation: ${hint.bodyOrientation}. This body orientation may not change between frames.`,
+    "DEFAULT VIEWING DIRECTION: for side views the mannequin faces to the RIGHT of the frame (profile pointing right). Never randomly mirror to the left between exercises or between frames. Only deviate from facing right when the camera/body orientation above explicitly requires a front, back or other angle to show the movement clearly.",
     hint.machineView
       ? `Equipment framing: ${hint.machineView}. The machine must be clearly visible, complete, anchored to the floor, and consistently positioned in both frames.`
       : "If the exercise uses equipment, it must be clearly visible and correctly positioned in the frame.",
