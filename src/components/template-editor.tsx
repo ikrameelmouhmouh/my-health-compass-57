@@ -117,9 +117,8 @@ export function TemplateEditor({ open, initial, onClose, onSave }: Props) {
                   {DAYS.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <Input value={focus} readOnly placeholder={t("tpl.focus_ph")} />
+              <FocusPicker selected={selectedFocus} onChange={setSelectedFocus} label={focus} />
             </div>
-            <FocusPicker selected={selectedFocus} onChange={setSelectedFocus} />
           </div>
         )}
 
