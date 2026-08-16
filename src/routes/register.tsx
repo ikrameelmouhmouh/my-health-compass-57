@@ -13,7 +13,7 @@ function safeNext(next: string | undefined): string | null {
 }
 
 export const Route = createFileRoute("/register")({
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: { next?: unknown }) => ({
     next: typeof s.next === "string" ? s.next : undefined,
   }),
   head: () => ({
