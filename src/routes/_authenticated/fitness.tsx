@@ -422,7 +422,13 @@ function TemplatesSection() {
             const dayLabel = tpl.day ? t(`day.${tpl.day}`) : "";
             return (
               <div key={tpl.id} className="rounded-2xl border border-border bg-card/50 p-3">
-                <button onClick={() => setStarting(tpl)} className="flex w-full items-start justify-between gap-2 text-left">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setStarting(tpl)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setStarting(tpl); }}
+                  className="flex w-full cursor-pointer items-start justify-between gap-2 text-left"
+                >
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{tpl.name}</p>
                     <p className="text-xs text-muted-foreground">
@@ -446,7 +452,7 @@ function TemplatesSection() {
                       <Trash2 className="size-4" />
                     </button>
                   </div>
-                </button>
+                </div>
               </div>
             );
           })}
