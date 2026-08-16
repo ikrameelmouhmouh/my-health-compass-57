@@ -214,39 +214,44 @@ function AdminExerciseFramesPage() {
         </div>
       </header>
 
-      <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
-        <div className="h-full bg-brand transition-all" style={{ width: `${(doneCount / Math.max(1, total)) * 100}%` }} />
-      </div>
+      {SHOW_BATCH_TOOLS ? (
+        <>
+          <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div className="h-full bg-brand transition-all" style={{ width: `${(doneCount / Math.max(1, total)) * 100}%` }} />
+          </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Button
-          size="sm"
-          onClick={() => runBatch(pendingIds.slice(0, 20), false)}
-          disabled={running || pendingIds.length === 0}
-        >
-          {running ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
-          Genereer volgende 20
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => runBatch(pendingIds, false)}
-          disabled={running || pendingIds.length === 0}
-        >
-          Alles resterend ({pendingIds.length})
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => resetJobs(visibleIds, "visible")}
-          disabled={running || visibleIds.length === 0}
-        >
-          <RotateCcw className="mr-2 size-4" />
-          {t("admin.frames.reset_visible", { n: visibleIds.length })}
-        </Button>
-      </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              onClick={() => runBatch(pendingIds.slice(0, 20), false)}
+              disabled={running || pendingIds.length === 0}
+            >
+              {running ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+              Genereer volgende 20
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => runBatch(pendingIds, false)}
+              disabled={running || pendingIds.length === 0}
+            >
+              Alles resterend ({pendingIds.length})
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => resetJobs(visibleIds, "visible")}
+              disabled={running || visibleIds.length === 0}
+            >
+              <RotateCcw className="mr-2 size-4" />
+              {t("admin.frames.reset_visible", { n: visibleIds.length })}
+            </Button>
+          </div>
 
-      <p className="mt-2 text-[11px] text-muted-foreground">{t("admin.frames.reset_hint")}</p>
+          <p className="mt-2 text-[11px] text-muted-foreground">{t("admin.frames.reset_hint")}</p>
+        </>
+      ) : null}
+
       {filmMode ? (
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <span className="text-[11px] text-muted-foreground">{t("admin.frames.film_speed_label")}</span>
