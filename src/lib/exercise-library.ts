@@ -835,7 +835,7 @@ export const EXERCISES: LibraryExercise[] = [
   // ===== O =====
   mk("oblique-crunch-bw", "Oblique Crunch", "Bodyweight", ["Core"]),
   mk("oblique-crunch-trx", "Oblique Crunch", "TRX", ["Core"]),
-  mk("ondersteunde-chin-up", "Assisted Chin-Up", "Assisted", ["Back"], ["Biceps"]),
+  mk("ondersteunde-chin-up", "Assisted Chin Up", "Assisted", ["Back"], ["Biceps"]),
   mk("one-arm-bent-over-row-db", "One Arm Bent Over Row", "Dumbbell", ["Back"], ["Biceps"]),
   mk("one-arm-bicep-curl-band", "One Arm Bicep Curl", "Band", ["Biceps"]),
   mk("one-arm-bicep-curl-cable", "One Arm Bicep Curl", "Cable", ["Biceps"]),
@@ -1058,7 +1058,7 @@ export const EXERCISES: LibraryExercise[] = [
   // ===== V =====
   mk("v-sit-up-bw", "V Sit Up", "Bodyweight", ["Core"]),
   // ===== W =====
-  mk("wisselende-golven-rope", "Wisselende golven", "Other", ["Full body"]),
+  mk("wisselende-golven-rope", "Battle Rope Alternating Waves", "Other", ["Full body"]),
   mk("wide-bicep-curl-barbell", "Wide Bicep Curl", "Barbell", ["Biceps"]),
   mk("wide-chest-press-trx", "Wide Chest Press", "TRX", ["Chest"], ["Triceps"]),
   mk("wide-grip-lat-pulldown-machine", "Wide Grip Lat Pulldown", "Machine", ["Back"], ["Biceps"]),
