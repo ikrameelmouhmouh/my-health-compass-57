@@ -489,7 +489,6 @@ function FrameAnimation({
   playing?: boolean;
 }) {
   const [frame, setFrame] = useState<0 | 1>(0);
-  const transitionMs = Math.min(SPEED_MS[speed] * 0.5, 600);
 
   useEffect(() => {
     if (!playing) return;
@@ -501,21 +500,23 @@ function FrameAnimation({
 
   return (
     <div className="relative h-full w-full">
+      {/* Harde cut: exact één frame is zichtbaar, geen crossfade/ghosting. */}
       <img
         src={url0}
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
-        style={{ opacity: frame === 0 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+        style={{ visibility: frame === 0 ? "visible" : "hidden" }}
       />
       <img
         src={url1}
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
-        style={{ opacity: frame === 1 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+        style={{ visibility: frame === 1 ? "visible" : "hidden" }}
       />
     </div>
   );
 }
+
 
 function Lightbox({
   value,
@@ -634,7 +635,6 @@ function Lightbox({
   const v = jobVersion ? `?v=${encodeURIComponent(jobVersion)}` : "";
   const url0 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/0${v}`;
   const url1 = `/api/exercise-frame/${encodeURIComponent(exercise.id)}/1${v}`;
-  const transitionMs = Math.min(SPEED_MS[filmSpeed] * 0.5, 600);
 
   return (
     <Dialog open={!!value} onOpenChange={(open) => !open && onChange(null)}>
@@ -673,13 +673,14 @@ function Lightbox({
               src={url0}
               alt={`${exercise.name} frame 1`}
               className="max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
-              style={{ opacity: frameIndex === 0 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+              style={{ visibility: frameIndex === 0 ? "visible" : "hidden" }}
             />
             <img
               src={url1}
               alt={`${exercise.name} frame 2`}
               className="absolute left-0 top-0 max-h-[85vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
-              style={{ opacity: frameIndex === 1 ? 1 : 0, transition: `opacity ${transitionMs}ms ease-in-out` }}
+              style={{ visibility: frameIndex === 1 ? "visible" : "hidden" }}
+
             />
           </div>
 
