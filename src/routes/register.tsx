@@ -13,9 +13,8 @@ function safeNext(next: string | undefined): string | null {
 }
 
 export const Route = createFileRoute("/register")({
-  validateSearch: (s: { next?: unknown }) => ({
-    next: typeof s.next === "string" ? s.next : undefined,
-  }),
+  validateSearch: (s: { next?: unknown }): { next?: string } =>
+    typeof s.next === "string" ? { next: s.next } : {},
   head: () => ({
     meta: [
       { title: "Create your account — Alyva" },
