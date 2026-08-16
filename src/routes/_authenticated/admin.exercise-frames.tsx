@@ -591,6 +591,10 @@ function Lightbox({
   useEffect(() => {
     if (!value) return;
     const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+        return;
+      }
       if (e.key === "ArrowLeft") {
         setPlaying(false);
         onChange({ exerciseId: value.exerciseId, frameIndex: 0 });
@@ -812,7 +816,7 @@ function FeedbackDialog({
   const skipLabel = isRegen ? "Genereer zonder notitie" : t("admin.frames.feedback.skip");
   return (
     <Dialog open={open} onOpenChange={(v) => !v && !saving && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto flex flex-col">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{desc}</DialogDescription>
@@ -827,7 +831,7 @@ function FeedbackDialog({
           rows={4}
           maxLength={800}
           autoFocus
-          className="w-full resize-none box-border"
+          className="w-full max-w-full resize-none box-border"
         />
 
         <DialogFooter className="flex-col gap-2 sm:flex-row">
