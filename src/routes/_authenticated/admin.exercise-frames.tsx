@@ -15,6 +15,9 @@ import { RefreshCw, CheckCircle2, XCircle, Loader2, Shield, Search, RotateCcw, C
 
 type FilmSpeed = "slow" | "normal" | "fast";
 
+// Zet op true om de batch-generatie tools (voortgangsbalk, genereer-knoppen, reset) weer te tonen
+const SHOW_BATCH_TOOLS = false;
+
 const SPEED_MS: Record<FilmSpeed, number> = {
   slow: 1500,
   normal: 800,
