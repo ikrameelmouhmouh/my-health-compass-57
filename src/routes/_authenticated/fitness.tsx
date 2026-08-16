@@ -305,36 +305,37 @@ function Dashboard({
       )}
 
       <h3 className="mt-6 mb-3 text-sm font-semibold">{t("fit.weekly_split")}</h3>
-      <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {sortedDays.map((d) => {
           const done = completedDays.includes(`${today}:${d.day}`);
           const isToday = d.day === todayName;
+          const isOpen = openDay === d.day;
           return (
-            <div key={d.day} className={`rounded-2xl border p-3 ${isToday ? "border-brand/50 bg-brand/5" : "border-border bg-card/50"}`}>
-              <button onClick={() => !d.rest && setOpenDay(openDay === d.day ? null : d.day)} className="flex w-full items-center justify-between text-left">
+            <div key={d.day} className={`rounded-2xl border p-2 transition ${isToday ? "border-brand/50 bg-brand/5" : "border-border bg-card/50"} ${isOpen ? "col-span-2 sm:col-span-3" : ""}`}>
+              <button onClick={() => !d.rest && setOpenDay(isOpen ? null : d.day)} className="flex w-full items-center justify-between gap-2 text-left">
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground">{t(`day.${d.day}`)}{isToday && ` · ${t("fit.today")}`}</p>
-                  <p className="truncate font-medium">{d.rest ? t("fit.rest") : d.focus}</p>
+                  <p className="text-[10px] text-muted-foreground">{t(`day.${d.day}`)}{isToday && ` · ${t("fit.today")}`}</p>
+                  <p className="truncate text-sm font-medium leading-tight">{d.rest ? t("fit.rest") : d.focus}</p>
                 </div>
                 {!d.rest && (
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleCompleted(d.day); }}
-                    className={`grid size-8 place-items-center rounded-full border-2 ${done ? "border-brand bg-brand text-white" : "border-border"}`}
+                    className={`grid size-7 shrink-0 place-items-center rounded-full border-2 ${done ? "border-brand bg-brand text-white" : "border-border"}`}
                     aria-label={t("fit.mark_complete")}
                   >
-                    {done && <Check className="size-4" />}
+                    {done && <Check className="size-3.5" />}
                   </button>
                 )}
               </button>
-              {openDay === d.day && !d.rest && (
-                <div className="mt-3 space-y-2 border-t border-border pt-3">
+              {isOpen && !d.rest && (
+                <div className="mt-2 space-y-1.5 border-t border-border pt-2">
                   {d.exercises.map((ex, i) => (
-                    <div key={i} className="rounded-lg bg-background/60 p-3">
-                      <p className="font-medium">{ex.name}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
+                    <div key={i} className="rounded-lg bg-background/60 p-2">
+                      <p className="text-sm font-medium">{ex.name}</p>
+                      <p className="text-[11px] text-muted-foreground">
                         {ex.sets} × {ex.reps} · {t("fit.rest_short")} {ex.restSec}s{ex.suggestedWeight ? ` · ${ex.suggestedWeight}` : ""}
                       </p>
-                      {ex.notes && <p className="mt-1 text-xs text-muted-foreground">{ex.notes}</p>}
+                      {ex.notes && <p className="text-[11px] text-muted-foreground">{ex.notes}</p>}
                     </div>
                   ))}
                 </div>
