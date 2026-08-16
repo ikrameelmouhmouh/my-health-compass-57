@@ -182,8 +182,8 @@ function Header() {
       </div>
       <div className="min-w-0">
         <h1 className="truncate font-display text-2xl font-semibold tracking-tight">{t("fit.title")}</h1>
-        <p className="truncate text-[12px] text-muted-foreground">{t("fit.subtitle")}</p>
       </div>
+
     </div>
   );
 }
