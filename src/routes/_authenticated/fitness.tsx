@@ -281,55 +281,22 @@ function Dashboard({
           </button>
         </div>
         <div className="mt-3">
-          <div className="mb-1 flex items-center justify-between text-[11px]">
-            <span className="text-muted-foreground">{t("fit.weekly_progress")}</span>
-            <span className="font-medium">{completedWeek}/{trainingDays} · {progressPct}%</span>
-          </div>
           <Progress value={progressPct} />
         </div>
       </div>
 
-      <h3 className="mt-6 mb-3 text-sm font-semibold">{t("fit.weekly_split")}</h3>
+      <h3 className="mt-6 mb-2 text-sm font-semibold">{t("fit.this_week")}</h3>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {sortedDays.map((d) => {
-          const done = completedDays.includes(`${today}:${d.day}`);
-          const isToday = d.day === todayName;
-          const isOpen = openDay === d.day;
-          return (
-            <div key={d.day} className={`rounded-2xl border p-2 transition ${isToday ? "border-brand/50 bg-brand/5" : "border-border bg-card/50"} ${isOpen ? "col-span-2 sm:col-span-3" : ""}`}>
-              <button onClick={() => !d.rest && setOpenDay(isOpen ? null : d.day)} className="flex w-full items-center justify-between gap-2 text-left">
-                <div className="min-w-0">
-                  <p className="text-[10px] text-muted-foreground">{t(`day.${d.day}`)}{isToday && ` · ${t("fit.today")}`}</p>
-                  <p className="truncate text-sm font-medium leading-tight">{d.rest ? t("fit.rest") : d.focus}</p>
-                </div>
-                {!d.rest && (
-                  <button
-                    onClick={(e) => { e.stopPropagation(); toggleCompleted(d.day); }}
-                    className={`grid size-7 shrink-0 place-items-center rounded-full border-2 ${done ? "border-brand bg-brand text-white" : "border-border"}`}
-                    aria-label={t("fit.mark_complete")}
-                  >
-                    {done && <Check className="size-3.5" />}
-                  </button>
-                )}
-              </button>
-              {isOpen && !d.rest && (
-                <div className="mt-2 space-y-1.5 border-t border-border pt-2">
-                  {d.exercises.map((ex, i) => (
-                    <div key={i} className="rounded-lg bg-background/60 p-2">
-                      <p className="text-sm font-medium">{ex.name}</p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {ex.sets} × {ex.reps} · {t("fit.rest_short")} {ex.restSec}s{ex.suggestedWeight ? ` · ${ex.suggestedWeight}` : ""}
-                      </p>
-                      {ex.notes && <p className="text-[11px] text-muted-foreground">{ex.notes}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <WeekList
+        days={sortedDays}
+        todayName={todayName}
+        completedDays={completedDays}
+        todayKey={today}
+        toggleCompleted={toggleCompleted}
+        openDay={openDay}
+        setOpenDay={setOpenDay}
+      />
+
 
       <TemplatesSection />
 
