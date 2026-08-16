@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
-import { ACTIVITIES } from "@/routes/_authenticated/fitness";
+import { ACTIVITIES } from "@/lib/fitness-activities";
 import {
   computeElapsedSec,
   formatTimer,
