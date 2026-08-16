@@ -275,6 +275,7 @@ function Dashboard({
           </button>
         </div>
         <div className="mt-3">
+          <p className="mb-1 text-[10px] uppercase tracking-wider text-muted-foreground">{t("fit.weekly_progress")}</p>
           <Progress value={progressPct} />
         </div>
       </div>
