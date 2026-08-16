@@ -241,14 +241,8 @@ function Dashboard({
 
   const today = todayLocalKey();
   const todayName = DAY_ORDER[(new Date().getDay() + 6) % 7];
-  const nextWorkout = useMemo(() => {
-    for (let i = 0; i < 7; i++) {
-      const idx = (DAY_ORDER.indexOf(todayName) + i) % 7;
-      const d = sortedDays.find((x) => x.day === DAY_ORDER[idx]);
-      if (d && !d.rest) return { ...d, when: i === 0 ? t("fit.today") : i === 1 ? t("fit.tomorrow") : t(`day.${d.day}`) };
-    }
-    return null;
-  }, [sortedDays, todayName, t]);
+
+
 
   if (!stored || !plan || !wizard) return null;
 
