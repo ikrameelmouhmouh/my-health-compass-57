@@ -355,22 +355,31 @@ function Dashboard({
         </div>
       )}
 
-      <div className="mt-6 space-y-2">
-        {isPremium ? (
-          <Button variant="outline" className="w-full" onClick={onRegenerate}>
-            <Sparkles className="mr-2 size-4" /> {t("fit.regenerate_cta")}
-          </Button>
-        ) : (
-          <Link to="/pricing" className="block">
-            <Button variant="outline" className="w-full">
-              <Lock className="mr-2 size-4" /> {t("wiz.premium.locked")} · {t("wiz.premium.upgrade")}
+      <div className="mt-6 rounded-2xl border border-border bg-card/50 p-3">
+        <div className="flex items-center gap-3">
+          <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand/15 text-brand">
+            <Sparkles className="size-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium">{t("fit.empty.title")}</p>
+            <p className="text-xs text-muted-foreground">{isPremium ? t("fit.regenerate_cta") : t("wiz.premium.locked")}</p>
+          </div>
+          {isPremium ? (
+            <Button size="sm" onClick={onRegenerate}>
+              <Sparkles className="mr-1 size-3.5" /> {t("fit.empty.cta")}
             </Button>
-          </Link>
-        )}
-        <button onClick={() => { if (confirm(t("fit.clear_confirm"))) onClear(); }} className="w-full text-xs text-muted-foreground hover:text-destructive">
-          {t("fit.clear")}
-        </button>
+          ) : (
+            <Link to="/pricing">
+              <Button size="sm" variant="outline">
+                <Lock className="mr-1 size-3.5" /> {t("wiz.premium.upgrade")}
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
+      <button onClick={() => { if (confirm(t("fit.clear_confirm"))) onClear(); }} className="mt-2 w-full text-xs text-muted-foreground hover:text-destructive">
+        {t("fit.clear")}
+      </button>
       </PaywallOverlay>
     </main>
   );
