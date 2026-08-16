@@ -13,9 +13,8 @@ function safeNext(next: string | undefined): string | null {
 }
 
 export const Route = createFileRoute("/register")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    next: typeof s.next === "string" ? s.next : undefined,
-  }),
+  validateSearch: (s: { next?: unknown }): { next?: string } =>
+    typeof s.next === "string" ? { next: s.next } : {},
   head: () => ({
     meta: [
       { title: "Create your account — Alyva" },
@@ -133,7 +132,7 @@ function Register() {
 
       <p className="mt-auto pt-8 text-center text-sm text-muted-foreground">
         {t("auth.register.switch")}{" "}
-        <Link to="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link to="/login" search={{}} className="font-medium text-foreground underline-offset-4 hover:underline">
           {t("auth.sign_in")}
         </Link>
       </p>

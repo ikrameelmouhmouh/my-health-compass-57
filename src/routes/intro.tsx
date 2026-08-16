@@ -17,7 +17,7 @@ function Intro() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (localStorage.getItem("alyva.app_mode") === "edit") {
-      navigate({ to: "/login", replace: true });
+      navigate({ to: "/login", search: {}, replace: true });
     }
   }, [navigate]);
 
@@ -133,7 +133,7 @@ function Intro() {
             <ArrowRight className="size-4 rtl:rotate-180" />
           </button>
           <Link
-            to="/login"
+            to="/login" search={{}}
             onClick={() => { try { localStorage.setItem("vita.intro_done", "1"); } catch {} }}
             className="flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-card text-sm font-medium"
           >
