@@ -805,7 +805,7 @@ export const EXERCISES: LibraryExercise[] = [
   mk("low-row-cable", "Low Row", "Cable", ["Back"], ["Biceps"]),
   mk("low-sled-push", "Low Sled Push", "Other", ["Quads"], ["Glutes"]),
   mk("lunge-bw", "Lunge", "Bodyweight", ["Quads"], ["Glutes"]),
-  mk("lunge-band", "Lunge Band", "Band", ["Quads"], ["Glutes"]),
+  mk("lunge-band", "Lunge", "Band", ["Quads"], ["Glutes"]),
   mk("lunge-barbell", "Lunge", "Barbell", ["Quads"], ["Glutes"]),
   mk("lunge-cable", "Lunge", "Cable", ["Quads"], ["Glutes"]),
   mk("lunge-db", "Lunge", "Dumbbell", ["Quads"], ["Glutes"]),
