@@ -261,7 +261,7 @@ const translations: Translations = {
     "dash.daily_plan": "Daily calorie target",
     "dash.personal": "Personal information",
     "profile.premium.short": "Premium features coming soon.",
-    "nav.home": "Home", "nav.eat": "Food", "nav.workouts": "Workouts", "nav.fasting": "Fasting", "nav.social": "Social", "nav.progress": "Progress",
+    "nav.home": "Home", "nav.eat": "Food", "nav.workouts": "Fitness", "nav.fasting": "Fasting", "nav.social": "Social", "nav.progress": "Progress",
     "progress.tabStats": "Stats", "progress.tabSocial": "Social",
     "cards.nutrition": "Nutrition", "cards.macros": "Macros", "cards.water": "Water", "cards.steps": "Steps", "cards.fasting": "Fasting", "cards.weight": "Weight", "cards.activity": "Activity", "cards.workout": "Today's workout", "cards.goals": "Daily goals",
     "today.customize": "Customize dashboard", "today.settings": "Settings",
