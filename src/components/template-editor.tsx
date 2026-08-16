@@ -281,7 +281,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function FocusPicker({ selected, onChange }: { selected: FocusOption[]; onChange: (s: FocusOption[]) => void }) {
+function FocusPicker({ selected, onChange, label }: { selected: FocusOption[]; onChange: (s: FocusOption[]) => void; label: string }) {
   const t = useT();
   const toggle = (option: FocusOption) => {
     if (selected.includes(option)) {
@@ -294,21 +294,33 @@ function FocusPicker({ selected, onChange }: { selected: FocusOption[]; onChange
   };
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      {FOCUS_OPTIONS.map((option) => {
-        const active = selected.includes(option);
-        return (
-          <button
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        >
+          <span className={label ? "truncate" : "truncate text-muted-foreground"}>
+            {label || t("tpl.focus_ph")}
+          </span>
+          <ChevronDown className="h-4 w-4 opacity-50" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="max-h-72 w-[var(--radix-dropdown-menu-trigger-width)] overflow-y-auto bg-popover">
+        {FOCUS_OPTIONS.map((option) => (
+          <DropdownMenuCheckboxItem
             key={option}
-            type="button"
-            onClick={() => toggle(option)}
-            className={`rounded-xl border px-2 py-2 text-xs font-medium transition ${active ? "border-brand bg-brand text-white" : "border-border bg-background text-foreground hover:bg-muted"}`}
+            checked={selected.includes(option)}
+            onSelect={(e) => {
+              e.preventDefault();
+              toggle(option);
+            }}
           >
             {t(`wiz.focus.${option}`)}
-          </button>
-        );
-      })}
-    </div>
+          </DropdownMenuCheckboxItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
