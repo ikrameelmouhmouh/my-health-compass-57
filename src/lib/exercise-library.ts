@@ -800,7 +800,7 @@ export const EXERCISES: LibraryExercise[] = [
   mk("leg-curl-trx", "Leg Curl", "TRX", ["Hamstrings"]),
   mk("leg-extensions-machine", "Leg Extensions", "Machine", ["Quads"]),
   mk("leg-press-machine", "Leg Press", "Machine", ["Quads"], ["Glutes"]),
-  mk("linksom-rope", "Linksom", "Other", ["Shoulders"], ["Core"]),
+  mk("linksom-rope", "Battle Rope Counterclockwise Circles", "Other", ["Shoulders"], ["Core"]),
   mk("low-bicep-curl-cable", "Low Bicep Curl", "Cable", ["Biceps"]),
   mk("low-row-cable", "Low Row", "Cable", ["Back"], ["Biceps"]),
   mk("low-sled-push", "Low Sled Push", "Other", ["Quads"], ["Glutes"]),
@@ -824,7 +824,7 @@ export const EXERCISES: LibraryExercise[] = [
   mk("military-press-barbell", "Military Press", "Barbell", ["Shoulders"], ["Triceps"]),
   mk("mountain-climbers", "Mountain Climbers", "Bodyweight", ["Core"], ["Shoulders"]),
   mk("muscle-up", "Muscle Up", "Bodyweight", ["Back"], ["Chest", "Triceps"]),
-  mk("mobiliteit", "Mobiliteit", "Bodyweight", ["Core"]),
+  mk("mobiliteit", "Mobility", "Bodyweight", ["Core"]),
 
   // ===== N =====
   mk("narrow-leg-press", "Narrow Leg Press", "Machine", ["Quads"], ["Glutes"]),
@@ -835,7 +835,7 @@ export const EXERCISES: LibraryExercise[] = [
   // ===== O =====
   mk("oblique-crunch-bw", "Oblique Crunch", "Bodyweight", ["Core"]),
   mk("oblique-crunch-trx", "Oblique Crunch", "TRX", ["Core"]),
-  mk("ondersteunde-chin-up", "Ondersteunde Chin Up", "Assisted", ["Back"], ["Biceps"]),
+  mk("ondersteunde-chin-up", "Assisted Chin-Up", "Assisted", ["Back"], ["Biceps"]),
   mk("one-arm-bent-over-row-db", "One Arm Bent Over Row", "Dumbbell", ["Back"], ["Biceps"]),
   mk("one-arm-bicep-curl-band", "One Arm Bicep Curl", "Band", ["Biceps"]),
   mk("one-arm-bicep-curl-cable", "One Arm Bicep Curl", "Cable", ["Biceps"]),
@@ -909,7 +909,7 @@ export const EXERCISES: LibraryExercise[] = [
   mk("raised-leg-plank", "Raised Leg Plank", "Bodyweight", ["Core"]),
   mk("rear-delt-row-barbell", "Rear Delt Row", "Barbell", ["Shoulders"], ["Back"]),
   mk("rear-delt-row-cable", "Rear Delt Row", "Cable", ["Shoulders"], ["Back"]),
-  mk("rechtsom-rope", "Rechtsom", "Other", ["Shoulders"], ["Core"]),
+  mk("rechtsom-rope", "Battle Rope Clockwise Circles", "Other", ["Shoulders"], ["Core"]),
   mk("renegade-row-db", "Renegade Row", "Dumbbell", ["Back"], ["Core"]),
   mk("reverse-bench-press", "Reverse Bench Press", "Barbell", ["Chest"], ["Biceps"]),
   mk("reverse-bent-over-row", "Reverse Bent Over Row", "Barbell", ["Back"], ["Biceps"]),
