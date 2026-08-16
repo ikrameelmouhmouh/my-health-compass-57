@@ -112,9 +112,9 @@ function FitnessPage() {
         <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
           {!stored && !showWizard ? (
             <>
-              <EmptyState onStart={openWizard} isPremium={isPremium} />
               <LibrarySection />
               <TemplatesSection />
+              <EmptyState onStart={openWizard} isPremium={isPremium} />
             </>
           ) : (
             <div className="mt-6">
