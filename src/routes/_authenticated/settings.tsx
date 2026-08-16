@@ -175,7 +175,7 @@ function SettingsPage() {
           className="w-full"
           onClick={async () => {
             await signOut();
-            navigate({ to: "/login", replace: true });
+            navigate({ to: "/login", search: {}, replace: true });
           }}
         >
           <Row icon={LogOut} label={t("set.signout")} destructive />

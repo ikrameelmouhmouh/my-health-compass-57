@@ -30,13 +30,13 @@ function LanguagePicker() {
       if (data.session) { navigate({ to: "/profile", replace: true }); return; }
       // Admin edit-mode: skip welcome/intro/language pre-app screens.
       if (localStorage.getItem("alyva.app_mode") === "edit") {
-        navigate({ to: "/login", replace: true });
+        navigate({ to: "/login", search: {}, replace: true });
         return;
       }
       const introDone = localStorage.getItem("vita.intro_done");
       const langSet = localStorage.getItem("vita.lang");
       const hasAccount = localStorage.getItem("vita.has_account");
-      if (hasAccount) { navigate({ to: "/login", replace: true }); return; }
+      if (hasAccount) { navigate({ to: "/login", search: {}, replace: true }); return; }
       if (langSet && introDone) navigate({ to: "/welcome", replace: true });
       else if (langSet) navigate({ to: "/intro", replace: true });
     })();

@@ -26,10 +26,10 @@ function Welcome() {
       if (cancelled) return;
       if (data.session) { navigate({ to: "/profile", replace: true }); return; }
       if (localStorage.getItem("alyva.app_mode") === "edit") {
-        navigate({ to: "/login", replace: true });
+        navigate({ to: "/login", search: {}, replace: true });
         return;
       }
-      if (localStorage.getItem("vita.has_account")) navigate({ to: "/login", replace: true });
+      if (localStorage.getItem("vita.has_account")) navigate({ to: "/login", search: {}, replace: true });
     })();
     return () => { cancelled = true; };
   }, [navigate]);
@@ -78,14 +78,14 @@ function Welcome() {
 
       <footer className="relative mt-8 space-y-3">
         <Link
-          to="/register"
+          to="/register" search={{}}
           className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-display text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
         >
           {t("welcome.cta.primary")}
           <ArrowRight className="size-4 rtl:rotate-180" />
         </Link>
         <Link
-          to="/login"
+          to="/login" search={{}}
           className="flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-card text-sm font-medium"
         >
           {t("welcome.cta.secondary")}
