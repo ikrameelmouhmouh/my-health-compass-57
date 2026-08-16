@@ -282,6 +282,37 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function FocusPicker({ selected, onChange }: { selected: FocusOption[]; onChange: (s: FocusOption[]) => void }) {
+  const t = useT();
+  const toggle = (option: FocusOption) => {
+    if (selected.includes(option)) {
+      onChange(selected.filter((o) => o !== option));
+    } else if (selected.length < 2) {
+      onChange([...selected, option]);
+    } else {
+      toast.info(t("tpl.focus_max"));
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {FOCUS_OPTIONS.map((option) => {
+        const active = selected.includes(option);
+        return (
+          <button
+            key={option}
+            type="button"
+            onClick={() => toggle(option)}
+            className={`rounded-xl border px-2 py-2 text-xs font-medium transition ${active ? "border-brand bg-brand text-white" : "border-border bg-background text-foreground hover:bg-muted"}`}
+          >
+            {t(`wiz.focus.${option}`)}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function AddOption({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
   return (
     <button
