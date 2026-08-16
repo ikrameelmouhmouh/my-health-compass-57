@@ -824,7 +824,7 @@ function FeedbackDialog({
   const skipLabel = isRegen ? "Genereer zonder notitie" : t("admin.frames.feedback.skip");
   return (
     <Dialog open={open} onOpenChange={(v) => !v && !saving && onClose()}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto flex flex-col">
+      <DialogContent className="flex max-h-[90vh] w-[calc(100vw-2rem)] max-w-2xl flex-col overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{desc}</DialogDescription>
@@ -842,7 +842,7 @@ function FeedbackDialog({
           className="w-full max-w-full resize-none box-border"
         />
 
-        <DialogFooter className="flex-col gap-2 sm:flex-row">
+        <DialogFooter className="flex-col gap-2 md:flex-row md:space-x-2">
           <Button
             variant="ghost"
             onClick={() => {
