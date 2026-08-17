@@ -34,13 +34,13 @@ export function BottomNav() {
               <Link
                 to={it.to}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex flex-col items-center justify-center gap-0.5 py-1.5 ios-press ${
-                  active ? "text-brand" : "text-muted-foreground"
+                className={`relative mx-1 flex flex-col items-center justify-center gap-1 rounded-2xl py-2 ios-press ${
+                  active ? `${it.tint} ${it.fg}` : "text-muted-foreground"
                 }`}
               >
                 <Icon
-                  className="size-[26px]"
-                  strokeWidth={active ? 2.2 : 1.7}
+                  className="size-[22px]"
+                  strokeWidth={active ? 2.1 : 1.6}
                 />
                 <span
                   className={`text-[10px] leading-none tracking-tight ${
@@ -49,17 +49,12 @@ export function BottomNav() {
                 >
                   {label}
                 </span>
-                {active && (
-                  <span
-                    aria-hidden
-                    className="mt-0.5 size-1 rounded-full bg-brand"
-                  />
-                )}
               </Link>
             </li>
           );
         })}
       </ul>
+
     </nav>
   );
 }
