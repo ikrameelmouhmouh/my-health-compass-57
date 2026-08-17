@@ -1,4 +1,5 @@
 import { todayLocalKey, localDayKey } from "@/lib/local-date";
+import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
@@ -288,6 +289,7 @@ function Dashboard({
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
+      <div className="mb-4 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
       <Header />
       <ViewTabs view={view} setView={setView} />
 

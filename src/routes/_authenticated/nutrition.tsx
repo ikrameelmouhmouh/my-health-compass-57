@@ -1,4 +1,5 @@
 import { todayLocalKey, localDayKey } from "@/lib/local-date";
+import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -80,6 +81,7 @@ function Nutrition() {
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
+      <div className="mb-4 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
       <header className="flex items-center justify-between">
         <button
           onClick={() => setDateOffset((d) => d - 1)}
