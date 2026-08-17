@@ -206,7 +206,9 @@ function Header() {
       </div>
 
     </div>
+    </div>
   );
+
 }
 
 function EmptyState({ onStart, isPremium }: { onStart: () => void; isPremium: boolean }) {
