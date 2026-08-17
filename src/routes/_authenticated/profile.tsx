@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Settings, Sliders,
+  Settings,
   Apple, Timer, Dumbbell, LineChart, Droplet, Footprints, Flame,
   Plus, Minus, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
   CheckCircle2, Circle, Scale, ArrowUpRight, Bell, Sparkles, Moon, CalendarDays,
@@ -31,7 +31,6 @@ import { SessionStartSheet } from "@/components/workout/session-start-sheet";
 
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
-import { RetentionSection } from "@/components/retention-section";
 import { NotificationsSheet, useNotifications } from "@/components/notifications-sheet";
 import { usePremium } from "@/hooks/use-premium";
 
@@ -52,7 +51,7 @@ function Profile() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const { prefs, move, toggle: toggleCard, reset } = useDashboardPrefs();
+  const { prefs } = useDashboardPrefs();
   const { day, update, addWater, addMeal } = useDayLog();
   const { log: weights, addEntry: addWeight } = useWeightLog();
   const { workout, save: saveWorkout } = useTodayWorkout();
