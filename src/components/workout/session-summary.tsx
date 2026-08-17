@@ -23,7 +23,7 @@ export function SessionSummary({
         <div className="mx-auto mb-3 text-5xl">🎉</div>
         <h1 className="font-display text-2xl font-semibold leading-tight">{localizeDayNames(session.templateName, t)}</h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          {new Date(session.endedAt).toLocaleString()}
+          {new Date(session.endedAt).toLocaleString(LOCALE_MAP[lang] ?? undefined)}
         </p>
       </div>
 
@@ -93,3 +93,5 @@ function Stat({ icon: Icon, label, value }: { icon: typeof Clock; label: string;
     </div>
   );
 }
+
+const LOCALE_MAP: Record<string, string> = { en: "en-US", nl: "nl-NL", ar: "ar", fr: "fr-FR", de: "de-DE", es: "es-ES" };

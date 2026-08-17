@@ -103,7 +103,7 @@ export function ChatHistoryDrawer({
                       <div className="min-w-0 flex-1">
                         <div className="truncate text-sm font-medium">{th.title}</div>
                         <div className="truncate text-[11px] text-muted-foreground">
-                          {new Date(th.last_message_at).toLocaleDateString()}
+                          {new Date(th.last_message_at).toLocaleDateString(LOCALE_MAP[lang] ?? undefined)}
                         </div>
                       </div>
                     </Link>
@@ -125,3 +125,5 @@ export function ChatHistoryDrawer({
     </Sheet>
   );
 }
+
+const LOCALE_MAP: Record<string, string> = { en: "en-US", nl: "nl-NL", ar: "ar", fr: "fr-FR", de: "de-DE", es: "es-ES" };

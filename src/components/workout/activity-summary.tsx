@@ -34,7 +34,7 @@ export function ActivitySummary({
         <div className="mx-auto mb-3 text-5xl">🎉</div>
         <h1 className="font-display text-2xl font-semibold leading-tight">{session.activityName}</h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          {new Date(session.endedAt).toLocaleString()}
+          {new Date(session.endedAt).toLocaleString(LOCALE_MAP[lang] ?? undefined)}
         </p>
         <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground">
           {t(`act.intensity.${session.intensity}`)}
@@ -100,3 +100,5 @@ function Stat({ icon: Icon, label, value, hint }: { icon: typeof Clock; label: s
     </div>
   );
 }
+
+const LOCALE_MAP: Record<string, string> = { en: "en-US", nl: "nl-NL", ar: "ar", fr: "fr-FR", de: "de-DE", es: "es-ES" };
