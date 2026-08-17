@@ -92,7 +92,7 @@ function FastingPage() {
   }
 
   return (
-    <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
+    <main className="section-fasting mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
       <header className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">

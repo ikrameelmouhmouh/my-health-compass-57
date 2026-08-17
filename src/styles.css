@@ -46,6 +46,8 @@
 
   --color-brand: var(--brand);
   --color-brand-foreground: var(--brand-foreground);
+  --color-alyva: var(--alyva);
+  --color-alyva-foreground: oklch(1 0 0);
   --color-surface: var(--surface);
   --color-hairline: var(--hairline);
 
@@ -97,6 +99,7 @@
 
   --brand: oklch(0.46 0.10 152);
   --brand-foreground: oklch(1 0 0);
+  --alyva: oklch(0.46 0.10 152);
 
   --acc-fitness: oklch(0.52 0.10 152);
   --acc-fitness-soft: oklch(0.95 0.03 152);
@@ -140,6 +143,7 @@
 
   --brand: oklch(0.58 0.11 142);
   --brand-foreground: oklch(1 0 0);
+  --alyva: oklch(0.58 0.11 142);
 
   --acc-fitness: oklch(0.72 0.10 152);
   --acc-fitness-soft: oklch(0.32 0.04 152);
@@ -225,24 +229,12 @@
 
 
 /* ------------------------------------------------------------------
- * Section themes: scope the brand/primary accent per health domain so
- * existing components inherit the right pastel identity without edits.
+ * Section theme: fasting keeps its lavender identity. Other sections
+ * use pastel accents locally and keep Alyva green for primary actions.
  * ------------------------------------------------------------------ */
 .section-fasting {
   --brand: var(--acc-fasting);
   --primary: var(--acc-fasting);
   --ring: var(--acc-fasting);
   --accent: var(--acc-fasting-soft);
-}
-.section-nutrition {
-  --brand: var(--acc-nutrition);
-  --primary: var(--acc-nutrition);
-  --ring: var(--acc-nutrition);
-  --accent: var(--acc-nutrition-soft);
-}
-.section-progress {
-  --brand: var(--acc-weight);
-  --primary: var(--acc-weight);
-  --ring: var(--acc-weight);
-  --accent: var(--acc-weight-soft);
 }
