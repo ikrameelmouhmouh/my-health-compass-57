@@ -6402,8 +6402,35 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
     const stored = localStorage.getItem(STORAGE_KEY) as Language | null;
-    if (stored && translations[stored]) setLangState(stored);
+    if (stored && translations[stored]) {
+      setLangState(stored);
+      return;
+    }
+
+    // If no localStorage override, prefer the authenticated user's profile language.
+    let cancelled = false;
+    (async () => {
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session || cancelled) return;
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("language")
+          .eq("id", session.user.id)
+          .single();
+        if (cancelled) return;
+        const profileLang = profile?.language as Language | null;
+        if (profileLang && translations[profileLang]) {
+          setLangState(profileLang);
+        }
+      } catch {
+        // Ignore auth/profile errors; keep default language.
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
