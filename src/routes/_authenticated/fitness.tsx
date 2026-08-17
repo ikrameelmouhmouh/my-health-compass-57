@@ -386,7 +386,47 @@ function OwnProgramCard() {
   );
 }
 
+/** Planned workouts of the week (own templates that have a weekday). */
+function PlannedWeekSection() {
+  const { t } = useI18n();
+  const { templates, loaded } = useTemplates();
+  if (!loaded) return null;
+
+  const planned = templates
+    .filter((tpl) => !!normalizeDay(tpl.day))
+    .sort((a, b) => DAY_ORDER.indexOf(normalizeDay(a.day)!) - DAY_ORDER.indexOf(normalizeDay(b.day)!));
+  if (planned.length === 0) return null;
+
+  const today = todayDayName();
+
+  return (
+    <section className="mt-6">
+      <h3 className="mb-2 text-sm font-semibold">{t("fit.week.planned")}</h3>
+      <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card/50">
+        {planned.map((tpl) => {
+          const day = normalizeDay(tpl.day)!;
+          const isToday = day === today;
+          return (
+            <div key={tpl.id} className={`flex items-center gap-3 px-3 py-2.5 ${isToday ? "bg-brand/5" : ""}`}>
+              <div className="min-w-0 flex-1">
+                <p className={`truncate text-sm ${isToday ? "font-semibold text-brand" : "font-medium"}`}>
+                  {t(`day.${day}`)}
+                </p>
+                <p className="truncate text-[11px] text-muted-foreground">
+                  {[tpl.name, t("fit.exercises_count", { n: tpl.exercises.length })].filter(Boolean).join(" · ")}
+                </p>
+              </div>
+              <StartWorkoutButton template={tpl} />
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 /** Calm vertical week list: one day per row, one expandable at a time. */
+
 function WeekList({
   days, todayName, completedDays, todayKey, toggleCompleted, openDay, setOpenDay,
 }: {
