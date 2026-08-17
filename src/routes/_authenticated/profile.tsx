@@ -356,14 +356,21 @@ function Profile() {
           </div>
         </div>
 
-        <h1 className="mt-5 text-[30px] font-bold leading-[1.08] tracking-tight text-foreground">
-          {greeting}
-          {p.display_name ? <span className="text-muted-foreground/60">, {p.display_name}</span> : null}
+        <h1 className="mt-5 text-[22px] font-medium leading-[1.15] tracking-tight text-muted-foreground/80">
+          {greeting},
         </h1>
-        <div className="mt-1 flex items-center gap-2">
-          <p className="text-[13px] font-medium text-muted-foreground/80">{formatToday(lang)}</p>
-          {isPremium ? <AlyvaPlusBadge /> : null}
-        </div>
+        {p.display_name ? (
+          <p className="text-[32px] font-bold leading-[1.08] tracking-tight text-foreground">
+            {p.display_name} <span aria-hidden>👋</span>
+          </p>
+        ) : null}
+        <p className="mt-1 text-[13px] font-medium text-muted-foreground/80">{formatToday(lang)}</p>
+        {isPremium ? (
+          <div className="mt-2">
+            <AlyvaPlusBadge />
+          </div>
+        ) : null}
+
       </header>
 
       {!isPremium ? (
@@ -725,23 +732,28 @@ function DayGoalsCard({ nutrition, water, steps, workout, overall, onWater }: {
       <div className="mt-4 flex items-center gap-5">
         <Ring pct={overall} label={`${overall}%`} sub={t("today.goals.overall")} />
         <div className="flex-1 space-y-1">
-          <GoalLink label={t("today.goals.nutrition")} pct={nutrition} to="/nutrition" icon={Apple} iconClass="text-acc-nutrition" />
-          <GoalLink label={t("today.goals.water")} pct={water} onClick={onWater} icon={Droplet} iconClass="text-acc-fitness" />
-          <GoalLink label={t("today.goals.steps")} pct={steps} to="/fitness" icon={Footprints} iconClass="text-acc-fitness" />
-          <GoalLink label={t("today.goals.workout")} pct={workout} to="/fitness" icon={Dumbbell} iconClass="text-acc-fitness" />
+          <GoalLink label={t("today.goals.water")} pct={water} onClick={onWater} icon={Droplet} tone="fitness" />
+          <GoalLink label={t("today.goals.steps")} pct={steps} to="/fitness" icon={Footprints} tone="fitness" />
+          <GoalLink label={t("today.goals.nutrition")} pct={nutrition} to="/nutrition" icon={Apple} tone="nutrition" />
+          <GoalLink label={t("today.goals.workout")} pct={workout} to="/fitness" icon={Dumbbell} tone="fitness" />
+
         </div>
       </div>
     </section>
   );
 }
 
-function GoalLink({ label, pct: p, to, onClick, icon: Icon, iconClass }: {
-  label: string; pct: number; to?: string; onClick?: () => void; icon: typeof Apple; iconClass: string;
+function GoalLink({ label, pct: p, to, onClick, icon: Icon, tone }: {
+  label: string; pct: number; to?: string; onClick?: () => void; icon: typeof Apple; tone: keyof typeof TONES;
 }) {
+  const tn = TONES[tone];
   const inner = (
     <>
-      <Icon className={`size-3.5 ${iconClass}`} />
+      <span className={`grid size-7 shrink-0 place-items-center rounded-full ${tn.bg}`}>
+        <Icon className={`size-3.5 ${tn.fg}`} />
+      </span>
       <span className="w-16 text-[11px] font-semibold">{label}</span>
+
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted/70">
         <div className="h-full rounded-full bg-alyva/60" style={{ width: `${Math.min(100, Math.max(0, p))}%` }} />
       </div>
