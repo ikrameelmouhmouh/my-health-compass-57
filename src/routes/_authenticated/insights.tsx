@@ -16,7 +16,7 @@ import { PaywallOverlay } from "@/components/paywall-gate";
 
 import { SocialPage } from "./social";
 
-export const Route = createFileRoute("/_authenticated/weight")({
+export const Route = createFileRoute("/_authenticated/insights")({
   component: ProgressShell,
 });
 
