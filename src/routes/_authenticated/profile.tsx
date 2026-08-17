@@ -373,7 +373,7 @@ function Profile() {
 
       </header>
 
-      {!isPremium ? (
+      {!isPremium && (
         <Link
           to="/pricing"
           className="ios-press mt-4 flex items-center justify-between rounded-2xl border border-brand/40 bg-brand/10 px-3.5 py-2.5"
