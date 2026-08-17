@@ -10,14 +10,14 @@ function AlyvaLeaf({ className = "" }: { className?: string }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.3"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M19 12c0-4-3-7-7-7S5 8 5 12c0 4 3 7 7 7 2.5 0 4.5-1.5 5.5-3.5" />
-      <path d="M12 5v14" />
-      <path d="M8 10c1.5 1.5 3 1.5 4.5 0" />
+      <path d="M14.5 4c3.5 1.5 6 5 5.5 9.5s-4.5 7-9 6.5c-3.5-.5-6.5-3-7-7C3.5 8 7 4.5 12 4c0 0 1.5-.5 2.5 0z" />
+      <path d="M12 4v11.5" />
+      <path d="M9 9.5c1 1 2.5 1 3.5 0" />
     </svg>
   );
 }
