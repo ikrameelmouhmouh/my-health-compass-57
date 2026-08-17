@@ -356,14 +356,21 @@ function Profile() {
           </div>
         </div>
 
-        <h1 className="mt-5 text-[30px] font-bold leading-[1.08] tracking-tight text-foreground">
-          {greeting}
-          {p.display_name ? <span className="text-muted-foreground/60">, {p.display_name}</span> : null}
+        <h1 className="mt-5 text-[22px] font-medium leading-[1.15] tracking-tight text-muted-foreground/80">
+          {greeting},
         </h1>
-        <div className="mt-1 flex items-center gap-2">
-          <p className="text-[13px] font-medium text-muted-foreground/80">{formatToday(lang)}</p>
-          {isPremium ? <AlyvaPlusBadge /> : null}
-        </div>
+        {p.display_name ? (
+          <p className="text-[32px] font-bold leading-[1.08] tracking-tight text-foreground">
+            {p.display_name} <span aria-hidden>👋</span>
+          </p>
+        ) : null}
+        <p className="mt-1 text-[13px] font-medium text-muted-foreground/80">{formatToday(lang)}</p>
+        {isPremium ? (
+          <div className="mt-2">
+            <AlyvaPlusBadge />
+          </div>
+        ) : null}
+
       </header>
 
       {!isPremium ? (
