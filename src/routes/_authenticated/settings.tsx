@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { AlyvaPlusBadge } from "@/components/brand";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 import { LANGUAGES, useI18n, useT, type Language } from "@/lib/i18n";
@@ -72,12 +73,16 @@ function SettingsPage() {
         <div className="rounded-3xl border border-border bg-card p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1">
-                <span className={`size-1.5 rounded-full ${isPremium ? "bg-brand" : "bg-muted-foreground"}`} />
-                <span className="font-display text-[10px] font-semibold uppercase tracking-wider">
-                  {isPremium ? `Alyva ${t("profile.plus")}` : t("profile.free")}
-                </span>
-              </div>
+              {isPremium ? (
+                <AlyvaPlusBadge />
+              ) : (
+                <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1">
+                  <span className="size-1.5 rounded-full bg-muted-foreground" />
+                  <span className="font-display text-[10px] font-light uppercase tracking-[0.22em]">
+                    {t("profile.free")}
+                  </span>
+                </div>
+              )}
               <p className="mt-3 font-display text-lg font-semibold leading-tight tracking-tight">
                 {isPremium ? t("set.plan.title_pro") : t("set.plan.title_free")}
               </p>
