@@ -461,18 +461,8 @@ function Profile() {
         )}
       </section>
 
-      <div className="mt-5 flex justify-center">
-        <button
-          onClick={() => setOpenSheet("customize")}
-          className="ios-press inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-[11px] font-semibold text-muted-foreground"
-        >
-          <Sliders className="size-3.5" /> {t("today.customize")}
-        </button>
-      </div>
+      {/* Streak / week overview / badges live under Inzichten, not on Start. */}
 
-      <div className="mt-5">
-        <RetentionSection />
-      </div>
 
       <CustomizeSheet
         open={openSheet === "customize"}
