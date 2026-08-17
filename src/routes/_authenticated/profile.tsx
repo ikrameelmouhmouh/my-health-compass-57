@@ -461,13 +461,23 @@ function IconBtn({ children, className, ...props }: React.ButtonHTMLAttributes<H
   );
 }
 
-function CardShell({ title, icon: Icon, children, action, compact }: { title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; compact?: boolean }) {
+const TONES = {
+  brand: { bg: "bg-brand/12", fg: "text-brand" },
+  nutrition: { bg: "bg-acc-nutrition-soft", fg: "text-acc-nutrition" },
+  water: { bg: "bg-acc-water-soft", fg: "text-acc-water" },
+  fasting: { bg: "bg-acc-fasting-soft", fg: "text-acc-fasting" },
+  weight: { bg: "bg-acc-weight-soft", fg: "text-acc-weight" },
+  fitness: { bg: "bg-acc-fitness-soft", fg: "text-acc-fitness" },
+} as const;
+
+function CardShell({ title, icon: Icon, children, action, compact, tone = "brand" }: { title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; compact?: boolean; tone?: keyof typeof TONES }) {
+  const tn = TONES[tone];
   return (
-    <div className={`rounded-3xl border border-border bg-card ${compact ? "p-4" : "p-5"}`}>
+    <div className={`alyva-card ${compact ? "p-4" : "p-5"}`}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <div className={`grid shrink-0 place-items-center rounded-xl bg-brand/12 ${compact ? "size-7" : "size-8"}`}>
-            <Icon className={compact ? "size-3.5 text-brand" : "size-4 text-brand"} />
+          <div className={`grid shrink-0 place-items-center rounded-xl ${tn.bg} ${compact ? "size-7" : "size-8"}`}>
+            <Icon className={`${compact ? "size-3.5" : "size-4"} ${tn.fg}`} />
           </div>
           <h2 className="truncate font-display text-[12px] font-semibold tracking-tight sm:text-[13px]">{title}</h2>
         </div>
@@ -477,6 +487,7 @@ function CardShell({ title, icon: Icon, children, action, compact }: { title: st
     </div>
   );
 }
+
 
 function Bar({ pct: p, className = "" }: { pct: number; className?: string }) {
   return (
@@ -525,7 +536,7 @@ function NutritionCard({ budget, mode, onToggleMode, onLogFood, protein, carbs, 
     ? t("today.cal.over", { n: Math.abs(budget.remaining).toLocaleString() })
     : t("today.cal.left", { n: remaining.toLocaleString() });
   return (
-    <CardShell title={t("today.cal.title")} icon={Apple} action={
+    <CardShell title={t("today.cal.title")} icon={Apple} tone="nutrition" action={
       <div className="flex items-center gap-1.5">
         <button
           onClick={onToggleMode}
@@ -602,7 +613,7 @@ function MacroCard({ protein, carbs, fat }: {
 }) {
   const t = useT();
   return (
-    <CardShell title={t("today.macro.title")} icon={LineChart}>
+    <CardShell title={t("today.macro.title")} icon={LineChart} tone="nutrition">
       <div className="grid grid-cols-3 gap-3">
         <MacroBlock label={t("today.macro.protein")} {...protein} />
         <MacroBlock label={t("today.macro.carbs")} {...carbs} />
@@ -628,7 +639,7 @@ function MacroBlock({ label, have, goal }: { label: string; have: number; goal: 
 function WaterCard({ ml, goal, onAdd, onOpen, compact }: { ml: number; goal: number; onAdd: (n: number) => void; onOpen: () => void; compact?: boolean }) {
   const t = useT();
   return (
-    <CardShell title={t("today.water.title")} icon={Droplet} compact={compact} action={
+    <CardShell title={t("today.water.title")} icon={Droplet} tone="water" compact={compact} action={
       !compact && (
         <button onClick={onOpen} className="text-[11px] font-medium text-muted-foreground hover:text-foreground">{t("today.water.details")}</button>
       )
@@ -660,7 +671,7 @@ function WaterCard({ ml, goal, onAdd, onOpen, compact }: { ml: number; goal: num
 function StepsCard({ steps, goal, compact }: { steps: number; goal: number; onChange?: (s: number) => void; compact?: boolean }) {
   const t = useT();
   return (
-    <CardShell title={t("today.steps.title")} icon={Footprints} compact={compact}>
+    <CardShell title={t("today.steps.title")} icon={Footprints} tone="weight" compact={compact}>
       <div className="flex items-end justify-between gap-2">
         <div className="min-w-0">
           <div className={`font-display font-semibold tabular-nums leading-none ${compact ? "text-2xl" : "text-3xl"}`}>{steps.toLocaleString()}</div>
@@ -687,7 +698,7 @@ function FastingCard({ active, elapsed, remaining, windowHours, pct: p, streak, 
 }) {
   const t = useT();
   return (
-    <CardShell title={t("today.fast.title")} icon={Timer} action={
+    <CardShell title={t("today.fast.title")} icon={Timer} tone="fasting" action={
       <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent-foreground">
         {t("today.fast.streak", { n: streak })}
       </span>
@@ -722,7 +733,7 @@ function WeightCard({ current, delta, goal, progress, onLog, compact }: {
   const t = useT();
   const deltaColor = delta < 0 ? "text-brand" : delta > 0 ? "text-destructive" : "text-muted-foreground";
   return (
-    <CardShell title={t("today.weight.title")} icon={Scale} compact={compact} action={
+    <CardShell title={t("today.weight.title")} icon={Scale} tone="weight" compact={compact} action={
       <button onClick={onLog} className={`inline-flex items-center gap-1 rounded-full bg-brand font-semibold text-brand-foreground ${compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]"}`}>
         <Plus className="size-3" /> {t("today.weight.log")}
       </button>
@@ -770,7 +781,7 @@ function ActivityCard({ burned, activeMin, onChange, compact }: { burned: number
   const goalKcal = 500;
   const p = pct(burned, goalKcal);
   return (
-    <CardShell title={t("today.activity.title")} icon={Flame} compact={compact}>
+    <CardShell title={t("today.activity.title")} icon={Flame} tone="water" compact={compact}>
       {compact ? (
         <>
           <div className="flex items-baseline gap-1">
@@ -832,7 +843,7 @@ function WorkoutCard({ workout, completed, onCreate, onStart, onClear }: {
 }) {
   const t = useT();
   return (
-    <CardShell title={t("today.workout.title")} icon={Dumbbell} action={
+    <CardShell title={t("today.workout.title")} icon={Dumbbell} tone="fitness" action={
       workout ? (
         <button onClick={onClear} className="text-[11px] font-medium text-muted-foreground hover:text-foreground">{t("today.workout.clear")}</button>
       ) : null
@@ -873,7 +884,7 @@ function GoalsCard({ nutrition, water, steps, workout, overall }: {
 }) {
   const t = useT();
   return (
-    <CardShell title={t("today.goals.title")} icon={CheckCircle2}>
+    <CardShell title={t("today.goals.title")} icon={CheckCircle2} tone="fitness">
       <div className="flex items-center gap-5">
         <Ring pct={overall} label={`${overall}%`} sub={t("today.goals.overall")} />
         <div className="flex-1 space-y-2.5">
