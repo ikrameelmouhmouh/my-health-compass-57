@@ -33,6 +33,7 @@ import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
 import { NotificationsSheet, useNotifications } from "@/components/notifications-sheet";
 import { usePremium } from "@/hooks/use-premium";
+import { AlyvaWordmark, AlyvaPlusBadge } from "@/components/brand";
 
 import { useServerFn } from "@tanstack/react-start";
 import { ensureTodayAura } from "@/lib/notifications.functions";
@@ -327,7 +328,7 @@ function Profile() {
     <main className="mx-auto min-h-[100dvh] w-full max-w-md px-4 pb-32 pt-4">
       <header className="px-1">
         <div className="flex items-center justify-between gap-3">
-          <span className="font-display text-[19px] font-extrabold tracking-[0.2em] text-brand">ALYVA</span>
+          <AlyvaWordmark />
           <div className="flex shrink-0 items-center gap-1">
             <IconBtn aria-label={t("notif.open")} onClick={() => setOpenSheet("notifications")} className="relative">
               <Bell className="size-[18px]" strokeWidth={2} />
@@ -359,7 +360,10 @@ function Profile() {
           {greeting}
           {p.display_name ? <span className="text-muted-foreground/60">, {p.display_name}</span> : null}
         </h1>
-        <p className="mt-1 text-[13px] font-medium text-muted-foreground/80">{formatToday(lang)}</p>
+        <div className="mt-1 flex items-center gap-2">
+          <p className="text-[13px] font-medium text-muted-foreground/80">{formatToday(lang)}</p>
+          {isPremium ? <AlyvaPlusBadge /> : null}
+        </div>
       </header>
 
       {!isPremium ? (

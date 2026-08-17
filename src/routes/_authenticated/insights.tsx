@@ -1,4 +1,5 @@
 import { todayLocalKey, localDayKey } from "@/lib/local-date";
+import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import {
@@ -217,6 +218,7 @@ function ProgressPage({ section }: { section: SubTab }) {
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-4 pb-32 pt-8">
+      <div className="mb-4 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
       {/* Header */}
       <div className="flex items-center gap-3">
         <div

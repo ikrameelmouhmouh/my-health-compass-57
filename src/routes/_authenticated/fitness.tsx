@@ -1,4 +1,5 @@
 import { todayLocalKey, localDayKey } from "@/lib/local-date";
+import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
@@ -194,6 +195,8 @@ function ViewTabs({ view, setView }: { view: View; setView: (v: View) => void })
 function Header() {
   const { t } = useI18n();
   return (
+    <div>
+    <div className="mb-4 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
     <div className="flex items-center gap-3">
       <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
         <Dumbbell className="size-6" />
@@ -203,7 +206,9 @@ function Header() {
       </div>
 
     </div>
+    </div>
   );
+
 }
 
 function EmptyState({ onStart, isPremium }: { onStart: () => void; isPremium: boolean }) {

@@ -1,4 +1,5 @@
 import { todayLocalKey, localDayKey } from "@/lib/local-date";
+import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -93,6 +94,7 @@ function FastingPage() {
 
   return (
     <main className="section-fasting mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
+      <div className="mb-4 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
       <header className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
