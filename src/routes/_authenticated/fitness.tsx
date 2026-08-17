@@ -11,6 +11,7 @@ import { TemplateEditor } from "@/components/template-editor";
 import { TemplateSyncDialog } from "@/components/template-sync-dialog";
 import { SessionStartSheet } from "@/components/workout/session-start-sheet";
 import { useStartWorkout } from "@/components/workout/use-start-workout";
+import { StartWorkoutButton } from "@/components/workout/start-workout-button";
 import { useWorkoutPlan, useTemplates, newTemplate, templatesFromPlan, type WorkoutTemplate } from "@/lib/workout-prefs";
 import type { WorkoutPlan } from "@/lib/workout.functions";
 import { useI18n } from "@/lib/i18n";
@@ -129,9 +130,11 @@ function FitnessPage() {
             <>
               <TodayCard plan={null} onCreate={openWizard} isPremium={isPremium} />
               <OwnProgramCard />
+              <PlannedWeekSection />
               <TemplatesSection />
               <EmptyState onStart={openWizard} isPremium={isPremium} />
             </>
+
 
           ) : (
             <div className="mt-6">
@@ -384,7 +387,47 @@ function OwnProgramCard() {
   );
 }
 
+/** Planned workouts of the week (own templates that have a weekday). */
+function PlannedWeekSection() {
+  const { t } = useI18n();
+  const { templates, loaded } = useTemplates();
+  if (!loaded) return null;
+
+  const planned = templates
+    .filter((tpl) => !!normalizeDay(tpl.day))
+    .sort((a, b) => DAY_ORDER.indexOf(normalizeDay(a.day)!) - DAY_ORDER.indexOf(normalizeDay(b.day)!));
+  if (planned.length === 0) return null;
+
+  const today = todayDayName();
+
+  return (
+    <section className="mt-6">
+      <h3 className="mb-2 text-sm font-semibold">{t("fit.week.planned")}</h3>
+      <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card/50">
+        {planned.map((tpl) => {
+          const day = normalizeDay(tpl.day)!;
+          const isToday = day === today;
+          return (
+            <div key={tpl.id} className={`flex items-center gap-3 px-3 py-2.5 ${isToday ? "bg-brand/5" : ""}`}>
+              <div className="min-w-0 flex-1">
+                <p className={`truncate text-sm ${isToday ? "font-semibold text-brand" : "font-medium"}`}>
+                  {t(`day.${day}`)}
+                </p>
+                <p className="truncate text-[11px] text-muted-foreground">
+                  {[tpl.name, t("fit.exercises_count", { n: tpl.exercises.length })].filter(Boolean).join(" · ")}
+                </p>
+              </div>
+              <StartWorkoutButton template={tpl} />
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 /** Calm vertical week list: one day per row, one expandable at a time. */
+
 function WeekList({
   days, todayName, completedDays, todayKey, toggleCompleted, openDay, setOpenDay,
 }: {
@@ -398,7 +441,6 @@ function WeekList({
 }) {
   const { t } = useI18n();
   const { templates } = useTemplates();
-  const startWorkout = useStartWorkout();
 
   const templateFor = (d: WorkoutPlan["days"][number]): WorkoutTemplate => {
     const own = templates.find((tpl) => normalizeDay(tpl.day) === normalizeDay(d.day) && tpl.exercises.length > 0);
@@ -439,6 +481,7 @@ function WeekList({
               </div>
               {!d.rest && (
                 <>
+                  <StartWorkoutButton template={templateFor(d)} className="size-8" />
                   <span
                     role="button"
                     tabIndex={0}
@@ -465,9 +508,7 @@ function WeekList({
                     {ex.notes && <p className="text-[11px] text-muted-foreground">{ex.notes}</p>}
                   </div>
                 ))}
-                <Button size="sm" className="mt-1 w-full" onClick={() => startWorkout(templateFor(d))}>
-                  <Play className="mr-2 size-3.5 fill-current" /> {t("session.start")}
-                </Button>
+                <StartWorkoutButton template={templateFor(d)} variant="full" className="mt-1 w-full" />
               </div>
             )}
           </div>
@@ -544,6 +585,7 @@ function TemplatesSection() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
+                    <StartWorkoutButton template={tpl} className="size-8" />
                     <button
                       onClick={(e) => { e.stopPropagation(); setEditing(tpl); }}
                       className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-background"
