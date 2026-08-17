@@ -389,13 +389,6 @@ function Profile() {
           </div>
           <span className="text-[11px] font-semibold uppercase tracking-wider text-brand">{t("today.upgrade.cta")}</span>
         </Link>
-      ) : (
-        <div className="mt-4 flex items-center px-1">
-          <div className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/15 px-3 py-1">
-            <span className="size-1.5 animate-pulse rounded-full bg-brand" />
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand">Alyva {t("profile.plus")}</span>
-          </div>
-        </div>
       )}
 
       {/* 1. Four primary summary cards */}
