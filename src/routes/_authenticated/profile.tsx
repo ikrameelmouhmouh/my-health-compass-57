@@ -732,10 +732,11 @@ function DayGoalsCard({ nutrition, water, steps, workout, overall, onWater }: {
       <div className="mt-4 flex items-center gap-5">
         <Ring pct={overall} label={`${overall}%`} sub={t("today.goals.overall")} />
         <div className="flex-1 space-y-1">
-          <GoalLink label={t("today.goals.nutrition")} pct={nutrition} to="/nutrition" icon={Apple} iconClass="text-acc-nutrition" />
-          <GoalLink label={t("today.goals.water")} pct={water} onClick={onWater} icon={Droplet} iconClass="text-acc-fitness" />
-          <GoalLink label={t("today.goals.steps")} pct={steps} to="/fitness" icon={Footprints} iconClass="text-acc-fitness" />
-          <GoalLink label={t("today.goals.workout")} pct={workout} to="/fitness" icon={Dumbbell} iconClass="text-acc-fitness" />
+          <GoalLink label={t("today.goals.water")} pct={water} onClick={onWater} icon={Droplet} tone="fitness" />
+          <GoalLink label={t("today.goals.steps")} pct={steps} to="/fitness" icon={Footprints} tone="fitness" />
+          <GoalLink label={t("today.goals.nutrition")} pct={nutrition} to="/nutrition" icon={Apple} tone="nutrition" />
+          <GoalLink label={t("today.goals.workout")} pct={workout} to="/fitness" icon={Dumbbell} tone="fitness" />
+
         </div>
       </div>
     </section>
