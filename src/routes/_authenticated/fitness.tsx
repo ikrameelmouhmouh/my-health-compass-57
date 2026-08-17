@@ -129,9 +129,11 @@ function FitnessPage() {
             <>
               <TodayCard plan={null} onCreate={openWizard} isPremium={isPremium} />
               <OwnProgramCard />
+              <PlannedWeekSection />
               <TemplatesSection />
               <EmptyState onStart={openWizard} isPremium={isPremium} />
             </>
+
 
           ) : (
             <div className="mt-6">
