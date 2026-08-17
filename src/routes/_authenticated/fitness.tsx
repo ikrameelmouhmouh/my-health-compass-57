@@ -19,7 +19,7 @@ import { PaywallOverlay } from "@/components/paywall-gate";
 import { usePremium } from "@/hooks/use-premium";
 import { toast } from "sonner";
 import { useTodayWorkout } from "@/lib/dashboard-prefs";
-import { normalizeDay, todayDayName } from "@/lib/workout-today";
+import { localizeDayNames, normalizeDay, todayDayName } from "@/lib/workout-today";
 import { useSessionHistory } from "@/lib/workout-session";
 import { ACTIVITIES, type ActivityCategory } from "@/lib/fitness-activities";
 
@@ -297,7 +297,7 @@ function Dashboard({
       <div className="mt-4 rounded-2xl border border-border bg-card/50 p-3">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{plan.name}</p>
+            <p className="truncate text-sm font-medium">{localizeDayNames(plan.name, t)}</p>
           </div>
           <button onClick={onRegenerate} className="rounded-full bg-background/60 p-2" aria-label={t("fit.regenerate_aria")}>
             <RotateCcw className="size-4" />
@@ -414,7 +414,7 @@ function PlannedWeekSection() {
                   {t(`day.${day}`)}
                 </p>
                 <p className="truncate text-[11px] text-muted-foreground">
-                  {[tpl.name, t("fit.exercises_count", { n: tpl.exercises.length })].filter(Boolean).join(" · ")}
+                  {[localizeDayNames(tpl.name, t), t("fit.exercises_count", { n: tpl.exercises.length })].filter(Boolean).join(" · ")}
                 </p>
               </div>
               <StartWorkoutButton template={tpl} />
@@ -578,7 +578,7 @@ function TemplatesSection({ headerOnly = false }: { headerOnly?: boolean }) {
                   className="flex w-full cursor-pointer items-start justify-between gap-2 text-left"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{tpl.name}</p>
+                    <p className="truncate font-medium">{localizeDayNames(tpl.name, t)}</p>
                     <p className="text-xs text-muted-foreground">
                       {[dayLabel, tpl.focus].filter(Boolean).join(" · ") || t("fit.tpl.no_day")}{" · "}
                       {tpl.exercises.length} {t("fit.tpl.ex_short")} · {sets} {t("fit.tpl.sets_short")}
@@ -594,7 +594,7 @@ function TemplatesSection({ headerOnly = false }: { headerOnly?: boolean }) {
                       <Pencil className="size-4" />
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); if (confirm(t("fit.tpl.delete_confirm", { name: tpl.name }))) remove(tpl.id); }}
+                      onClick={(e) => { e.stopPropagation(); if (confirm(t("fit.tpl.delete_confirm", { name: localizeDayNames(tpl.name, t) }))) remove(tpl.id); }}
                       className="grid size-8 place-items-center rounded-full text-muted-foreground hover:text-destructive"
                       aria-label={t("fit.tpl.delete")}
                     >
@@ -676,7 +676,7 @@ function TodayCard({
 
         {active ? (
           <>
-            <h2 className="mt-1 font-display text-xl font-semibold leading-tight">{active.name}</h2>
+            <h2 className="mt-1 font-display text-xl font-semibold leading-tight">{localizeDayNames(active.name, t)}</h2>
             <p className="mt-1 text-xs text-muted-foreground">
               {t("fit.exercises_count", { n: active.exercises.length })} · {t("fit.today.est_min", { n: estMin })}
             </p>

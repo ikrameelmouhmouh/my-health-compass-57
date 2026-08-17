@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
+import { localizeDayNames } from "@/lib/workout-today";
 import {
   computeElapsedSec,
   formatDuration,
@@ -217,7 +218,7 @@ function SessionPage() {
             {formatDuration(elapsed)}
           </p>
           <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-            {isPaused ? t("session.paused") : session.templateName}
+            {isPaused ? t("session.paused") : localizeDayNames(session.templateName, t)}
           </p>
         </div>
         <button

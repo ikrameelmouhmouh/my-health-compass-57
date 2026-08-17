@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Play, Pencil, X, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
+import { localizeDayNames } from "@/lib/workout-today";
 import { buildSessionFromTemplate, useActiveSession } from "@/lib/workout-session";
 import { EXERCISES } from "@/lib/exercise-library";
 import type { WorkoutTemplate } from "@/lib/workout-prefs";
@@ -55,7 +56,7 @@ export function SessionStartSheet({
           <div className="mx-auto mb-3 h-1 w-12 rounded-full bg-muted" />
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="font-display text-xl font-semibold leading-tight">{template.name}</h2>
+              <h2 className="font-display text-xl font-semibold leading-tight">{localizeDayNames(template.name, t)}</h2>
               <p className="mt-1 text-xs text-muted-foreground">
                 {t("fit.exercises_count", { n: template.exercises.length })} · {totalSets} {t("fit.tpl.sets_short")} · {t("fit.today.est_min", { n: estMin })}
               </p>
