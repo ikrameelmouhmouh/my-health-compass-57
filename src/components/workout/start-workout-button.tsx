@@ -13,13 +13,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { normalizeDay, todayDayName } from "@/lib/workout-today";
-import type { WorkoutTemplate } from "@/lib/workout-prefs";
-import { useStartWorkout } from "./use-start-workout";
+import { useTemplates, type WorkoutTemplate } from "@/lib/workout-prefs";
+import { SessionStartSheet } from "./session-start-sheet";
+import { TemplateEditor } from "@/components/template-editor";
 
 /**
- * Play/start action for a workout card. Starting a workout scheduled on
- * another weekday only changes today's session — the weekly schedule stays
- * untouched — so we ask for confirmation first.
+ * Play action for a workout card. Never starts immediately: it first opens the
+ * Alyva workout overview sheet where the user can review/edit and then start.
+ * Starting a workout scheduled on another weekday only changes today's session
+ * — the weekly schedule stays untouched — so we confirm first.
  */
 export function StartWorkoutButton({
   template,
@@ -31,8 +33,10 @@ export function StartWorkoutButton({
   className?: string;
 }) {
   const { t } = useI18n();
-  const startWorkout = useStartWorkout();
+  const { upsert } = useTemplates();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [editing, setEditing] = useState<WorkoutTemplate | null>(null);
 
   const today = todayDayName();
   const tplDay = normalizeDay(template.day);
@@ -43,7 +47,7 @@ export function StartWorkoutButton({
   const handle = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (isOtherDay) setConfirmOpen(true);
-    else startWorkout(template);
+    else setPreviewOpen(true);
   };
 
   return (
@@ -75,12 +79,28 @@ export function StartWorkoutButton({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => startWorkout(template)}>
+            <AlertDialogAction onClick={() => setPreviewOpen(true)}>
               {t("session.otherday.confirm", { day: dayLabel })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <SessionStartSheet
+        template={template}
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        onEdit={(tpl) => { setPreviewOpen(false); setEditing(tpl); }}
+      />
+
+      {editing && (
+        <TemplateEditor
+          open
+          initial={editing}
+          onClose={() => setEditing(null)}
+          onSave={(tpl) => { upsert(tpl); setEditing(null); }}
+        />
+      )}
     </>
   );
 }
