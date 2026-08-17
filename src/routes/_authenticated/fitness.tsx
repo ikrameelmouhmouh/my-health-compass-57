@@ -441,7 +441,6 @@ function WeekList({
 }) {
   const { t } = useI18n();
   const { templates } = useTemplates();
-  const startWorkout = useStartWorkout();
 
   const templateFor = (d: WorkoutPlan["days"][number]): WorkoutTemplate => {
     const own = templates.find((tpl) => normalizeDay(tpl.day) === normalizeDay(d.day) && tpl.exercises.length > 0);
