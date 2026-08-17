@@ -16,32 +16,74 @@ import { PaywallOverlay } from "@/components/paywall-gate";
 
 import { SocialPage } from "./social";
 
+type SubTab = "overview" | "progress" | "wellness";
+
 export const Route = createFileRoute("/_authenticated/insights")({
-  component: ProgressShell,
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab:
+      search["tab"] === "progress" || search["tab"] === "wellness" || search["tab"] === "overview"
+        ? (search["tab"] as SubTab)
+        : undefined,
+  }),
+  head: () => ({
+    meta: [
+      { title: "Insights — Alyva" },
+      { name: "description", content: "Your Alyva insights: health overview, body progress and wellbeing in one calm place." },
+      { property: "og:title", content: "Insights — Alyva" },
+      { property: "og:description", content: "Your Alyva insights: health overview, body progress and wellbeing in one calm place." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: InsightsShell,
 });
 
-function ProgressShell() {
+function InsightsShell() {
   const { t } = useI18n();
-  const [tab, setTab] = useState<"stats" | "social">("stats");
+  const search = Route.useSearch();
+  const [tab, setTab] = useState<"insights" | "social">("insights");
+  const [sub, setSub] = useState<SubTab>(search.tab ?? "overview");
+
   return (
     <>
       <div className="mx-auto w-full max-w-md px-4 pt-6">
-        <div className="grid grid-cols-2 gap-1 rounded-2xl border border-border bg-card/50 p-1">
-          <button
-            onClick={() => setTab("stats")}
-            className={`rounded-xl px-3 py-2 text-sm font-medium transition ${tab === "stats" ? "bg-brand text-brand-foreground shadow" : "text-muted-foreground"}`}
-          >
-            {t("progress.tabStats")}
-          </button>
-          <button
-            onClick={() => setTab("social")}
-            className={`rounded-xl px-3 py-2 text-sm font-medium transition ${tab === "social" ? "bg-brand text-brand-foreground shadow" : "text-muted-foreground"}`}
-          >
-            {t("progress.tabSocial")}
-          </button>
+        <div className="grid grid-cols-2 gap-1 rounded-2xl border border-border bg-surface p-1">
+          {(["insights", "social"] as const).map((k) => (
+            <button
+              key={k}
+              onClick={() => setTab(k)}
+              className={`ios-press rounded-xl px-3 py-2 text-[13px] font-semibold tracking-tight transition ${
+                tab === k ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"
+              }`}
+            >
+              {t(k === "insights" ? "ins.tab.insights" : "ins.tab.social")}
+            </button>
+          ))}
         </div>
+
+        {tab === "insights" && (
+          <div className="mt-2 flex gap-1.5 overflow-x-auto scrollbar-none">
+            {(["overview", "progress", "wellness"] as const).map((k) => (
+              <button
+                key={k}
+                onClick={() => setSub(k)}
+                className={`ios-press shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-semibold transition ${
+                  sub === k
+                    ? k === "progress"
+                      ? "tint-weight"
+                      : k === "wellness"
+                        ? "tint-sleep"
+                        : "bg-brand/12 text-brand"
+                    : "border border-border text-muted-foreground"
+                }`}
+              >
+                {t(`ins.sub.${k}`)}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-      {tab === "stats" ? <ProgressPage /> : <SocialPage />}
+      {tab === "social" ? <SocialPage /> : <ProgressPage section={sub} />}
     </>
   );
 }
