@@ -33,6 +33,7 @@ export function BottomNav() {
             <li key={it.to} className="flex-1">
               <Link
                 to={it.to}
+                search={it.to === "/insights" ? { tab: "overview" as const } : undefined}
                 aria-current={active ? "page" : undefined}
                 className={`relative mx-1 flex flex-col items-center justify-center gap-1 rounded-2xl py-2 ios-press ${
                   active ? `${it.tint} ${it.fg}` : "text-muted-foreground"
