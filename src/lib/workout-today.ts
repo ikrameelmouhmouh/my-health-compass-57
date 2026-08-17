@@ -50,3 +50,21 @@ export function useScheduledWorkoutForToday(): Workout | null {
     };
   }, [templates]);
 }
+
+const CANONICAL_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+
+/**
+ * Replaces any hardcoded English weekday inside a free-text string (e.g. legacy
+ * template names like "Full Body & Glute Volume — Monday") with the weekday in
+ * the app's current language, using the central i18n `day.<Day>` keys.
+ */
+export function localizeDayNames(text: string | null | undefined, t: (k: string) => string): string {
+  if (!text) return text ?? "";
+  let out = text;
+  for (const day of CANONICAL_DAYS) {
+    const label = t(`day.${day}`);
+    if (!label || label === `day.${day}`) continue;
+    out = out.replace(new RegExp(`\\b${day}\\b`, "gi"), label);
+  }
+  return out;
+}

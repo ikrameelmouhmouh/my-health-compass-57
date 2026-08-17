@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Clock, Flame, Repeat, Weight, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
+import { localizeDayNames } from "@/lib/workout-today";
 import { formatDuration, previousBestFor, type FinishedSession } from "@/lib/workout-session";
 
 export function SessionSummary({
@@ -11,7 +12,7 @@ export function SessionSummary({
   session: FinishedSession;
   onClose: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   // crude calorie estimate: kcal ≈ (durationMin * 5 MET * 70kg * 3.5) / 200
   const minutes = session.durationSec / 60;
   const kcal = Math.round((minutes * 5 * 70 * 3.5) / 200);
@@ -20,9 +21,9 @@ export function SessionSummary({
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
       <div className="text-center">
         <div className="mx-auto mb-3 text-5xl">🎉</div>
-        <h1 className="font-display text-2xl font-semibold leading-tight">{session.templateName}</h1>
+        <h1 className="font-display text-2xl font-semibold leading-tight">{localizeDayNames(session.templateName, t)}</h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          {new Date(session.endedAt).toLocaleString()}
+          {new Date(session.endedAt).toLocaleString(LOCALE_MAP[lang] ?? undefined)}
         </p>
       </div>
 
@@ -92,3 +93,5 @@ function Stat({ icon: Icon, label, value }: { icon: typeof Clock; label: string;
     </div>
   );
 }
+
+const LOCALE_MAP: Record<string, string> = { en: "en-US", nl: "nl-NL", ar: "ar", fr: "fr-FR", de: "de-DE", es: "es-ES" };

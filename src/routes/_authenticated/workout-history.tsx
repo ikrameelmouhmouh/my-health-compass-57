@@ -5,6 +5,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
+import { localizeDayNames } from "@/lib/workout-today";
 import { formatDuration } from "@/lib/workout-session";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
@@ -101,7 +102,7 @@ function WorkoutHistoryPage() {
               <Dumbbell className="size-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{s.name ?? t("hist.untitled")}</p>
+              <p className="truncate text-sm font-semibold">{s.name ? localizeDayNames(s.name, t) : t("hist.untitled")}</p>
               <p className="text-[11px] text-muted-foreground">
                 {fmtDate(s.started_at, lang)} · <Clock className="-mt-0.5 inline size-3" /> {formatDuration(s.duration_seconds ?? 0)} · {Math.round(Number(s.total_volume_kg ?? 0))} kg
               </p>
@@ -114,7 +115,7 @@ function WorkoutHistoryPage() {
       <Sheet open={!!openId} onOpenChange={(o) => !o && setOpenId(null)}>
         <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>{openSession?.name ?? t("hist.untitled")}</SheetTitle>
+            <SheetTitle>{openSession?.name ? localizeDayNames(openSession.name, t) : t("hist.untitled")}</SheetTitle>
           </SheetHeader>
           {openSession && (
             <div className="mt-2 grid grid-cols-3 gap-2 text-center">
