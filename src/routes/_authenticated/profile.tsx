@@ -130,15 +130,19 @@ function Profile() {
   );
 
   const currentWeight = weights.at(-1)?.kg ?? Number(p?.current_weight_kg ?? 0);
-  const previousWeight = weights.at(-2)?.kg ?? Number(p?.current_weight_kg ?? currentWeight);
-  const weightDelta = +(currentWeight - previousWeight).toFixed(1);
+  // Change vs. the previous logged entry only. With fewer than two entries there
+  // is no measurable change yet — never compare against the onboarding weight.
+  const previousWeight = weights.length >= 2 ? weights.at(-2)!.kg : null;
+  const weightDelta = previousWeight === null ? 0 : +(currentWeight - previousWeight).toFixed(1);
   const goalWeight = Number(p?.goal_weight_kg ?? currentWeight);
-  const startWeight = Number(p?.current_weight_kg ?? currentWeight);
+  // Starting point = first logged weight, else the onboarding weight.
+  const startWeight = weights[0]?.kg ?? Number(p?.current_weight_kg ?? currentWeight);
   const goalProgress = goalWeight !== startWeight
     ? Math.max(0, Math.min(100, ((startWeight - currentWeight) / (startWeight - goalWeight)) * 100))
     : 0;
 
-  const greeting = greetingFor(new Date(), t);
+  // Greeting strings already end with a comma; strip it so the name renders once.
+  const greeting = greetingFor(new Date(), t).replace(/[,،]\s*$/, "");
 
   // Compute Aura insight strings from today's data (same logic as the old card).
   const aura = useMemo(() => {
