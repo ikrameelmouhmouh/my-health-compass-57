@@ -634,18 +634,18 @@ function TrainingSection() {
       </h2>
 
       <div className="alyva-card mt-2 overflow-hidden">
-        <div className="flex gap-3 p-4">
-          <div className="min-w-0 flex-1">
+        <div className="p-4">
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="grid size-7 place-items-center rounded-xl bg-acc-fitness-soft">
                 <Dumbbell className="size-3.5 text-acc-fitness" />
               </span>
-              <span className="text-[12px] font-semibold text-muted-foreground">{t("start.workout.title")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-acc-fitness">{t("start.workout.title")}</span>
             </div>
             {tpl ? (
               <>
-                <h3 className="mt-2 line-clamp-2 font-display text-[17px] font-semibold leading-tight">{tpl.name}</h3>
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <h3 className="mt-2.5 line-clamp-2 font-display text-[19px] font-semibold leading-tight">{tpl.name}</h3>
+                <p className="mt-1 text-[12px] text-muted-foreground">
                   {t("fit.exercises_count", { n: tpl.exercises.length })} · {t("fit.today.est_min", { n: estMin })}
                 </p>
               </>
@@ -653,10 +653,8 @@ function TrainingSection() {
               <p className="mt-2 text-[13px] text-muted-foreground">{t("start.workout.none")}</p>
             )}
           </div>
-          {tpl && (
-            <ExerciseThumb libraryId={lib?.id} name={tpl.exercises[0]?.name ?? tpl.name} className="size-20 shrink-0 rounded-2xl" />
-          )}
         </div>
+
 
         <div className="flex gap-2 px-4 pb-4">
           {tpl ? (
