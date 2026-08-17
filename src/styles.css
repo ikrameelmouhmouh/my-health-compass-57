@@ -198,47 +198,28 @@
 }
 
 /* ------------------------------------------------------------------
- * Home surface — scoped Forest & Moss palette + Space Grotesk / DM Sans
- * Applied only where the .home-forest wrapper class is present, so it
- * doesn't affect the rest of the app.
+ * Alyva 2026 surface language: large rounded cards, hairline border,
+ * soft shadow, generous whitespace.
  * ------------------------------------------------------------------ */
-.home-forest {
-  --background: oklch(0.28 0.05 148);          /* #1a3c2a deep forest */
-  --foreground: oklch(1 0 0);
-  --surface: oklch(0.35 0.06 148);
-  --card: oklch(0.36 0.06 148);                /* #2d5a3d moss */
-  --card-foreground: oklch(1 0 0);
-  --popover: oklch(0.36 0.06 148);
-  --popover-foreground: oklch(1 0 0);
-
-  --primary: oklch(0.83 0.09 138);             /* #a0c49d sage highlight */
-  --primary-foreground: oklch(0.28 0.05 148);
-
-  --secondary: oklch(1 0 0 / 8%);
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(1 0 0 / 6%);
-  --muted-foreground: oklch(0.83 0.09 138);    /* #a0c49d */
-  --accent: oklch(1 0 0 / 10%);
-  --accent-foreground: oklch(1 0 0);
-
-  --border: oklch(1 0 0 / 10%);
-  --hairline: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.83 0.09 138);
-
-  --brand: oklch(0.83 0.09 138);
-  --brand-foreground: oklch(0.28 0.05 148);
-
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: "DM Sans", var(--font-sans);
+@utility alyva-card {
+  border-radius: var(--radius);
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
 }
 
-.home-forest .font-display,
-.home-forest h1,
-.home-forest h2,
-.home-forest h3 {
-  font-family: "Space Grotesk", var(--font-display);
-  letter-spacing: -0.02em;
+@utility alyva-tile {
+  border-radius: calc(var(--radius) - 4px);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card);
+  box-shadow: var(--shadow-card);
 }
+
+/* Pastel section tints */
+@utility tint-fitness { background-color: var(--acc-fitness-soft); color: var(--acc-fitness); }
+@utility tint-water { background-color: var(--acc-water-soft); color: var(--acc-water); }
+@utility tint-fasting { background-color: var(--acc-fasting-soft); color: var(--acc-fasting); }
+@utility tint-weight { background-color: var(--acc-weight-soft); color: var(--acc-weight); }
+@utility tint-nutrition { background-color: var(--acc-nutrition-soft); color: var(--acc-nutrition); }
+
 
