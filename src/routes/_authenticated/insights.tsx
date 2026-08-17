@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
+import { RetentionSection } from "@/components/retention-section";
 
 import { SocialPage } from "./social";
 
@@ -371,6 +372,8 @@ function ProgressPage({ section }: { section: SubTab }) {
 
       {section === "overview" && (
       <div className="mt-4 grid gap-3">
+        {/* Streak, weekoverzicht en badges horen bij Inzichten, niet op Start. */}
+        <RetentionSection />
         {/* Fasting stats */}
         <Card title={t("prog.card.fasting")} icon={Timer}>
           <Bars values={last7Fast.values} labels={last7Fast.labels} />
