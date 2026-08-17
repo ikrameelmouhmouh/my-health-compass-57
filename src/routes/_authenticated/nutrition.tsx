@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
-  Camera, CalendarDays,
+  Camera, CalendarDays, Sparkles,
 } from "lucide-react";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { NutritionSpeedDial } from "@/components/nutrition-speed-dial";
