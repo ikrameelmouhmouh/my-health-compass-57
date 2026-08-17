@@ -737,7 +737,7 @@ function GoalLink({ label, pct: p, to, onClick, tone, done }: {
   const tn = TONES[tone];
   const inner = (
     <>
-      {done ? <CheckCircle2 className={`size-3.5 ${tn.fg}`} /> : <Circle className="size-3.5 text-muted-foreground" />}
+      {done ? <CheckCircle2 className={`size-3.5 ${tn.fg}`} /> : <Circle className={`size-3.5 ${tn.fg} opacity-45`} />}
       <span className="w-16 text-[11px] font-semibold">{label}</span>
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted/70">
         <div className={`h-full rounded-full ${tn.bar}`} style={{ width: `${Math.min(100, Math.max(0, p))}%` }} />
@@ -1168,7 +1168,7 @@ function GoalsCard({ nutrition, water, steps, workout, overall }: {
 function GoalRow({ label, pct: p, done }: { label: string; pct: number; done?: boolean }) {
   return (
     <div className="flex items-center gap-3">
-      {done ? <CheckCircle2 className="size-3.5 text-brand" /> : <Circle className="size-3.5 text-muted-foreground" />}
+      {done ? <CheckCircle2 className="size-3.5 text-brand" /> : <Circle className={`size-3.5 ${tn.fg} opacity-45`} />}
       <span className="w-16 text-[11px] font-semibold">{label}</span>
       <Bar pct={p} />
       <span className="w-9 text-right text-[10px] font-semibold tabular-nums text-muted-foreground">{Math.round(Math.min(100, p))}%</span>
