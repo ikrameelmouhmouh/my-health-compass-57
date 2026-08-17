@@ -3,12 +3,13 @@ import { Home, UtensilsCrossed, Dumbbell, TrendingUp, Timer } from "lucide-react
 import { useT } from "@/lib/i18n";
 
 const items = [
-  { to: "/profile", key: "nav.home", icon: Home },
-  { to: "/nutrition", key: "nav.eat", icon: UtensilsCrossed },
-  { to: "/fasting", key: "nav.fasting", icon: Timer },
-  { to: "/fitness", key: "nav.workouts", icon: Dumbbell },
-  { to: "/weight", key: "nav.progress", icon: TrendingUp },
+  { to: "/profile", key: "nav.home", icon: Home, tint: "bg-acc-fitness-soft", fg: "text-acc-fitness" },
+  { to: "/nutrition", key: "nav.eat", icon: UtensilsCrossed, tint: "bg-acc-nutrition-soft", fg: "text-acc-nutrition" },
+  { to: "/fasting", key: "nav.fasting", icon: Timer, tint: "bg-acc-fasting-soft", fg: "text-acc-fasting" },
+  { to: "/fitness", key: "nav.workouts", icon: Dumbbell, tint: "bg-acc-fitness-soft", fg: "text-acc-fitness" },
+  { to: "/weight", key: "nav.progress", icon: TrendingUp, tint: "bg-acc-weight-soft", fg: "text-acc-weight" },
 ] as const;
+
 
 /**
  * iOS 18 style bottom tab bar — flat, frosted, hairline top border,
