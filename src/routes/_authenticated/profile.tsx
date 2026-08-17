@@ -28,7 +28,7 @@ import { useTemplates } from "@/lib/workout-prefs";
 import { useSessionHistory } from "@/lib/workout-session";
 import { StartWorkoutButton } from "@/components/workout/start-workout-button";
 import { SessionStartSheet } from "@/components/workout/session-start-sheet";
-import { ExerciseThumb, resolveLibraryExercise } from "@/components/workout/exercise-detail-sheet";
+
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
 import { RetentionSection } from "@/components/retention-section";
@@ -615,7 +615,6 @@ function TrainingSection() {
 
   const totalSets = tpl?.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0) ?? 0;
   const estMin = Math.max(15, Math.min(120, Math.round(totalSets * 3) || 30));
-  const lib = tpl?.exercises[0] ? resolveLibraryExercise(undefined, tpl.exercises[0].name) : null;
 
   const planned = templates.filter((x) => !!x.day).length;
   const weekStart = useMemo(() => {
