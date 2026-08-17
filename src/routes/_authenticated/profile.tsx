@@ -8,7 +8,7 @@ import {
   Settings, Sliders,
   Apple, Timer, Dumbbell, LineChart, Droplet, Footprints, Flame,
   Plus, Minus, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
-  CheckCircle2, Circle, Scale, ArrowUpRight, Bell,
+  CheckCircle2, Circle, Scale, ArrowUpRight, Bell, Sparkles, Moon, CalendarDays,
 } from "lucide-react";
 import { useT, useI18n } from "@/lib/i18n";
 import {
@@ -23,7 +23,12 @@ import {
   useCaloriePrefs, calcCalorieBudget,
   type DashCardId, type CalorieBudget, type CalorieMode,
 } from "@/lib/dashboard-prefs";
-import { useScheduledWorkoutForToday } from "@/lib/workout-today";
+import { useScheduledWorkoutForToday, findTodaysTemplate } from "@/lib/workout-today";
+import { useTemplates } from "@/lib/workout-prefs";
+import { useSessionHistory } from "@/lib/workout-session";
+import { StartWorkoutButton } from "@/components/workout/start-workout-button";
+import { SessionStartSheet } from "@/components/workout/session-start-sheet";
+import { ExerciseThumb, resolveLibraryExercise } from "@/components/workout/exercise-detail-sheet";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
 import { RetentionSection } from "@/components/retention-section";
@@ -176,7 +181,9 @@ function Profile() {
     });
   }, [isLoading, p?.onboarding_completed, aura.title, aura.body, aura.advice, ensureAuraFn]);
 
-  const visibleCards = prefs.order.filter((c) => !prefs.hidden.includes(c));
+  // Cards owned by the fixed Start composition (primary cards, training, day goals).
+  const COMPOSED: DashCardId[] = ["nutrition", "fasting", "steps", "weight", "workout", "goals"];
+  const visibleCards = prefs.order.filter((c) => !prefs.hidden.includes(c) && !COMPOSED.includes(c));
 
   if (isLoading || !p?.onboarding_completed) {
     return (
@@ -385,7 +392,7 @@ function Profile() {
           label={t("today.cal.title")}
           value={Math.max(0, Math.round(budget.remaining)).toLocaleString()}
           unit="kcal"
-          sub={t("today.cal.of_goal", { n: budget.allowance.toLocaleString() })}
+          sub={`${t("today.cal.goal")} ${budget.allowance.toLocaleString()}`}
           pct={Math.min(100, nutritionPct)}
           to="/nutrition"
         />
@@ -519,12 +526,13 @@ function IconBtn({ children, className, ...props }: React.ButtonHTMLAttributes<H
 }
 
 const TONES = {
-  brand: { bg: "bg-brand/12", fg: "text-brand" },
-  nutrition: { bg: "bg-acc-nutrition-soft", fg: "text-acc-nutrition" },
-  water: { bg: "bg-acc-water-soft", fg: "text-acc-water" },
-  fasting: { bg: "bg-acc-fasting-soft", fg: "text-acc-fasting" },
-  weight: { bg: "bg-acc-weight-soft", fg: "text-acc-weight" },
-  fitness: { bg: "bg-acc-fitness-soft", fg: "text-acc-fitness" },
+  brand: { bg: "bg-brand/12", fg: "text-brand", bar: "bg-brand" },
+  nutrition: { bg: "bg-acc-nutrition-soft", fg: "text-acc-nutrition", bar: "bg-acc-nutrition" },
+  water: { bg: "bg-acc-water-soft", fg: "text-acc-water", bar: "bg-acc-water" },
+  fasting: { bg: "bg-acc-fasting-soft", fg: "text-acc-fasting", bar: "bg-acc-fasting" },
+  weight: { bg: "bg-acc-weight-soft", fg: "text-acc-weight", bar: "bg-acc-weight" },
+  fitness: { bg: "bg-acc-fitness-soft", fg: "text-acc-fitness", bar: "bg-acc-fitness" },
+  sleep: { bg: "bg-acc-sleep-soft", fg: "text-acc-sleep", bar: "bg-acc-sleep" },
 } as const;
 
 function CardShell({ title, icon: Icon, children, action, compact, tone = "brand" }: { title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; compact?: boolean; tone?: keyof typeof TONES }) {
@@ -575,6 +583,223 @@ function Ring({ pct: p, size = 76, label, sub }: { pct: number; size?: number; l
         {sub && <div className="mt-0.5 text-[9px] font-medium uppercase tracking-wider text-muted-foreground">{sub}</div>}
       </div>
     </div>
+  );
+}
+
+
+/* --------------------------- Start composition --------------------------- */
+function PrimaryCard({ tone, icon: Icon, label, value, unit, sub, pct: p, to, search }: {
+  tone: keyof typeof TONES; icon: React.ElementType; label: string; value: string; unit?: string;
+  sub: string; pct: number; to: string; search?: Record<string, string>;
+}) {
+  const tn = TONES[tone];
+  return (
+    <Link
+      to={to as never}
+      search={search as never}
+      className="ios-press alyva-card flex flex-col justify-between p-4"
+    >
+      <div className="flex items-center gap-2">
+        <span className={`grid size-7 shrink-0 place-items-center rounded-xl ${tn.bg}`}>
+          <Icon className={`size-3.5 ${tn.fg}`} />
+        </span>
+        <span className="truncate text-[12px] font-semibold tracking-tight text-muted-foreground">{label}</span>
+      </div>
+      <div className="mt-3 flex items-baseline gap-1">
+        <span className="font-display text-[26px] font-semibold leading-none tabular-nums">{value}</span>
+        {unit && <span className="text-[12px] font-medium text-muted-foreground">{unit}</span>}
+      </div>
+      <p className="mt-1 truncate text-[11px] text-muted-foreground">{sub}</p>
+      <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted/70">
+        <div className={`h-full rounded-full ${tn.bar}`} style={{ width: `${Math.max(0, Math.min(100, p))}%` }} />
+      </div>
+    </Link>
+  );
+}
+
+function TrainingSection() {
+  const t = useT();
+  const { templates } = useTemplates();
+  const { history } = useSessionHistory();
+  const tpl = useMemo(() => findTodaysTemplate(templates), [templates]);
+  const [preview, setPreview] = useState(false);
+
+  const totalSets = tpl?.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0) ?? 0;
+  const estMin = Math.max(15, Math.min(120, Math.round(totalSets * 3) || 30));
+  const lib = tpl?.exercises[0] ? resolveLibraryExercise(undefined, tpl.exercises[0].name) : null;
+
+  const planned = templates.filter((x) => !!x.day).length;
+  const weekStart = useMemo(() => {
+    const d = new Date();
+    const diff = (d.getDay() + 6) % 7;
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - diff);
+    return d.getTime();
+  }, []);
+  const doneThisWeek = history.filter((h) => new Date(h.finishedAt ?? h.startedAt).getTime() >= weekStart).length;
+
+  return (
+    <section className="mt-6">
+      <h2 className="px-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        {t("start.section.training")}
+      </h2>
+
+      <div className="alyva-card mt-2 overflow-hidden">
+        <div className="flex gap-3 p-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="grid size-7 place-items-center rounded-xl bg-acc-fitness-soft">
+                <Dumbbell className="size-3.5 text-acc-fitness" />
+              </span>
+              <span className="text-[12px] font-semibold text-muted-foreground">{t("start.workout.title")}</span>
+            </div>
+            {tpl ? (
+              <>
+                <h3 className="mt-2 line-clamp-2 font-display text-[17px] font-semibold leading-tight">{tpl.name}</h3>
+                <p className="mt-1 text-[11px] text-muted-foreground">
+                  {t("fit.exercises_count", { n: tpl.exercises.length })} · {t("fit.today.est_min", { n: estMin })}
+                </p>
+              </>
+            ) : (
+              <p className="mt-2 text-[13px] text-muted-foreground">{t("start.workout.none")}</p>
+            )}
+          </div>
+          {tpl && (
+            <ExerciseThumb libraryId={lib?.id} name={tpl.exercises[0]?.name ?? tpl.name} className="size-20 shrink-0 rounded-2xl" />
+          )}
+        </div>
+
+        <div className="flex gap-2 px-4 pb-4">
+          {tpl ? (
+            <>
+              <StartWorkoutButton template={tpl} variant="full" className="h-10 flex-1 rounded-xl" />
+              <button
+                onClick={() => setPreview(true)}
+                className="ios-press h-10 flex-1 rounded-xl border border-border text-[13px] font-semibold"
+              >
+                {t("start.workout.view")}
+              </button>
+            </>
+          ) : (
+            <Link to="/fitness" className="ios-press grid h-10 w-full place-items-center rounded-xl border border-border text-[13px] font-semibold">
+              {t("start.workout.plan")}
+            </Link>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        <Link to="/fitness" className="ios-press alyva-card p-4">
+          <span className="grid size-7 place-items-center rounded-xl bg-acc-fitness-soft">
+            <CalendarDays className="size-3.5 text-acc-fitness" />
+          </span>
+          <p className="mt-2.5 text-[12px] font-semibold leading-tight">{t("start.plan.title")}</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            {planned > 0 ? t("start.plan.week", { done: doneThisWeek, total: planned }) : t("start.plan.empty")}
+          </p>
+          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted/70">
+            <div className="h-full rounded-full bg-acc-fitness" style={{ width: `${planned ? Math.min(100, (doneThisWeek / planned) * 100) : 0}%` }} />
+          </div>
+        </Link>
+
+        <Link to="/ai-coach" className="ios-press alyva-card p-4">
+          <span className="grid size-7 place-items-center rounded-xl bg-alyva/15">
+            <Sparkles className="size-3.5 text-alyva" />
+          </span>
+          <p className="mt-2.5 text-[12px] font-semibold leading-tight">{t("start.coach.title")}</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">{t("start.coach.sub")}</p>
+          <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-alyva">
+            {t("nav.insights") ? null : null}
+            <ArrowUpRight className="size-3.5" />
+          </span>
+        </Link>
+      </div>
+
+      <SessionStartSheet template={tpl} open={preview} onClose={() => setPreview(false)} />
+    </section>
+  );
+}
+
+function DayGoalsCard({ nutrition, water, steps, workout, overall, onWater }: {
+  nutrition: number; water: number; steps: number; workout: number; overall: number; onWater: () => void;
+}) {
+  const t = useT();
+  return (
+    <section className="alyva-card mt-6 p-5">
+      <div className="flex items-center gap-2">
+        <span className="grid size-7 place-items-center rounded-xl bg-brand/12">
+          <CheckCircle2 className="size-3.5 text-brand" />
+        </span>
+        <h2 className="text-[12px] font-semibold tracking-tight">{t("today.goals.title")}</h2>
+      </div>
+
+      <div className="mt-4 flex items-center gap-5">
+        <Ring pct={overall} label={`${overall}%`} sub={t("today.goals.overall")} />
+        <div className="flex-1 space-y-1">
+          <GoalLink label={t("today.goals.nutrition")} pct={nutrition} to="/nutrition" tone="nutrition" />
+          <GoalLink label={t("today.goals.water")} pct={water} onClick={onWater} tone="water" />
+          <GoalLink label={t("today.goals.steps")} pct={steps} to="/fitness" tone="fitness" />
+          <GoalLink label={t("today.goals.workout")} pct={workout} to="/fitness" tone="fitness" done={workout >= 100} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GoalLink({ label, pct: p, to, onClick, tone, done }: {
+  label: string; pct: number; to?: string; onClick?: () => void; tone: keyof typeof TONES; done?: boolean;
+}) {
+  const tn = TONES[tone];
+  const inner = (
+    <>
+      {done ? <CheckCircle2 className={`size-3.5 ${tn.fg}`} /> : <Circle className="size-3.5 text-muted-foreground" />}
+      <span className="w-16 text-[11px] font-semibold">{label}</span>
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted/70">
+        <div className={`h-full rounded-full ${tn.bar}`} style={{ width: `${Math.min(100, Math.max(0, p))}%` }} />
+      </div>
+      <span className="w-9 text-right text-[10px] font-semibold tabular-nums text-muted-foreground">
+        {Math.round(Math.min(100, p))}%
+      </span>
+    </>
+  );
+  const cls = "ios-press flex w-full items-center gap-3 rounded-xl px-1 py-1.5 text-left hover:bg-muted/40";
+  if (to) return <Link to={to as never} className={cls}>{inner}</Link>;
+  return <button type="button" onClick={onClick} className={cls}>{inner}</button>;
+}
+
+function QuickActions() {
+  const t = useT();
+  const items = [
+    { key: "fasting", label: t("today.fast.title"), icon: Timer, tone: "fasting" as const, to: "/fasting", search: undefined },
+    { key: "food", label: t("nav.eat"), icon: Apple, tone: "nutrition" as const, to: "/nutrition", search: undefined },
+    { key: "activity", label: t("start.quick.activity"), icon: Flame, tone: "fitness" as const, to: "/fitness", search: undefined },
+    { key: "sleep", label: t("start.quick.sleep"), icon: Moon, tone: "sleep" as const, to: "/insights", search: { tab: "wellness" as const } },
+  ];
+  return (
+    <section className="mt-6">
+      <h2 className="px-1 text-[12px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        {t("start.quick.title")}
+      </h2>
+      <div className="mt-2 grid grid-cols-4 gap-2">
+        {items.map((it) => {
+          const tn = TONES[it.tone];
+          const Icon = it.icon;
+          return (
+            <Link
+              key={it.key}
+              to={it.to as never}
+              search={it.search as never}
+              className="ios-press alyva-card flex flex-col items-center gap-2 px-1.5 py-3.5"
+            >
+              <span className={`grid size-9 place-items-center rounded-2xl ${tn.bg}`}>
+                <Icon className={`size-4 ${tn.fg}`} />
+              </span>
+              <span className="truncate text-[11px] font-semibold">{it.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
