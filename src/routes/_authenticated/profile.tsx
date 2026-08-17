@@ -642,7 +642,7 @@ function TrainingSection() {
             </div>
             {tpl ? (
               <>
-                <h3 className="mt-2.5 line-clamp-2 font-display text-[19px] font-semibold leading-tight">{tpl.name}</h3>
+                <h3 className="mt-2.5 line-clamp-2 font-display text-[19px] font-semibold leading-tight">{localizeDayNames(tpl.name, t)}</h3>
                 <p className="mt-1 text-[12px] text-muted-foreground">
                   {t("fit.exercises_count", { n: tpl.exercises.length })} · {t("fit.today.est_min", { n: estMin })}
                 </p>
