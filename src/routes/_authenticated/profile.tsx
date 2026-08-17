@@ -636,7 +636,7 @@ function TrainingSection() {
     d.setDate(d.getDate() - diff);
     return d.getTime();
   }, []);
-  const doneThisWeek = history.filter((h) => new Date(h.finishedAt ?? h.startedAt).getTime() >= weekStart).length;
+  const doneThisWeek = history.filter((h) => new Date(h.endedAt).getTime() >= weekStart).length;
 
   return (
     <section className="mt-6">
