@@ -464,15 +464,6 @@ function Profile() {
       {/* Streak / week overview / badges live under Inzichten, not on Start. */}
 
 
-      <CustomizeSheet
-        open={openSheet === "customize"}
-        onOpenChange={(o) => !o && setOpenSheet(null)}
-        order={prefs.order}
-        hidden={prefs.hidden}
-        onMove={move}
-        onToggle={toggleCard}
-        onReset={reset}
-      />
 
       <WaterDialog open={openSheet === "water"} onOpenChange={(o) => !o && setOpenSheet(null)} ml={day.waterMl} goal={WATER_GOAL_ML} onAdd={addWater} />
 
