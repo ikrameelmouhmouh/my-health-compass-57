@@ -12,7 +12,7 @@ export function SessionSummary({
   session: FinishedSession;
   onClose: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   // crude calorie estimate: kcal ≈ (durationMin * 5 MET * 70kg * 3.5) / 200
   const minutes = session.durationSec / 60;
   const kcal = Math.round((minutes * 5 * 70 * 3.5) / 200);
