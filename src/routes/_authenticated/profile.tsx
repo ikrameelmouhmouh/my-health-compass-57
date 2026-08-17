@@ -23,7 +23,7 @@ import {
   useCaloriePrefs, calcCalorieBudget,
   type DashCardId, type CalorieBudget, type CalorieMode,
 } from "@/lib/dashboard-prefs";
-import { useScheduledWorkoutForToday, findTodaysTemplate } from "@/lib/workout-today";
+import { useScheduledWorkoutForToday, findTodaysTemplate, localizeDayNames } from "@/lib/workout-today";
 import { useTemplates } from "@/lib/workout-prefs";
 import { useSessionHistory } from "@/lib/workout-session";
 import { StartWorkoutButton } from "@/components/workout/start-workout-button";
@@ -642,7 +642,7 @@ function TrainingSection() {
             </div>
             {tpl ? (
               <>
-                <h3 className="mt-2.5 line-clamp-2 font-display text-[19px] font-semibold leading-tight">{tpl.name}</h3>
+                <h3 className="mt-2.5 line-clamp-2 font-display text-[19px] font-semibold leading-tight">{localizeDayNames(tpl.name, t)}</h3>
                 <p className="mt-1 text-[12px] text-muted-foreground">
                   {t("fit.exercises_count", { n: tpl.exercises.length })} · {t("fit.today.est_min", { n: estMin })}
                 </p>
@@ -721,26 +721,25 @@ function DayGoalsCard({ nutrition, water, steps, workout, overall, onWater }: {
       <div className="mt-4 flex items-center gap-5">
         <Ring pct={overall} label={`${overall}%`} sub={t("today.goals.overall")} />
         <div className="flex-1 space-y-1">
-          <GoalLink label={t("today.goals.nutrition")} pct={nutrition} to="/nutrition" tone="nutrition" />
-          <GoalLink label={t("today.goals.water")} pct={water} onClick={onWater} tone="water" />
-          <GoalLink label={t("today.goals.steps")} pct={steps} to="/fitness" tone="fitness" />
-          <GoalLink label={t("today.goals.workout")} pct={workout} to="/fitness" tone="fitness" done={workout >= 100} />
+          <GoalLink label={t("today.goals.nutrition")} pct={nutrition} to="/nutrition" icon={Apple} iconClass="text-acc-nutrition" />
+          <GoalLink label={t("today.goals.water")} pct={water} onClick={onWater} icon={Droplet} iconClass="text-acc-fitness" />
+          <GoalLink label={t("today.goals.steps")} pct={steps} to="/fitness" icon={Footprints} iconClass="text-acc-fitness" />
+          <GoalLink label={t("today.goals.workout")} pct={workout} to="/fitness" icon={Dumbbell} iconClass="text-acc-fitness" />
         </div>
       </div>
     </section>
   );
 }
 
-function GoalLink({ label, pct: p, to, onClick, tone, done }: {
-  label: string; pct: number; to?: string; onClick?: () => void; tone: keyof typeof TONES; done?: boolean;
+function GoalLink({ label, pct: p, to, onClick, icon: Icon, iconClass }: {
+  label: string; pct: number; to?: string; onClick?: () => void; icon: typeof Apple; iconClass: string;
 }) {
-  const tn = TONES[tone];
   const inner = (
     <>
-      {done ? <CheckCircle2 className={`size-3.5 ${tn.fg}`} /> : <Circle className={`size-3.5 ${tn.fg} opacity-45`} />}
+      <Icon className={`size-3.5 ${iconClass}`} />
       <span className="w-16 text-[11px] font-semibold">{label}</span>
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted/70">
-        <div className={`h-full rounded-full ${tn.bar}`} style={{ width: `${Math.min(100, Math.max(0, p))}%` }} />
+        <div className="h-full rounded-full bg-alyva/60" style={{ width: `${Math.min(100, Math.max(0, p))}%` }} />
       </div>
       <span className="w-9 text-right text-[10px] font-semibold tabular-nums text-muted-foreground">
         {Math.round(Math.min(100, p))}%
