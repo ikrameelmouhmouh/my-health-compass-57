@@ -396,7 +396,8 @@ function Profile() {
           label={t("today.cal.title")}
           value={Math.max(0, Math.round(budget.remaining)).toLocaleString()}
           unit="kcal"
-          sub={`${t("today.cal.goal")} ${budget.allowance.toLocaleString()}`}
+          caption={t("start.cal.remaining")}
+          sub={`${Math.round(budget.eaten).toLocaleString()} ${t("today.cal.eaten")} · ${t("today.cal.goal")} ${budget.allowance.toLocaleString()}`}
           pct={Math.min(100, nutritionPct)}
           to="/nutrition"
         />
