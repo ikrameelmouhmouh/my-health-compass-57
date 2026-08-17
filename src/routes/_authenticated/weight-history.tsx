@@ -26,7 +26,7 @@ function WeightHistoryPage() {
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
       <header className="flex items-center gap-3">
-        <Link to="/weight" className="grid size-9 place-items-center rounded-full border border-border" aria-label={t("hist.back")}>
+        <Link to="/insights" className="grid size-9 place-items-center rounded-full border border-border" aria-label={t("hist.back")}>
           <ChevronLeft className="size-4" />
         </Link>
         <div className="min-w-0">
