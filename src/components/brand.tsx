@@ -10,16 +10,23 @@ function AlyvaLeaf({ className = "" }: { className?: string }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth="1.4"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M12 20c-5-3-7.5-7-6-11 1.5-3.5 6-5 6-5s4.5 1.5 6 5c1.5 4-1 8-6 11z" />
-      <path d="M12 4v16" />
+      {/* stem */}
+      <path d="M11.4 22c-.2-4 .1-8.4.9-11.2" />
+      {/* upper-right leaf */}
+      <path d="M12.5 11c.4-5 3.9-7.6 7.5-8 0 4-2.5 7.6-7.5 8z" />
+      <path d="M19.4 3.6c-2.8 1.7-5 4.4-6.3 6.9" />
+      {/* lower-left leaf */}
+      <path d="M11.5 15c-1-3.5-4-5.5-7.5-5.8.2 3.6 3 6.2 7.5 5.8z" />
+      <path d="M4.6 9.8c2.8 1.7 5 3.6 6.3 5.1" />
     </svg>
   );
 }
+
 
 /**
  * Central ALYVA wordmark: small leaf icon + thin, wide-tracked wordmark.
