@@ -223,3 +223,26 @@
 @utility tint-nutrition { background-color: var(--acc-nutrition-soft); color: var(--acc-nutrition); }
 
 
+
+/* ------------------------------------------------------------------
+ * Section themes: scope the brand/primary accent per health domain so
+ * existing components inherit the right pastel identity without edits.
+ * ------------------------------------------------------------------ */
+.section-fasting {
+  --brand: var(--acc-fasting);
+  --primary: var(--acc-fasting);
+  --ring: var(--acc-fasting);
+  --accent: var(--acc-fasting-soft);
+}
+.section-nutrition {
+  --brand: var(--acc-nutrition);
+  --primary: var(--acc-nutrition);
+  --ring: var(--acc-nutrition);
+  --accent: var(--acc-nutrition-soft);
+}
+.section-progress {
+  --brand: var(--acc-weight);
+  --primary: var(--acc-weight);
+  --ring: var(--acc-weight);
+  --accent: var(--acc-weight-soft);
+}
