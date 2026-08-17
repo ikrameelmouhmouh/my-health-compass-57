@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import {
   TrendingUp, Scale, Ruler, Camera, Flame, Activity, Footprints,
-  Moon, Timer, Trophy, Plus, X, ChevronRight,
+  Moon, Timer, Trophy, Plus, X, ChevronRight, Heart,
 } from "lucide-react";
 import { useWeightLog, useFasting, useDayLog } from "@/lib/dashboard-prefs";
 import { useMeasurements, usePhotos, useMilestones } from "@/lib/progress";
@@ -168,7 +168,7 @@ function StatPill({ label, value, sub, tone = "default" }: { label: string; valu
 }
 
 // ---------- page ----------
-function ProgressPage() {
+function ProgressPage({ section }: { section: SubTab }) {
   const { t, lang } = useI18n();
   const { log: weights, addEntry: addWeight } = useWeightLog();
   const { state: fasting } = useFasting();
@@ -218,16 +218,26 @@ function ProgressPage() {
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-4 pb-32 pt-8">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
-          <TrendingUp className="size-6" />
+        <div
+          className={`grid size-12 shrink-0 place-items-center rounded-2xl ${
+            section === "progress" ? "tint-weight" : section === "wellness" ? "tint-sleep" : "bg-brand/12 text-brand"
+          }`}
+        >
+          {section === "progress" ? <Scale className="size-6" /> : section === "wellness" ? <Moon className="size-6" /> : <TrendingUp className="size-6" />}
         </div>
         <div className="min-w-0 flex-1">
-          <h1 className="font-display text-2xl font-semibold tracking-tight">{t("prog.title")}</h1>
-          <p className="text-[12px] text-muted-foreground">{t("prog.subtitle")}</p>
+          <h1 className="font-display text-2xl font-semibold tracking-tight">
+            {section === "progress" ? t("prog.title") : section === "wellness" ? t("ins.sub.wellness") : t("ins.overview.title")}
+          </h1>
+          <p className="text-[12px] text-muted-foreground">
+            {section === "progress" ? t("prog.subtitle") : section === "wellness" ? t("ins.wellness.soon") : t("ins.overview.sub")}
+          </p>
         </div>
       </div>
 
       <PaywallOverlay feature={t("prog.title")} description={t("pay.overlay.progress_desc")}>
+      {section === "progress" && (
+      <>
       {/* Hero summary */}
       <section className="mt-5 overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-br from-brand/15 via-card to-card p-5">
         <div className="flex items-end justify-between">
@@ -355,6 +365,12 @@ function ProgressPage() {
           )}
         </Card>
 
+      </div>
+      </>
+      )}
+
+      {section === "overview" && (
+      <div className="mt-4 grid gap-3">
         {/* Fasting stats */}
         <Card title={t("prog.card.fasting")} icon={Timer}>
           <Bars values={last7Fast.values} labels={last7Fast.labels} />
@@ -412,6 +428,26 @@ function ProgressPage() {
           )}
         </Card>
       </div>
+      )}
+
+      {section === "wellness" && (
+        <div className="mt-5 grid gap-3">
+          <Card title={t("ins.wellness.sleep")} icon={Moon}>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-semibold tabular-nums">—</span>
+              <span className="text-[12px] text-muted-foreground">{t("ins.notconnected")}</span>
+            </div>
+            <p className="mt-2 text-[12px] text-muted-foreground">{t("ins.wellness.soon")}</p>
+          </Card>
+          <Card title={t("ins.wellness.cycle")} icon={Heart}>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-semibold tabular-nums">—</span>
+              <span className="text-[12px] text-muted-foreground">{t("ins.notconnected")}</span>
+            </div>
+            <p className="mt-2 text-[12px] text-muted-foreground">{t("ins.wellness.soon")}</p>
+          </Card>
+        </div>
+      )}
       </PaywallOverlay>
     </main>
   );
