@@ -743,13 +743,17 @@ function DayGoalsCard({ nutrition, water, steps, workout, overall, onWater }: {
   );
 }
 
-function GoalLink({ label, pct: p, to, onClick, icon: Icon, iconClass }: {
-  label: string; pct: number; to?: string; onClick?: () => void; icon: typeof Apple; iconClass: string;
+function GoalLink({ label, pct: p, to, onClick, icon: Icon, tone }: {
+  label: string; pct: number; to?: string; onClick?: () => void; icon: typeof Apple; tone: keyof typeof TONES;
 }) {
+  const tn = TONES[tone];
   const inner = (
     <>
-      <Icon className={`size-3.5 ${iconClass}`} />
+      <span className={`grid size-7 shrink-0 place-items-center rounded-full ${tn.bg}`}>
+        <Icon className={`size-3.5 ${tn.fg}`} />
+      </span>
       <span className="w-16 text-[11px] font-semibold">{label}</span>
+
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted/70">
         <div className="h-full rounded-full bg-alyva/60" style={{ width: `${Math.min(100, Math.max(0, p))}%` }} />
       </div>
