@@ -315,44 +315,47 @@ function Profile() {
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md px-4 pb-32 pt-4">
-      <header className="flex items-start justify-between gap-3 px-1">
-        <div className="min-w-0 flex-1">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand/80">
-            {greeting}
-          </p>
-          <h1 className="mt-1 truncate text-[36px] font-bold leading-[1.02] tracking-tight text-foreground">
-            {p.display_name || "—"}
-          </h1>
-          <p className="mt-1 text-[13px] font-medium text-muted-foreground/80">
-            {formatToday(lang)}
-          </p>
+      <header className="px-1">
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-display text-[19px] font-extrabold tracking-[0.2em] text-brand">ALYVA</span>
+          <div className="flex shrink-0 items-center gap-1">
+            <IconBtn aria-label={t("notif.open")} onClick={() => setOpenSheet("notifications")} className="relative">
+              <Bell className="size-[18px]" strokeWidth={2} />
+              {unreadCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 grid h-[16px] min-w-[16px] place-items-center rounded-full bg-brand px-1 text-[9px] font-bold leading-none text-brand-foreground">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </IconBtn>
+            <Link
+              to="/insights"
+              search={{ tab: "overview" as const }}
+              aria-label={t("nav.insights")}
+              className="ios-press inline-flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground"
+            >
+              <LineChart className="size-[18px]" strokeWidth={2} />
+            </Link>
+            <Link
+              to="/settings"
+              aria-label={t("today.settings")}
+              className="ios-press inline-flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground"
+            >
+              <Settings className="size-[18px]" strokeWidth={2} />
+            </Link>
+          </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
-          <IconBtn aria-label={t("notif.open")} onClick={() => setOpenSheet("notifications")} className="relative">
-            <Bell className="size-[18px]" strokeWidth={2} />
-            {unreadCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 grid min-w-[16px] h-[16px] place-items-center rounded-full bg-brand px-1 text-[9px] font-bold leading-none text-brand-foreground">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            )}
-          </IconBtn>
-          <IconBtn aria-label={t("today.customize")} onClick={() => setOpenSheet("customize")}>
-            <Sliders className="size-[18px]" strokeWidth={2} />
-          </IconBtn>
-          <Link
-            to="/settings"
-            aria-label={t("today.settings")}
-            className="ios-press inline-flex size-9 items-center justify-center rounded-full border border-border bg-card text-foreground"
-          >
-            <Settings className="size-[18px]" strokeWidth={2} />
-          </Link>
-        </div>
+
+        <h1 className="mt-5 text-[30px] font-bold leading-[1.08] tracking-tight text-foreground">
+          {greeting}
+          {p.display_name ? <span className="text-muted-foreground/60">, {p.display_name}</span> : null}
+        </h1>
+        <p className="mt-1 text-[13px] font-medium text-muted-foreground/80">{formatToday(lang)}</p>
       </header>
 
       {!isPremium ? (
         <Link
           to="/pricing"
-          className="mt-3 flex items-center justify-between rounded-2xl border border-brand/40 bg-brand/10 px-3.5 py-2.5 ios-press"
+          className="ios-press mt-4 flex items-center justify-between rounded-2xl border border-brand/40 bg-brand/10 px-3.5 py-2.5"
         >
           <div className="flex items-center gap-2">
             <span className="grid size-7 place-items-center rounded-full bg-brand/25 text-brand">
@@ -366,7 +369,7 @@ function Profile() {
           <span className="text-[11px] font-semibold uppercase tracking-wider text-brand">{t("today.upgrade.cta")}</span>
         </Link>
       ) : (
-        <div className="mt-3 flex items-center px-1">
+        <div className="mt-4 flex items-center px-1">
           <div className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/15 px-3 py-1">
             <span className="size-1.5 animate-pulse rounded-full bg-brand" />
             <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand">Alyva {t("profile.plus")}</span>
@@ -374,11 +377,64 @@ function Profile() {
         </div>
       )}
 
+      {/* 1. Four primary summary cards */}
+      <section className="mt-5 grid grid-cols-2 gap-3">
+        <PrimaryCard
+          tone="nutrition"
+          icon={Apple}
+          label={t("today.cal.title")}
+          value={Math.max(0, Math.round(budget.remaining)).toLocaleString()}
+          unit="kcal"
+          sub={t("today.cal.of_goal", { n: budget.allowance.toLocaleString() })}
+          pct={Math.min(100, nutritionPct)}
+          to="/nutrition"
+        />
+        <PrimaryCard
+          tone="fasting"
+          icon={Timer}
+          label={t("today.fast.title")}
+          value={fastInfo.active ? formatHours(fastInfo.hoursElapsed) : "—"}
+          sub={fastInfo.active ? t("today.fast.elapsed") : t("today.fast.not_fasting")}
+          pct={fastInfo.pct}
+          to="/fasting"
+        />
+        <PrimaryCard
+          tone="fitness"
+          icon={Footprints}
+          label={t("today.steps.title")}
+          value={day.steps.toLocaleString()}
+          sub={t("today.steps.of", { goal: STEP_GOAL.toLocaleString(), pct: Math.round(stepsPct) })}
+          pct={Math.min(100, stepsPct)}
+          to="/fitness"
+        />
+        <PrimaryCard
+          tone="weight"
+          icon={Scale}
+          label={t("today.weight.title")}
+          value={currentWeight ? currentWeight.toFixed(1) : "—"}
+          unit={currentWeight ? "kg" : undefined}
+          sub={weightDelta === 0 ? t("today.weight.no_change") : `${weightDelta > 0 ? "+" : ""}${weightDelta.toFixed(1)} kg`}
+          pct={goalProgress}
+          to="/insights"
+          search={{ tab: "progress" as const }}
+        />
+      </section>
 
-      
+      {/* 2. Training area */}
+      <TrainingSection />
 
+      {/* 3. Day goals */}
+      <DayGoalsCard
+        nutrition={nutritionPct}
+        water={waterPct}
+        steps={stepsPct}
+        workout={workoutDone}
+        overall={overallPct}
+        onWater={() => setOpenSheet("water")}
+      />
 
-
+      {/* 4. Quick actions */}
+      <QuickActions />
 
       <section className="mt-5 space-y-3">
         {rows.map((row, i) =>
@@ -391,15 +447,16 @@ function Profile() {
             renderCard(row[0], false)
           )
         )}
-        {visibleCards.length === 0 && (
-          <div className="rounded-3xl border border-dashed border-border bg-card/50 p-8 text-center">
-            <p className="text-sm text-muted-foreground">{t("today.empty.hidden")}</p>
-            <Button variant="outline" size="sm" className="mt-3" onClick={() => setOpenSheet("customize")}>
-              {t("today.customize")}
-            </Button>
-          </div>
-        )}
       </section>
+
+      <div className="mt-5 flex justify-center">
+        <button
+          onClick={() => setOpenSheet("customize")}
+          className="ios-press inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-[11px] font-semibold text-muted-foreground"
+        >
+          <Sliders className="size-3.5" /> {t("today.customize")}
+        </button>
+      </div>
 
       <div className="mt-5">
         <RetentionSection />
