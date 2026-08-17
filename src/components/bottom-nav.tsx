@@ -1,13 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, UtensilsCrossed, Dumbbell, Sparkles, Timer } from "lucide-react";
+import { Home, UtensilsCrossed, Dumbbell, LineChart, Timer } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 const items = [
-  { to: "/profile", key: "nav.home", icon: Home, tint: "bg-acc-fitness-soft", fg: "text-acc-fitness" },
+  { to: "/profile", key: "nav.home", icon: Home, tint: "bg-brand/12", fg: "text-brand" },
   { to: "/nutrition", key: "nav.eat", icon: UtensilsCrossed, tint: "bg-acc-nutrition-soft", fg: "text-acc-nutrition" },
   { to: "/fasting", key: "nav.fasting", icon: Timer, tint: "bg-acc-fasting-soft", fg: "text-acc-fasting" },
   { to: "/fitness", key: "nav.workouts", icon: Dumbbell, tint: "bg-acc-fitness-soft", fg: "text-acc-fitness" },
-  { to: "/insights", key: "nav.insights", icon: Sparkles, tint: "bg-acc-weight-soft", fg: "text-acc-weight" },
+  { to: "/insights", key: "nav.insights", icon: LineChart, tint: "bg-acc-weight-soft", fg: "text-acc-weight" },
 ] as const;
 
 
