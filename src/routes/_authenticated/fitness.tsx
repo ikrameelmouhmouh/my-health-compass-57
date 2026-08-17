@@ -131,7 +131,7 @@ function FitnessPage() {
               <TodayCard plan={null} onCreate={openWizard} isPremium={isPremium} />
               <OwnProgramCard />
               <PlannedWeekSection />
-              <TemplatesSection />
+              <TemplatesSection headerOnly />
               <EmptyState onStart={openWizard} isPremium={isPremium} />
             </>
 
@@ -270,7 +270,8 @@ function Dashboard({
         <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
           <TodayCard plan={plan ?? null} onCreate={onRegenerate} isPremium={isPremium} />
           <OwnProgramCard />
-          <TemplatesSection />
+          <PlannedWeekSection />
+          <TemplatesSection headerOnly />
           <EmptyState onStart={onRegenerate} isPremium={isPremium} />
         </PaywallOverlay>
       </main>
@@ -321,15 +322,7 @@ function Dashboard({
       />
 
 
-      <TemplatesSection />
-
-
-      {plan.progressionNotes && (
-        <div className="mt-6 rounded-2xl border border-border bg-card/50 p-4">
-          <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("fit.coach_note")}</p>
-          <p className="mt-1 text-sm">{plan.progressionNotes}</p>
-        </div>
-      )}
+      <TemplatesSection headerOnly />
 
       <div className="mt-6 rounded-2xl border border-border bg-card/50 p-3">
         <div className="flex items-center gap-3">
@@ -353,6 +346,13 @@ function Dashboard({
           )}
         </div>
       </div>
+      {plan.progressionNotes && (
+        <div className="mt-6 rounded-2xl border border-border bg-card/50 p-4">
+          <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{t("fit.coach_note")}</p>
+          <p className="mt-1 text-sm">{plan.progressionNotes}</p>
+        </div>
+      )}
+
       <button onClick={() => { if (confirm(t("fit.clear_confirm"))) onClear(); }} className="mt-2 w-full text-xs text-muted-foreground hover:text-destructive">
         {t("fit.clear")}
       </button>
@@ -529,7 +529,7 @@ function Stat({ icon: Icon, label, value }: { icon: typeof Calendar; label: stri
   );
 }
 
-function TemplatesSection() {
+function TemplatesSection({ headerOnly = false }: { headerOnly?: boolean }) {
   const { t } = useI18n();
   const { templates, loaded, upsert, remove } = useTemplates();
   const [editing, setEditing] = useState<WorkoutTemplate | null>(null);
@@ -556,7 +556,7 @@ function TemplatesSection() {
         </div>
       </div>
 
-      {templates.length === 0 ? (
+      {headerOnly ? null : templates.length === 0 ? (
         <button
           onClick={() => setEditing(newTemplate())}
           className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card/30 p-6 text-sm text-muted-foreground hover:bg-card/50"
