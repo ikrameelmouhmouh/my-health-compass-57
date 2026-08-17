@@ -461,13 +461,23 @@ function IconBtn({ children, className, ...props }: React.ButtonHTMLAttributes<H
   );
 }
 
-function CardShell({ title, icon: Icon, children, action, compact }: { title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; compact?: boolean }) {
+const TONES = {
+  brand: { bg: "bg-brand/12", fg: "text-brand" },
+  nutrition: { bg: "bg-acc-nutrition-soft", fg: "text-acc-nutrition" },
+  water: { bg: "bg-acc-water-soft", fg: "text-acc-water" },
+  fasting: { bg: "bg-acc-fasting-soft", fg: "text-acc-fasting" },
+  weight: { bg: "bg-acc-weight-soft", fg: "text-acc-weight" },
+  fitness: { bg: "bg-acc-fitness-soft", fg: "text-acc-fitness" },
+} as const;
+
+function CardShell({ title, icon: Icon, children, action, compact, tone = "brand" }: { title: string; icon: React.ElementType; children: React.ReactNode; action?: React.ReactNode; compact?: boolean; tone?: keyof typeof TONES }) {
+  const tn = TONES[tone];
   return (
-    <div className={`rounded-3xl border border-border bg-card ${compact ? "p-4" : "p-5"}`}>
+    <div className={`alyva-card ${compact ? "p-4" : "p-5"}`}>
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <div className={`grid shrink-0 place-items-center rounded-xl bg-brand/12 ${compact ? "size-7" : "size-8"}`}>
-            <Icon className={compact ? "size-3.5 text-brand" : "size-4 text-brand"} />
+          <div className={`grid shrink-0 place-items-center rounded-xl ${tn.bg} ${compact ? "size-7" : "size-8"}`}>
+            <Icon className={`${compact ? "size-3.5" : "size-4"} ${tn.fg}`} />
           </div>
           <h2 className="truncate font-display text-[12px] font-semibold tracking-tight sm:text-[13px]">{title}</h2>
         </div>
@@ -477,6 +487,7 @@ function CardShell({ title, icon: Icon, children, action, compact }: { title: st
     </div>
   );
 }
+
 
 function Bar({ pct: p, className = "" }: { pct: number; className?: string }) {
   return (
