@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Settings, Sliders,
+  Settings,
   Apple, Timer, Dumbbell, LineChart, Droplet, Footprints, Flame,
   Plus, Minus, GripVertical, Eye, EyeOff, ChevronUp, ChevronDown,
   CheckCircle2, Circle, Scale, ArrowUpRight, Bell, Sparkles, Moon, CalendarDays,
@@ -28,10 +28,9 @@ import { useTemplates } from "@/lib/workout-prefs";
 import { useSessionHistory } from "@/lib/workout-session";
 import { StartWorkoutButton } from "@/components/workout/start-workout-button";
 import { SessionStartSheet } from "@/components/workout/session-start-sheet";
-import { ExerciseThumb, resolveLibraryExercise } from "@/components/workout/exercise-detail-sheet";
+
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useMeals } from "@/lib/food";
-import { RetentionSection } from "@/components/retention-section";
 import { NotificationsSheet, useNotifications } from "@/components/notifications-sheet";
 import { usePremium } from "@/hooks/use-premium";
 
@@ -52,7 +51,7 @@ function Profile() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const { prefs, move, toggle: toggleCard, reset } = useDashboardPrefs();
+  const { prefs } = useDashboardPrefs();
   const { day, update, addWater, addMeal } = useDayLog();
   const { log: weights, addEntry: addWeight } = useWeightLog();
   const { workout, save: saveWorkout } = useTodayWorkout();
@@ -130,15 +129,19 @@ function Profile() {
   );
 
   const currentWeight = weights.at(-1)?.kg ?? Number(p?.current_weight_kg ?? 0);
-  const previousWeight = weights.at(-2)?.kg ?? Number(p?.current_weight_kg ?? currentWeight);
-  const weightDelta = +(currentWeight - previousWeight).toFixed(1);
+  // Change vs. the previous logged entry only. With fewer than two entries there
+  // is no measurable change yet — never compare against the onboarding weight.
+  const previousWeight = weights.length >= 2 ? weights.at(-2)!.kg : null;
+  const weightDelta = previousWeight === null ? 0 : +(currentWeight - previousWeight).toFixed(1);
   const goalWeight = Number(p?.goal_weight_kg ?? currentWeight);
-  const startWeight = Number(p?.current_weight_kg ?? currentWeight);
+  // Starting point = first logged weight, else the onboarding weight.
+  const startWeight = weights[0]?.kg ?? Number(p?.current_weight_kg ?? currentWeight);
   const goalProgress = goalWeight !== startWeight
     ? Math.max(0, Math.min(100, ((startWeight - currentWeight) / (startWeight - goalWeight)) * 100))
     : 0;
 
-  const greeting = greetingFor(new Date(), t);
+  // Greeting strings already end with a comma; strip it so the name renders once.
+  const greeting = greetingFor(new Date(), t).replace(/[,،]\s*$/, "");
 
   // Compute Aura insight strings from today's data (same logic as the old card).
   const aura = useMemo(() => {
@@ -392,7 +395,8 @@ function Profile() {
           label={t("today.cal.title")}
           value={Math.max(0, Math.round(budget.remaining)).toLocaleString()}
           unit="kcal"
-          sub={`${t("today.cal.goal")} ${budget.allowance.toLocaleString()}`}
+          caption={t("start.cal.remaining")}
+          sub={`${Math.round(budget.eaten).toLocaleString()} ${t("today.cal.eaten")} · ${t("today.cal.goal")} ${budget.allowance.toLocaleString()}`}
           pct={Math.min(100, nutritionPct)}
           to="/nutrition"
         />
@@ -456,28 +460,9 @@ function Profile() {
         )}
       </section>
 
-      <div className="mt-5 flex justify-center">
-        <button
-          onClick={() => setOpenSheet("customize")}
-          className="ios-press inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-[11px] font-semibold text-muted-foreground"
-        >
-          <Sliders className="size-3.5" /> {t("today.customize")}
-        </button>
-      </div>
+      {/* Streak / week overview / badges live under Inzichten, not on Start. */}
 
-      <div className="mt-5">
-        <RetentionSection />
-      </div>
 
-      <CustomizeSheet
-        open={openSheet === "customize"}
-        onOpenChange={(o) => !o && setOpenSheet(null)}
-        order={prefs.order}
-        hidden={prefs.hidden}
-        onMove={move}
-        onToggle={toggleCard}
-        onReset={reset}
-      />
 
       <WaterDialog open={openSheet === "water"} onOpenChange={(o) => !o && setOpenSheet(null)} ml={day.waterMl} goal={WATER_GOAL_ML} onAdd={addWater} />
 
@@ -588,9 +573,9 @@ function Ring({ pct: p, size = 76, label, sub }: { pct: number; size?: number; l
 
 
 /* --------------------------- Start composition --------------------------- */
-function PrimaryCard({ tone, icon: Icon, label, value, unit, sub, pct: p, to, search }: {
+function PrimaryCard({ tone, icon: Icon, label, value, unit, caption, sub, pct: p, to, search }: {
   tone: keyof typeof TONES; icon: React.ElementType; label: string; value: string; unit?: string;
-  sub: string; pct: number; to: string; search?: Record<string, string>;
+  caption?: string; sub: string; pct: number; to: string; search?: Record<string, string>;
 }) {
   const tn = TONES[tone];
   return (
@@ -609,6 +594,9 @@ function PrimaryCard({ tone, icon: Icon, label, value, unit, sub, pct: p, to, se
         <span className="font-display text-[26px] font-semibold leading-none tabular-nums">{value}</span>
         {unit && <span className="text-[12px] font-medium text-muted-foreground">{unit}</span>}
       </div>
+      {caption && (
+        <p className={`mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${tn.fg}`}>{caption}</p>
+      )}
       <p className="mt-1 truncate text-[11px] text-muted-foreground">{sub}</p>
       <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted/70">
         <div className={`h-full rounded-full ${tn.bar}`} style={{ width: `${Math.max(0, Math.min(100, p))}%` }} />
@@ -626,7 +614,6 @@ function TrainingSection() {
 
   const totalSets = tpl?.exercises.reduce((s, e) => s + (Number(e.sets) || 0), 0) ?? 0;
   const estMin = Math.max(15, Math.min(120, Math.round(totalSets * 3) || 30));
-  const lib = tpl?.exercises[0] ? resolveLibraryExercise(undefined, tpl.exercises[0].name) : null;
 
   const planned = templates.filter((x) => !!x.day).length;
   const weekStart = useMemo(() => {
@@ -645,18 +632,18 @@ function TrainingSection() {
       </h2>
 
       <div className="alyva-card mt-2 overflow-hidden">
-        <div className="flex gap-3 p-4">
-          <div className="min-w-0 flex-1">
+        <div className="p-4">
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="grid size-7 place-items-center rounded-xl bg-acc-fitness-soft">
                 <Dumbbell className="size-3.5 text-acc-fitness" />
               </span>
-              <span className="text-[12px] font-semibold text-muted-foreground">{t("start.workout.title")}</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-acc-fitness">{t("start.workout.title")}</span>
             </div>
             {tpl ? (
               <>
-                <h3 className="mt-2 line-clamp-2 font-display text-[17px] font-semibold leading-tight">{tpl.name}</h3>
-                <p className="mt-1 text-[11px] text-muted-foreground">
+                <h3 className="mt-2.5 line-clamp-2 font-display text-[19px] font-semibold leading-tight">{tpl.name}</h3>
+                <p className="mt-1 text-[12px] text-muted-foreground">
                   {t("fit.exercises_count", { n: tpl.exercises.length })} · {t("fit.today.est_min", { n: estMin })}
                 </p>
               </>
@@ -664,10 +651,8 @@ function TrainingSection() {
               <p className="mt-2 text-[13px] text-muted-foreground">{t("start.workout.none")}</p>
             )}
           </div>
-          {tpl && (
-            <ExerciseThumb libraryId={lib?.id} name={tpl.exercises[0]?.name ?? tpl.name} className="size-20 shrink-0 rounded-2xl" />
-          )}
         </div>
+
 
         <div className="flex gap-2 px-4 pb-4">
           {tpl ? (
@@ -702,14 +687,14 @@ function TrainingSection() {
           </div>
         </Link>
 
-        <Link to="/ai-coach" className="ios-press alyva-card p-4">
+        <Link to="/ai-coach" className="ios-press alyva-card flex flex-col p-4">
           <span className="grid size-7 place-items-center rounded-xl bg-alyva/15">
             <Sparkles className="size-3.5 text-alyva" />
           </span>
           <p className="mt-2.5 text-[12px] font-semibold leading-tight">{t("start.coach.title")}</p>
           <p className="mt-1 text-[11px] text-muted-foreground">{t("start.coach.sub")}</p>
-          <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-alyva">
-            {t("nav.insights") ? null : null}
+          <span className="mt-auto flex items-center justify-between gap-1 pt-3 text-[11px] font-semibold text-alyva">
+            {t("start.coach.cta")}
             <ArrowUpRight className="size-3.5" />
           </span>
         </Link>
@@ -752,7 +737,7 @@ function GoalLink({ label, pct: p, to, onClick, tone, done }: {
   const tn = TONES[tone];
   const inner = (
     <>
-      {done ? <CheckCircle2 className={`size-3.5 ${tn.fg}`} /> : <Circle className="size-3.5 text-muted-foreground" />}
+      {done ? <CheckCircle2 className={`size-3.5 ${tn.fg}`} /> : <Circle className={`size-3.5 ${tn.fg} opacity-45`} />}
       <span className="w-16 text-[11px] font-semibold">{label}</span>
       <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted/70">
         <div className={`h-full rounded-full ${tn.bar}`} style={{ width: `${Math.min(100, Math.max(0, p))}%` }} />
