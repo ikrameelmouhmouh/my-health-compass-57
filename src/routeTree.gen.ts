@@ -19,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedWorkoutHistoryRouteImport } from './routes/_authenticated/workout-history'
 import { Route as AuthenticatedWeightHistoryRouteImport } from './routes/_authenticated/weight-history'
+import { Route as AuthenticatedWeightRouteImport } from './routes/_authenticated/weight'
 import { Route as AuthenticatedSocialRouteImport } from './routes/_authenticated/social'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
@@ -100,6 +101,11 @@ const AuthenticatedWeightHistoryRoute =
     path: '/weight-history',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedWeightRoute = AuthenticatedWeightRouteImport.update({
+  id: '/weight',
+  path: '/weight',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedSocialRoute = AuthenticatedSocialRouteImport.update({
   id: '/social',
   path: '/social',
@@ -281,6 +287,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/social': typeof AuthenticatedSocialRoute
+  '/weight': typeof AuthenticatedWeightRoute
   '/weight-history': typeof AuthenticatedWeightHistoryRoute
   '/workout-history': typeof AuthenticatedWorkoutHistoryRoute
   '/api/chat': typeof ApiChatRoute
@@ -321,6 +328,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/social': typeof AuthenticatedSocialRoute
+  '/weight': typeof AuthenticatedWeightRoute
   '/weight-history': typeof AuthenticatedWeightHistoryRoute
   '/workout-history': typeof AuthenticatedWorkoutHistoryRoute
   '/api/chat': typeof ApiChatRoute
@@ -363,6 +371,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/social': typeof AuthenticatedSocialRoute
+  '/_authenticated/weight': typeof AuthenticatedWeightRoute
   '/_authenticated/weight-history': typeof AuthenticatedWeightHistoryRoute
   '/_authenticated/workout-history': typeof AuthenticatedWorkoutHistoryRoute
   '/api/chat': typeof ApiChatRoute
@@ -405,6 +414,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/social'
+    | '/weight'
     | '/weight-history'
     | '/workout-history'
     | '/api/chat'
@@ -445,6 +455,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/social'
+    | '/weight'
     | '/weight-history'
     | '/workout-history'
     | '/api/chat'
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/settings'
     | '/_authenticated/social'
+    | '/_authenticated/weight'
     | '/_authenticated/weight-history'
     | '/_authenticated/workout-history'
     | '/api/chat'
@@ -597,6 +609,13 @@ declare module '@tanstack/react-router' {
       path: '/weight-history'
       fullPath: '/weight-history'
       preLoaderRoute: typeof AuthenticatedWeightHistoryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/weight': {
+      id: '/_authenticated/weight'
+      path: '/weight'
+      fullPath: '/weight'
+      preLoaderRoute: typeof AuthenticatedWeightRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/social': {
@@ -830,6 +849,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedSocialRoute: typeof AuthenticatedSocialRoute
+  AuthenticatedWeightRoute: typeof AuthenticatedWeightRoute
   AuthenticatedWeightHistoryRoute: typeof AuthenticatedWeightHistoryRoute
   AuthenticatedWorkoutHistoryRoute: typeof AuthenticatedWorkoutHistoryRoute
   AuthenticatedActivitySessionActivityIdRoute: typeof AuthenticatedActivitySessionActivityIdRoute
@@ -852,6 +872,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedSocialRoute: AuthenticatedSocialRoute,
+  AuthenticatedWeightRoute: AuthenticatedWeightRoute,
   AuthenticatedWeightHistoryRoute: AuthenticatedWeightHistoryRoute,
   AuthenticatedWorkoutHistoryRoute: AuthenticatedWorkoutHistoryRoute,
   AuthenticatedActivitySessionActivityIdRoute:
