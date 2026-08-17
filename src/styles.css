@@ -62,6 +62,10 @@
   --color-acc-weight-soft: var(--acc-weight-soft);
   --color-acc-nutrition: var(--acc-nutrition);
   --color-acc-nutrition-soft: var(--acc-nutrition-soft);
+  --color-acc-sleep: var(--acc-sleep);
+  --color-acc-sleep-soft: var(--acc-sleep-soft);
+  --color-acc-cycle: var(--acc-cycle);
+  --color-acc-cycle-soft: var(--acc-cycle-soft);
 
   --shadow-card: 0 1px 2px oklch(0 0 0 / 4%), 0 8px 24px -12px oklch(0 0 0 / 12%);
   --shadow-float: 0 8px 30px -8px oklch(0 0 0 / 18%);
@@ -101,16 +105,21 @@
   --brand-foreground: oklch(1 0 0);
   --alyva: oklch(0.46 0.10 152);
 
-  --acc-fitness: oklch(0.52 0.10 152);
-  --acc-fitness-soft: oklch(0.95 0.03 152);
-  --acc-water: oklch(0.60 0.10 240);
-  --acc-water-soft: oklch(0.955 0.028 240);
-  --acc-fasting: oklch(0.58 0.11 300);
+  /* Category colors — fixed mapping across the whole app */
+  --acc-fitness: oklch(0.60 0.11 240);          /* fitness / activity / steps = blue */
+  --acc-fitness-soft: oklch(0.955 0.03 240);
+  --acc-water: oklch(0.66 0.10 225);            /* water = light blue */
+  --acc-water-soft: oklch(0.96 0.03 225);
+  --acc-fasting: oklch(0.58 0.11 300);          /* fasting = lavender */
   --acc-fasting-soft: oklch(0.955 0.03 300);
-  --acc-weight: oklch(0.68 0.11 85);
-  --acc-weight-soft: oklch(0.965 0.045 90);
-  --acc-nutrition: oklch(0.64 0.11 15);
-  --acc-nutrition-soft: oklch(0.96 0.028 15);
+  --acc-weight: oklch(0.68 0.13 55);            /* progress / weight = pastel orange */
+  --acc-weight-soft: oklch(0.965 0.045 60);
+  --acc-nutrition: oklch(0.52 0.10 152);        /* food / calories / macros = Alyva green */
+  --acc-nutrition-soft: oklch(0.95 0.03 152);
+  --acc-sleep: oklch(0.58 0.09 258);            /* sleep = soft blue */
+  --acc-sleep-soft: oklch(0.955 0.028 258);
+  --acc-cycle: oklch(0.68 0.11 350);            /* cycle = soft pink */
+  --acc-cycle-soft: oklch(0.96 0.03 350);
 }
 
 
@@ -145,16 +154,20 @@
   --brand-foreground: oklch(1 0 0);
   --alyva: oklch(0.58 0.11 142);
 
-  --acc-fitness: oklch(0.72 0.10 152);
-  --acc-fitness-soft: oklch(0.32 0.04 152);
-  --acc-water: oklch(0.74 0.09 240);
-  --acc-water-soft: oklch(0.30 0.04 240);
+  --acc-fitness: oklch(0.74 0.10 240);
+  --acc-fitness-soft: oklch(0.30 0.04 240);
+  --acc-water: oklch(0.78 0.09 225);
+  --acc-water-soft: oklch(0.30 0.04 225);
   --acc-fasting: oklch(0.74 0.10 300);
   --acc-fasting-soft: oklch(0.31 0.04 300);
-  --acc-weight: oklch(0.82 0.10 90);
-  --acc-weight-soft: oklch(0.32 0.04 90);
-  --acc-nutrition: oklch(0.76 0.10 15);
-  --acc-nutrition-soft: oklch(0.31 0.04 15);
+  --acc-weight: oklch(0.80 0.12 60);
+  --acc-weight-soft: oklch(0.32 0.05 60);
+  --acc-nutrition: oklch(0.72 0.10 152);
+  --acc-nutrition-soft: oklch(0.32 0.04 152);
+  --acc-sleep: oklch(0.74 0.09 258);
+  --acc-sleep-soft: oklch(0.30 0.04 258);
+  --acc-cycle: oklch(0.78 0.10 350);
+  --acc-cycle-soft: oklch(0.31 0.04 350);
 }
 
 @layer base {
@@ -225,6 +238,8 @@
 @utility tint-fasting { background-color: var(--acc-fasting-soft); color: var(--acc-fasting); }
 @utility tint-weight { background-color: var(--acc-weight-soft); color: var(--acc-weight); }
 @utility tint-nutrition { background-color: var(--acc-nutrition-soft); color: var(--acc-nutrition); }
+@utility tint-sleep { background-color: var(--acc-sleep-soft); color: var(--acc-sleep); }
+@utility tint-cycle { background-color: var(--acc-cycle-soft); color: var(--acc-cycle); }
 
 
 
