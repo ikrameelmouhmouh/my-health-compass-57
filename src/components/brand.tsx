@@ -1,7 +1,7 @@
 import { Crown } from "lucide-react";
 
 /**
- * Thin, elegant leaf icon for the ALYVA wordmark.
+ * Elegant, thin leaf icon for the ALYVA wordmark.
  */
 function AlyvaLeaf({ className = "" }: { className?: string }) {
   return (
@@ -15,9 +15,8 @@ function AlyvaLeaf({ className = "" }: { className?: string }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M14.5 4c3.5 1.5 6 5 5.5 9.5s-4.5 7-9 6.5c-3.5-.5-6.5-3-7-7C3.5 8 7 4.5 12 4c0 0 1.5-.5 2.5 0z" />
-      <path d="M12 4v11.5" />
-      <path d="M9 9.5c1 1 2.5 1 3.5 0" />
+      <path d="M12 20c-5-3-7.5-7-6-11 1.5-3.5 6-5 6-5s4.5 1.5 6 5c1.5 4-1 8-6 11z" />
+      <path d="M12 4v16" />
     </svg>
   );
 }
