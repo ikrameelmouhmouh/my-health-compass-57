@@ -8,7 +8,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useT } from "@/lib/i18n";
+import { useI18n, useT } from "@/lib/i18n";
 import { listThreads, deleteThread, type ChatThread } from "@/lib/chat.functions";
 import { toast } from "sonner";
 
@@ -20,6 +20,7 @@ export function ChatHistoryDrawer({
   activeThreadId?: string;
 }) {
   const t = useT();
+  const { lang } = useI18n();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [threads, setThreads] = useState<ChatThread[] | null>(null);
