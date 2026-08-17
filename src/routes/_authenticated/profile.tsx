@@ -23,7 +23,7 @@ import {
   useCaloriePrefs, calcCalorieBudget,
   type DashCardId, type CalorieBudget, type CalorieMode,
 } from "@/lib/dashboard-prefs";
-import { useScheduledWorkoutForToday, findTodaysTemplate } from "@/lib/workout-today";
+import { useScheduledWorkoutForToday, findTodaysTemplate, localizeDayNames } from "@/lib/workout-today";
 import { useTemplates } from "@/lib/workout-prefs";
 import { useSessionHistory } from "@/lib/workout-session";
 import { StartWorkoutButton } from "@/components/workout/start-workout-button";
