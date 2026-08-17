@@ -15,9 +15,9 @@ function AlyvaLeaf({ className = "" }: { className?: string }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M12 20c0-5.5-3.5-10-8-12 4 2 8 1.5 11-1-3 4-3 9-3 13" />
-      <path d="M12 20c1-5 5-9 9-10-3 1-5 3-6 6" />
-      <path d="M12 20V8" />
+      <path d="M19 12c0-4-3-7-7-7S5 8 5 12c0 4 3 7 7 7 2.5 0 4.5-1.5 5.5-3.5" />
+      <path d="M12 5v14" />
+      <path d="M8 10c1.5 1.5 3 1.5 4.5 0" />
     </svg>
   );
 }
