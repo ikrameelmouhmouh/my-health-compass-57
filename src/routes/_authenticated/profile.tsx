@@ -687,14 +687,14 @@ function TrainingSection() {
           </div>
         </Link>
 
-        <Link to="/ai-coach" className="ios-press alyva-card p-4">
+        <Link to="/ai-coach" className="ios-press alyva-card flex flex-col p-4">
           <span className="grid size-7 place-items-center rounded-xl bg-alyva/15">
             <Sparkles className="size-3.5 text-alyva" />
           </span>
           <p className="mt-2.5 text-[12px] font-semibold leading-tight">{t("start.coach.title")}</p>
           <p className="mt-1 text-[11px] text-muted-foreground">{t("start.coach.sub")}</p>
-          <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-alyva">
-            {t("nav.insights") ? null : null}
+          <span className="mt-auto flex items-center justify-between gap-1 pt-3 text-[11px] font-semibold text-alyva">
+            {t("start.coach.cta")}
             <ArrowUpRight className="size-3.5" />
           </span>
         </Link>
