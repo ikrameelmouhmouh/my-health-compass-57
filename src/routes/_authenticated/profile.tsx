@@ -574,9 +574,9 @@ function Ring({ pct: p, size = 76, label, sub }: { pct: number; size?: number; l
 
 
 /* --------------------------- Start composition --------------------------- */
-function PrimaryCard({ tone, icon: Icon, label, value, unit, sub, pct: p, to, search }: {
+function PrimaryCard({ tone, icon: Icon, label, value, unit, caption, sub, pct: p, to, search }: {
   tone: keyof typeof TONES; icon: React.ElementType; label: string; value: string; unit?: string;
-  sub: string; pct: number; to: string; search?: Record<string, string>;
+  caption?: string; sub: string; pct: number; to: string; search?: Record<string, string>;
 }) {
   const tn = TONES[tone];
   return (
@@ -595,6 +595,9 @@ function PrimaryCard({ tone, icon: Icon, label, value, unit, sub, pct: p, to, se
         <span className="font-display text-[26px] font-semibold leading-none tabular-nums">{value}</span>
         {unit && <span className="text-[12px] font-medium text-muted-foreground">{unit}</span>}
       </div>
+      {caption && (
+        <p className={`mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${tn.fg}`}>{caption}</p>
+      )}
       <p className="mt-1 truncate text-[11px] text-muted-foreground">{sub}</p>
       <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-muted/70">
         <div className={`h-full rounded-full ${tn.bar}`} style={{ width: `${Math.max(0, Math.min(100, p))}%` }} />
