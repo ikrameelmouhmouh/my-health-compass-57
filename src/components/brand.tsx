@@ -44,7 +44,7 @@ export function AlyvaWordmark({
   const icon = size === "sm" ? "size-3.5" : size === "lg" ? "size-5" : "size-[17px]";
   return (
     <span className={`inline-flex items-center gap-1.5 text-brand ${className}`}>
-      <AlyvaLeaf className={`${icon} -rotate-12`} />
+      <AlyvaLeaf className={icon} />
       <span className={`font-display ${text} font-light tracking-[0.3em] leading-none`}>
         ALYVA
       </span>
