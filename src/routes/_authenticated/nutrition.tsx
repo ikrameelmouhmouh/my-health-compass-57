@@ -153,7 +153,7 @@ function Nutrition() {
             onClick={openScan}
             className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
           >
-            <div className="grid size-10 place-items-center rounded-2xl bg-brand/15 text-brand">
+            <div className="grid size-10 place-items-center rounded-2xl bg-acc-nutrition-soft text-acc-nutrition">
               <Camera className="size-5" />
             </div>
             <p className="mt-3 font-display text-sm font-semibold">{t("nutr.scan_meal")}</p>
@@ -195,7 +195,7 @@ function Nutrition() {
 
       {dayMeals.length === 0 && (
         <div className="mt-6 rounded-3xl border border-dashed border-border bg-card/50 p-8 text-center">
-          <div className="mx-auto mb-2 grid size-12 place-items-center rounded-full bg-brand/15 text-brand">
+          <div className="mx-auto mb-2 grid size-12 place-items-center rounded-full bg-acc-nutrition-soft text-acc-nutrition">
             <Flame className="size-5" />
           </div>
           <p className="text-sm font-semibold">
@@ -227,8 +227,8 @@ function Nutrition() {
         aria-label={t("fab.open_coach")}
         className="fixed z-50 right-4 bottom-[calc(env(safe-area-inset-bottom)+168px)] group"
       >
-        <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-brand/40 blur-xl opacity-70 group-hover:opacity-100 transition-opacity" />
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-[0_10px_30px_-8px_color-mix(in_oklab,var(--brand)_70%,transparent)] ring-1 ring-white/10 backdrop-blur-md transition-transform duration-300 ease-out active:scale-95 group-hover:scale-105">
+        <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-alyva/30 blur-xl opacity-70 group-hover:opacity-100 transition-opacity" />
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-alyva text-alyva-foreground shadow-float ring-1 ring-black/5 transition-transform duration-300 ease-out active:scale-95 group-hover:scale-105">
           <Sparkles className="size-6" strokeWidth={2.2} />
         </span>
       </Link>
@@ -265,7 +265,7 @@ function MealSection({
         {!disabled && (
           <button
             onClick={onAdd}
-            className="grid size-8 place-items-center rounded-full bg-brand/15 text-brand"
+            className="grid size-8 place-items-center rounded-full bg-acc-nutrition-soft text-acc-nutrition"
             aria-label={tAddTo}
           >
             <Plus className="size-4" />
