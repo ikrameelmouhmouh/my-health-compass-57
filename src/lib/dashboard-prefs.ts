@@ -13,13 +13,15 @@ export type DashCardId =
   | "goals";
 
 export const DEFAULT_ORDER: DashCardId[] = [
+  // Four primary cards first: calories, fasting, steps, weight.
   "nutrition",
   "fasting",
+  "steps",
+  "weight",
+  // Then the fitness area and the rest.
   "workout",
   "water",
-  "steps",
   "activity",
-  "weight",
   "macros",
   "goals",
 ];

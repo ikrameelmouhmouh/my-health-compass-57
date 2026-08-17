@@ -27,6 +27,7 @@ import { Route as AuthenticatedPricingRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedNutritionRouteImport } from './routes/_authenticated/nutrition'
 import { Route as AuthenticatedMealPlannerRouteImport } from './routes/_authenticated/meal-planner'
+import { Route as AuthenticatedInsightsRouteImport } from './routes/_authenticated/insights'
 import { Route as AuthenticatedFitnessRouteImport } from './routes/_authenticated/fitness'
 import { Route as AuthenticatedFastingRouteImport } from './routes/_authenticated/fasting'
 import { Route as AuthenticatedBadgesRouteImport } from './routes/_authenticated/badges'
@@ -141,6 +142,11 @@ const AuthenticatedMealPlannerRoute =
     path: '/meal-planner',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedInsightsRoute = AuthenticatedInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedFitnessRoute = AuthenticatedFitnessRouteImport.update({
   id: '/fitness',
   path: '/fitness',
@@ -273,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/badges': typeof AuthenticatedBadgesRoute
   '/fasting': typeof AuthenticatedFastingRoute
   '/fitness': typeof AuthenticatedFitnessRoute
+  '/insights': typeof AuthenticatedInsightsRoute
   '/meal-planner': typeof AuthenticatedMealPlannerRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -313,6 +320,7 @@ export interface FileRoutesByTo {
   '/badges': typeof AuthenticatedBadgesRoute
   '/fasting': typeof AuthenticatedFastingRoute
   '/fitness': typeof AuthenticatedFitnessRoute
+  '/insights': typeof AuthenticatedInsightsRoute
   '/meal-planner': typeof AuthenticatedMealPlannerRoute
   '/nutrition': typeof AuthenticatedNutritionRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -355,6 +363,7 @@ export interface FileRoutesById {
   '/_authenticated/badges': typeof AuthenticatedBadgesRoute
   '/_authenticated/fasting': typeof AuthenticatedFastingRoute
   '/_authenticated/fitness': typeof AuthenticatedFitnessRoute
+  '/_authenticated/insights': typeof AuthenticatedInsightsRoute
   '/_authenticated/meal-planner': typeof AuthenticatedMealPlannerRoute
   '/_authenticated/nutrition': typeof AuthenticatedNutritionRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
@@ -397,6 +406,7 @@ export interface FileRouteTypes {
     | '/badges'
     | '/fasting'
     | '/fitness'
+    | '/insights'
     | '/meal-planner'
     | '/nutrition'
     | '/onboarding'
@@ -437,6 +447,7 @@ export interface FileRouteTypes {
     | '/badges'
     | '/fasting'
     | '/fitness'
+    | '/insights'
     | '/meal-planner'
     | '/nutrition'
     | '/onboarding'
@@ -478,6 +489,7 @@ export interface FileRouteTypes {
     | '/_authenticated/badges'
     | '/_authenticated/fasting'
     | '/_authenticated/fitness'
+    | '/_authenticated/insights'
     | '/_authenticated/meal-planner'
     | '/_authenticated/nutrition'
     | '/_authenticated/onboarding'
@@ -655,6 +667,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMealPlannerRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/insights': {
+      id: '/_authenticated/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof AuthenticatedInsightsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/fitness': {
       id: '/_authenticated/fitness'
       path: '/fitness'
@@ -822,6 +841,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedBadgesRoute: typeof AuthenticatedBadgesRoute
   AuthenticatedFastingRoute: typeof AuthenticatedFastingRoute
   AuthenticatedFitnessRoute: typeof AuthenticatedFitnessRoute
+  AuthenticatedInsightsRoute: typeof AuthenticatedInsightsRoute
   AuthenticatedMealPlannerRoute: typeof AuthenticatedMealPlannerRoute
   AuthenticatedNutritionRoute: typeof AuthenticatedNutritionRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
@@ -844,6 +864,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBadgesRoute: AuthenticatedBadgesRoute,
   AuthenticatedFastingRoute: AuthenticatedFastingRoute,
   AuthenticatedFitnessRoute: AuthenticatedFitnessRoute,
+  AuthenticatedInsightsRoute: AuthenticatedInsightsRoute,
   AuthenticatedMealPlannerRoute: AuthenticatedMealPlannerRoute,
   AuthenticatedNutritionRoute: AuthenticatedNutritionRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
