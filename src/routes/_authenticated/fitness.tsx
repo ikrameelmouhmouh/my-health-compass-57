@@ -11,6 +11,7 @@ import { TemplateEditor } from "@/components/template-editor";
 import { TemplateSyncDialog } from "@/components/template-sync-dialog";
 import { SessionStartSheet } from "@/components/workout/session-start-sheet";
 import { useStartWorkout } from "@/components/workout/use-start-workout";
+import { StartWorkoutButton } from "@/components/workout/start-workout-button";
 import { useWorkoutPlan, useTemplates, newTemplate, templatesFromPlan, type WorkoutTemplate } from "@/lib/workout-prefs";
 import type { WorkoutPlan } from "@/lib/workout.functions";
 import { useI18n } from "@/lib/i18n";
@@ -481,6 +482,7 @@ function WeekList({
               </div>
               {!d.rest && (
                 <>
+                  <StartWorkoutButton template={templateFor(d)} className="size-8" />
                   <span
                     role="button"
                     tabIndex={0}
@@ -507,9 +509,7 @@ function WeekList({
                     {ex.notes && <p className="text-[11px] text-muted-foreground">{ex.notes}</p>}
                   </div>
                 ))}
-                <Button size="sm" className="mt-1 w-full" onClick={() => startWorkout(templateFor(d))}>
-                  <Play className="mr-2 size-3.5 fill-current" /> {t("session.start")}
-                </Button>
+                <StartWorkoutButton template={templateFor(d)} variant="full" className="mt-1 w-full" />
               </div>
             )}
           </div>
@@ -586,6 +586,7 @@ function TemplatesSection() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1">
+                    <StartWorkoutButton template={tpl} className="size-8" />
                     <button
                       onClick={(e) => { e.stopPropagation(); setEditing(tpl); }}
                       className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-background"
