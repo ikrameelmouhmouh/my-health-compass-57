@@ -195,6 +195,8 @@ function ViewTabs({ view, setView }: { view: View; setView: (v: View) => void })
 function Header() {
   const { t } = useI18n();
   return (
+    <div>
+    <div className="mb-4 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
     <div className="flex items-center gap-3">
       <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
         <Dumbbell className="size-6" />
@@ -289,7 +291,6 @@ function Dashboard({
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
-      <div className="mb-4 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
       <Header />
       <ViewTabs view={view} setView={setView} />
 
