@@ -140,6 +140,17 @@
 
   --brand: oklch(0.58 0.11 142);
   --brand-foreground: oklch(1 0 0);
+
+  --acc-fitness: oklch(0.72 0.10 152);
+  --acc-fitness-soft: oklch(0.32 0.04 152);
+  --acc-water: oklch(0.74 0.09 240);
+  --acc-water-soft: oklch(0.30 0.04 240);
+  --acc-fasting: oklch(0.74 0.10 300);
+  --acc-fasting-soft: oklch(0.31 0.04 300);
+  --acc-weight: oklch(0.82 0.10 90);
+  --acc-weight-soft: oklch(0.32 0.04 90);
+  --acc-nutrition: oklch(0.76 0.10 15);
+  --acc-nutrition-soft: oklch(0.31 0.04 15);
 }
 
 @layer base {
