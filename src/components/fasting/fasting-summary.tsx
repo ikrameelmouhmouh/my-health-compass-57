@@ -79,10 +79,27 @@ export function FastingSummarySheet({
         <div className="px-6 pb-6 space-y-5">
           {/* Metrics */}
           <div className="grid grid-cols-3 gap-2">
-            <Metric label={t("fast.summary.duration")} value={fmtHM(entry.durationMs)} />
             <Metric label={t("fast.summary.goal")} value={`${targetH}h`} />
-            <Metric label={t("fast.summary.percent")} value={`${pct}%`} />
+            <Metric label={t("fast.summary.actual")} value={fmtHM(entry.durationMs)} />
+            <Metric
+              label={extraMs > 0 ? t("fast.summary.extra") : t("fast.summary.percent")}
+              value={extraMs > 0 ? `+${fmtHM(extraMs)}` : `${pct}%`}
+            />
           </div>
+
+          {extraMs > 0 && (
+            <div className="rounded-2xl border border-border bg-card px-4 py-3 text-center text-sm font-medium">
+              {t("fast.summary.extraTitle", { h: fmtHM(extraMs) })}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-3">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("fast.summary.endPhase")}
+            </span>
+            <span className="text-sm font-semibold">{t(`fast.phase.${reached.key}.title` as const)}</span>
+          </div>
+
 
           {entry.completed && typeof streak === "number" && streak > 0 && (
             <div className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card px-4 py-3">
