@@ -190,7 +190,7 @@ function Nutrition() {
         <div className="mt-4 grid grid-cols-3 divide-x divide-border border-t border-border pt-4">
           <MacroBlock
             label={t("food.carbs_long")} value={totals.carbs} goal={carbsTarget}
-            color="text-alyva" bar="bg-alyva" tint="bg-alyva/10" Icon={Utensils}
+            color="text-acc-carbs" bar="bg-acc-carbs" tint="bg-acc-carbs/15" Icon={Utensils}
           />
           <MacroBlock
             label={t("food.protein_long")} value={totals.protein} goal={proteinTarget}
