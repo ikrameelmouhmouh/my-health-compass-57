@@ -723,25 +723,34 @@ function AddFastDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
   dayKey: string;
-  onSave: (startIso: string, endIso: string) => void;
+  onSave: (startIso: string, endIso: string, protocol?: FastingProtocol) => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const locale = LOCALE_MAP[lang] ?? lang;
+  const [mode, setMode] = useState<FastingProtocol | "manual">("16:8");
   const [startTime, setStartTime] = useState("20:00");
   const [endTime, setEndTime] = useState("12:00");
 
   useEffect(() => {
-    if (open) { setStartTime("20:00"); setEndTime("12:00"); }
+    if (open) { setMode("16:8"); setStartTime("20:00"); setEndTime("12:00"); }
   }, [open]);
 
   const { startDate, endDate, hours } = useMemo(() => {
+    if (mode !== "manual") {
+      const start = new Date(`${dayKey}T${startTime || "00:00"}:00`);
+      const fastH = getProtocol(mode).fast;
+      const end = new Date(start.getTime() + fastH * 3_600_000);
+      return { startDate: start, endDate: end, hours: fastH };
+    }
     const end = new Date(`${dayKey}T${endTime || "00:00"}:00`);
     const start = new Date(`${dayKey}T${startTime || "00:00"}:00`);
     // End time earlier than or equal to start ⇒ the fast started the previous day.
     if (start.getTime() >= end.getTime()) start.setDate(start.getDate() - 1);
     return { startDate: start, endDate: end, hours: (end.getTime() - start.getTime()) / 3_600_000 };
-  }, [dayKey, startTime, endTime]);
+  }, [dayKey, startTime, endTime, mode]);
 
   const valid = hours > 0 && hours <= 72;
+  const fmtEnd = endDate.toLocaleString(locale, { weekday: "short", hour: "2-digit", minute: "2-digit" });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -750,16 +759,52 @@ function AddFastDialog({
           <DialogTitle className="font-display">{t("fast.add.title")}</DialogTitle>
           <DialogDescription>{t("fast.add.desc")}</DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-2 gap-3">
+
+        <div className="space-y-1.5">
+          <Label className="text-[12px]">{t("fast.add.protocol")}</Label>
+          <div className="flex flex-wrap gap-1.5">
+            {[...FASTING_PROTOCOLS.map((p) => p.id), "manual" as const].map((id) => {
+              const active = mode === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setMode(id)}
+                  className={`rounded-full border px-3 py-1.5 text-[12px] font-semibold transition-colors ${
+                    active
+                      ? "border-acc-fasting bg-acc-fasting-soft text-acc-fasting"
+                      : "border-border text-muted-foreground hover:bg-accent"
+                  }`}
+                >
+                  {id === "manual" ? t("fast.add.manual") : id}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className={mode === "manual" ? "grid grid-cols-2 gap-3" : "grid grid-cols-1 gap-3"}>
           <div className="space-y-1.5">
             <Label className="text-[12px]">{t("fast.add.start")}</Label>
             <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-[12px]">{t("fast.add.end")}</Label>
-            <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
-          </div>
+          {mode === "manual" && (
+            <div className="space-y-1.5">
+              <Label className="text-[12px]">{t("fast.add.end")}</Label>
+              <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+            </div>
+          )}
         </div>
+
+        {mode !== "manual" && (
+          <div className="flex items-center justify-between rounded-2xl border border-border px-3.5 py-2.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("fast.add.end")}
+            </span>
+            <span className="text-[13px] font-semibold tabular-nums">{valid ? fmtEnd : "—"}</span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between rounded-2xl bg-acc-fasting-soft px-3.5 py-2.5">
           <span className="text-[10px] font-semibold uppercase tracking-wider text-acc-fasting">
             {t("fast.add.duration")}
@@ -772,7 +817,11 @@ function AddFastDialog({
           <Button
             className="h-11 w-full rounded-2xl"
             disabled={!valid}
-            onClick={() => onSave(startDate.toISOString(), endDate.toISOString())}
+            onClick={() => onSave(
+              startDate.toISOString(),
+              endDate.toISOString(),
+              mode === "manual" ? undefined : mode,
+            )}
           >
             {t("fast.add.save")}
           </Button>
