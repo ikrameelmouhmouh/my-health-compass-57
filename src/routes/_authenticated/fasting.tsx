@@ -219,6 +219,7 @@ function FastingPage() {
       <PaywallOverlay feature={t("fast.title")} description={t("pay.overlay.fasting_desc")}>
         {tab === "overview" ? (
           <>
+            {isToday && (<>
             <FastingPhaseTimeline
               currentHours={live.active ? live.elapsedMs / 3_600_000 : 0}
               active={live.active}
@@ -366,6 +367,74 @@ function FastingPage() {
                 </div>
               </StatCard>
             </section>
+            </>)}
+
+            {/* Day history — soft lavender, editable */}
+            <section className="mt-4">
+              <div className="mb-2 flex items-baseline justify-between px-1">
+                <h2 className="font-display text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("fast.day.title")}
+                </h2>
+                {dayHours > 0 && (
+                  <span className="text-[11px] font-medium text-acc-fasting tabular-nums">
+                    {dayHours.toFixed(1)}u
+                  </span>
+                )}
+              </div>
+
+              {dayEntries.length === 0 ? (
+                <div className="rounded-[22px] border border-dashed border-border p-5 text-center text-[12.5px] text-muted-foreground">
+                  {t("fast.day.empty")}
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {dayEntries.map((e) => (
+                    <li key={e.id} className="flex items-center gap-3 rounded-[20px] border border-border bg-card p-3">
+                      <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${
+                        e.completed ? "bg-acc-fasting-soft text-acc-fasting" : "bg-muted text-muted-foreground"
+                      }`}>
+                        {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
+                      </div>
+                      <button
+                        onClick={() => { setSummary(e); setSummaryIsLive(false); }}
+                        className="min-w-0 flex-1 text-left"
+                      >
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className="truncate font-display text-sm font-semibold">
+                            {formatHM(e.durationMs)} · {e.protocol}
+                          </span>
+                          <span className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider ${
+                            e.completed ? "text-acc-fasting" : "text-muted-foreground"
+                          }`}>
+                            {e.completed ? t("fast.done") : t("fast.aborted")}
+                          </span>
+                        </div>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          {new Date(e.startedAt).toLocaleString(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          {" → "}
+                          {new Date(e.endedAt).toLocaleString(locale, { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </button>
+                      <button onClick={() => setEditEntry(e)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.edit")}>
+                        <Pencil className="size-3.5" />
+                      </button>
+                      <button onClick={() => deleteEntry(e.id)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.delete")}>
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setAddOpen(true)}
+                className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-[20px] border border-acc-fasting/25 bg-acc-fasting-soft/60 py-3 text-[13px] font-semibold text-acc-fasting ios-press"
+              >
+                <Plus className="size-4" />
+                {t("fast.add.btn")}
+              </button>
+            </section>
 
             {/* Tip of the day */}
             <button
@@ -422,65 +491,18 @@ function FastingPage() {
         )}
       </PaywallOverlay>
 
-      <Drawer open={historyOpen} onOpenChange={setHistoryOpen}>
-        <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader className="text-left">
-            <DrawerTitle className="font-display">{t("fast.history")}</DrawerTitle>
-            <DrawerDescription>{t("fast.subtitle")}</DrawerDescription>
-          </DrawerHeader>
-          <div className="overflow-y-auto px-4 pb-8">
-            {state.history.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                {t("fast.noHistory")}
-              </div>
-            ) : (
-              <ul className="space-y-2">
-                {state.history.slice(0, 50).map((e) => (
-                  <li key={e.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-                    <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${
-                      e.completed ? "bg-acc-fasting-soft text-acc-fasting" : "bg-muted text-muted-foreground"
-                    }`}>
-                      {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
-                    </div>
-                    <button
-                      onClick={() => { setSummary(e); setSummaryIsLive(false); }}
-                      className="min-w-0 flex-1 text-left"
-                    >
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="truncate font-display text-sm font-semibold">
-                          {formatHM(e.durationMs)} · {e.protocol}
-                        </span>
-                        <span className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider ${
-                          e.completed ? "text-acc-fasting" : "text-muted-foreground"
-                        }`}>
-                          {e.completed ? t("fast.done") : t("fast.aborted")}
-                        </span>
-                      </div>
-                      <p className="truncate text-[11px] text-muted-foreground">
-                        {new Date(e.startedAt).toLocaleString(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                        {" → "}
-                        {new Date(e.endedAt).toLocaleString(locale, { hour: "2-digit", minute: "2-digit" })}
-                      </p>
-                    </button>
-                    <button onClick={() => setEditEntry(e)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.edit")}>
-                      <Pencil className="size-3.5" />
-                    </button>
-                    <button onClick={() => deleteEntry(e.id)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.delete")}>
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
-
       <EditStartDialog
         open={editStart}
         onOpenChange={setEditStart}
         startedAt={state.startedAt}
         onSave={(iso) => { setStartTime(iso); setEditStart(false); }}
+      />
+
+      <AddFastDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        dayKey={viewKey}
+        onSave={(startIso, endIso) => { addEntry(startIso, endIso); setAddOpen(false); }}
       />
 
       <EditEntryDialog
