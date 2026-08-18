@@ -455,9 +455,14 @@ function FastingPage() {
                         onClick={() => { setSummary(e); setSummaryIsLive(false); }}
                         className="min-w-0 flex-1 text-left"
                       >
-                        <div className="flex items-baseline justify-between gap-2">
-                          <span className="truncate font-display text-sm font-semibold">
-                            {formatHM(e.durationMs)} · {e.protocol}
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="flex min-w-0 items-center gap-1.5">
+                            <span className="truncate font-display text-sm font-semibold">
+                              {formatHM(e.durationMs)}
+                            </span>
+                            <span className="shrink-0 rounded-full bg-acc-fasting-soft px-2 py-0.5 text-[10px] font-semibold tabular-nums text-acc-fasting">
+                              {e.protocol}
+                            </span>
                           </span>
                           <span className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider ${
                             e.completed ? "text-acc-fasting" : "text-muted-foreground"
