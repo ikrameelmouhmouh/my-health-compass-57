@@ -309,15 +309,15 @@ function MealSection({
   const totalKcal = meals.reduce((s, m) => s + m.kcal, 0);
   const Icon = MEAL_ICONS[type];
   return (
-    <div className="rounded-3xl border border-border bg-card p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="grid size-9 place-items-center rounded-2xl bg-alyva/10 text-alyva">
-            <Icon className="size-5" />
+    <div className="rounded-[26px] border border-border/70 bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10 text-alyva">
+            <Icon className="size-6" />
           </span>
-          <div>
-            <h3 className="font-display text-sm font-semibold">{label}</h3>
-            <p className="text-[11px] text-muted-foreground">
+          <div className="min-w-0">
+            <h3 className="font-display text-[16px] font-bold leading-tight">{label}</h3>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">
               {totalKcal} {tKcal} · {meals.length} {meals.length === 1 ? tItem : tItems}
             </p>
           </div>
@@ -325,13 +325,14 @@ function MealSection({
         {!disabled && (
           <button
             onClick={onAdd}
-            className="grid size-8 place-items-center rounded-full bg-alyva/12 text-alyva"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-alyva/10 text-alyva ios-press"
             aria-label={tAddTo}
           >
-            <Plus className="size-4" />
+            <Plus className="size-5" />
           </button>
         )}
       </div>
+
 
       {meals.length > 0 && (
         <ul className="mt-3 space-y-1.5">
