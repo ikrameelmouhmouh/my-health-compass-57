@@ -357,6 +357,35 @@ function fmtDur(ms: number) {
   return `${h}h ${m}m`;
 }
 
+/** Recompute streak fields from the full history (day-based, completed fasts). */
+function withStreakState(s: FastingState, history: FastEntry[]) {
+  const days = new Set(history.filter((e) => e.completed).map((e) => localDayKey(new Date(e.endedAt))));
+  const sorted = [...days].sort();
+  let longest = 0;
+  let run = 0;
+  let prev: string | null = null;
+  for (const d of sorted) {
+    const expected = prev ? localDayKey(new Date(new Date(prev + "T12:00:00").getTime() + 86_400_000)) : null;
+    run = expected === d ? run + 1 : 1;
+    longest = Math.max(longest, run);
+    prev = d;
+  }
+  const today = localDayKey();
+  const yesterday = localDayKey(new Date(Date.now() - 86_400_000));
+  let streak = 0;
+  let cursor = days.has(today) ? today : days.has(yesterday) ? yesterday : null;
+  while (cursor && days.has(cursor)) {
+    streak += 1;
+    cursor = localDayKey(new Date(new Date(cursor + "T12:00:00").getTime() - 86_400_000));
+  }
+  return {
+    history,
+    streak,
+    longestStreak: Math.max(longest, s.longestStreak === 0 ? 0 : longest),
+    lastCompletedDate: sorted.length ? sorted[sorted.length - 1] : null,
+  };
+}
+
 export function useFasting() {
   const [state, setState] = useState<FastingState>(() => loadFast());
   const stateRef = useRef(state);
@@ -437,7 +466,7 @@ export function useFasting() {
 
 
   const deleteEntry = useCallback((id: string) => {
-    setState((s) => ({ ...s, history: withStreaks(s, s.history.filter((e) => e.id !== id)) }));
+    setState((s) => ({ ...s, ...withStreakState(s, s.history.filter((e) => e.id !== id)) }));
   }, []);
 
   const updateEntry = useCallback((id: string, patch: Partial<Pick<FastEntry, "startedAt" | "endedAt">>) => {
