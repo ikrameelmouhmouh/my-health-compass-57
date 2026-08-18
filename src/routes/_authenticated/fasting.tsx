@@ -2,20 +2,22 @@ import { localDayKey } from "@/lib/local-date";
 import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute } from "@tanstack/react-router";
 import type * as React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Timer, Play, Pause, Square, Plus, Pencil, Trash2, Check, ChevronLeft, ChevronRight,
-  Sparkles, Flame, TrendingUp, CalendarCheck, Lightbulb,
+  Sparkles, Flame, TrendingUp, CalendarCheck, Lightbulb, Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MonthCalendar } from "@/components/nutrition/month-calendar";
 import {
-  useFasting, FASTING_PROTOCOLS, getProtocol,
-  type FastEntry,
+  useFasting, useFastReminders, FASTING_PROTOCOLS, getProtocol,
+  requestNotificationPermission, notify,
+  type FastEntry, type FastReminderPrefs,
 } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
@@ -63,6 +65,7 @@ function FastingPage() {
   const { t, lang } = useI18n();
   const locale = LOCALE_MAP[lang] ?? lang;
   const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry, addEntry } = useFasting();
+  const { reminders, toggleReminder } = useFastReminders();
   const [tab, setTab] = useState<"overview" | "insights">("overview");
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -85,7 +88,7 @@ function FastingPage() {
   const targetMs = proto.fast * 3_600_000;
 
   const live = useMemo(() => {
-    if (!state.startedAt) return { active: false, paused: false, elapsedMs: 0, leftMs: 0, pct: 0 };
+    if (!state.startedAt) return { active: false, paused: false, elapsedMs: 0, leftMs: 0, overMs: 0, pct: 0 };
     const now = Date.now();
     let pausedMs = state.pausedTotalMs;
     if (state.pausedAt) pausedMs += now - new Date(state.pausedAt).getTime();
@@ -95,19 +98,37 @@ function FastingPage() {
       paused: !!state.pausedAt,
       elapsedMs,
       leftMs: Math.max(0, targetMs - elapsedMs),
+      overMs: Math.max(0, elapsedMs - targetMs),
       pct: Math.min(100, (elapsedMs / targetMs) * 100),
     };
   }, [state.startedAt, state.pausedAt, state.pausedTotalMs, targetMs, tick]);
 
+  /** Expected moment the protocol goal is reached (start + protocol hours + pauses). */
+  const goalAt = useMemo(() => {
+    if (!state.startedAt) return null;
+    let pausedMs = state.pausedTotalMs;
+    if (state.pausedAt) pausedMs += Date.now() - new Date(state.pausedAt).getTime();
+    return new Date(new Date(state.startedAt).getTime() + pausedMs + targetMs);
+  }, [state.startedAt, state.pausedAt, state.pausedTotalMs, targetMs, tick]);
+
+  /* Optional reminders around the calculated goal time. */
+  const firedRef = useRef<Record<string, string>>({});
   useEffect(() => {
-    if (!live.active || live.paused) return;
-    if (live.elapsedMs >= targetMs && live.elapsedMs - targetMs < 2000) {
-      try {
-        if ("Notification" in window && Notification.permission === "granted")
-          new Notification(t("fast.title"), { body: t("fast.status.eating") });
-      } catch { /* ignore */ }
-    }
-  }, [live.active, live.paused, live.elapsedMs, targetMs, t]);
+    if (!live.active || live.paused || !goalAt) return;
+    const key = `${state.startedAt}-${state.protocol}`;
+    const leftMin = live.leftMs / 60_000;
+    const fire = (id: keyof FastReminderPrefs, body: string) => {
+      if (firedRef.current[id] === key) return;
+      firedRef.current[id] = key;
+      notify(t("fast.title"), body);
+    };
+    if (reminders.before1h && leftMin <= 60 && leftMin > 55)
+      fire("before1h", t("fast.rem.body1h", { p: proto.label }));
+    if (reminders.before5m && leftMin <= 5 && leftMin > 0)
+      fire("before5m", t("fast.rem.body5m"));
+    if (reminders.atGoal && live.elapsedMs >= targetMs)
+      fire("atGoal", t("fast.rem.bodyAt", { h: formatHM(live.elapsedMs) }));
+  }, [live.active, live.paused, live.elapsedMs, live.leftMs, goalAt, reminders, targetMs, state.startedAt, state.protocol, proto.label, t]);
 
   const viewDate = useMemo(() => {
     const d = new Date();
@@ -124,10 +145,8 @@ function FastingPage() {
   const daysDoneThisWeek = last7.filter((d) => d.hours >= proto.fast * 0.9).length;
   const weekLeft = Math.max(0, 7 - daysDoneThisWeek);
 
-  const eatStart = state.startedAt ? new Date(new Date(state.startedAt).getTime() + targetMs) : null;
-  const eatEnd = eatStart ? new Date(eatStart.getTime() + proto.eat * 3_600_000) : null;
   const hhmm = (d: Date) => d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
-  const windowText = eatStart && eatEnd ? `${hhmm(eatStart)} – ${hhmm(eatEnd)}` : proto.window;
+  const goalAtText = goalAt ? hhmm(goalAt) : "—";
 
   const tipIndex = useMemo(() => fastingTipOfTheDay(localDayKey(viewDate)), [viewDate]);
 
@@ -249,12 +268,17 @@ function FastingPage() {
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <p className="text-[12px] leading-snug text-muted-foreground">
                     {live.active
-                      ? t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
+                      ? live.overMs > 0
+                        ? t("fast.overtime") + " " + formatHM(live.overMs)
+                        : t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
                       : t("fast.tapStart")}
                   </p>
                   <Row label={t("fast.elapsed")} value={live.active ? formatHM(live.elapsedMs) : "—"} />
                   <Row label={t("fast.remaining")} value={live.active ? formatHM(live.leftMs) : "—"} />
                   <Row label={t("fast.goalLabel")} value={`${proto.fast}u`} />
+                  {live.active && live.overMs > 0 && (
+                    <Row label={t("fast.overtime")} value={`+${formatHM(live.overMs)}`} />
+                  )}
                 </div>
               </div>
 
@@ -270,9 +294,9 @@ function FastingPage() {
 
               <div className="mt-3 flex items-center justify-between rounded-2xl bg-acc-fasting-soft px-3.5 py-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-acc-fasting">
-                  {t("fast.eatWindow")}
+                  {t("fast.goalAt")}
                 </span>
-                <span className="text-[13px] font-semibold tabular-nums">{windowText}</span>
+                <span className="text-[13px] font-semibold tabular-nums">{goalAtText}</span>
               </div>
 
               <div className="mt-3 flex gap-2">
@@ -330,7 +354,7 @@ function FastingPage() {
                             <span className={`truncate text-[11px] font-medium ${tint.text}`}>{t(TAG_KEY[p.id])}</span>
                           </span>
                         </span>
-                        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{p.window}</span>
+                        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{p.fast}u</span>
                         {selected && <Check className={`size-4 shrink-0 ${tint.text}`} />}
                       </button>
                     </li>
@@ -338,6 +362,38 @@ function FastingPage() {
                 })}
               </ul>
             </section>
+
+            {/* Reminders around the calculated goal time */}
+            <section className="mt-4 rounded-[22px] border border-border bg-card p-4">
+              <div className="flex items-start gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-acc-fasting-soft">
+                  <Bell className="size-[18px] text-acc-fasting" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-display text-[14px] font-bold leading-tight">{t("fast.rem.title")}</p>
+                  <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{t("fast.rem.desc")}</p>
+                </div>
+              </div>
+              <div className="mt-3 space-y-1">
+                {([
+                  ["before1h", t("fast.rem.1h")],
+                  ["before5m", t("fast.rem.5m")],
+                  ["atGoal", t("fast.rem.at")],
+                ] as const).map(([key, label]) => (
+                  <div key={key} className="flex items-center justify-between border-b border-border/60 py-2 last:border-0">
+                    <span className="text-[13px]">{label}</span>
+                    <Switch
+                      checked={reminders[key]}
+                      onCheckedChange={(v) => {
+                        if (v) void requestNotificationPermission();
+                        toggleReminder(key, v);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+
 
             {/* Stay consistent */}
             <section className="mt-4 flex items-start gap-3 rounded-[22px] border border-border bg-card p-4">
