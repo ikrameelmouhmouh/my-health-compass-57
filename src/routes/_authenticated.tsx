@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { BottomNav } from "@/components/bottom-nav";
 import { AiFab } from "@/components/ai-fab";
+import { AiQuickActionsProvider } from "@/lib/ai-quick-actions";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
