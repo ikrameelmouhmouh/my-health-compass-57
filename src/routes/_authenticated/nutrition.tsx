@@ -312,8 +312,8 @@ function MealSection({
     <div className="rounded-[26px] border border-border/70 bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3.5">
-          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10 text-alyva">
-            <Icon className="size-6" />
+          <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10 text-[22px] leading-none">
+            {emoji}
           </span>
           <div className="min-w-0">
             <h3 className="font-display text-[16px] font-bold leading-tight">{label}</h3>
