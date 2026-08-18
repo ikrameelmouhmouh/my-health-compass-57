@@ -36,12 +36,12 @@ export function FastingTipsSheet({
                 key={n}
                 className={`flex items-start gap-3 rounded-3xl px-4 py-4 ${
                   n === highlight
-                    ? "bg-acc-fasting-soft ring-1 ring-acc-fasting/30"
-                    : "bg-acc-fasting-soft/50"
+                    ? "bg-alyva/[0.09] ring-1 ring-alyva/25"
+                    : "bg-alyva/[0.045]"
                 }`}
               >
-                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-acc-fasting/15">
-                  <Lightbulb className="size-5 text-acc-fasting" />
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-alyva/10">
+                  <Lightbulb className="size-5 text-alyva" />
                 </span>
                 <p className="min-w-0 text-[13px] leading-relaxed text-foreground/90">
                   {t(`fast.tip.${n}`)}
