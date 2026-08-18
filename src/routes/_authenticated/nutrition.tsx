@@ -238,28 +238,6 @@ function Nutrition() {
       )}
       </PaywallOverlay>
 
-      <button
-        type="button"
-        onClick={() => setTipsOpen(true)}
-        className="mt-5 flex w-full items-start gap-4 rounded-[28px] bg-alyva/[0.045] px-5 py-5 text-left ios-press"
-      >
-        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10">
-          <TipIcon className="size-6 text-alyva" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-alyva">
-            {t("nutr.tip_title")}
-          </p>
-          <p className="mt-1 font-display text-[15px] font-bold leading-tight">
-            {t(`nutr.tip.${tipIndex + 1}.h`)}
-          </p>
-          <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-            {t(`nutr.tip.${tipIndex + 1}.b`)}
-          </p>
-        </div>
-        <ChevRight className="mt-1 size-5 shrink-0 text-muted-foreground/70 rtl:rotate-180" />
-      </button>
-      <TipsSheet open={tipsOpen} onOpenChange={setTipsOpen} highlight={tipIndex} />
 
 
       {isToday && (
@@ -286,6 +264,29 @@ function Nutrition() {
           </Link>
         </div>
       )}
+
+      <button
+        type="button"
+        onClick={() => setTipsOpen(true)}
+        className="mt-5 flex w-full items-start gap-4 rounded-[28px] bg-alyva/[0.045] px-5 py-5 text-left ios-press"
+      >
+        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10">
+          <TipIcon className="size-6 text-alyva" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-alyva">
+            {t("nutr.tip_title")}
+          </p>
+          <p className="mt-1 font-display text-[15px] font-bold leading-tight">
+            {t(`nutr.tip.${tipIndex + 1}.h`)}
+          </p>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
+            {t(`nutr.tip.${tipIndex + 1}.b`)}
+          </p>
+        </div>
+        <ChevRight className="mt-1 size-5 shrink-0 text-muted-foreground/70 rtl:rotate-180" />
+      </button>
+      <TipsSheet open={tipsOpen} onOpenChange={setTipsOpen} highlight={tipIndex} />
 
 
 
