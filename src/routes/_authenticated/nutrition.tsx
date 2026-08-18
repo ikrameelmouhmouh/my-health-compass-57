@@ -154,47 +154,51 @@ function Nutrition() {
 
       <PaywallOverlay feature={t("nutr.title")} description={t("pay.overlay.food_desc")}>
       <section className="mt-5 rounded-[28px] border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-medium text-muted-foreground">{t("nutr.cal_remaining")}</p>
-            <p className="mt-1 font-display text-[34px] font-bold leading-none tabular-nums">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1 pt-1">
+            <p className="text-[12px] font-medium text-muted-foreground">{t("nutr.still")}</p>
+            <p className="mt-1 font-display text-[32px] font-bold leading-none tabular-nums">
               {remaining.toLocaleString()}
-              <span className="ml-1.5 text-sm font-semibold text-muted-foreground">{t("food.kcal")}</span>
+              <span className="ml-1.5 text-[13px] font-semibold text-muted-foreground">{t("nutr.kcal_to_eat")}</span>
             </p>
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-alyva/12">
+            <div className="mt-3 h-[6px] overflow-hidden rounded-full bg-alyva/12">
               <div className="h-full rounded-full bg-alyva transition-all" style={{ width: `${pct}%` }} />
             </div>
-            <p className="mt-2 text-[12px] text-muted-foreground">
-              <span className="font-semibold text-foreground tabular-nums">{totals.kcal}</span>{" "}
-              {t("food.kcal")} {t("nutr.eaten")}
+            <p className="mt-2 text-[12px] font-semibold text-alyva tabular-nums">
+              {totals.kcal} {t("nutr.kcal_eaten")}
             </p>
           </div>
 
-          <div className="relative grid size-[104px] shrink-0 place-items-center">
-            <svg width={104} height={104} className="-rotate-90">
-              <circle cx={52} cy={52} r={44} stroke="currentColor" className="text-alyva/12" strokeWidth={10} fill="none" />
-              <circle
-                cx={52} cy={52} r={44}
-                stroke="currentColor" className="text-alyva"
-                strokeWidth={10} strokeLinecap="round" fill="none"
-                strokeDasharray={2 * Math.PI * 44}
-                strokeDashoffset={2 * Math.PI * 44 - (pct / 100) * 2 * Math.PI * 44}
-              />
-            </svg>
-            <span className="absolute grid size-12 place-items-center rounded-full bg-alyva/10">
-              <Flame className="size-6 text-alyva" />
-            </span>
+          <div className="relative shrink-0">
+            <CalorieGauge pct={pct} />
+            <div className="absolute inset-0 flex items-center justify-center gap-2 px-3">
+              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-alyva/10">
+                <Flame className="size-4 text-alyva" />
+              </span>
+              <span className="min-w-0 leading-tight">
+                <span className="block text-[10px] font-medium text-muted-foreground">{t("nutr.goal")}</span>
+                <span className="block font-display text-[15px] font-bold tabular-nums">
+                  {calorieTarget.toLocaleString()}
+                </span>
+                <span className="block text-[10px] text-muted-foreground">{t("food.kcal")}</span>
+              </span>
+            </div>
           </div>
         </div>
 
-        <p className="mt-4 text-[12px] text-muted-foreground">
-          {t("nutr.goal")} <span className="font-semibold text-foreground tabular-nums">{calorieTarget.toLocaleString()}</span> {t("food.kcal")}
-        </p>
-
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <MacroBlock label={t("food.carbs")} value={totals.carbs} goal={carbsTarget} color="text-alyva" />
-          <MacroBlock label={t("food.protein")} value={totals.protein} goal={proteinTarget} color="text-acc-protein" />
-          <MacroBlock label={t("food.fat")} value={totals.fat} goal={fatTarget} color="text-acc-fat" />
+        <div className="mt-4 grid grid-cols-3 divide-x divide-border border-t border-border pt-4">
+          <MacroBlock
+            label={t("food.carbs_long")} value={totals.carbs} goal={carbsTarget}
+            color="text-alyva" bar="bg-alyva" tint="bg-alyva/10" Icon={Utensils}
+          />
+          <MacroBlock
+            label={t("food.protein_long")} value={totals.protein} goal={proteinTarget}
+            color="text-acc-protein" bar="bg-acc-protein" tint="bg-acc-protein/15" Icon={Droplet}
+          />
+          <MacroBlock
+            label={t("food.fat_long")} value={totals.fat} goal={fatTarget}
+            color="text-acc-fat" bar="bg-acc-fat" tint="bg-acc-fat/20" Icon={Droplets}
+          />
         </div>
       </section>
       </PaywallOverlay>
