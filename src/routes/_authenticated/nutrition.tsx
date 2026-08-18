@@ -7,8 +7,11 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
-  Camera, CalendarDays, Utensils, Search, Lightbulb,
+  Camera, CalendarDays, Utensils, Search,
 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MonthCalendar } from "@/components/nutrition/month-calendar";
+import { MEAL_ICONS, ScanMealIcon, PlannerIcon, TipIcon } from "@/components/nutrition/meal-icons";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useRegisterAiQuickActions } from "@/lib/ai-quick-actions";
 import { useNavigate } from "@tanstack/react-router";
@@ -28,12 +31,13 @@ export const Route = createFileRoute("/_authenticated/nutrition")({
 function Nutrition() {
   const { user } = useAuth();
   const { t, lang } = useI18n();
-  const { removeMeal, logMeal, mealsOn } = useMeals();
+  const { removeMeal, logMeal, mealsOn, meals } = useMeals();
   const { day, addMeal } = useDayLog();
   const [open, setOpen] = useState(false);
   const [defaultMealType, setDefaultMealType] = useState<MealType | undefined>();
   const [autoOpenScan, setAutoOpenScan] = useState(false);
   const [dateOffset, setDateOffset] = useState(0);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -55,6 +59,17 @@ function Nutrition() {
     return localDayKey(d);
   }, [dateOffset]);
   const isToday = dateOffset === 0;
+
+  const markedDays = useMemo(() => new Set(meals.map((m) => m.date)), [meals]);
+
+  function selectDay(day: string) {
+    const target = new Date(day + "T00:00:00");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diff = Math.round((target.getTime() - today.getTime()) / 86_400_000);
+    setDateOffset(Math.min(0, diff));
+    setCalendarOpen(false);
+  }
 
   const dayMeals = mealsOn(viewDate);
   const totals = useMemo(() => sum(dayMeals), [dayMeals]);
@@ -111,9 +126,24 @@ function Nutrition() {
           >
             <ChevronLeft className="size-4" />
           </button>
-          <div className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center">
-            <span className="text-[13px] font-semibold capitalize">{formatDate(viewDate, lang)}</span>
-          </div>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center ios-press"
+              >
+                <span className="text-[13px] font-semibold capitalize">{formatDate(viewDate, lang)}</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="center" className="w-[320px] rounded-3xl p-4">
+              <MonthCalendar
+                value={viewDate}
+                markedDays={markedDays}
+                locale={LOCALE_MAP[lang]}
+                onSelect={selectDay}
+              />
+            </PopoverContent>
+          </Popover>
           <button
             onClick={() => setDateOffset((d) => Math.min(0, d + 1))}
             className="grid size-9 shrink-0 place-items-center rounded-full border border-border ios-press disabled:opacity-40"
