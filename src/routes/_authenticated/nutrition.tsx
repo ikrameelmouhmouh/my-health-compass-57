@@ -1,13 +1,14 @@
 import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
-  Camera, CalendarDays, Utensils, Search,
+  Camera, CalendarDays, Utensils, Search, Droplet, Droplets,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MonthCalendar } from "@/components/nutrition/month-calendar";
@@ -115,10 +116,7 @@ function Nutrition() {
       <div className="mb-5 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
 
       <header>
-        <h1 className="font-display text-[30px] font-semibold leading-tight tracking-tight">
-          {t("nutr.title")}
-        </h1>
-        <div className="mt-3 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setDateOffset((d) => d - 1)}
             className="grid size-9 shrink-0 place-items-center rounded-full border border-border ios-press"
@@ -157,47 +155,51 @@ function Nutrition() {
 
       <PaywallOverlay feature={t("nutr.title")} description={t("pay.overlay.food_desc")}>
       <section className="mt-5 rounded-[28px] border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-medium text-muted-foreground">{t("nutr.cal_remaining")}</p>
-            <p className="mt-1 font-display text-[34px] font-bold leading-none tabular-nums">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1 pt-1">
+            <p className="text-[12px] font-medium text-muted-foreground">{t("nutr.still")}</p>
+            <p className="mt-1 font-display text-[32px] font-bold leading-none tabular-nums">
               {remaining.toLocaleString()}
-              <span className="ml-1.5 text-sm font-semibold text-muted-foreground">{t("food.kcal")}</span>
+              <span className="ml-1.5 text-[13px] font-semibold text-muted-foreground">{t("nutr.kcal_to_eat")}</span>
             </p>
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-alyva/12">
+            <div className="mt-3 h-[6px] overflow-hidden rounded-full bg-alyva/12">
               <div className="h-full rounded-full bg-alyva transition-all" style={{ width: `${pct}%` }} />
             </div>
-            <p className="mt-2 text-[12px] text-muted-foreground">
-              <span className="font-semibold text-foreground tabular-nums">{totals.kcal}</span>{" "}
-              {t("food.kcal")} {t("nutr.eaten")}
+            <p className="mt-2 text-[12px] font-semibold text-alyva tabular-nums">
+              {totals.kcal} {t("nutr.kcal_eaten")}
             </p>
           </div>
 
-          <div className="relative grid size-[104px] shrink-0 place-items-center">
-            <svg width={104} height={104} className="-rotate-90">
-              <circle cx={52} cy={52} r={44} stroke="currentColor" className="text-alyva/12" strokeWidth={10} fill="none" />
-              <circle
-                cx={52} cy={52} r={44}
-                stroke="currentColor" className="text-alyva"
-                strokeWidth={10} strokeLinecap="round" fill="none"
-                strokeDasharray={2 * Math.PI * 44}
-                strokeDashoffset={2 * Math.PI * 44 - (pct / 100) * 2 * Math.PI * 44}
-              />
-            </svg>
-            <span className="absolute grid size-12 place-items-center rounded-full bg-alyva/10">
-              <Flame className="size-6 text-alyva" />
-            </span>
+          <div className="relative shrink-0">
+            <CalorieGauge pct={pct} />
+            <div className="absolute inset-0 flex items-center justify-center gap-2 px-3">
+              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-alyva/10">
+                <Flame className="size-4 text-alyva" />
+              </span>
+              <span className="min-w-0 leading-tight">
+                <span className="block text-[10px] font-medium text-muted-foreground">{t("nutr.goal")}</span>
+                <span className="block font-display text-[15px] font-bold tabular-nums">
+                  {calorieTarget.toLocaleString()}
+                </span>
+                <span className="block text-[10px] text-muted-foreground">{t("food.kcal")}</span>
+              </span>
+            </div>
           </div>
         </div>
 
-        <p className="mt-4 text-[12px] text-muted-foreground">
-          {t("nutr.goal")} <span className="font-semibold text-foreground tabular-nums">{calorieTarget.toLocaleString()}</span> {t("food.kcal")}
-        </p>
-
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <MacroBlock label={t("food.carbs")} value={totals.carbs} goal={carbsTarget} color="text-alyva" />
-          <MacroBlock label={t("food.protein")} value={totals.protein} goal={proteinTarget} color="text-acc-protein" />
-          <MacroBlock label={t("food.fat")} value={totals.fat} goal={fatTarget} color="text-acc-fat" />
+        <div className="mt-4 grid grid-cols-3 divide-x divide-border border-t border-border pt-4">
+          <MacroBlock
+            label={t("food.carbs_long")} value={totals.carbs} goal={carbsTarget}
+            color="text-alyva" bar="bg-alyva" tint="bg-alyva/10" Icon={Utensils}
+          />
+          <MacroBlock
+            label={t("food.protein_long")} value={totals.protein} goal={proteinTarget}
+            color="text-acc-protein" bar="bg-acc-protein" tint="bg-acc-protein/15" Icon={Droplet}
+          />
+          <MacroBlock
+            label={t("food.fat_long")} value={totals.fat} goal={fatTarget}
+            color="text-acc-fat" bar="bg-acc-fat" tint="bg-acc-fat/20" Icon={Droplets}
+          />
         </div>
       </section>
       </PaywallOverlay>
@@ -360,29 +362,52 @@ function MealSection({
   );
 }
 
-function MacroBlock({ label, value, goal, color }: { label: string; value: number; goal: number; color: string }) {
-  const pct = clamp(goal > 0 ? (value / goal) * 100 : 0);
-  const r = 22;
-  const c = 2 * Math.PI * r;
+function CalorieGauge({ pct }: { pct: number }) {
+  const size = 132, stroke = 11, r = (size - stroke) / 2 - 2;
+  const cx = size / 2, cy = size / 2;
+  const sweep = 260; // degrees
+  const start = 90 + (360 - sweep) / 2;
+  const pol = (deg: number) => {
+    const rad = (deg * Math.PI) / 180;
+    return `${cx + r * Math.cos(rad)} ${cy + r * Math.sin(rad)}`;
+  };
+  const d = `M ${pol(start)} A ${r} ${r} 0 ${sweep > 180 ? 1 : 0} 1 ${pol(start + sweep)}`;
+  const len = (sweep / 360) * 2 * Math.PI * r;
   return (
-    <div className="rounded-2xl border border-border p-3 text-center">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <div className="relative mx-auto mt-2 grid size-14 place-items-center">
-        <svg width={56} height={56} className="-rotate-90">
-          <circle cx={28} cy={28} r={r} stroke="currentColor" strokeOpacity={0.12} strokeWidth={5} fill="none" />
-          <circle
-            cx={28} cy={28} r={r}
-            stroke="currentColor" className={color}
-            strokeWidth={5} strokeLinecap="round" fill="none"
-            strokeDasharray={c}
-            strokeDashoffset={c - (pct / 100) * c}
-          />
-        </svg>
-        <span className="absolute text-[10px] font-bold">{Math.round(pct)}%</span>
+    <svg width={size} height={size} className="block">
+      <path d={d} stroke="currentColor" className="text-alyva/15" strokeWidth={stroke} strokeLinecap="round" fill="none" />
+      <path
+        d={d} stroke="currentColor" className="text-alyva transition-all"
+        strokeWidth={stroke} strokeLinecap="round" fill="none"
+        strokeDasharray={len} strokeDashoffset={len - (clamp(pct) / 100) * len}
+      />
+    </svg>
+  );
+}
+
+function MacroBlock({
+  label, value, goal, color, bar, tint, Icon,
+}: {
+  label: string; value: number; goal: number;
+  color: string; bar: string; tint: string;
+  Icon: React.ComponentType<{ className?: string }>;
+}) {
+  const pct = clamp(goal > 0 ? (value / goal) * 100 : 0);
+  return (
+    <div className="px-2 first:pl-0 last:pr-0">
+      <div className="flex items-center gap-1.5">
+        <span className={`grid size-6 shrink-0 place-items-center rounded-full ${tint}`}>
+          <Icon className={`size-3.5 ${color}`} />
+        </span>
+        <p className="truncate text-[11px] font-semibold">{label}</p>
       </div>
-      <p className="mt-1 text-[11px] font-semibold tabular-nums">
-        {Math.round(value)}<span className="text-muted-foreground">/{goal}g</span>
+      <p className="mt-2 text-[12px] font-semibold tabular-nums">
+        <span className={color}>{Math.round(value)}</span>
+        <span className="text-muted-foreground"> / {goal} g</span>
       </p>
+      <div className="mt-2 h-1 overflow-hidden rounded-full bg-muted">
+        <div className={`h-full rounded-full ${bar} transition-all`} style={{ width: `${pct}%` }} />
+      </div>
     </div>
   );
 }
