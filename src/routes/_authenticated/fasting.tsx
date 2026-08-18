@@ -17,7 +17,7 @@ import { MonthCalendar } from "@/components/nutrition/month-calendar";
 import {
   useFasting, useFastReminders, FASTING_PROTOCOLS, getProtocol,
   requestNotificationPermission, notify,
-  type FastEntry, type FastReminderPrefs,
+  type FastEntry, type FastReminderPrefs, type FastingProtocol,
 } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
@@ -563,7 +563,7 @@ function FastingPage() {
         open={addOpen}
         onOpenChange={setAddOpen}
         dayKey={viewKey}
-        onSave={(startIso, endIso) => { addEntry(startIso, endIso); setAddOpen(false); }}
+        onSave={(startIso, endIso, protocol) => { addEntry(startIso, endIso, protocol); setAddOpen(false); }}
       />
 
       <EditEntryDialog
