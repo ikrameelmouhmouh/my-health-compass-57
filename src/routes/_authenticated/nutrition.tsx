@@ -1,6 +1,7 @@
 import { todayLocalKey, localDayKey } from "@/lib/local-date";
 import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import type * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth-context";
