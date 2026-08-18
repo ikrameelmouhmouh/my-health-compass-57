@@ -1,6 +1,7 @@
 import { localDayKey } from "@/lib/local-date";
 import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute } from "@tanstack/react-router";
+import type * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
   Timer, Play, Pause, Square, Bell, Pencil, Trash2, Check, ChevronLeft, ChevronRight,
@@ -13,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import {
   useFasting, FASTING_PROTOCOLS, getProtocol,
-  requestNotificationPermission, type FastingProtocol, type FastEntry,
+  requestNotificationPermission, type FastEntry,
 } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
@@ -708,5 +709,3 @@ function bucketByDay(history: FastEntry[], days: number, locale: string) {
   }
   return out;
 }
-
-export type { FastingProtocol };
