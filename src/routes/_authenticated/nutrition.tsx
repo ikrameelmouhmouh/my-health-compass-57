@@ -234,25 +234,31 @@ function Nutrition() {
       )}
       </PaywallOverlay>
 
-      <section className="mt-5 flex items-start gap-3 rounded-3xl border border-alyva/20 bg-alyva/[0.05] px-4 py-3">
-        <TipIcon className="mt-0.5 size-5 shrink-0 text-alyva" />
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-alyva">
+      <section className="mt-5 flex items-start gap-4 rounded-[28px] bg-alyva/[0.045] px-5 py-5">
+        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10">
+          <TipIcon className="size-6 text-alyva" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-alyva">
             {t("nutr.tip_title")}
           </p>
-          <p className="mt-0.5 text-[12px] leading-snug text-foreground/90">
+          <p className="mt-1 font-display text-[15px] font-bold leading-tight">
+            {t("nutr.tip_headline")}
+          </p>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
             {t("today.aura.tip_default")}
           </p>
         </div>
+        <ChevRight className="mt-1 size-5 shrink-0 text-muted-foreground/70 rtl:rotate-180" />
       </section>
 
       {isToday && (
         <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             onClick={openScan}
-            className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
+            className="flex flex-col items-start rounded-3xl bg-acc-fitness-soft p-4 text-left ios-press"
           >
-            <div className="grid size-10 place-items-center rounded-2xl bg-alyva/10 text-alyva">
+            <div className="grid size-11 place-items-center rounded-full bg-acc-fitness/15 text-acc-fitness">
               <ScanMealIcon className="size-5" />
             </div>
             <p className="mt-3 font-display text-sm font-semibold">{t("nutr.scan_meal")}</p>
@@ -260,9 +266,9 @@ function Nutrition() {
           </button>
           <Link
             to="/meal-planner"
-            className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
+            className="flex flex-col items-start rounded-3xl bg-acc-fasting-soft p-4 text-left ios-press"
           >
-            <div className="grid size-10 place-items-center rounded-2xl bg-alyva/10 text-alyva">
+            <div className="grid size-11 place-items-center rounded-full bg-acc-fasting/15 text-acc-fasting">
               <PlannerIcon className="size-5" />
             </div>
             <p className="mt-3 font-display text-sm font-semibold">{t("mealplan.title")}</p>
@@ -270,6 +276,7 @@ function Nutrition() {
           </Link>
         </div>
       )}
+
 
 
       <FoodLogDialog
@@ -302,15 +309,15 @@ function MealSection({
   const totalKcal = meals.reduce((s, m) => s + m.kcal, 0);
   const Icon = MEAL_ICONS[type];
   return (
-    <div className="rounded-3xl border border-border bg-card p-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="grid size-9 place-items-center rounded-2xl bg-alyva/10 text-alyva">
-            <Icon className="size-5" />
+    <div className="rounded-[26px] border border-border/70 bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10 text-alyva">
+            <Icon className="size-6" />
           </span>
-          <div>
-            <h3 className="font-display text-sm font-semibold">{label}</h3>
-            <p className="text-[11px] text-muted-foreground">
+          <div className="min-w-0">
+            <h3 className="font-display text-[16px] font-bold leading-tight">{label}</h3>
+            <p className="mt-0.5 text-[13px] text-muted-foreground">
               {totalKcal} {tKcal} · {meals.length} {meals.length === 1 ? tItem : tItems}
             </p>
           </div>
@@ -318,13 +325,14 @@ function MealSection({
         {!disabled && (
           <button
             onClick={onAdd}
-            className="grid size-8 place-items-center rounded-full bg-alyva/12 text-alyva"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-alyva/10 text-alyva ios-press"
             aria-label={tAddTo}
           >
-            <Plus className="size-4" />
+            <Plus className="size-5" />
           </button>
         )}
       </div>
+
 
       {meals.length > 0 && (
         <ul className="mt-3 space-y-1.5">

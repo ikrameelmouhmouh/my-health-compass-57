@@ -31,10 +31,11 @@ export function BowlIcon(props: IconProps) {
 export function SaladPlateIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
-      <circle cx="12" cy="13" r="7.5" />
-      <circle cx="12" cy="13" r="4" />
-      <path d="M2.5 13h1.6M19.9 13h1.6" />
-      <path d="M9.5 6.5c.6-1.6 2.2-2.6 3.9-2.4" />
+      <path d="M3.5 11.5h17a8.5 8.5 0 0 1-8.5 8 8.5 8.5 0 0 1-8.5-8Z" />
+      <path d="M7.5 11.5c-.8-1.4-.3-3 1.2-3.6" />
+      <path d="M9.8 11.5c-.6-1.9.4-3.7 2.2-4.2" />
+      <path d="M13.6 11.5c.1-2 1.6-3.3 3.3-3.2" />
+      <path d="M11.3 8c.5-1.4 1.8-2.2 3.2-2" />
     </svg>
   );
 }
@@ -42,13 +43,13 @@ export function SaladPlateIcon(props: IconProps) {
 export function CutleryPlateIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
-      <circle cx="12" cy="12" r="6.2" />
-      <circle cx="12" cy="12" r="3.2" />
-      <path d="M3.4 4.5v4.2c0 .8.6 1.4 1.3 1.4S6 9.5 6 8.7V4.5M4.7 10.1V19.5" />
-      <path d="M19.4 4.5c-1 .8-1.5 2-1.5 3.4 0 1 .5 1.7 1.5 1.9V19.5" />
+      <path d="M3.5 12.5h17a8.5 8.5 0 0 1-8.5 8 8.5 8.5 0 0 1-8.5-8Z" />
+      <path d="M8.5 9c0-1.3 1-1.8 1-3M12 8.5c0-1.6 1.2-2.1 1.2-3.4M15.5 9c0-1.1.9-1.6.9-2.6" />
+      <path d="M2.5 12.5h1M20.5 12.5h1" />
     </svg>
   );
 }
+
 
 export function AppleSnackIcon(props: IconProps) {
   return (
@@ -63,8 +64,9 @@ export function AppleSnackIcon(props: IconProps) {
 export function ScanMealIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
-      <path d="M3.5 8V5.5c0-1.1.9-2 2-2H8M16 3.5h2.5c1.1 0 2 .9 2 2V8M20.5 16v2.5c0 1.1-.9 2-2 2H16M8 20.5H5.5c-1.1 0-2-.9-2-2V16" />
-      <circle cx="12" cy="12" r="3.4" />
+      <rect x="2.8" y="6.5" width="18.4" height="13.5" rx="3.2" />
+      <path d="M8.6 6.5l1.2-2.2c.2-.4.6-.6 1-.6h2.4c.4 0 .8.2 1 .6l1.2 2.2" />
+      <circle cx="12" cy="13.4" r="3.5" />
     </svg>
   );
 }
@@ -82,11 +84,12 @@ export function PlannerIcon(props: IconProps) {
 export function TipIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
-      <path d="M9.5 17.5h5M10 20.5h4" />
-      <path d="M12 3.5a5.8 5.8 0 0 0-3.4 10.5c.5.4.8 1 .9 1.5h5c.1-.6.4-1.1.9-1.5A5.8 5.8 0 0 0 12 3.5Z" />
+      <path d="M12 3.2c.4 2.2-.6 3.2-1.8 4.4-1.5 1.4-2.9 2.8-2.9 5.4a4.7 4.7 0 0 0 9.4 0c0-1.6-.6-2.8-1.5-3.9-.3 1-.9 1.6-1.7 1.8.4-3-1.5-6.2-1.5-7.7Z" />
+      <path d="M12 20.8a2.6 2.6 0 0 0 2.6-2.6c0-1.4-1.3-2.1-2.6-4-1.3 1.9-2.6 2.6-2.6 4a2.6 2.6 0 0 0 2.6 2.6Z" />
     </svg>
   );
 }
+
 
 export const MEAL_ICONS: Record<MealType, (p: IconProps) => React.ReactElement> = {
   breakfast: BowlIcon,
