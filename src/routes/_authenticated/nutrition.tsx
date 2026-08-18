@@ -380,7 +380,7 @@ const LOCALE_MAP: Record<string, string> = {
 
 function formatDate(iso: string, lang: string) {
   const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString(LOCALE_MAP[lang] ?? undefined, { weekday: "short", day: "numeric", month: "short" });
+  return d.toLocaleDateString(LOCALE_MAP[lang] ?? undefined, { weekday: "long", day: "numeric", month: "long" });
 }
 
 function FastingCard() {

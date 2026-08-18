@@ -1349,7 +1349,7 @@ const translations: Translations = {
     "today.aura.title": "Aura's dagelijks inzicht", "today.aura.badge": "AI", "today.aura.summary": "Vandaag: {facts}.", "today.aura.empty": "Log een maaltijd, je water of stappen en Aura maakt het inzicht voor vandaag.", "today.aura.fact_steps": "{n} stappen", "today.aura.fact_fast": "{n}u gevast", "today.aura.fact_burn": "{n} kcal verbrand", "today.aura.fact_eaten": "{n} kcal gegeten", "today.aura.advice": "Advies", "today.aura.advice_kcal": "richt op ongeveer {n} kcal vandaag.", "today.aura.tip_default": "Houd het ritme vast — kleine winsten tellen op.", "today.aura.tip_steps": "Doe een korte wandeling van 15 min om je stappen aan te vullen.", "today.aura.tip_water": "Drink nu een glas water om op koers te blijven.", "today.aura.tip_lowcal": "Je bent dichtbij je doel — houd het diner licht.", "today.aura.strip_title": "Aura tip", "today.aura.open": "Open", "notif.title": "Meldingen", "notif.empty": "Nog geen meldingen.", "notif.mark_all_read": "Alles als gelezen markeren", "notif.open": "Open meldingen", "notif.unread": "ongelezen",
     "onb.recalc_done": "Je plan is opnieuw berekend.",
     "today.goals.title": "Dagdoelen", "today.goals.overall": "totaal", "today.goals.nutrition": "Voeding", "today.goals.water": "Water", "today.goals.steps": "Stappen", "today.goals.workout": "Workout",
-    "nutr.title": "Voeding",
+    "nutr.title": "Eten",
     "nut.fastingTitle": "Intermittent vasten",
     "nut.fastingActive": "Aan het vasten",
     "nut.fastingIdle": "Niet aan het vasten",
