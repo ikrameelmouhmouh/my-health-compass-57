@@ -286,12 +286,11 @@ function Nutrition() {
 }
 
 function MealSection({
-  type, label, emoji, meals, onAdd, onRemove, disabled,
+  type, label, meals, onAdd, onRemove, disabled,
   tAddTo, tRemove, tItem, tItems, tKcal,
 }: {
   type: MealType;
   label: string;
-  emoji: string;
   meals: LoggedMeal[];
   onAdd: () => void;
   onRemove: (id: string) => void;
@@ -299,11 +298,14 @@ function MealSection({
   tAddTo: string; tRemove: string; tItem: string; tItems: string; tKcal: string;
 }) {
   const totalKcal = meals.reduce((s, m) => s + m.kcal, 0);
+  const Icon = MEAL_ICONS[type];
   return (
     <div className="rounded-3xl border border-border bg-card p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">{emoji}</span>
+          <span className="grid size-9 place-items-center rounded-2xl bg-alyva/10 text-alyva">
+            <Icon className="size-5" />
+          </span>
           <div>
             <h3 className="font-display text-sm font-semibold">{label}</h3>
             <p className="text-[11px] text-muted-foreground">
