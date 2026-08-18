@@ -87,7 +87,7 @@ export function TipIcon(props: IconProps) {
   );
 }
 
-export const MEAL_ICONS: Record<MealType, (p: IconProps) => JSX.Element> = {
+export const MEAL_ICONS: Record<MealType, (p: IconProps) => React.ReactElement> = {
   breakfast: BowlIcon,
   lunch: SaladPlateIcon,
   dinner: CutleryPlateIcon,
