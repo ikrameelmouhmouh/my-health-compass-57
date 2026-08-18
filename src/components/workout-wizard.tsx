@@ -114,7 +114,7 @@ export function WorkoutWizard({ onComplete, onCancel, initial }: Props) {
         <div className="flex-1">
           <div className="flex gap-1">
             {Array.from({ length: totalSteps }).map((_, i) => (
-              <div key={i} className={`h-1 flex-1 rounded-full ${i < step ? "bg-brand" : "bg-muted"}`} />
+              <div key={i} className={`h-1 flex-1 rounded-full ${i < step ? "bg-primary" : "bg-muted"}`} />
             ))}
           </div>
           <p className="mt-2 text-xs text-muted-foreground">{t("wiz.step", { n: step, total: totalSteps })}</p>

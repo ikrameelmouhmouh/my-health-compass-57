@@ -94,7 +94,7 @@ function SettingsPage() {
           </div>
           <Link
             to="/pricing"
-            className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-brand px-4 py-2.5 font-display text-sm font-semibold text-brand-foreground transition hover:opacity-90"
+            className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-primary px-4 py-2.5 font-display text-sm font-semibold text-primary-foreground transition hover:opacity-90"
           >
             {isPremium ? t("set.plan.cta_pro") : t("set.plan.cta_free")}
           </Link>

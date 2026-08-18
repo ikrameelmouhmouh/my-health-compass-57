@@ -164,7 +164,7 @@ export function FoodLogDialog({ open, onOpenChange, onLogged, defaultMealType, a
                   </button>
                   <button
                     onClick={() => setScanOpen(true)}
-                    className="grid size-9 place-items-center rounded-full bg-brand text-brand-foreground"
+                    className="grid size-9 place-items-center rounded-full bg-primary text-primary-foreground"
                     aria-label={t("food.scan_aria")}
                   >
                     <ScanLine className="size-4" />
@@ -486,7 +486,7 @@ function TabBtn({ active, children, onClick }: { active: boolean; children: Reac
     <button
       onClick={onClick}
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
-        active ? "bg-brand text-brand-foreground" : "bg-card border border-border text-foreground"
+        active ? "bg-primary text-primary-foreground" : "bg-card border border-border text-foreground"
       }`}
     >
       {children}

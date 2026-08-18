@@ -116,7 +116,7 @@ function Intro() {
             <button
               key={i}
               onClick={() => setStep(i)}
-              className={`h-1.5 rounded-full transition-all ${i === step ? "w-8 bg-brand" : "w-1.5 bg-border"}`}
+              className={`h-1.5 rounded-full transition-all ${i === step ? "w-8 bg-primary" : "w-1.5 bg-border"}`}
               aria-label={`Slide ${i + 1}`}
             />
           ))}

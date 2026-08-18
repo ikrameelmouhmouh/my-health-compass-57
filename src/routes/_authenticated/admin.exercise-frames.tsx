@@ -220,7 +220,7 @@ function AdminExerciseFramesPage() {
       {SHOW_BATCH_TOOLS ? (
         <>
           <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
-            <div className="h-full bg-brand transition-all" style={{ width: `${(doneCount / Math.max(1, total)) * 100}%` }} />
+            <div className="h-full bg-primary transition-all" style={{ width: `${(doneCount / Math.max(1, total)) * 100}%` }} />
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
@@ -264,7 +264,7 @@ function AdminExerciseFramesPage() {
               onClick={() => setFilmSpeed(s)}
               className={`rounded-full px-2.5 py-1 text-[11px] transition ${
                 filmSpeed === s
-                  ? "bg-brand text-white"
+                  ? "bg-primary text-primary-foreground"
                   : "border border-border bg-card text-muted-foreground hover:bg-muted"
               }`}
             >

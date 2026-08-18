@@ -163,7 +163,7 @@ function Onboarding() {
       </div>
 
       <div className="mt-5 h-[3px] w-full overflow-hidden rounded-full bg-border">
-        <div className="h-full bg-brand transition-[width] duration-500 ease-out" style={{ width: `${progress}%` }} />
+        <div className="h-full bg-primary transition-[width] duration-500 ease-out" style={{ width: `${progress}%` }} />
       </div>
 
       <div className="mt-10 flex-1 overflow-y-auto -mx-6 px-6">
@@ -413,7 +413,7 @@ function OptionCard({ selected, onClick, children }: { selected: boolean; onClic
       }`}
     >
       <div className="flex-1">{children}</div>
-      <div className={`grid size-6 shrink-0 place-items-center rounded-full transition-colors ${selected ? "bg-brand text-brand-foreground" : "border border-border"}`}>
+      <div className={`grid size-6 shrink-0 place-items-center rounded-full transition-colors ${selected ? "bg-primary text-primary-foreground" : "border border-border"}`}>
         {selected && <Check className="size-3.5" strokeWidth={3} />}
       </div>
     </button>

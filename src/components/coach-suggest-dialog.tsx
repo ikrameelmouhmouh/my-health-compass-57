@@ -97,7 +97,7 @@ export function CoachSuggestDialog({ open, defaultFocus, onClose, onAdd }: Props
                     className={`w-full rounded-xl border p-3 text-left transition ${on ? "border-brand bg-brand/5" : "border-border bg-card/50"}`}
                   >
                     <div className="flex items-start gap-2">
-                      <div className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2 ${on ? "border-brand bg-brand text-white" : "border-border"}`}>
+                      <div className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2 ${on ? "border-brand bg-primary text-primary-foreground" : "border-border"}`}>
                         {on && <Check className="size-3" />}
                       </div>
                       <div className="min-w-0 flex-1">

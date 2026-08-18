@@ -61,7 +61,7 @@ export function StartWorkoutButton({
           type="button"
           onClick={handle}
           aria-label={t("session.start")}
-          className={`grid size-9 shrink-0 place-items-center rounded-full bg-brand text-white shadow-sm transition hover:opacity-90 ${className ?? ""}`}
+          className={`grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm transition hover:opacity-90 ${className ?? ""}`}
         >
           <Play className="size-4 fill-current" />
         </button>

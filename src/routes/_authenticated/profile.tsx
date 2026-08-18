@@ -333,7 +333,7 @@ function Profile() {
             <IconBtn aria-label={t("notif.open")} onClick={() => setOpenSheet("notifications")} className="relative">
               <Bell className="size-[18px]" strokeWidth={2} />
               {unreadCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid h-[16px] min-w-[16px] place-items-center rounded-full bg-brand px-1 text-[9px] font-bold leading-none text-brand-foreground">
+                <span className="absolute -right-0.5 -top-0.5 grid h-[16px] min-w-[16px] place-items-center rounded-full bg-primary px-1 text-[9px] font-bold leading-none text-primary-foreground">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -515,7 +515,7 @@ function IconBtn({ children, className, ...props }: React.ButtonHTMLAttributes<H
 }
 
 const TONES = {
-  brand: { bg: "bg-brand/12", fg: "text-brand", bar: "bg-brand" },
+  brand: { bg: "bg-brand/12", fg: "text-brand", bar: "bg-primary" },
   nutrition: { bg: "bg-acc-nutrition-soft", fg: "text-acc-nutrition", bar: "bg-acc-nutrition" },
   water: { bg: "bg-acc-water-soft", fg: "text-acc-water", bar: "bg-acc-water" },
   fasting: { bg: "bg-acc-fasting-soft", fg: "text-acc-fasting", bar: "bg-acc-fasting" },
@@ -546,7 +546,7 @@ function CardShell({ title, icon: Icon, children, action, compact, tone = "brand
 function Bar({ pct: p, className = "" }: { pct: number; className?: string }) {
   return (
     <div className={`h-1.5 w-full overflow-hidden rounded-full bg-border ${className}`}>
-      <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${Math.min(100, p)}%` }} />
+      <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.min(100, p)}%` }} />
     </div>
   );
 }
@@ -820,7 +820,7 @@ function NutritionCard({ budget, mode, onToggleMode, onLogFood, protein, carbs, 
         >
           {mode === "smart" ? t("today.cal.smart") : t("today.cal.standard")}
         </button>
-        <button onClick={onLogFood} className="inline-flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-[11px] font-semibold text-brand-foreground">
+        <button onClick={onLogFood} className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[11px] font-semibold text-primary-foreground">
           <Plus className="size-3" /> {t("today.cal.log")}
         </button>
       </div>
@@ -845,7 +845,7 @@ function NutritionCard({ budget, mode, onToggleMode, onLogFood, protein, carbs, 
 
         <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-muted/60">
           <div
-            className={`h-full rounded-full transition-all duration-500 ${over ? "bg-destructive" : "bg-brand"}`}
+            className={`h-full rounded-full transition-all duration-500 ${over ? "bg-destructive" : "bg-primary"}`}
             style={{ width: `${consumedPct}%` }}
           />
         </div>
@@ -926,7 +926,7 @@ function WaterCard({ ml, goal, onAdd, onOpen, compact }: { ml: number; goal: num
         </div>
         <div className="flex shrink-0 gap-1">
           <button onClick={() => onAdd(-250)} className={`grid place-items-center rounded-full border border-border bg-background hover:bg-accent ${compact ? "size-7" : "size-9"}`}><Minus className={compact ? "size-3" : "size-4"} /></button>
-          <button onClick={() => onAdd(250)} className={`grid place-items-center rounded-full bg-brand text-brand-foreground ${compact ? "size-7" : "size-9"}`}><Plus className={compact ? "size-3" : "size-4"} /></button>
+          <button onClick={() => onAdd(250)} className={`grid place-items-center rounded-full bg-primary text-primary-foreground ${compact ? "size-7" : "size-9"}`}><Plus className={compact ? "size-3" : "size-4"} /></button>
         </div>
       </div>
       <Bar pct={pct(ml, goal)} className={compact ? "mt-3" : "mt-4"} />
@@ -1009,7 +1009,7 @@ function WeightCard({ current, delta, goal, progress, onLog, compact }: {
   const deltaColor = delta < 0 ? "text-brand" : delta > 0 ? "text-destructive" : "text-muted-foreground";
   return (
     <CardShell title={t("today.weight.title")} icon={Scale} tone="weight" compact={compact} action={
-      <button onClick={onLog} className={`inline-flex items-center gap-1 rounded-full bg-brand font-semibold text-brand-foreground ${compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]"}`}>
+      <button onClick={onLog} className={`inline-flex items-center gap-1 rounded-full bg-primary font-semibold text-primary-foreground ${compact ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-[11px]"}`}>
         <Plus className="size-3" /> {t("today.weight.log")}
       </button>
     }>

@@ -44,7 +44,7 @@ export function SocialPage() {
         </div>
         <button
           onClick={() => (tab === "challenges" ? setCreateChallengeOpen(true) : setComposeOpen(true))}
-          className="grid size-10 place-items-center rounded-full bg-brand text-brand-foreground shadow-lg shadow-brand/30"
+          className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-brand/30"
           aria-label={t("soc.new")}
         >
           <Plus className="size-5" />
@@ -76,7 +76,7 @@ function TabBtn({ active, onClick, icon, label }: { active: boolean; onClick: ()
     <button
       onClick={onClick}
       className={`flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium transition ${
-        active ? "bg-brand text-brand-foreground shadow" : "text-muted-foreground hover:text-foreground"
+        active ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
       }`}
     >
       {icon} {label}

@@ -59,7 +59,7 @@ export function FastingPhaseStrip({
                   <div
                     className={`relative grid size-14 place-items-center rounded-full border-2 transition ${
                       isCurrent
-                        ? "border-brand bg-brand text-white shadow-lg shadow-brand/30"
+                        ? "border-brand bg-primary text-primary-foreground shadow-lg shadow-brand/30"
                         : reached
                         ? "border-brand/50 bg-brand/15 text-brand"
                         : "border-border bg-card text-muted-foreground"
