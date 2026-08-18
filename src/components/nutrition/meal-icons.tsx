@@ -64,8 +64,9 @@ export function AppleSnackIcon(props: IconProps) {
 export function ScanMealIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
-      <path d="M3.5 8V5.5c0-1.1.9-2 2-2H8M16 3.5h2.5c1.1 0 2 .9 2 2V8M20.5 16v2.5c0 1.1-.9 2-2 2H16M8 20.5H5.5c-1.1 0-2-.9-2-2V16" />
-      <circle cx="12" cy="12" r="3.4" />
+      <rect x="2.8" y="6.5" width="18.4" height="13.5" rx="3.2" />
+      <path d="M8.6 6.5l1.2-2.2c.2-.4.6-.6 1-.6h2.4c.4 0 .8.2 1 .6l1.2 2.2" />
+      <circle cx="12" cy="13.4" r="3.5" />
     </svg>
   );
 }
@@ -83,11 +84,12 @@ export function PlannerIcon(props: IconProps) {
 export function TipIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
-      <path d="M9.5 17.5h5M10 20.5h4" />
-      <path d="M12 3.5a5.8 5.8 0 0 0-3.4 10.5c.5.4.8 1 .9 1.5h5c.1-.6.4-1.1.9-1.5A5.8 5.8 0 0 0 12 3.5Z" />
+      <path d="M12 3.2c.4 2.2-.6 3.2-1.8 4.4-1.5 1.4-2.9 2.8-2.9 5.4a4.7 4.7 0 0 0 9.4 0c0-1.6-.6-2.8-1.5-3.9-.3 1-.9 1.6-1.7 1.8.4-3-1.5-6.2-1.5-7.7Z" />
+      <path d="M12 20.8a2.6 2.6 0 0 0 2.6-2.6c0-1.4-1.3-2.1-2.6-4-1.3 1.9-2.6 2.6-2.6 4a2.6 2.6 0 0 0 2.6 2.6Z" />
     </svg>
   );
 }
+
 
 export const MEAL_ICONS: Record<MealType, (p: IconProps) => React.ReactElement> = {
   breakfast: BowlIcon,
