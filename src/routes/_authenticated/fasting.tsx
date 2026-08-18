@@ -655,6 +655,72 @@ function StreakLine({ history, className, emptyLabel }: { history: FastEntry[]; 
 }
 
 /* ---------- Dialogs ---------- */
+/** Log a forgotten fast afterwards: pick start + end time, duration is derived. */
+function AddFastDialog({
+  open, onOpenChange, dayKey, onSave,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  dayKey: string;
+  onSave: (startIso: string, endIso: string) => void;
+}) {
+  const { t } = useI18n();
+  const [startTime, setStartTime] = useState("20:00");
+  const [endTime, setEndTime] = useState("12:00");
+
+  useEffect(() => {
+    if (open) { setStartTime("20:00"); setEndTime("12:00"); }
+  }, [open]);
+
+  const { startDate, endDate, hours } = useMemo(() => {
+    const end = new Date(`${dayKey}T${endTime || "00:00"}:00`);
+    const start = new Date(`${dayKey}T${startTime || "00:00"}:00`);
+    // End time earlier than or equal to start ⇒ the fast started the previous day.
+    if (start.getTime() >= end.getTime()) start.setDate(start.getDate() - 1);
+    return { startDate: start, endDate: end, hours: (end.getTime() - start.getTime()) / 3_600_000 };
+  }, [dayKey, startTime, endTime]);
+
+  const valid = hours > 0 && hours <= 72;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm rounded-3xl">
+        <DialogHeader>
+          <DialogTitle className="font-display">{t("fast.add.title")}</DialogTitle>
+          <DialogDescription>{t("fast.add.desc")}</DialogDescription>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-[12px]">{t("fast.add.start")}</Label>
+            <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-[12px]">{t("fast.add.end")}</Label>
+            <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+          </div>
+        </div>
+        <div className="flex items-center justify-between rounded-2xl bg-acc-fasting-soft px-3.5 py-2.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-acc-fasting">
+            {t("fast.add.duration")}
+          </span>
+          <span className="font-display text-[15px] font-semibold tabular-nums">
+            {valid ? `${Math.floor(hours)}u ${Math.round((hours % 1) * 60)}m` : "—"}
+          </span>
+        </div>
+        <DialogFooter>
+          <Button
+            className="h-11 w-full rounded-2xl"
+            disabled={!valid}
+            onClick={() => onSave(startDate.toISOString(), endDate.toISOString())}
+          >
+            {t("fast.add.save")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function EditStartDialog({
   open, onOpenChange, startedAt, onSave,
 }: {
