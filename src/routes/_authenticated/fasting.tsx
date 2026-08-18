@@ -87,7 +87,7 @@ function FastingPage() {
   const targetMs = proto.fast * 3_600_000;
 
   const live = useMemo(() => {
-    if (!state.startedAt) return { active: false, paused: false, elapsedMs: 0, leftMs: 0, pct: 0 };
+    if (!state.startedAt) return { active: false, paused: false, elapsedMs: 0, leftMs: 0, overMs: 0, pct: 0 };
     const now = Date.now();
     let pausedMs = state.pausedTotalMs;
     if (state.pausedAt) pausedMs += now - new Date(state.pausedAt).getTime();
@@ -97,19 +97,37 @@ function FastingPage() {
       paused: !!state.pausedAt,
       elapsedMs,
       leftMs: Math.max(0, targetMs - elapsedMs),
+      overMs: Math.max(0, elapsedMs - targetMs),
       pct: Math.min(100, (elapsedMs / targetMs) * 100),
     };
   }, [state.startedAt, state.pausedAt, state.pausedTotalMs, targetMs, tick]);
 
+  /** Expected moment the protocol goal is reached (start + protocol hours + pauses). */
+  const goalAt = useMemo(() => {
+    if (!state.startedAt) return null;
+    let pausedMs = state.pausedTotalMs;
+    if (state.pausedAt) pausedMs += Date.now() - new Date(state.pausedAt).getTime();
+    return new Date(new Date(state.startedAt).getTime() + pausedMs + targetMs);
+  }, [state.startedAt, state.pausedAt, state.pausedTotalMs, targetMs, tick]);
+
+  /* Optional reminders around the calculated goal time. */
+  const firedRef = useRef<Record<string, string>>({});
   useEffect(() => {
-    if (!live.active || live.paused) return;
-    if (live.elapsedMs >= targetMs && live.elapsedMs - targetMs < 2000) {
-      try {
-        if ("Notification" in window && Notification.permission === "granted")
-          new Notification(t("fast.title"), { body: t("fast.status.eating") });
-      } catch { /* ignore */ }
-    }
-  }, [live.active, live.paused, live.elapsedMs, targetMs, t]);
+    if (!live.active || live.paused || !goalAt) return;
+    const key = `${state.startedAt}-${state.protocol}`;
+    const leftMin = live.leftMs / 60_000;
+    const fire = (id: keyof FastReminderPrefs, body: string) => {
+      if (firedRef.current[id] === key) return;
+      firedRef.current[id] = key;
+      notify(t("fast.title"), body);
+    };
+    if (reminders.before1h && leftMin <= 60 && leftMin > 55)
+      fire("before1h", t("fast.rem.body1h", { p: proto.label }));
+    if (reminders.before5m && leftMin <= 5 && leftMin > 0)
+      fire("before5m", t("fast.rem.body5m"));
+    if (reminders.atGoal && live.elapsedMs >= targetMs)
+      fire("atGoal", t("fast.rem.bodyAt", { h: formatHM(live.elapsedMs) }));
+  }, [live.active, live.paused, live.elapsedMs, live.leftMs, goalAt, reminders, targetMs, state.startedAt, state.protocol, proto.label, t]);
 
   const viewDate = useMemo(() => {
     const d = new Date();
