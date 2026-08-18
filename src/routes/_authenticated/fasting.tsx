@@ -207,8 +207,14 @@ function FastingPage() {
       <PaywallOverlay feature={t("fast.title")} description={t("pay.overlay.fasting_desc")}>
         {tab === "overview" ? (
           <>
-            {/* Timer card */}
-            <section className="mt-5 rounded-[28px] border border-border bg-card p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+            <FastingPhaseTimeline
+              currentHours={live.active ? live.elapsedMs / 3_600_000 : 0}
+              active={live.active}
+              onSelect={(id) => setPhaseSheet(id)}
+            />
+
+            {/* Timer card — compact */}
+            <section className="mt-3 rounded-[26px] border border-border bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
               <div className="flex items-center justify-between">
                 <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
                   live.active ? "bg-acc-fasting-soft text-acc-fasting" : "bg-muted text-muted-foreground"
@@ -222,57 +228,58 @@ function FastingPage() {
                 </span>
               </div>
 
-              <div className="mt-5 grid place-items-center">
+              <div className="mt-3 flex items-center gap-4">
                 <BigRing
                   pct={live.active ? live.pct : 0}
                   label={live.active ? formatHMS(live.elapsedMs) : "00:00:00"}
-                  sub={live.active
-                    ? t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
-                    : t("fast.tapStart")}
                 />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <p className="text-[12px] leading-snug text-muted-foreground">
+                    {live.active
+                      ? t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
+                      : t("fast.tapStart")}
+                  </p>
+                  <Row label={t("fast.elapsed")} value={live.active ? formatHM(live.elapsedMs) : "—"} />
+                  <Row label={t("fast.remaining")} value={live.active ? formatHM(live.leftMs) : "—"} />
+                  <Row label={t("fast.goalLabel")} value={`${proto.fast}u`} />
+                </div>
               </div>
 
               {live.active && state.startedAt && (
                 <button
                   onClick={() => setEditStart(true)}
-                  className="mt-4 inline-flex w-full items-center justify-center gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground"
+                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground"
                 >
                   <Pencil className="size-3" />
                   {t("fast.since")} {new Date(state.startedAt).toLocaleString(locale, { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}
                 </button>
               )}
 
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                <Mini label={t("fast.elapsed")} value={live.active ? formatHM(live.elapsedMs) : "—"} />
-                <Mini label={t("fast.remaining")} value={live.active ? formatHM(live.leftMs) : "—"} />
-                <Mini label={t("fast.goalLabel")} value={`${proto.fast}u`} />
-              </div>
-
-              <div className="mt-3 rounded-2xl bg-acc-fasting-soft px-3 py-2.5 text-center">
+              <div className="mt-3 flex items-center justify-between rounded-2xl bg-acc-fasting-soft px-3.5 py-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-acc-fasting">
                   {t("fast.eatWindow")}
                 </span>
-                <p className="mt-0.5 text-[13px] font-semibold tabular-nums">{windowText}</p>
+                <span className="text-[13px] font-semibold tabular-nums">{windowText}</span>
               </div>
 
-              <div className="mt-4 flex gap-2">
+              <div className="mt-3 flex gap-2">
                 {!live.active ? (
-                  <Button className="h-12 flex-1 rounded-2xl" onClick={start}>
+                  <Button className="h-11 flex-1 rounded-2xl" onClick={start}>
                     <Play className="mr-1.5 size-4" />{t("fast.startBtn")}
                   </Button>
                 ) : (
                   <>
                     {live.paused ? (
-                      <Button variant="outline" className="h-12 flex-1 rounded-2xl" onClick={resume}>
+                      <Button variant="outline" className="h-11 flex-1 rounded-2xl" onClick={resume}>
                         <Play className="mr-1.5 size-4" />{t("fast.action.resume")}
                       </Button>
                     ) : (
-                      <Button variant="outline" className="h-12 flex-1 rounded-2xl" onClick={pause}>
+                      <Button variant="outline" className="h-11 flex-1 rounded-2xl" onClick={pause}>
                         <Pause className="mr-1.5 size-4" />{t("fast.action.pause")}
                       </Button>
                     )}
                     <Button
-                      className="h-12 flex-1 rounded-2xl"
+                      className="h-11 flex-1 rounded-2xl"
                       onClick={() => { const e = stop(); if (e) { setSummary(e); setSummaryIsLive(true); } }}
                     >
                       <Square className="mr-1.5 size-4" />{t("fast.endBtn")}
@@ -282,11 +289,6 @@ function FastingPage() {
               </div>
             </section>
 
-            <FastingPhaseStrip
-              currentHours={live.active ? live.elapsedMs / 3_600_000 : 0}
-              active={live.active}
-              onSelect={(id) => setPhaseSheet(id)}
-            />
 
             {/* Protocols */}
             <section className="mt-5">
