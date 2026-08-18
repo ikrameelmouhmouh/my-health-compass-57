@@ -115,10 +115,7 @@ function Nutrition() {
       <div className="mb-5 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
 
       <header>
-        <h1 className="font-display text-[30px] font-semibold leading-tight tracking-tight">
-          {t("nutr.title")}
-        </h1>
-        <div className="mt-3 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setDateOffset((d) => d - 1)}
             className="grid size-9 shrink-0 place-items-center rounded-full border border-border ios-press"
