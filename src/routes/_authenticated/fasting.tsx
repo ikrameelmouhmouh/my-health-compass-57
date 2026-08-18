@@ -292,10 +292,10 @@ function FastingPage() {
 
             {/* Protocols */}
             <section className="mt-5">
-              <h2 className="mb-2 px-1 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <h2 className="mb-2 px-1 font-display text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {t("fast.proto.title")}
               </h2>
-              <ul className="space-y-2">
+              <ul className="space-y-1.5">
                 {FASTING_PROTOCOLS.map((p) => {
                   const tint = PROTO_TINT[p.id] ?? PROTO_TINT["16:8"];
                   const selected = state.protocol === p.id;
@@ -304,20 +304,20 @@ function FastingPage() {
                       <button
                         onClick={() => setProtocol(p.id)}
                         disabled={live.active}
-                        className={`flex w-full items-center gap-3 rounded-[22px] border bg-card px-4 py-3.5 text-left transition ios-press disabled:opacity-50 ${
-                          selected ? `${tint.ring} ${tint.soft}` : "border-border"
+                        className={`flex w-full items-center gap-3 rounded-[18px] border px-3.5 py-2.5 text-left transition ios-press disabled:opacity-50 ${
+                          selected ? `${tint.ring} ${tint.soft}` : "border-border bg-card"
                         }`}
                       >
-                        <span className={`grid size-9 shrink-0 place-items-center rounded-full ${tint.soft}`}>
-                          <span className={`size-2.5 rounded-full ${tint.dot}`} />
+                        <span className={`grid size-8 shrink-0 place-items-center rounded-full ${tint.soft}`}>
+                          <span className={`size-2 rounded-full ${tint.dot}`} />
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-baseline gap-2">
-                            <span className="font-display text-[15px] font-bold">{p.label}</span>
-                            <span className={`text-[11px] font-semibold ${tint.text}`}>{t(TAG_KEY[p.id])}</span>
+                            <span className="font-display text-[14px] font-bold">{p.label}</span>
+                            <span className={`truncate text-[11px] font-medium ${tint.text}`}>{t(TAG_KEY[p.id])}</span>
                           </span>
-                          <span className="mt-0.5 block text-[12px] tabular-nums text-muted-foreground">{p.window}</span>
                         </span>
+                        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{p.window}</span>
                         {selected && <Check className={`size-4 shrink-0 ${tint.text}`} />}
                       </button>
                     </li>
@@ -327,15 +327,16 @@ function FastingPage() {
             </section>
 
             {/* Stay consistent */}
-            <section className="mt-5 flex items-start gap-3 rounded-[24px] border border-border bg-card p-5">
-              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-acc-fasting-soft">
-                <Sparkles className="size-5 text-acc-fasting" />
+            <section className="mt-4 flex items-start gap-3 rounded-[22px] border border-border bg-card p-4">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-acc-fasting-soft">
+                <Sparkles className="size-[18px] text-acc-fasting" />
               </span>
               <div className="min-w-0">
-                <p className="font-display text-[15px] font-bold leading-tight">{t("fast.consist.title")}</p>
-                <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{t("fast.consist.body")}</p>
+                <p className="font-display text-[14px] font-bold leading-tight">{t("fast.consist.title")}</p>
+                <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{t("fast.consist.body")}</p>
               </div>
             </section>
+
 
             {/* Stats */}
             <section className="mt-3 grid grid-cols-3 gap-2">
