@@ -176,8 +176,8 @@
   --acc-sleep-soft: oklch(0.30 0.04 258);
   --acc-cycle: oklch(0.78 0.10 350);
   --acc-cycle-soft: oklch(0.31 0.04 350);
-  --acc-protein: oklch(0.82 0.10 60);
-  --acc-protein-soft: oklch(0.32 0.04 60);
+  --acc-protein: oklch(0.78 0.15 55);
+  --acc-protein-soft: oklch(0.33 0.06 55);
   --acc-fat: oklch(0.86 0.10 95);
   --acc-fat-soft: oklch(0.32 0.04 95);
 }
