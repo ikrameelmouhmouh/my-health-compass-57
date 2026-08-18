@@ -234,25 +234,31 @@ function Nutrition() {
       )}
       </PaywallOverlay>
 
-      <section className="mt-5 flex items-start gap-3 rounded-3xl border border-alyva/20 bg-alyva/[0.05] px-4 py-3">
-        <TipIcon className="mt-0.5 size-5 shrink-0 text-alyva" />
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-alyva">
+      <section className="mt-5 flex items-start gap-4 rounded-[28px] bg-alyva/[0.045] px-5 py-5">
+        <span className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10">
+          <TipIcon className="size-6 text-alyva" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-alyva">
             {t("nutr.tip_title")}
           </p>
-          <p className="mt-0.5 text-[12px] leading-snug text-foreground/90">
+          <p className="mt-1 font-display text-[15px] font-bold leading-tight">
+            {t("nutr.tip_headline")}
+          </p>
+          <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
             {t("today.aura.tip_default")}
           </p>
         </div>
+        <ChevRight className="mt-1 size-5 shrink-0 text-muted-foreground/70 rtl:rotate-180" />
       </section>
 
       {isToday && (
         <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             onClick={openScan}
-            className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
+            className="flex flex-col items-start rounded-3xl bg-acc-fitness-soft p-4 text-left ios-press"
           >
-            <div className="grid size-10 place-items-center rounded-2xl bg-alyva/10 text-alyva">
+            <div className="grid size-11 place-items-center rounded-full bg-acc-fitness/15 text-acc-fitness">
               <ScanMealIcon className="size-5" />
             </div>
             <p className="mt-3 font-display text-sm font-semibold">{t("nutr.scan_meal")}</p>
@@ -260,9 +266,9 @@ function Nutrition() {
           </button>
           <Link
             to="/meal-planner"
-            className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
+            className="flex flex-col items-start rounded-3xl bg-acc-fasting-soft p-4 text-left ios-press"
           >
-            <div className="grid size-10 place-items-center rounded-2xl bg-alyva/10 text-alyva">
+            <div className="grid size-11 place-items-center rounded-full bg-acc-fasting/15 text-acc-fasting">
               <PlannerIcon className="size-5" />
             </div>
             <p className="mt-3 font-display text-sm font-semibold">{t("mealplan.title")}</p>
@@ -270,6 +276,7 @@ function Nutrition() {
           </Link>
         </div>
       )}
+
 
 
       <FoodLogDialog
