@@ -307,7 +307,7 @@ function MealSection({
   tAddTo: string; tRemove: string; tItem: string; tItems: string; tKcal: string;
 }) {
   const totalKcal = meals.reduce((s, m) => s + m.kcal, 0);
-  const Icon = MEAL_ICONS[type];
+  const emoji = MEAL_TYPES.find((m) => m.id === type)?.emoji ?? "🍽️";
   return (
     <div className="rounded-[26px] border border-border/70 bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
       <div className="flex items-center justify-between gap-3">
