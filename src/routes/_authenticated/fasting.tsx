@@ -4,17 +4,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import type * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Timer, Play, Pause, Square, Bell, Pencil, Trash2, Check, ChevronLeft, ChevronRight,
-  History, Sparkles, Flame, TrendingUp, CalendarCheck, Lightbulb,
+  Timer, Play, Pause, Square, Plus, Pencil, Trash2, Check, ChevronLeft, ChevronRight,
+  Sparkles, Flame, TrendingUp, CalendarCheck, Lightbulb,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MonthCalendar } from "@/components/nutrition/month-calendar";
 import {
   useFasting, FASTING_PROTOCOLS, getProtocol,
-  requestNotificationPermission, type FastEntry,
+  type FastEntry,
 } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
@@ -61,9 +62,10 @@ const TAG_KEY: Record<string, string> = {
 function FastingPage() {
   const { t, lang } = useI18n();
   const locale = LOCALE_MAP[lang] ?? lang;
-  const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry } = useFasting();
+  const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry, addEntry } = useFasting();
   const [tab, setTab] = useState<"overview" | "insights">("overview");
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [tipsOpen, setTipsOpen] = useState(false);
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
@@ -71,9 +73,6 @@ function FastingPage() {
   const [summaryIsLive, setSummaryIsLive] = useState(false);
   const [phaseSheet, setPhaseSheet] = useState<string | null>(null);
   const [dateOffset, setDateOffset] = useState(0);
-  const [notifPerm, setNotifPerm] = useState<NotificationPermission>(() =>
-    typeof window !== "undefined" && "Notification" in window ? Notification.permission : "denied"
-  );
 
   const [tick, setTick] = useState(0);
   useEffect(() => {
@@ -132,8 +131,28 @@ function FastingPage() {
 
   const tipIndex = useMemo(() => fastingTipOfTheDay(localDayKey(viewDate)), [viewDate]);
 
-  async function askNotif() {
-    setNotifPerm(await requestNotificationPermission());
+  const viewKey = localDayKey(viewDate);
+  const isToday = dateOffset === 0;
+
+  /** Days that hold at least one logged fast — soft lavender dot in the calendar. */
+  const markedDays = useMemo(
+    () => new Set(state.history.map((e) => localDayKey(new Date(e.endedAt)))),
+    [state.history],
+  );
+
+  const dayEntries = useMemo(
+    () => state.history
+      .filter((e) => localDayKey(new Date(e.endedAt)) === viewKey)
+      .sort((a, b) => +new Date(b.endedAt) - +new Date(a.endedAt)),
+    [state.history, viewKey],
+  );
+  const dayHours = dayEntries.reduce((a, e) => a + e.durationMs / 3_600_000, 0);
+
+  function selectDay(day: string) {
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    const target = new Date(day + "T12:00:00");
+    setDateOffset(Math.round((target.getTime() - today.getTime()) / 86_400_000));
+    setCalendarOpen(false);
   }
 
   return (
@@ -141,27 +160,7 @@ function FastingPage() {
       <div className="mb-5 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
 
       <header>
-        <div className="flex items-center justify-between gap-2">
-          <h1 className="font-display text-[26px] font-bold tracking-tight">{t("fast.title")}</h1>
-          <div className="flex items-center gap-1.5">
-            {notifPerm !== "granted" && (
-              <button
-                onClick={askNotif}
-                className="grid size-9 place-items-center rounded-full border border-border bg-card ios-press"
-                aria-label={t("fast.enable_notif")}
-              >
-                <Bell className="size-4" />
-              </button>
-            )}
-            <button
-              onClick={() => setHistoryOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-[12px] font-semibold ios-press"
-            >
-              <History className="size-3.5" />
-              {t("fast.history.btn")}
-            </button>
-          </div>
-        </div>
+        <h1 className="font-display text-[26px] font-bold tracking-tight">{t("fast.title")}</h1>
 
         <div className="mt-3 flex items-center gap-2">
           <button
@@ -171,11 +170,27 @@ function FastingPage() {
           >
             <ChevronLeft className="size-4" />
           </button>
-          <div className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center">
-            <span className="text-[13px] font-semibold capitalize">
-              {viewDate.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
-            </span>
-          </div>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center ios-press"
+              >
+                <span className="text-[13px] font-semibold capitalize">
+                  {viewDate.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
+                </span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="center" className="w-[320px] rounded-3xl p-4">
+              <MonthCalendar
+                value={viewKey}
+                markedDays={markedDays}
+                locale={locale}
+                accent="fasting"
+                onSelect={selectDay}
+              />
+            </PopoverContent>
+          </Popover>
           <button
             onClick={() => setDateOffset((d) => Math.min(0, d + 1))}
             disabled={dateOffset >= 0}
