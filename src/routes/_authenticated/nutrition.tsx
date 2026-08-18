@@ -62,6 +62,8 @@ function Nutrition() {
     return localDayKey(d);
   }, [dateOffset]);
   const isToday = dateOffset === 0;
+  const tipIndex = useMemo(() => tipOfTheDayIndex(viewDate), [viewDate]);
+
 
   const markedDays = useMemo(() => new Set(meals.map((m) => m.date)), [meals]);
 
