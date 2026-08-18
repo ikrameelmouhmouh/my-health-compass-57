@@ -122,6 +122,8 @@ function mapOFFProduct(p: any): FoodItem | null {
     iron: round1(num(n["iron_100g"]) * 1000),
     calcium: Math.round(num(n["calcium_100g"]) * 1000),
   };
+  const displayName = (p.product_name || p.generic_name || "").trim();
+  if (!displayName || !kcal) return null;
   const servingGrams = Number(p.serving_quantity);
   const servings: FoodServing[] = [];
   if (servingGrams && servingGrams > 0) {
