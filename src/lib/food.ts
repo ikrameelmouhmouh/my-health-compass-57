@@ -133,7 +133,7 @@ function mapOFFProduct(p: any): FoodItem | null {
   servings.push({ label: "1 g", grams: 1 });
   return {
     id: `off:${p.code ?? p._id ?? uid()}`,
-    name: p.product_name || p.generic_name || "Unknown product",
+    name: displayName,
     brand: p.brands?.split(",")[0]?.trim() || undefined,
     imageUrl: p.image_small_url || p.image_thumb_url || p.image_url,
     barcode: p.code,
