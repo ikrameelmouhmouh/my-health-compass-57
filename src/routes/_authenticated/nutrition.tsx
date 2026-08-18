@@ -361,29 +361,52 @@ function MealSection({
   );
 }
 
-function MacroBlock({ label, value, goal, color }: { label: string; value: number; goal: number; color: string }) {
-  const pct = clamp(goal > 0 ? (value / goal) * 100 : 0);
-  const r = 22;
-  const c = 2 * Math.PI * r;
+function CalorieGauge({ pct }: { pct: number }) {
+  const size = 132, stroke = 11, r = (size - stroke) / 2 - 2;
+  const cx = size / 2, cy = size / 2;
+  const sweep = 260; // degrees
+  const start = 90 + (360 - sweep) / 2;
+  const pol = (deg: number) => {
+    const rad = (deg * Math.PI) / 180;
+    return `${cx + r * Math.cos(rad)} ${cy + r * Math.sin(rad)}`;
+  };
+  const d = `M ${pol(start)} A ${r} ${r} 0 ${sweep > 180 ? 1 : 0} 1 ${pol(start + sweep)}`;
+  const len = (sweep / 360) * 2 * Math.PI * r;
   return (
-    <div className="rounded-2xl border border-border p-3 text-center">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</p>
-      <div className="relative mx-auto mt-2 grid size-14 place-items-center">
-        <svg width={56} height={56} className="-rotate-90">
-          <circle cx={28} cy={28} r={r} stroke="currentColor" strokeOpacity={0.12} strokeWidth={5} fill="none" />
-          <circle
-            cx={28} cy={28} r={r}
-            stroke="currentColor" className={color}
-            strokeWidth={5} strokeLinecap="round" fill="none"
-            strokeDasharray={c}
-            strokeDashoffset={c - (pct / 100) * c}
-          />
-        </svg>
-        <span className="absolute text-[10px] font-bold">{Math.round(pct)}%</span>
+    <svg width={size} height={size} className="block">
+      <path d={d} stroke="currentColor" className="text-alyva/15" strokeWidth={stroke} strokeLinecap="round" fill="none" />
+      <path
+        d={d} stroke="currentColor" className="text-alyva transition-all"
+        strokeWidth={stroke} strokeLinecap="round" fill="none"
+        strokeDasharray={len} strokeDashoffset={len - (clamp(pct) / 100) * len}
+      />
+    </svg>
+  );
+}
+
+function MacroBlock({
+  label, value, goal, color, bar, tint, Icon,
+}: {
+  label: string; value: number; goal: number;
+  color: string; bar: string; tint: string;
+  Icon: React.ComponentType<{ className?: string }>;
+}) {
+  const pct = clamp(goal > 0 ? (value / goal) * 100 : 0);
+  return (
+    <div className="px-2 first:pl-0 last:pr-0">
+      <div className="flex items-center gap-1.5">
+        <span className={`grid size-6 shrink-0 place-items-center rounded-full ${tint}`}>
+          <Icon className={`size-3.5 ${color}`} />
+        </span>
+        <p className="truncate text-[11px] font-semibold">{label}</p>
       </div>
-      <p className="mt-1 text-[11px] font-semibold tabular-nums">
-        {Math.round(value)}<span className="text-muted-foreground">/{goal}g</span>
+      <p className="mt-2 text-[12px] font-semibold tabular-nums">
+        <span className={color}>{Math.round(value)}</span>
+        <span className="text-muted-foreground"> / {goal} g</span>
       </p>
+      <div className="mt-2 h-1 overflow-hidden rounded-full bg-muted">
+        <div className={`h-full rounded-full ${bar} transition-all`} style={{ width: `${pct}%` }} />
+      </div>
     </div>
   );
 }
