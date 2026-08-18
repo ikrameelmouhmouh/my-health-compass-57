@@ -7,8 +7,11 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
-  Camera, CalendarDays, Utensils, Search, Lightbulb,
+  Camera, CalendarDays, Utensils, Search,
 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MonthCalendar } from "@/components/nutrition/month-calendar";
+import { MEAL_ICONS, ScanMealIcon, PlannerIcon, TipIcon } from "@/components/nutrition/meal-icons";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useRegisterAiQuickActions } from "@/lib/ai-quick-actions";
 import { useNavigate } from "@tanstack/react-router";
@@ -28,12 +31,13 @@ export const Route = createFileRoute("/_authenticated/nutrition")({
 function Nutrition() {
   const { user } = useAuth();
   const { t, lang } = useI18n();
-  const { removeMeal, logMeal, mealsOn } = useMeals();
+  const { removeMeal, logMeal, mealsOn, meals } = useMeals();
   const { day, addMeal } = useDayLog();
   const [open, setOpen] = useState(false);
   const [defaultMealType, setDefaultMealType] = useState<MealType | undefined>();
   const [autoOpenScan, setAutoOpenScan] = useState(false);
   const [dateOffset, setDateOffset] = useState(0);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
@@ -55,6 +59,17 @@ function Nutrition() {
     return localDayKey(d);
   }, [dateOffset]);
   const isToday = dateOffset === 0;
+
+  const markedDays = useMemo(() => new Set(meals.map((m) => m.date)), [meals]);
+
+  function selectDay(day: string) {
+    const target = new Date(day + "T00:00:00");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diff = Math.round((target.getTime() - today.getTime()) / 86_400_000);
+    setDateOffset(Math.min(0, diff));
+    setCalendarOpen(false);
+  }
 
   const dayMeals = mealsOn(viewDate);
   const totals = useMemo(() => sum(dayMeals), [dayMeals]);
@@ -111,9 +126,24 @@ function Nutrition() {
           >
             <ChevronLeft className="size-4" />
           </button>
-          <div className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center">
-            <span className="text-[13px] font-semibold capitalize">{formatDate(viewDate, lang)}</span>
-          </div>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center ios-press"
+              >
+                <span className="text-[13px] font-semibold capitalize">{formatDate(viewDate, lang)}</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="center" className="w-[320px] rounded-3xl p-4">
+              <MonthCalendar
+                value={viewDate}
+                markedDays={markedDays}
+                locale={LOCALE_MAP[lang]}
+                onSelect={selectDay}
+              />
+            </PopoverContent>
+          </Popover>
           <button
             onClick={() => setDateOffset((d) => Math.min(0, d + 1))}
             className="grid size-9 shrink-0 place-items-center rounded-full border border-border ios-press disabled:opacity-40"
@@ -126,60 +156,59 @@ function Nutrition() {
       </header>
 
       <PaywallOverlay feature={t("nutr.title")} description={t("pay.overlay.food_desc")}>
-      <section className="mt-5 rounded-3xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              {t("nutr.cal_remaining")}
-            </p>
-            <p className="mt-1 font-display text-3xl font-bold tabular-nums">
+      <section className="mt-5 rounded-[28px] border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-[12px] font-medium text-muted-foreground">{t("nutr.cal_remaining")}</p>
+            <p className="mt-1 font-display text-[34px] font-bold leading-none tabular-nums">
               {remaining.toLocaleString()}
-              <span className="ml-1 text-sm text-muted-foreground">{t("food.kcal")}</span>
+              <span className="ml-1.5 text-sm font-semibold text-muted-foreground">{t("food.kcal")}</span>
+            </p>
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-alyva/12">
+              <div className="h-full rounded-full bg-alyva transition-all" style={{ width: `${pct}%` }} />
+            </div>
+            <p className="mt-2 text-[12px] text-muted-foreground">
+              <span className="font-semibold text-foreground tabular-nums">{totals.kcal}</span>{" "}
+              {t("food.kcal")} {t("nutr.eaten")}
             </p>
           </div>
-          <div className="relative grid size-20 place-items-center">
-            <svg width={80} height={80} className="-rotate-90">
-              <circle cx={40} cy={40} r={34} stroke="currentColor" strokeOpacity={0.12} strokeWidth={8} fill="none" />
+
+          <div className="relative grid size-[104px] shrink-0 place-items-center">
+            <svg width={104} height={104} className="-rotate-90">
+              <circle cx={52} cy={52} r={44} stroke="currentColor" className="text-alyva/12" strokeWidth={10} fill="none" />
               <circle
-                cx={40} cy={40} r={34}
+                cx={52} cy={52} r={44}
                 stroke="currentColor" className="text-alyva"
-                strokeWidth={8} strokeLinecap="round" fill="none"
-                strokeDasharray={2 * Math.PI * 34}
-                strokeDashoffset={2 * Math.PI * 34 - (pct / 100) * 2 * Math.PI * 34}
+                strokeWidth={10} strokeLinecap="round" fill="none"
+                strokeDasharray={2 * Math.PI * 44}
+                strokeDashoffset={2 * Math.PI * 44 - (pct / 100) * 2 * Math.PI * 44}
               />
             </svg>
-            <Flame className="absolute size-5 text-alyva" />
+            <span className="absolute grid size-12 place-items-center rounded-full bg-alyva/10">
+              <Flame className="size-6 text-alyva" />
+            </span>
           </div>
         </div>
-        <div className="mt-3 flex items-center justify-between text-[11px]">
-          <span className="text-muted-foreground">
-            <span className="font-semibold text-foreground">{totals.kcal}</span> {t("nutr.eaten")}
-          </span>
-          <span className="text-muted-foreground">
-            {t("nutr.goal")}: <span className="font-semibold text-foreground">{calorieTarget}</span>
-          </span>
-        </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-alyva/12">
-          <div className="h-full rounded-full bg-alyva transition-all" style={{ width: `${pct}%` }} />
-        </div>
+
+        <p className="mt-4 text-[12px] text-muted-foreground">
+          {t("nutr.goal")} <span className="font-semibold text-foreground tabular-nums">{calorieTarget.toLocaleString()}</span> {t("food.kcal")}
+        </p>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
           <MacroBlock label={t("food.carbs")} value={totals.carbs} goal={carbsTarget} color="text-alyva" />
-          <MacroBlock label={t("food.protein")} value={totals.protein} goal={proteinTarget} color="text-alyva" />
-          <MacroBlock label={t("food.fat")} value={totals.fat} goal={fatTarget} color="text-alyva" />
+          <MacroBlock label={t("food.protein")} value={totals.protein} goal={proteinTarget} color="text-acc-protein" />
+          <MacroBlock label={t("food.fat")} value={totals.fat} goal={fatTarget} color="text-acc-fat" />
         </div>
       </section>
       </PaywallOverlay>
 
       <PaywallOverlay feature={t("nutr.title")} description={t("pay.overlay.food_desc")}>
-      <h2 className="mt-7 font-display text-base font-semibold tracking-tight">{t("nutr.diary")}</h2>
-      <section className="mt-3 space-y-3">
+      <section className="mt-5 space-y-3">
         {MEAL_TYPES.map((m) => (
           <MealSection
             key={m.id}
             type={m.id}
             label={t(`meal.${m.id}`)}
-            emoji={m.emoji}
             meals={byType[m.id]}
             onAdd={() => openFor(m.id)}
             onRemove={removeMeal}
@@ -194,10 +223,7 @@ function Nutrition() {
       </section>
 
       {dayMeals.length === 0 && (
-        <div className="mt-4 rounded-3xl border border-dashed border-border bg-card/50 p-8 text-center">
-          <div className="mx-auto mb-2 grid size-12 place-items-center rounded-full bg-alyva/12 text-alyva">
-            <Flame className="size-5" />
-          </div>
+        <div className="mt-4 rounded-3xl border border-dashed border-border bg-card/50 p-6 text-center">
           <p className="text-sm font-semibold">
             {isToday ? t("nutr.empty_title_today") : t("nutr.empty_title_day")}
           </p>
@@ -206,15 +232,13 @@ function Nutrition() {
       )}
       </PaywallOverlay>
 
-      <section className="mt-7 flex items-start gap-3 rounded-3xl border border-alyva/20 bg-alyva/[0.06] p-4">
-        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-alyva/15 text-alyva">
-          <Lightbulb className="size-4" />
-        </span>
+      <section className="mt-5 flex items-start gap-3 rounded-3xl border border-alyva/20 bg-alyva/[0.05] px-4 py-3">
+        <TipIcon className="mt-0.5 size-5 shrink-0 text-alyva" />
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-alyva">
             {t("nutr.tip_title")}
           </p>
-          <p className="mt-0.5 text-[13px] leading-snug text-foreground/90">
+          <p className="mt-0.5 text-[12px] leading-snug text-foreground/90">
             {t("today.aura.tip_default")}
           </p>
         </div>
@@ -226,8 +250,8 @@ function Nutrition() {
             onClick={openScan}
             className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
           >
-            <div className="grid size-10 place-items-center rounded-2xl bg-alyva/12 text-alyva">
-              <Camera className="size-5" />
+            <div className="grid size-10 place-items-center rounded-2xl bg-alyva/10 text-alyva">
+              <ScanMealIcon className="size-5" />
             </div>
             <p className="mt-3 font-display text-sm font-semibold">{t("nutr.scan_meal")}</p>
             <p className="text-[11px] text-muted-foreground">{t("nutr.scan_sub")}</p>
@@ -236,14 +260,15 @@ function Nutrition() {
             to="/meal-planner"
             className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
           >
-            <div className="grid size-10 place-items-center rounded-2xl bg-alyva/12 text-alyva">
-              <CalendarDays className="size-5" />
+            <div className="grid size-10 place-items-center rounded-2xl bg-alyva/10 text-alyva">
+              <PlannerIcon className="size-5" />
             </div>
             <p className="mt-3 font-display text-sm font-semibold">{t("mealplan.title")}</p>
             <p className="text-[11px] text-muted-foreground">{t("mealplan.sub_short")}</p>
           </Link>
         </div>
       )}
+
 
       <FoodLogDialog
         open={open}
@@ -261,12 +286,11 @@ function Nutrition() {
 }
 
 function MealSection({
-  type, label, emoji, meals, onAdd, onRemove, disabled,
+  type, label, meals, onAdd, onRemove, disabled,
   tAddTo, tRemove, tItem, tItems, tKcal,
 }: {
   type: MealType;
   label: string;
-  emoji: string;
   meals: LoggedMeal[];
   onAdd: () => void;
   onRemove: (id: string) => void;
@@ -274,11 +298,14 @@ function MealSection({
   tAddTo: string; tRemove: string; tItem: string; tItems: string; tKcal: string;
 }) {
   const totalKcal = meals.reduce((s, m) => s + m.kcal, 0);
+  const Icon = MEAL_ICONS[type];
   return (
     <div className="rounded-3xl border border-border bg-card p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">{emoji}</span>
+          <span className="grid size-9 place-items-center rounded-2xl bg-alyva/10 text-alyva">
+            <Icon className="size-5" />
+          </span>
           <div>
             <h3 className="font-display text-sm font-semibold">{label}</h3>
             <p className="text-[11px] text-muted-foreground">
