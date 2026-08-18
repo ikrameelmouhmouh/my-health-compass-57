@@ -13,6 +13,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MonthCalendar } from "@/components/nutrition/month-calendar";
 import { ScanMealIcon, PlannerIcon, TipIcon } from "@/components/nutrition/meal-icons";
+import { TipsSheet, tipOfTheDayIndex } from "@/components/nutrition/tips-sheet";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useRegisterAiQuickActions } from "@/lib/ai-quick-actions";
 import { useNavigate } from "@tanstack/react-router";
@@ -39,6 +40,7 @@ function Nutrition() {
   const [autoOpenScan, setAutoOpenScan] = useState(false);
   const [dateOffset, setDateOffset] = useState(0);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState(false);
 
   const { data: profile } = useQuery({
     queryKey: ["profile", user?.id],
