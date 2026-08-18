@@ -66,7 +66,7 @@ export function ChatHistoryDrawer({
           <Link
             to="/ai-coach"
             onClick={() => setOpen(false)}
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-brand text-sm font-semibold text-brand-foreground"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-sm font-semibold text-primary-foreground"
           >
             <Plus className="size-4" />
             {t("chat.new")}
