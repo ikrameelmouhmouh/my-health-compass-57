@@ -107,7 +107,7 @@ export function FastingSummarySheet({
                     <div
                       className={`grid size-8 place-items-center rounded-full border ${
                         isCurrent
-                          ? "border-brand bg-brand text-white"
+                          ? "border-brand bg-primary text-primary-foreground"
                           : active
                           ? "border-brand/40 bg-brand/15 text-brand"
                           : "border-border bg-muted text-muted-foreground"

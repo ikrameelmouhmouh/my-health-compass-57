@@ -282,7 +282,7 @@ function Choice({ active, disabled, multi, onClick, children }: { active?: boole
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`relative min-h-11 rounded-xl border px-3 py-2.5 text-sm font-medium transition disabled:opacity-35 ${active ? "border-brand bg-brand text-brand-foreground" : "border-border bg-card text-foreground hover:bg-accent"}`}
+      className={`relative min-h-11 rounded-xl border px-3 py-2.5 text-sm font-medium transition disabled:opacity-35 ${active ? "border-brand bg-primary text-primary-foreground" : "border-border bg-card text-foreground hover:bg-accent"}`}
     >
       {children}
       {active && multi && <Check className="absolute right-2 top-2 size-3.5" />}

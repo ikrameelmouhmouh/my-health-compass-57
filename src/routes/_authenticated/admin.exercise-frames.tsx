@@ -264,7 +264,7 @@ function AdminExerciseFramesPage() {
               onClick={() => setFilmSpeed(s)}
               className={`rounded-full px-2.5 py-1 text-[11px] transition ${
                 filmSpeed === s
-                  ? "bg-brand text-white"
+                  ? "bg-primary text-primary-foreground"
                   : "border border-border bg-card text-muted-foreground hover:bg-muted"
               }`}
             >

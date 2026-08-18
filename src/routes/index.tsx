@@ -78,7 +78,7 @@ function LanguagePicker() {
                 <div className="font-display text-base font-semibold">{l.native}</div>
                 <div className="text-xs text-muted-foreground">{l.label}</div>
               </div>
-              <div className={`grid size-6 place-items-center rounded-full transition-colors ${selected ? "bg-brand text-brand-foreground" : "border border-border"}`}>
+              <div className={`grid size-6 place-items-center rounded-full transition-colors ${selected ? "bg-primary text-primary-foreground" : "border border-border"}`}>
                 {selected && <Check className="size-3.5" strokeWidth={3} />}
               </div>
             </button>

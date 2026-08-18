@@ -224,11 +224,11 @@ function SessionPage() {
         <button
           onClick={togglePause}
           aria-label={isPaused ? t("session.resume") : t("session.pause")}
-          className={`grid size-9 place-items-center rounded-full ${isPaused ? "bg-brand text-brand-foreground" : "bg-card text-muted-foreground"}`}
+          className={`grid size-9 place-items-center rounded-full ${isPaused ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
         >
           {isPaused ? <Play className="size-4 fill-current" /> : <Pause className="size-4" />}
         </button>
-        <Button size="sm" onClick={handleFinish} className="bg-brand text-brand-foreground">
+        <Button size="sm" onClick={handleFinish} className="bg-primary text-primary-foreground">
           {t("session.finish")}
         </Button>
       </div>
@@ -282,7 +282,7 @@ function SessionPage() {
               <div className="mt-3 space-y-2">
                 {ex.sets.map((st, setIdx) => (
                   <div key={setIdx} className="flex items-center gap-2">
-                    <span className={`grid size-8 shrink-0 place-items-center rounded-full border text-xs font-semibold ${st.done ? "border-brand bg-brand text-brand-foreground" : "border-border text-muted-foreground"}`}>
+                    <span className={`grid size-8 shrink-0 place-items-center rounded-full border text-xs font-semibold ${st.done ? "border-brand bg-primary text-primary-foreground" : "border-border text-muted-foreground"}`}>
                       {setIdx + 1}
                     </span>
                     <div className="flex flex-1 items-center gap-1.5">
@@ -303,7 +303,7 @@ function SessionPage() {
                     <button
                       onClick={() => toggleSet(exIdx, setIdx)}
                       aria-label={t("session.mark_set")}
-                      className={`grid size-9 shrink-0 place-items-center rounded-full ${st.done ? "bg-brand text-brand-foreground" : "border border-border text-muted-foreground"}`}
+                      className={`grid size-9 shrink-0 place-items-center rounded-full ${st.done ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground"}`}
                     >
                       {st.done ? <Check className="size-4" /> : <Play className="size-3.5 fill-current" />}
                     </button>
@@ -333,7 +333,7 @@ function SessionPage() {
                             setExerciseRest(exIdx, sec);
                             startRest(sec);
                           }}
-                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${active ? "bg-brand text-brand-foreground" : "bg-background text-muted-foreground"}`}
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${active ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground"}`}
                         >
                           {sec}s
                         </button>
@@ -425,7 +425,7 @@ function SessionPage() {
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur">
             <Pause className="size-4 text-brand" />
             <p className="flex-1 text-sm">{t("session.paused_hint")}</p>
-            <Button size="sm" onClick={togglePause} className="bg-brand text-brand-foreground">
+            <Button size="sm" onClick={togglePause} className="bg-primary text-primary-foreground">
               {t("session.resume")}
             </Button>
           </div>

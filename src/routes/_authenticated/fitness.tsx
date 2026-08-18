@@ -182,7 +182,7 @@ function ViewTabs({ view, setView }: { view: View; setView: (v: View) => void })
           <button
             key={tab.id}
             onClick={() => setView(tab.id)}
-            className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${active ? "bg-brand text-white shadow" : "text-muted-foreground hover:text-foreground"}`}
+            className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${active ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"}`}
           >
             <tab.icon className="size-4" /> {tab.label}
           </button>
@@ -492,7 +492,7 @@ function WeekList({
                     tabIndex={0}
                     onClick={(e) => { e.stopPropagation(); toggleCompleted(d.day); }}
                     onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); toggleCompleted(d.day); } }}
-                    className={`grid size-6 shrink-0 place-items-center rounded-full border-2 ${done ? "border-brand bg-brand text-white" : "border-border"}`}
+                    className={`grid size-6 shrink-0 place-items-center rounded-full border-2 ${done ? "border-brand bg-primary text-primary-foreground" : "border-border"}`}
                     aria-label={t("fit.mark_complete")}
                   >
                     {done && <Check className="size-3" />}

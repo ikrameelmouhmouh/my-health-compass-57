@@ -347,7 +347,7 @@ function Composer({
             type="submit"
             disabled={!input.trim() && !attachedName}
             aria-label={t("chat.send")}
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-brand text-brand-foreground disabled:opacity-40"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground disabled:opacity-40"
           >
             <Send className="size-4" />
           </button>

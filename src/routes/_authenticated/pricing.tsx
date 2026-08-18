@@ -189,7 +189,7 @@ function PricingPage() {
                   interval === "yearly" ? "border-brand ring-2 ring-brand/30" : "border-border"
                 }`}
               >
-                <div className="absolute -top-2 right-2 text-[10px] font-semibold bg-brand text-brand-foreground px-2 py-0.5 rounded-full">
+                <div className="absolute -top-2 right-2 text-[10px] font-semibold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
                   -33%
                 </div>
                 <div className="text-xs text-muted-foreground">{t("price.yearly")}</div>

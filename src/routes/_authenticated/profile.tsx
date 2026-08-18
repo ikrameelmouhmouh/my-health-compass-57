@@ -926,7 +926,7 @@ function WaterCard({ ml, goal, onAdd, onOpen, compact }: { ml: number; goal: num
         </div>
         <div className="flex shrink-0 gap-1">
           <button onClick={() => onAdd(-250)} className={`grid place-items-center rounded-full border border-border bg-background hover:bg-accent ${compact ? "size-7" : "size-9"}`}><Minus className={compact ? "size-3" : "size-4"} /></button>
-          <button onClick={() => onAdd(250)} className={`grid place-items-center rounded-full bg-brand text-brand-foreground ${compact ? "size-7" : "size-9"}`}><Plus className={compact ? "size-3" : "size-4"} /></button>
+          <button onClick={() => onAdd(250)} className={`grid place-items-center rounded-full bg-primary text-primary-foreground ${compact ? "size-7" : "size-9"}`}><Plus className={compact ? "size-3" : "size-4"} /></button>
         </div>
       </div>
       <Bar pct={pct(ml, goal)} className={compact ? "mt-3" : "mt-4"} />

@@ -44,7 +44,7 @@ export function FastingPhaseSheet({
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
         <div className="relative bg-gradient-to-br from-brand/20 via-brand/10 to-transparent px-6 pt-8 pb-6 text-center">
-          <div className={`mx-auto grid size-16 place-items-center rounded-full ${isCurrent ? "bg-brand text-white" : reached ? "bg-brand/20 text-brand" : "bg-muted text-muted-foreground"}`}>
+          <div className={`mx-auto grid size-16 place-items-center rounded-full ${isCurrent ? "bg-primary text-primary-foreground" : reached ? "bg-brand/20 text-brand" : "bg-muted text-muted-foreground"}`}>
             <Icon className="size-8" />
           </div>
           <div className="mt-3 inline-block rounded-full bg-card/70 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">

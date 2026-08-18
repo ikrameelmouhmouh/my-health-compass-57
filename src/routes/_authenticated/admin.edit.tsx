@@ -101,7 +101,7 @@ function AdminEditPage() {
                   onClick={() => setMode(m)}
                   className={`inline-flex items-center justify-center gap-1.5 rounded-full px-2 py-2 text-[12px] font-semibold transition ${
                     isActive
-                      ? "bg-brand text-brand-foreground shadow-sm"
+                      ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
@@ -138,7 +138,7 @@ function AdminEditPage() {
                   onClick={() => setOverride(m)}
                   className={`rounded-full px-2 py-2 text-[12px] font-semibold transition ${
                     active
-                      ? "bg-brand text-brand-foreground shadow-sm"
+                      ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
