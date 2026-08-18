@@ -1,17 +1,20 @@
-import { todayLocalKey, localDayKey } from "@/lib/local-date";
+import { localDayKey } from "@/lib/local-date";
 import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute } from "@tanstack/react-router";
+import type * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Timer, Play, Pause, Square, Bell, Pencil, Trash2, Flame, Trophy, CalendarCheck, Check,
+  Timer, Play, Pause, Square, Bell, Pencil, Trash2, Check, ChevronLeft, ChevronRight,
+  History, Sparkles, Flame, TrendingUp, CalendarCheck, Lightbulb,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import {
   useFasting, FASTING_PROTOCOLS, getProtocol,
-  requestNotificationPermission, type FastingProtocol, type FastEntry,
+  requestNotificationPermission, type FastEntry,
 } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
@@ -19,26 +22,57 @@ import { FastingSummarySheet } from "@/components/fasting/fasting-summary";
 import { FastingPhaseStrip } from "@/components/fasting/fasting-phase-strip";
 import { FastingPhaseSheet } from "@/components/fasting/fasting-phase-sheet";
 
-
 export const Route = createFileRoute("/_authenticated/fasting")({
-  head: () => ({ meta: [{ title: "Fasting — Alyva" }] }),
+  head: () => ({
+    meta: [
+      { title: "Vasten — Alyva" },
+      { name: "description", content: "Volg je intermittent fasting met een live timer, protocollen, reeksen en inzichten." },
+      { property: "og:title", content: "Vasten — Alyva" },
+      { property: "og:description", content: "Live vastentimer, protocollen van 16:8 tot OMAD en heldere inzichten." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: FastingPage,
 });
 
+const LOCALE_MAP: Record<string, string> = {
+  en: "en-GB", nl: "nl-NL", ar: "ar", fr: "fr-FR", de: "de-DE", es: "es-ES",
+};
+
+/** Colour tokens per protocol (module accent colours only — brand stays green). */
+const PROTO_TINT: Record<string, { dot: string; ring: string; soft: string; text: string }> = {
+  "16:8": { dot: "bg-acc-fasting", ring: "border-acc-fasting", soft: "bg-acc-fasting-soft", text: "text-acc-fasting" },
+  "14:10": { dot: "bg-acc-nutrition", ring: "border-acc-nutrition", soft: "bg-acc-nutrition-soft", text: "text-acc-nutrition" },
+  "18:6": { dot: "bg-acc-weight", ring: "border-acc-weight", soft: "bg-acc-weight-soft", text: "text-acc-weight" },
+  "20:4": { dot: "bg-acc-cycle", ring: "border-acc-cycle", soft: "bg-acc-cycle-soft", text: "text-acc-cycle" },
+  OMAD: { dot: "bg-acc-fitness", ring: "border-acc-fitness", soft: "bg-acc-fitness-soft", text: "text-acc-fitness" },
+};
+
+const TAG_KEY: Record<string, string> = {
+  "16:8": "fast.proto.tag.16_8",
+  "14:10": "fast.proto.tag.14_10",
+  "18:6": "fast.proto.tag.18_6",
+  "20:4": "fast.proto.tag.20_4",
+  OMAD: "fast.proto.tag.OMAD",
+};
+
 function FastingPage() {
   const { t, lang } = useI18n();
+  const locale = LOCALE_MAP[lang] ?? lang;
   const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry } = useFasting();
+  const [tab, setTab] = useState<"overview" | "insights">("overview");
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
   const [summary, setSummary] = useState<FastEntry | null>(null);
   const [summaryIsLive, setSummaryIsLive] = useState(false);
   const [phaseSheet, setPhaseSheet] = useState<string | null>(null);
+  const [dateOffset, setDateOffset] = useState(0);
   const [notifPerm, setNotifPerm] = useState<NotificationPermission>(() =>
-
     typeof window !== "undefined" && "Notification" in window ? Notification.permission : "denied"
   );
 
-  // tick
   const [tick, setTick] = useState(0);
   useEffect(() => {
     if (!state.startedAt || state.pausedAt) return;
@@ -64,223 +98,363 @@ function FastingPage() {
     };
   }, [state.startedAt, state.pausedAt, state.pausedTotalMs, targetMs, tick]);
 
-  // Fire end-of-fast notification once
   useEffect(() => {
     if (!live.active || live.paused) return;
     if (live.elapsedMs >= targetMs && live.elapsedMs - targetMs < 2000) {
-      try { if ("Notification" in window && Notification.permission === "granted")
-        new Notification(t("fast.title"), { body: t("fast.status.eating") });
-      } catch {}
+      try {
+        if ("Notification" in window && Notification.permission === "granted")
+          new Notification(t("fast.title"), { body: t("fast.status.eating") });
+      } catch { /* ignore */ }
     }
   }, [live.active, live.paused, live.elapsedMs, targetMs, t]);
 
-  // Stats
-  const totalCompleted = state.history.filter((e) => e.completed).length;
-  const last7 = useMemo(() => bucketByDay(state.history, 7, lang), [state.history, lang]);
-  const last30 = useMemo(() => bucketByDay(state.history, 30, lang), [state.history, lang]);
+  const viewDate = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + dateOffset);
+    return d;
+  }, [dateOffset]);
+
+  const last7 = useMemo(() => bucketByDay(state.history, 7, locale), [state.history, locale]);
+  const last30 = useMemo(() => bucketByDay(state.history, 30, locale), [state.history, locale]);
   const weeklyHours = last7.reduce((a, b) => a + b.hours, 0);
   const monthlyHours = last30.reduce((a, b) => a + b.hours, 0);
   const consistency = Math.round((last7.filter((d) => d.hours > 0).length / 7) * 100);
+  const totalHours = state.history.reduce((a, e) => a + e.durationMs / 3_600_000, 0);
+  const daysDoneThisWeek = last7.filter((d) => d.hours >= proto.fast * 0.9).length;
+  const weekLeft = Math.max(0, 7 - daysDoneThisWeek);
 
-  const eatStart = state.startedAt
-    ? new Date(new Date(state.startedAt).getTime() + targetMs)
-    : null;
+  const eatStart = state.startedAt ? new Date(new Date(state.startedAt).getTime() + targetMs) : null;
   const eatEnd = eatStart ? new Date(eatStart.getTime() + proto.eat * 3_600_000) : null;
+  const hhmm = (d: Date) => d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+  const windowText = eatStart && eatEnd ? `${hhmm(eatStart)} – ${hhmm(eatEnd)}` : proto.window;
+
+  const tipIndex = useMemo(() => {
+    const key = localDayKey(viewDate);
+    let h = 0;
+    for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+    return (h % 5) + 1;
+  }, [viewDate]);
 
   async function askNotif() {
-    const r = await requestNotificationPermission();
-    setNotifPerm(r);
+    setNotifPerm(await requestNotificationPermission());
   }
 
   return (
-    <main className="section-fasting mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
-      <div className="mb-4 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
-      <header className="flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand/15 text-brand">
-            <Timer className="size-6" />
-          </div>
-          <div>
-            <h1 className="font-display text-2xl font-semibold tracking-tight">{t("fast.title")}</h1>
-            <p className="text-[12px] text-muted-foreground">{t("fast.subtitle")}</p>
-          </div>
-        </div>
-        {notifPerm !== "granted" && (
-          <button
-            onClick={askNotif}
-            className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-card"
-            aria-label={t("fast.enable_notif")}
-          >
-            <Bell className="size-4" />
-          </button>
-        )}
-      </header>
+    <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
+      <div className="mb-5 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
 
-      <PaywallOverlay feature={t("fast.title")} description={t("pay.overlay.fasting_desc")}>
-      {/* Timer */}
-      <section className="mt-6 rounded-3xl border border-border bg-card p-6">
-        <div className="flex items-center justify-between">
-          <span className="rounded-full bg-accent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-accent-foreground">
-            {live.active ? (live.paused ? t("fast.status.paused") : t("fast.status.fasting")) : t("fast.status.eating")}
-          </span>
-          <span className="font-display text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            {proto.label}
-          </span>
-        </div>
-
-        <div className="mt-5 grid place-items-center">
-          <BigRing
-            pct={live.active ? live.pct : 0}
-            label={live.active ? formatHMS(live.elapsedMs) : "00:00:00"}
-            sub={live.active
-              ? t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
-              : t("fast.sub.tapStart", { n: proto.fast })}
-          />
-        </div>
-
-        <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-          <Mini label={t("fast.mini.elapsed")} value={live.active ? formatHM(live.elapsedMs) : "—"} />
-          <Mini label={t("fast.mini.remaining")} value={live.active ? formatHM(live.leftMs) : "—"} />
-          <Mini label={t("fast.mini.goal")} value={`${proto.fast}h`} />
-        </div>
-
-        <div className="mt-5 flex gap-2">
-          {!live.active ? (
-            <Button className="h-11 flex-1" onClick={start}><Play className="mr-1.5 size-4" />{t("fast.action.start")}</Button>
-          ) : (
-            <>
-              {live.paused ? (
-                <Button className="h-11 flex-1" onClick={resume}><Play className="mr-1.5 size-4" />{t("fast.action.resume")}</Button>
-              ) : (
-                <Button variant="outline" className="h-11 flex-1" onClick={pause}><Pause className="mr-1.5 size-4" />{t("fast.action.pause")}</Button>
-              )}
-              <Button variant="destructive" className="h-11 flex-1" onClick={() => { const e = stop(); if (e) { setSummary(e); setSummaryIsLive(true); } }}><Square className="mr-1.5 size-4" />{t("fast.action.end")}</Button>
-            </>
-          )}
-        </div>
-
-        {live.active && (
-          <button
-            onClick={() => setEditStart(true)}
-            className="mt-3 inline-flex w-full items-center justify-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground"
-          >
-            <Pencil className="size-3" /> {t("fast.started", { when: new Date(state.startedAt!).toLocaleString(lang, { hour: "2-digit", minute: "2-digit", month: "short", day: "numeric" }) })}
-          </button>
-        )}
-
-        {eatStart && eatEnd && (
-          <div className="mt-3 rounded-2xl bg-accent/40 p-3 text-center text-[11px] text-muted-foreground">
-            {t("fast.window", {
-              start: eatStart.toLocaleTimeString(lang, { hour: "2-digit", minute: "2-digit" }),
-              end: eatEnd.toLocaleTimeString(lang, { hour: "2-digit", minute: "2-digit" }),
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* Phase strip */}
-      <FastingPhaseStrip
-        currentHours={live.active ? live.elapsedMs / 3_600_000 : 0}
-        active={live.active}
-        onSelect={(id) => setPhaseSheet(id)}
-      />
-
-
-
-      {/* Protocols */}
-      <section className="mt-5">
-        <h2 className="mb-2 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">{t("fast.proto.title")}</h2>
-        <div className="grid grid-cols-3 gap-2">
-          {FASTING_PROTOCOLS.map((p) => (
+      <header>
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="font-display text-[26px] font-bold tracking-tight">{t("fast.title")}</h1>
+          <div className="flex items-center gap-1.5">
+            {notifPerm !== "granted" && (
+              <button
+                onClick={askNotif}
+                className="grid size-9 place-items-center rounded-full border border-border bg-card ios-press"
+                aria-label={t("fast.enable_notif")}
+              >
+                <Bell className="size-4" />
+              </button>
+            )}
             <button
-              key={p.id}
-              onClick={() => setProtocol(p.id)}
-              disabled={live.active}
-              className={`rounded-2xl border p-3 text-left transition disabled:opacity-50 ${
-                state.protocol === p.id ? "border-brand bg-brand/10" : "border-border bg-card hover:bg-accent"
+              onClick={() => setHistoryOpen(true)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-[12px] font-semibold ios-press"
+            >
+              <History className="size-3.5" />
+              {t("fast.history.btn")}
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            onClick={() => setDateOffset((d) => d - 1)}
+            className="grid size-9 shrink-0 place-items-center rounded-full border border-border ios-press"
+            aria-label={t("fast.phase.prev")}
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <div className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center">
+            <span className="text-[13px] font-semibold capitalize">
+              {viewDate.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
+            </span>
+          </div>
+          <button
+            onClick={() => setDateOffset((d) => Math.min(0, d + 1))}
+            disabled={dateOffset >= 0}
+            className="grid size-9 shrink-0 place-items-center rounded-full border border-border ios-press disabled:opacity-40"
+            aria-label={t("fast.phase.next")}
+          >
+            <ChevronRight className="size-4" />
+          </button>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-1 rounded-full bg-muted p-1">
+          {(["overview", "insights"] as const).map((k) => (
+            <button
+              key={k}
+              onClick={() => setTab(k)}
+              className={`rounded-full py-2 text-[13px] font-semibold transition ${
+                tab === k ? "bg-acc-fasting-soft text-acc-fasting shadow-sm" : "text-muted-foreground"
               }`}
             >
-              <div className="flex items-center justify-between">
-                <span className="font-display text-sm font-semibold">{p.label}</span>
-                {state.protocol === p.id && <Check className="size-3.5 text-brand" />}
-              </div>
-              <p className="mt-1 text-[10px] leading-tight text-muted-foreground">{p.desc}</p>
+              {t(k === "overview" ? "fast.tab.overview" : "fast.tab.insights")}
             </button>
           ))}
         </div>
-      </section>
+      </header>
 
-      {/* Stats */}
-      <section className="mt-5 grid grid-cols-3 gap-2">
-        <StatTile icon={Flame} label={t("fast.stats.streak")} value={`${state.streak}${t("fast.unit.day")}`} />
-        <StatTile icon={Trophy} label={t("fast.stats.longest")} value={`${state.longestStreak}${t("fast.unit.day")}`} />
-        <StatTile icon={CalendarCheck} label={t("fast.stats.total")} value={totalCompleted} />
-      </section>
+      <PaywallOverlay feature={t("fast.title")} description={t("pay.overlay.fasting_desc")}>
+        {tab === "overview" ? (
+          <>
+            {/* Timer card */}
+            <section className="mt-5 rounded-[28px] border border-border bg-card p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+              <div className="flex items-center justify-between">
+                <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
+                  live.active ? "bg-acc-fasting-soft text-acc-fasting" : "bg-muted text-muted-foreground"
+                }`}>
+                  {live.active
+                    ? live.paused ? t("fast.status.paused") : t("fast.status.fasting")
+                    : t("fast.notStarted")}
+                </span>
+                <span className="font-display text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {proto.label}
+                </span>
+              </div>
 
-      {/* Weekly chart */}
-      <section className="mt-5 rounded-3xl border border-border bg-card p-5">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-sm font-semibold">{t("fast.last7")}</h2>
-          <span className="text-[11px] text-muted-foreground">{t("fast.weeklySummary", { h: weeklyHours.toFixed(1), p: consistency })}</span>
-        </div>
-        <BarChart data={last7} targetH={proto.fast} className="mt-3 h-28" />
-      </section>
+              <div className="mt-5 grid place-items-center">
+                <BigRing
+                  pct={live.active ? live.pct : 0}
+                  label={live.active ? formatHMS(live.elapsedMs) : "00:00:00"}
+                  sub={live.active
+                    ? t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
+                    : t("fast.tapStart")}
+                />
+              </div>
 
-      {/* Monthly chart */}
-      <section className="mt-3 rounded-3xl border border-border bg-card p-5">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-sm font-semibold">{t("fast.last30")}</h2>
-          <span className="text-[11px] text-muted-foreground">{t("fast.monthlySummary", { h: monthlyHours.toFixed(0) })}</span>
-        </div>
-        <BarChart data={last30} targetH={proto.fast} className="mt-3 h-20" thin />
-      </section>
+              {live.active && state.startedAt && (
+                <button
+                  onClick={() => setEditStart(true)}
+                  className="mt-4 inline-flex w-full items-center justify-center gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground"
+                >
+                  <Pencil className="size-3" />
+                  {t("fast.since")} {new Date(state.startedAt).toLocaleString(locale, { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}
+                </button>
+              )}
 
-      {/* Streak growth */}
-      <section className="mt-3 rounded-3xl border border-border bg-card p-5">
-        <h2 className="font-display text-sm font-semibold">{t("fast.streakGrowth")}</h2>
-        <StreakLine history={state.history} className="mt-3 h-20" emptyLabel={t("fast.noStreak")} />
-      </section>
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                <Mini label={t("fast.elapsed")} value={live.active ? formatHM(live.elapsedMs) : "—"} />
+                <Mini label={t("fast.remaining")} value={live.active ? formatHM(live.leftMs) : "—"} />
+                <Mini label={t("fast.goalLabel")} value={`${proto.fast}u`} />
+              </div>
 
-      {/* History */}
-      <section className="mt-5">
-        <h2 className="mb-2 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">{t("fast.history")}</h2>
-        {state.history.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-border bg-card/50 p-6 text-center text-sm text-muted-foreground">
-            {t("fast.noHistory")}
-          </div>
-        ) : (
-          <ul className="space-y-2">
-            {state.history.slice(0, 20).map((e) => (
-              <li key={e.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-                <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${e.completed ? "bg-brand/15 text-brand" : "bg-muted text-muted-foreground"}`}>
-                  {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
+              <div className="mt-3 rounded-2xl bg-acc-fasting-soft px-3 py-2.5 text-center">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-acc-fasting">
+                  {t("fast.eatWindow")}
+                </span>
+                <p className="mt-0.5 text-[13px] font-semibold tabular-nums">{windowText}</p>
+              </div>
+
+              <div className="mt-4 flex gap-2">
+                {!live.active ? (
+                  <Button className="h-12 flex-1 rounded-2xl" onClick={start}>
+                    <Play className="mr-1.5 size-4" />{t("fast.startBtn")}
+                  </Button>
+                ) : (
+                  <>
+                    {live.paused ? (
+                      <Button variant="outline" className="h-12 flex-1 rounded-2xl" onClick={resume}>
+                        <Play className="mr-1.5 size-4" />{t("fast.action.resume")}
+                      </Button>
+                    ) : (
+                      <Button variant="outline" className="h-12 flex-1 rounded-2xl" onClick={pause}>
+                        <Pause className="mr-1.5 size-4" />{t("fast.action.pause")}
+                      </Button>
+                    )}
+                    <Button
+                      className="h-12 flex-1 rounded-2xl"
+                      onClick={() => { const e = stop(); if (e) { setSummary(e); setSummaryIsLive(true); } }}
+                    >
+                      <Square className="mr-1.5 size-4" />{t("fast.endBtn")}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </section>
+
+            <FastingPhaseStrip
+              currentHours={live.active ? live.elapsedMs / 3_600_000 : 0}
+              active={live.active}
+              onSelect={(id) => setPhaseSheet(id)}
+            />
+
+            {/* Protocols */}
+            <section className="mt-5">
+              <h2 className="mb-2 px-1 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("fast.proto.title")}
+              </h2>
+              <ul className="space-y-2">
+                {FASTING_PROTOCOLS.map((p) => {
+                  const tint = PROTO_TINT[p.id] ?? PROTO_TINT["16:8"];
+                  const selected = state.protocol === p.id;
+                  return (
+                    <li key={p.id}>
+                      <button
+                        onClick={() => setProtocol(p.id)}
+                        disabled={live.active}
+                        className={`flex w-full items-center gap-3 rounded-[22px] border bg-card px-4 py-3.5 text-left transition ios-press disabled:opacity-50 ${
+                          selected ? `${tint.ring} ${tint.soft}` : "border-border"
+                        }`}
+                      >
+                        <span className={`grid size-9 shrink-0 place-items-center rounded-full ${tint.soft}`}>
+                          <span className={`size-2.5 rounded-full ${tint.dot}`} />
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-baseline gap-2">
+                            <span className="font-display text-[15px] font-bold">{p.label}</span>
+                            <span className={`text-[11px] font-semibold ${tint.text}`}>{t(TAG_KEY[p.id])}</span>
+                          </span>
+                          <span className="mt-0.5 block text-[12px] tabular-nums text-muted-foreground">{p.window}</span>
+                        </span>
+                        {selected && <Check className={`size-4 shrink-0 ${tint.text}`} />}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+
+            {/* Stay consistent */}
+            <section className="mt-5 flex items-start gap-3 rounded-[24px] border border-border bg-card p-5">
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-acc-fasting-soft">
+                <Sparkles className="size-5 text-acc-fasting" />
+              </span>
+              <div className="min-w-0">
+                <p className="font-display text-[15px] font-bold leading-tight">{t("fast.consist.title")}</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{t("fast.consist.body")}</p>
+              </div>
+            </section>
+
+            {/* Stats */}
+            <section className="mt-3 grid grid-cols-3 gap-2">
+              <StatCard icon={Flame} tint="text-acc-weight" soft="bg-acc-weight-soft" label={t("fast.stat.longest")} value={`${state.longestStreak}${t("fast.unit.day")}`}>
+                <Spark values={last7.map((d) => d.hours)} className="text-acc-weight" />
+              </StatCard>
+              <StatCard icon={CalendarCheck} tint="text-acc-fasting" soft="bg-acc-fasting-soft" label={t("fast.stat.total")} value={`${Math.round(totalHours)}u`}>
+                <Spark values={last30.slice(-14).map((d) => d.hours)} className="text-acc-fasting" />
+              </StatCard>
+              <StatCard icon={TrendingUp} tint="text-acc-nutrition" soft="bg-acc-nutrition-soft" label={t("fast.stat.weekLeft")} value={`${weekLeft}${t("fast.unit.day")}`}>
+                <div className="flex items-end gap-[3px]">
+                  {last7.map((d, i) => (
+                    <span key={i} className={`h-1.5 flex-1 rounded-full ${d.hours >= proto.fast * 0.9 ? "bg-acc-nutrition" : "bg-border"}`} />
+                  ))}
                 </div>
-                <button onClick={() => { setSummary(e); setSummaryIsLive(false); }} className="min-w-0 flex-1 text-left">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <span className="truncate font-display text-sm font-semibold">{formatHM(e.durationMs)} · {e.protocol}</span>
-                    <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      {e.completed ? t("fast.done") : t("fast.short")}
-                    </span>
-                  </div>
-                  <p className="truncate text-[11px] text-muted-foreground">
-                    {new Date(e.startedAt).toLocaleString(lang, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} → {new Date(e.endedAt).toLocaleString(lang, { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                </button>
+              </StatCard>
+            </section>
 
-                <button onClick={() => setEditEntry(e)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.edit")}>
-                  <Pencil className="size-3.5" />
-                </button>
-                <button onClick={() => deleteEntry(e.id)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.delete")}>
-                  <Trash2 className="size-3.5" />
-                </button>
-              </li>
-            ))}
-          </ul>
+            {/* Tip of the day */}
+            <section className="mt-3 flex items-start gap-3 rounded-[24px] bg-alyva/[0.05] p-5">
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-alyva/10">
+                <Lightbulb className="size-5 text-alyva" />
+              </span>
+              <div className="min-w-0">
+                <p className="font-display text-[15px] font-bold leading-tight">{t("fast.tipTitle")}</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{t(`fast.tip.${tipIndex}`)}</p>
+              </div>
+            </section>
+          </>
+        ) : (
+          <>
+            <section className="mt-5 rounded-[24px] border border-border bg-card p-5">
+              <div className="flex items-baseline justify-between">
+                <h2 className="font-display text-sm font-semibold">{t("fast.last7")}</h2>
+                <span className="text-[11px] text-muted-foreground">
+                  {t("fast.weeklySummary", { h: weeklyHours.toFixed(1), p: consistency })}
+                </span>
+              </div>
+              {weeklyHours > 0
+                ? <BarChart data={last7} targetH={proto.fast} className="mt-3 h-24" />
+                : <Empty label={t("fast.ins.empty")} />}
+            </section>
+
+            <section className="mt-3 rounded-[24px] border border-border bg-card p-5">
+              <div className="flex items-baseline justify-between">
+                <h2 className="font-display text-sm font-semibold">{t("fast.last30")}</h2>
+                <span className="text-[11px] text-muted-foreground">
+                  {t("fast.monthlySummary", { h: monthlyHours.toFixed(0) })}
+                </span>
+              </div>
+              {monthlyHours > 0
+                ? <BarChart data={last30} targetH={proto.fast} className="mt-3 h-16" thin />
+                : <Empty label={t("fast.ins.empty")} />}
+            </section>
+
+            <section className="mt-3 rounded-[24px] border border-border bg-card p-5">
+              <h2 className="font-display text-sm font-semibold">{t("fast.streakGrowth")}</h2>
+              <StreakLine history={state.history} className="mt-3 h-16" emptyLabel={t("fast.noStreak")} />
+            </section>
+
+            <section className="mt-3 grid grid-cols-2 gap-2">
+              <StatCard icon={Flame} tint="text-acc-weight" soft="bg-acc-weight-soft" label={t("fast.stats.streak")} value={`${state.streak}${t("fast.unit.day")}`} />
+              <StatCard icon={CalendarCheck} tint="text-acc-fasting" soft="bg-acc-fasting-soft" label={t("fast.stats.total")} value={state.history.filter((e) => e.completed).length} />
+            </section>
+          </>
         )}
-      </section>
       </PaywallOverlay>
 
-
+      <Drawer open={historyOpen} onOpenChange={setHistoryOpen}>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader className="text-left">
+            <DrawerTitle className="font-display">{t("fast.history")}</DrawerTitle>
+            <DrawerDescription>{t("fast.subtitle")}</DrawerDescription>
+          </DrawerHeader>
+          <div className="overflow-y-auto px-4 pb-8">
+            {state.history.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                {t("fast.noHistory")}
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {state.history.slice(0, 50).map((e) => (
+                  <li key={e.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
+                    <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${
+                      e.completed ? "bg-acc-fasting-soft text-acc-fasting" : "bg-muted text-muted-foreground"
+                    }`}>
+                      {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
+                    </div>
+                    <button
+                      onClick={() => { setSummary(e); setSummaryIsLive(false); }}
+                      className="min-w-0 flex-1 text-left"
+                    >
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="truncate font-display text-sm font-semibold">
+                          {formatHM(e.durationMs)} · {e.protocol}
+                        </span>
+                        <span className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider ${
+                          e.completed ? "text-acc-fasting" : "text-muted-foreground"
+                        }`}>
+                          {e.completed ? t("fast.done") : t("fast.aborted")}
+                        </span>
+                      </div>
+                      <p className="truncate text-[11px] text-muted-foreground">
+                        {new Date(e.startedAt).toLocaleString(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        {" → "}
+                        {new Date(e.endedAt).toLocaleString(locale, { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </button>
+                    <button onClick={() => setEditEntry(e)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.edit")}>
+                      <Pencil className="size-3.5" />
+                    </button>
+                    <button onClick={() => deleteEntry(e.id)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.delete")}>
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <EditStartDialog
         open={editStart}
@@ -311,7 +485,6 @@ function FastingPage() {
   );
 }
 
-
 /* ---------- UI bits ---------- */
 function BigRing({ pct, label, sub }: { pct: number; label: string; sub: string }) {
   const size = 220, stroke = 12;
@@ -321,13 +494,16 @@ function BigRing({ pct, label, sub }: { pct: number; label: string; sub: string 
   return (
     <div className="relative grid place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size/2} cy={size/2} r={r} stroke="currentColor" strokeOpacity={0.12} strokeWidth={stroke} fill="none" />
-        <circle cx={size/2} cy={size/2} r={r} stroke="currentColor" className="text-brand" strokeWidth={stroke} strokeLinecap="round" fill="none" strokeDasharray={c} strokeDashoffset={off} />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="currentColor" strokeOpacity={0.1} strokeWidth={stroke} fill="none" />
+        <circle
+          cx={size / 2} cy={size / 2} r={r} stroke="currentColor" className="text-acc-fasting"
+          strokeWidth={stroke} strokeLinecap="round" fill="none" strokeDasharray={c} strokeDashoffset={off}
+        />
       </svg>
-      <div className="absolute text-center">
-        <div className="font-display text-4xl font-semibold tabular-nums leading-none">{label}</div>
-        <div className="mt-2 text-[11px] font-medium text-muted-foreground">{sub}</div>
-        <div className="mt-1 font-display text-[11px] font-semibold tabular-nums text-brand">{Math.round(pct)}%</div>
+      <div className="absolute px-6 text-center">
+        <div className="font-display text-[34px] font-bold tabular-nums leading-none">{label}</div>
+        <div className="mt-2 text-[11px] font-medium leading-snug text-muted-foreground">{sub}</div>
+        <div className="mt-1 font-display text-[11px] font-semibold tabular-nums text-acc-fasting">{Math.round(pct)}%</div>
       </div>
     </div>
   );
@@ -335,21 +511,49 @@ function BigRing({ pct, label, sub }: { pct: number; label: string; sub: string 
 
 function Mini({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-border bg-background/40 px-2 py-2">
+    <div className="rounded-2xl border border-border px-2 py-2">
       <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className="mt-0.5 font-display text-sm font-semibold tabular-nums">{value}</div>
     </div>
   );
 }
 
-function StatTile({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | number }) {
+function StatCard({
+  icon: Icon, label, value, tint, soft, children,
+}: {
+  icon: React.ElementType; label: string; value: string | number; tint: string; soft: string; children?: React.ReactNode;
+}) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-3">
-      <div className="flex items-center gap-1.5 text-muted-foreground">
-        <Icon className="size-3.5" />
-        <span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span>
-      </div>
-      <div className="mt-1.5 font-display text-xl font-semibold tabular-nums">{value}</div>
+    <div className="rounded-[20px] border border-border bg-card p-3">
+      <span className={`grid size-7 place-items-center rounded-full ${soft}`}>
+        <Icon className={`size-3.5 ${tint}`} />
+      </span>
+      <div className="mt-2 font-display text-lg font-bold tabular-nums leading-none">{value}</div>
+      <div className="mt-1 text-[10px] font-medium leading-tight text-muted-foreground">{label}</div>
+      {children && <div className="mt-2 h-4">{children}</div>}
+    </div>
+  );
+}
+
+function Spark({ values, className }: { values: number[]; className?: string }) {
+  const max = Math.max(...values, 1);
+  return (
+    <div className="flex h-full items-end gap-[3px]">
+      {values.map((v, i) => (
+        <span
+          key={i}
+          className={`flex-1 rounded-full bg-current ${className ?? ""} ${v > 0 ? "opacity-80" : "opacity-15"}`}
+          style={{ height: `${Math.max(12, (v / max) * 100)}%` }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function Empty({ label }: { label: string }) {
+  return (
+    <div className="mt-3 rounded-2xl border border-dashed border-border py-5 text-center text-[12px] text-muted-foreground">
+      {label}
     </div>
   );
 }
@@ -364,7 +568,7 @@ function BarChart({ data, targetH, className, thin }: { data: { label: string; h
         return (
           <div key={i} className="flex flex-1 flex-col items-center justify-end gap-1">
             <div
-              className={`w-full rounded-t-md ${met ? "bg-brand" : d.hours > 0 ? "bg-brand/40" : "bg-border"}`}
+              className={`w-full rounded-t-md ${met ? "bg-acc-fasting" : d.hours > 0 ? "bg-acc-fasting/40" : "bg-border"}`}
               style={{ height: `${Math.max(h, d.hours > 0 ? 6 : 2)}%` }}
               title={`${d.label}: ${d.hours.toFixed(1)}h`}
             />
@@ -384,13 +588,13 @@ function StreakLine({ history, className, emptyLabel }: { history: FastEntry[]; 
     if (!e.completed) continue;
     const d = e.endedAt.slice(0, 10);
     if (last && new Date(d).getTime() - new Date(last).getTime() === 86_400_000) cur += 1;
-    else if (last === d) {/* same day */}
+    else if (last === d) { /* same day */ }
     else cur = 1;
     last = d;
     days.push({ date: d, streak: cur });
   }
   if (days.length === 0) {
-    return <div className={`grid place-items-center text-[11px] text-muted-foreground ${className ?? ""}`}>{emptyLabel}</div>;
+    return <Empty label={emptyLabel} />;
   }
   const max = Math.max(...days.map((d) => d.streak), 1);
   const w = 100, h = 100;
@@ -401,16 +605,20 @@ function StreakLine({ history, className, emptyLabel }: { history: FastEntry[]; 
   }).join(" ");
   return (
     <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className={`w-full ${className ?? ""}`}>
-      <polyline fill="none" stroke="currentColor" className="text-brand" strokeWidth={2} points={pts} />
+      <polyline fill="none" stroke="currentColor" className="text-acc-fasting" strokeWidth={2} points={pts} />
     </svg>
   );
 }
 
 /* ---------- Dialogs ---------- */
-function EditStartDialog({ open, onOpenChange, startedAt, onSave }: { open: boolean; onOpenChange: (b: boolean) => void; startedAt: string | null; onSave: (iso: string) => void }) {
+function EditStartDialog({
+  open, onOpenChange, startedAt, onSave,
+}: {
+  open: boolean; onOpenChange: (v: boolean) => void; startedAt: string | null; onSave: (iso: string) => void;
+}) {
   const { t } = useI18n();
   const [val, setVal] = useState("");
-  useEffect(() => { if (open && startedAt) setVal(toLocalInput(startedAt)); }, [open, startedAt]);
+  useEffect(() => { if (startedAt) setVal(toLocalInput(startedAt)); }, [startedAt, open]);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -474,20 +682,20 @@ function formatHM(ms: number) {
   const s = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
-  return `${h}h ${m}m`;
+  return `${h}u ${m}m`;
 }
 function toLocalInput(iso: string) {
   const d = new Date(iso);
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-function bucketByDay(history: FastEntry[], days: number, lang: string) {
+function bucketByDay(history: FastEntry[], days: number, locale: string) {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const out: { label: string; date: string; hours: number }[] = [];
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(today.getTime() - i * 86_400_000);
     const key = localDayKey(d);
-    const label = d.toLocaleDateString(lang, { weekday: "short" }).slice(0, 1);
+    const label = d.toLocaleDateString(locale, { weekday: "short" }).slice(0, 2);
     let hours = 0;
     for (const e of history) {
       const start = new Date(e.startedAt).getTime();
