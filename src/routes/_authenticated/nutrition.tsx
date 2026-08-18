@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MonthCalendar } from "@/components/nutrition/month-calendar";
-import { MEAL_ICONS, ScanMealIcon, PlannerIcon, TipIcon } from "@/components/nutrition/meal-icons";
+import { ScanMealIcon, PlannerIcon, TipIcon } from "@/components/nutrition/meal-icons";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useRegisterAiQuickActions } from "@/lib/ai-quick-actions";
 import { useNavigate } from "@tanstack/react-router";
@@ -307,13 +307,13 @@ function MealSection({
   tAddTo: string; tRemove: string; tItem: string; tItems: string; tKcal: string;
 }) {
   const totalKcal = meals.reduce((s, m) => s + m.kcal, 0);
-  const Icon = MEAL_ICONS[type];
+  const emoji = MEAL_TYPES.find((m) => m.id === type)?.emoji ?? "🍽️";
   return (
     <div className="rounded-[26px] border border-border/70 bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3.5">
-          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10 text-alyva">
-            <Icon className="size-6" />
+          <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10 text-[22px] leading-none">
+            {emoji}
           </span>
           <div className="min-w-0">
             <h3 className="font-display text-[16px] font-bold leading-tight">{label}</h3>
