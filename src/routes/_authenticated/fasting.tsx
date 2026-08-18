@@ -2,20 +2,22 @@ import { localDayKey } from "@/lib/local-date";
 import { AlyvaWordmark } from "@/components/brand";
 import { createFileRoute } from "@tanstack/react-router";
 import type * as React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Timer, Play, Pause, Square, Plus, Pencil, Trash2, Check, ChevronLeft, ChevronRight,
-  Sparkles, Flame, TrendingUp, CalendarCheck, Lightbulb,
+  Sparkles, Flame, TrendingUp, CalendarCheck, Lightbulb, Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MonthCalendar } from "@/components/nutrition/month-calendar";
 import {
-  useFasting, FASTING_PROTOCOLS, getProtocol,
-  type FastEntry,
+  useFasting, useFastReminders, FASTING_PROTOCOLS, getProtocol,
+  requestNotificationPermission, notify,
+  type FastEntry, type FastReminderPrefs,
 } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
