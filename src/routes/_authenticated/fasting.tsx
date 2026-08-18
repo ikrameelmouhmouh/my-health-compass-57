@@ -19,7 +19,7 @@ import {
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
 import { FastingSummarySheet } from "@/components/fasting/fasting-summary";
-import { FastingPhaseStrip } from "@/components/fasting/fasting-phase-strip";
+import { FastingPhaseTimeline } from "@/components/fasting/fasting-phase-timeline";
 import { FastingPhaseSheet } from "@/components/fasting/fasting-phase-sheet";
 
 export const Route = createFileRoute("/_authenticated/fasting")({
@@ -207,8 +207,14 @@ function FastingPage() {
       <PaywallOverlay feature={t("fast.title")} description={t("pay.overlay.fasting_desc")}>
         {tab === "overview" ? (
           <>
-            {/* Timer card */}
-            <section className="mt-5 rounded-[28px] border border-border bg-card p-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
+            <FastingPhaseTimeline
+              currentHours={live.active ? live.elapsedMs / 3_600_000 : 0}
+              active={live.active}
+              onSelect={(id) => setPhaseSheet(id)}
+            />
+
+            {/* Timer card — compact */}
+            <section className="mt-3 rounded-[26px] border border-border bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
               <div className="flex items-center justify-between">
                 <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
                   live.active ? "bg-acc-fasting-soft text-acc-fasting" : "bg-muted text-muted-foreground"
@@ -222,57 +228,58 @@ function FastingPage() {
                 </span>
               </div>
 
-              <div className="mt-5 grid place-items-center">
+              <div className="mt-3 flex items-center gap-4">
                 <BigRing
                   pct={live.active ? live.pct : 0}
                   label={live.active ? formatHMS(live.elapsedMs) : "00:00:00"}
-                  sub={live.active
-                    ? t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
-                    : t("fast.tapStart")}
                 />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <p className="text-[12px] leading-snug text-muted-foreground">
+                    {live.active
+                      ? t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
+                      : t("fast.tapStart")}
+                  </p>
+                  <Row label={t("fast.elapsed")} value={live.active ? formatHM(live.elapsedMs) : "—"} />
+                  <Row label={t("fast.remaining")} value={live.active ? formatHM(live.leftMs) : "—"} />
+                  <Row label={t("fast.goalLabel")} value={`${proto.fast}u`} />
+                </div>
               </div>
 
               {live.active && state.startedAt && (
                 <button
                   onClick={() => setEditStart(true)}
-                  className="mt-4 inline-flex w-full items-center justify-center gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground"
+                  className="mt-3 inline-flex w-full items-center justify-center gap-1.5 text-[12px] font-medium text-muted-foreground hover:text-foreground"
                 >
                   <Pencil className="size-3" />
                   {t("fast.since")} {new Date(state.startedAt).toLocaleString(locale, { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" })}
                 </button>
               )}
 
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                <Mini label={t("fast.elapsed")} value={live.active ? formatHM(live.elapsedMs) : "—"} />
-                <Mini label={t("fast.remaining")} value={live.active ? formatHM(live.leftMs) : "—"} />
-                <Mini label={t("fast.goalLabel")} value={`${proto.fast}u`} />
-              </div>
-
-              <div className="mt-3 rounded-2xl bg-acc-fasting-soft px-3 py-2.5 text-center">
+              <div className="mt-3 flex items-center justify-between rounded-2xl bg-acc-fasting-soft px-3.5 py-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-acc-fasting">
                   {t("fast.eatWindow")}
                 </span>
-                <p className="mt-0.5 text-[13px] font-semibold tabular-nums">{windowText}</p>
+                <span className="text-[13px] font-semibold tabular-nums">{windowText}</span>
               </div>
 
-              <div className="mt-4 flex gap-2">
+              <div className="mt-3 flex gap-2">
                 {!live.active ? (
-                  <Button className="h-12 flex-1 rounded-2xl" onClick={start}>
+                  <Button className="h-11 flex-1 rounded-2xl" onClick={start}>
                     <Play className="mr-1.5 size-4" />{t("fast.startBtn")}
                   </Button>
                 ) : (
                   <>
                     {live.paused ? (
-                      <Button variant="outline" className="h-12 flex-1 rounded-2xl" onClick={resume}>
+                      <Button variant="outline" className="h-11 flex-1 rounded-2xl" onClick={resume}>
                         <Play className="mr-1.5 size-4" />{t("fast.action.resume")}
                       </Button>
                     ) : (
-                      <Button variant="outline" className="h-12 flex-1 rounded-2xl" onClick={pause}>
+                      <Button variant="outline" className="h-11 flex-1 rounded-2xl" onClick={pause}>
                         <Pause className="mr-1.5 size-4" />{t("fast.action.pause")}
                       </Button>
                     )}
                     <Button
-                      className="h-12 flex-1 rounded-2xl"
+                      className="h-11 flex-1 rounded-2xl"
                       onClick={() => { const e = stop(); if (e) { setSummary(e); setSummaryIsLive(true); } }}
                     >
                       <Square className="mr-1.5 size-4" />{t("fast.endBtn")}
@@ -282,18 +289,13 @@ function FastingPage() {
               </div>
             </section>
 
-            <FastingPhaseStrip
-              currentHours={live.active ? live.elapsedMs / 3_600_000 : 0}
-              active={live.active}
-              onSelect={(id) => setPhaseSheet(id)}
-            />
 
             {/* Protocols */}
             <section className="mt-5">
-              <h2 className="mb-2 px-1 font-display text-[12px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <h2 className="mb-2 px-1 font-display text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 {t("fast.proto.title")}
               </h2>
-              <ul className="space-y-2">
+              <ul className="space-y-1.5">
                 {FASTING_PROTOCOLS.map((p) => {
                   const tint = PROTO_TINT[p.id] ?? PROTO_TINT["16:8"];
                   const selected = state.protocol === p.id;
@@ -302,20 +304,20 @@ function FastingPage() {
                       <button
                         onClick={() => setProtocol(p.id)}
                         disabled={live.active}
-                        className={`flex w-full items-center gap-3 rounded-[22px] border bg-card px-4 py-3.5 text-left transition ios-press disabled:opacity-50 ${
-                          selected ? `${tint.ring} ${tint.soft}` : "border-border"
+                        className={`flex w-full items-center gap-3 rounded-[18px] border px-3.5 py-2.5 text-left transition ios-press disabled:opacity-50 ${
+                          selected ? `${tint.ring} ${tint.soft}` : "border-border bg-card"
                         }`}
                       >
-                        <span className={`grid size-9 shrink-0 place-items-center rounded-full ${tint.soft}`}>
-                          <span className={`size-2.5 rounded-full ${tint.dot}`} />
+                        <span className={`grid size-8 shrink-0 place-items-center rounded-full ${tint.soft}`}>
+                          <span className={`size-2 rounded-full ${tint.dot}`} />
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-baseline gap-2">
-                            <span className="font-display text-[15px] font-bold">{p.label}</span>
-                            <span className={`text-[11px] font-semibold ${tint.text}`}>{t(TAG_KEY[p.id])}</span>
+                            <span className="font-display text-[14px] font-bold">{p.label}</span>
+                            <span className={`truncate text-[11px] font-medium ${tint.text}`}>{t(TAG_KEY[p.id])}</span>
                           </span>
-                          <span className="mt-0.5 block text-[12px] tabular-nums text-muted-foreground">{p.window}</span>
                         </span>
+                        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{p.window}</span>
                         {selected && <Check className={`size-4 shrink-0 ${tint.text}`} />}
                       </button>
                     </li>
@@ -325,15 +327,16 @@ function FastingPage() {
             </section>
 
             {/* Stay consistent */}
-            <section className="mt-5 flex items-start gap-3 rounded-[24px] border border-border bg-card p-5">
-              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-acc-fasting-soft">
-                <Sparkles className="size-5 text-acc-fasting" />
+            <section className="mt-4 flex items-start gap-3 rounded-[22px] border border-border bg-card p-4">
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-acc-fasting-soft">
+                <Sparkles className="size-[18px] text-acc-fasting" />
               </span>
               <div className="min-w-0">
-                <p className="font-display text-[15px] font-bold leading-tight">{t("fast.consist.title")}</p>
-                <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{t("fast.consist.body")}</p>
+                <p className="font-display text-[14px] font-bold leading-tight">{t("fast.consist.title")}</p>
+                <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{t("fast.consist.body")}</p>
               </div>
             </section>
+
 
             {/* Stats */}
             <section className="mt-3 grid grid-cols-3 gap-2">
@@ -486,37 +489,37 @@ function FastingPage() {
 }
 
 /* ---------- UI bits ---------- */
-function BigRing({ pct, label, sub }: { pct: number; label: string; sub: string }) {
-  const size = 220, stroke = 12;
+function BigRing({ pct, label }: { pct: number; label: string }) {
+  const size = 132, stroke = 9;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const off = c - (Math.min(100, pct) / 100) * c;
   return (
-    <div className="relative grid place-items-center" style={{ width: size, height: size }}>
+    <div className="relative grid shrink-0 place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="currentColor" strokeOpacity={0.1} strokeWidth={stroke} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="currentColor" strokeOpacity={0.08} strokeWidth={stroke} fill="none" />
         <circle
           cx={size / 2} cy={size / 2} r={r} stroke="currentColor" className="text-acc-fasting"
           strokeWidth={stroke} strokeLinecap="round" fill="none" strokeDasharray={c} strokeDashoffset={off}
         />
       </svg>
-      <div className="absolute px-6 text-center">
-        <div className="font-display text-[34px] font-bold tabular-nums leading-none">{label}</div>
-        <div className="mt-2 text-[11px] font-medium leading-snug text-muted-foreground">{sub}</div>
+      <div className="absolute text-center">
+        <div className="font-display text-[19px] font-bold tabular-nums leading-none">{label}</div>
         <div className="mt-1 font-display text-[11px] font-semibold tabular-nums text-acc-fasting">{Math.round(pct)}%</div>
       </div>
     </div>
   );
 }
 
-function Mini({ label, value }: { label: string; value: string | number }) {
+function Row({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-border px-2 py-2">
-      <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="mt-0.5 font-display text-sm font-semibold tabular-nums">{value}</div>
+    <div className="flex items-baseline justify-between gap-2 border-b border-border/60 pb-1 last:border-0 last:pb-0">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="font-display text-[13px] font-semibold tabular-nums">{value}</span>
     </div>
   );
 }
+
 
 function StatCard({
   icon: Icon, label, value, tint, soft, children,
