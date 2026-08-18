@@ -54,6 +54,7 @@ export function FastingSummarySheet({
   const hours = entry.durationMs / 3_600_000;
   const targetH = entry.targetMs / 3_600_000;
   const pct = Math.min(999, Math.round((entry.durationMs / entry.targetMs) * 100));
+  const extraMs = Math.max(0, entry.durationMs - entry.targetMs);
   const reached = phaseForHours(hours);
   const reachedIdx = FASTING_PHASES.findIndex((p) => p.id === reached.id);
 
