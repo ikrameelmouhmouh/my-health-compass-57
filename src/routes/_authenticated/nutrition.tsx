@@ -218,7 +218,6 @@ function Nutrition() {
             meals={byType[m.id]}
             onAdd={() => openFor(m.id)}
             onRemove={removeMeal}
-            disabled={!isToday}
             tAddTo={t("nutr.add_to", { meal: t(`meal.${m.id}`) })}
             tRemove={t("nutr.remove")}
             tItem={t("nutr.item_one")}
