@@ -19,7 +19,7 @@ import {
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
 import { FastingSummarySheet } from "@/components/fasting/fasting-summary";
-import { FastingPhaseStrip } from "@/components/fasting/fasting-phase-strip";
+import { FastingPhaseTimeline } from "@/components/fasting/fasting-phase-timeline";
 import { FastingPhaseSheet } from "@/components/fasting/fasting-phase-sheet";
 
 export const Route = createFileRoute("/_authenticated/fasting")({
@@ -488,37 +488,37 @@ function FastingPage() {
 }
 
 /* ---------- UI bits ---------- */
-function BigRing({ pct, label, sub }: { pct: number; label: string; sub: string }) {
-  const size = 220, stroke = 12;
+function BigRing({ pct, label }: { pct: number; label: string }) {
+  const size = 132, stroke = 9;
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const off = c - (Math.min(100, pct) / 100) * c;
   return (
-    <div className="relative grid place-items-center" style={{ width: size, height: size }}>
+    <div className="relative grid shrink-0 place-items-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="currentColor" strokeOpacity={0.1} strokeWidth={stroke} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="currentColor" strokeOpacity={0.08} strokeWidth={stroke} fill="none" />
         <circle
           cx={size / 2} cy={size / 2} r={r} stroke="currentColor" className="text-acc-fasting"
           strokeWidth={stroke} strokeLinecap="round" fill="none" strokeDasharray={c} strokeDashoffset={off}
         />
       </svg>
-      <div className="absolute px-6 text-center">
-        <div className="font-display text-[34px] font-bold tabular-nums leading-none">{label}</div>
-        <div className="mt-2 text-[11px] font-medium leading-snug text-muted-foreground">{sub}</div>
+      <div className="absolute text-center">
+        <div className="font-display text-[19px] font-bold tabular-nums leading-none">{label}</div>
         <div className="mt-1 font-display text-[11px] font-semibold tabular-nums text-acc-fasting">{Math.round(pct)}%</div>
       </div>
     </div>
   );
 }
 
-function Mini({ label, value }: { label: string; value: string | number }) {
+function Row({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-border px-2 py-2">
-      <div className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="mt-0.5 font-display text-sm font-semibold tabular-nums">{value}</div>
+    <div className="flex items-baseline justify-between gap-2 border-b border-border/60 pb-1 last:border-0 last:pb-0">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="font-display text-[13px] font-semibold tabular-nums">{value}</span>
     </div>
   );
 }
+
 
 function StatCard({
   icon: Icon, label, value, tint, soft, children,
