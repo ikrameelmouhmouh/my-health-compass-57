@@ -145,10 +145,8 @@ function FastingPage() {
   const daysDoneThisWeek = last7.filter((d) => d.hours >= proto.fast * 0.9).length;
   const weekLeft = Math.max(0, 7 - daysDoneThisWeek);
 
-  const eatStart = state.startedAt ? new Date(new Date(state.startedAt).getTime() + targetMs) : null;
-  const eatEnd = eatStart ? new Date(eatStart.getTime() + proto.eat * 3_600_000) : null;
   const hhmm = (d: Date) => d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
-  const windowText = eatStart && eatEnd ? `${hhmm(eatStart)} – ${hhmm(eatEnd)}` : proto.window;
+  const goalAtText = goalAt ? hhmm(goalAt) : "—";
 
   const tipIndex = useMemo(() => fastingTipOfTheDay(localDayKey(viewDate)), [viewDate]);
 
