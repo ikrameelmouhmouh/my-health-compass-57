@@ -268,12 +268,17 @@ function FastingPage() {
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <p className="text-[12px] leading-snug text-muted-foreground">
                     {live.active
-                      ? t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
+                      ? live.overMs > 0
+                        ? t("fast.overtime") + " " + formatHM(live.overMs)
+                        : t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
                       : t("fast.tapStart")}
                   </p>
                   <Row label={t("fast.elapsed")} value={live.active ? formatHM(live.elapsedMs) : "—"} />
                   <Row label={t("fast.remaining")} value={live.active ? formatHM(live.leftMs) : "—"} />
                   <Row label={t("fast.goalLabel")} value={`${proto.fast}u`} />
+                  {live.active && live.overMs > 0 && (
+                    <Row label={t("fast.overtime")} value={`+${formatHM(live.overMs)}`} />
+                  )}
                 </div>
               </div>
 
@@ -289,9 +294,9 @@ function FastingPage() {
 
               <div className="mt-3 flex items-center justify-between rounded-2xl bg-acc-fasting-soft px-3.5 py-2">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-acc-fasting">
-                  {t("fast.eatWindow")}
+                  {t("fast.goalAt")}
                 </span>
-                <span className="text-[13px] font-semibold tabular-nums">{windowText}</span>
+                <span className="text-[13px] font-semibold tabular-nums">{goalAtText}</span>
               </div>
 
               <div className="mt-3 flex gap-2">
