@@ -199,32 +199,42 @@ export async function searchFoods(query: string, signal?: AbortSignal): Promise<
       )}&search_simple=1&action=process&json=1&page_size=20&lc=${lc}&cc=${cc}&fields=${fields}`
     : null;
 
-  const fetchList = async (url: string) => {
+  type Ranked = { item: FoodItem; localized: boolean };
+
+  const fetchList = async (url: string): Promise<Ranked[]> => {
     try {
       const res = await fetch(url, { signal });
-      if (!res.ok) return [] as FoodItem[];
+      if (!res.ok) return [];
       const data = await res.json();
       return ((data.products ?? []) as any[])
-        .map((p) => mapOFFProduct(preferLocale(p, lc)))
-        .filter(Boolean) as FoodItem[];
+        .map((p) => {
+          const localized = Boolean(p[`product_name_${lc}`] || p[`generic_name_${lc}`]);
+          const item = mapOFFProduct(preferLocale(p, lc));
+          return item ? { item, localized } : null;
+        })
+        .filter(Boolean) as Ranked[];
     } catch {
-      return [] as FoodItem[];
+      return [];
     }
   };
 
   const [local, world] = await Promise.all([
-    localUrl ? fetchList(localUrl) : Promise.resolve([] as FoodItem[]),
+    localUrl ? fetchList(localUrl) : Promise.resolve([] as Ranked[]),
     fetchList(worldUrl),
   ]);
   const seen = new Set<string>();
-  const merged: FoodItem[] = [];
-  for (const item of [...local, ...world]) {
-    const key = item.barcode || item.id;
+  const merged: Ranked[] = [];
+  for (const r of [...local, ...world]) {
+    const key = r.item.barcode || r.item.id;
     if (seen.has(key)) continue;
     seen.add(key);
-    merged.push(item);
+    merged.push(r);
   }
-  return merged;
+  // Products with a name in the user's language first, original order preserved otherwise.
+  return [
+    ...merged.filter((r) => r.localized).map((r) => r.item),
+    ...merged.filter((r) => !r.localized).map((r) => r.item),
+  ];
 }
 
 export async function lookupBarcode(code: string): Promise<FoodItem | null> {
