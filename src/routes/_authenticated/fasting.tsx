@@ -64,6 +64,7 @@ function FastingPage() {
   const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry } = useFasting();
   const [tab, setTab] = useState<"overview" | "insights">("overview");
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState(false);
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
   const [summary, setSummary] = useState<FastEntry | null>(null);
@@ -479,6 +480,8 @@ function FastingPage() {
         onClose={() => { setSummary(null); setSummaryIsLive(false); }}
         onStartAgain={summaryIsLive ? () => { setSummary(null); setSummaryIsLive(false); start(); } : undefined}
       />
+
+      <FastingTipsSheet open={tipsOpen} onOpenChange={setTipsOpen} highlight={tipIndex} />
 
       <FastingPhaseSheet
         phaseId={phaseSheet}
