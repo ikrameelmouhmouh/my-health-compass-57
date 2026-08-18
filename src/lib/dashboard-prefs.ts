@@ -381,7 +381,7 @@ function withStreakState(s: FastingState, history: FastEntry[]) {
   return {
     history,
     streak,
-    longestStreak: Math.max(longest, s.longestStreak === 0 ? 0 : longest),
+    longestStreak: Math.max(longest, s.longestStreak),
     lastCompletedDate: sorted.length ? sorted[sorted.length - 1] : null,
   };
 }
