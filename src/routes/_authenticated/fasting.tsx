@@ -363,6 +363,38 @@ function FastingPage() {
               </ul>
             </section>
 
+            {/* Reminders around the calculated goal time */}
+            <section className="mt-4 rounded-[22px] border border-border bg-card p-4">
+              <div className="flex items-start gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-acc-fasting-soft">
+                  <Bell className="size-[18px] text-acc-fasting" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-display text-[14px] font-bold leading-tight">{t("fast.rem.title")}</p>
+                  <p className="mt-1 text-[12.5px] leading-relaxed text-muted-foreground">{t("fast.rem.desc")}</p>
+                </div>
+              </div>
+              <div className="mt-3 space-y-1">
+                {([
+                  ["before1h", t("fast.rem.1h")],
+                  ["before5m", t("fast.rem.5m")],
+                  ["atGoal", t("fast.rem.at")],
+                ] as const).map(([key, label]) => (
+                  <div key={key} className="flex items-center justify-between border-b border-border/60 py-2 last:border-0">
+                    <span className="text-[13px]">{label}</span>
+                    <Switch
+                      checked={reminders[key]}
+                      onCheckedChange={(v) => {
+                        if (v) void requestNotificationPermission();
+                        toggleReminder(key, v);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+
             {/* Stay consistent */}
             <section className="mt-4 flex items-start gap-3 rounded-[22px] border border-border bg-card p-4">
               <span className="grid size-10 shrink-0 place-items-center rounded-full bg-acc-fasting-soft">
