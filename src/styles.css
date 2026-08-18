@@ -272,7 +272,15 @@
  * ------------------------------------------------------------------ */
 .section-fasting {
   --brand: var(--acc-fasting);
-  --primary: var(--acc-fasting);
+  /* Soft pastel lavender actions with deep readable ink */
+  --primary: color-mix(in oklab, var(--acc-fasting) 22%, var(--card));
+  --primary-foreground: oklch(0.42 0.11 300);
   --ring: var(--acc-fasting);
   --accent: var(--acc-fasting-soft);
 }
+
+.dark .section-fasting {
+  --primary: color-mix(in oklab, var(--acc-fasting) 30%, var(--card));
+  --primary-foreground: oklch(0.92 0.06 300);
+}
+
