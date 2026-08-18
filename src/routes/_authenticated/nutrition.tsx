@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MonthCalendar } from "@/components/nutrition/month-calendar";
-import { MEAL_ICONS, ScanMealIcon, PlannerIcon, TipIcon } from "@/components/nutrition/meal-icons";
+import { ScanMealIcon, PlannerIcon, TipIcon } from "@/components/nutrition/meal-icons";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useRegisterAiQuickActions } from "@/lib/ai-quick-actions";
 import { useNavigate } from "@tanstack/react-router";
