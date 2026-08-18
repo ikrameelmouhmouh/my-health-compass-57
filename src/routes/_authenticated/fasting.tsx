@@ -20,6 +20,7 @@ import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
 import { FastingSummarySheet } from "@/components/fasting/fasting-summary";
 import { FastingPhaseTimeline } from "@/components/fasting/fasting-phase-timeline";
+import { FastingTipsSheet, fastingTipOfTheDay } from "@/components/fasting/fasting-tips-sheet";
 import { FastingPhaseSheet } from "@/components/fasting/fasting-phase-sheet";
 
 export const Route = createFileRoute("/_authenticated/fasting")({
@@ -128,12 +129,7 @@ function FastingPage() {
   const hhmm = (d: Date) => d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   const windowText = eatStart && eatEnd ? `${hhmm(eatStart)} – ${hhmm(eatEnd)}` : proto.window;
 
-  const tipIndex = useMemo(() => {
-    const key = localDayKey(viewDate);
-    let h = 0;
-    for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
-    return (h % 5) + 1;
-  }, [viewDate]);
+  const tipIndex = useMemo(() => fastingTipOfTheDay(localDayKey(viewDate)), [viewDate]);
 
   async function askNotif() {
     setNotifPerm(await requestNotificationPermission());
@@ -356,15 +352,20 @@ function FastingPage() {
             </section>
 
             {/* Tip of the day */}
-            <section className="mt-3 flex items-start gap-3 rounded-[24px] bg-alyva/[0.05] p-5">
+            <button
+              type="button"
+              onClick={() => setTipsOpen(true)}
+              className="mt-3 flex w-full items-start gap-3 rounded-[24px] bg-alyva/[0.05] p-5 text-left ios-press"
+            >
               <span className="grid size-11 shrink-0 place-items-center rounded-full bg-alyva/10">
                 <Lightbulb className="size-5 text-alyva" />
               </span>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="font-display text-[15px] font-bold leading-tight">{t("fast.tipTitle")}</p>
                 <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">{t(`fast.tip.${tipIndex}`)}</p>
               </div>
-            </section>
+              <ChevronRight className="mt-1 size-5 shrink-0 text-muted-foreground/70 rtl:rotate-180" />
+            </button>
           </>
         ) : (
           <>
