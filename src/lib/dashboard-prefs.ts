@@ -357,6 +357,35 @@ function fmtDur(ms: number) {
   return `${h}h ${m}m`;
 }
 
+/** Recompute streak fields from the full history (day-based, completed fasts). */
+function withStreakState(s: FastingState, history: FastEntry[]) {
+  const days = new Set(history.filter((e) => e.completed).map((e) => localDayKey(new Date(e.endedAt))));
+  const sorted = [...days].sort();
+  let longest = 0;
+  let run = 0;
+  let prev: string | null = null;
+  for (const d of sorted) {
+    const expected = prev ? localDayKey(new Date(new Date(prev + "T12:00:00").getTime() + 86_400_000)) : null;
+    run = expected === d ? run + 1 : 1;
+    longest = Math.max(longest, run);
+    prev = d;
+  }
+  const today = localDayKey();
+  const yesterday = localDayKey(new Date(Date.now() - 86_400_000));
+  let streak = 0;
+  let cursor = days.has(today) ? today : days.has(yesterday) ? yesterday : null;
+  while (cursor && days.has(cursor)) {
+    streak += 1;
+    cursor = localDayKey(new Date(new Date(cursor + "T12:00:00").getTime() - 86_400_000));
+  }
+  return {
+    history,
+    streak,
+    longestStreak: Math.max(longest, s.longestStreak),
+    lastCompletedDate: sorted.length ? sorted[sorted.length - 1] : null,
+  };
+}
+
 export function useFasting() {
   const [state, setState] = useState<FastingState>(() => loadFast());
   const stateRef = useRef(state);
@@ -437,20 +466,45 @@ export function useFasting() {
 
 
   const deleteEntry = useCallback((id: string) => {
-    setState((s) => ({ ...s, history: s.history.filter((e) => e.id !== id) }));
+    setState((s) => ({ ...s, ...withStreakState(s, s.history.filter((e) => e.id !== id)) }));
   }, []);
 
   const updateEntry = useCallback((id: string, patch: Partial<Pick<FastEntry, "startedAt" | "endedAt">>) => {
     setState((s) => ({
       ...s,
-      history: s.history.map((e) => {
+      ...withStreakState(s, s.history.map((e) => {
         if (e.id !== id) return e;
         const startedAt = patch.startedAt ?? e.startedAt;
         const endedAt = patch.endedAt ?? e.endedAt;
         const durationMs = new Date(endedAt).getTime() - new Date(startedAt).getTime();
         return { ...e, startedAt, endedAt, durationMs, completed: durationMs >= e.targetMs };
-      }),
+      })),
     }));
+  }, []);
+
+  /** Add a historical (forgotten) fast without touching existing entries. */
+  const addEntry = useCallback((startedAt: string, endedAt: string, protocol?: FastingProtocol): FastEntry | null => {
+    const s = stateRef.current;
+    const proto = getProtocol(protocol ?? s.protocol);
+    const durationMs = new Date(endedAt).getTime() - new Date(startedAt).getTime();
+    if (!(durationMs > 0)) return null;
+    const targetMs = proto.fast * 3_600_000;
+    const entry: FastEntry = {
+      id: (typeof crypto !== "undefined" && "randomUUID" in crypto) ? crypto.randomUUID() : String(Date.now()),
+      startedAt,
+      endedAt,
+      durationMs,
+      targetMs,
+      completed: durationMs >= targetMs,
+      protocol: proto.id,
+    };
+    setState((prev) => {
+      const history = [entry, ...prev.history]
+        .sort((a, b) => +new Date(b.endedAt) - +new Date(a.endedAt))
+        .slice(0, 365);
+      return { ...prev, ...withStreakState(prev, history) };
+    });
+    return entry;
   }, []);
 
   const setWindow = useCallback((h: number) => {
@@ -458,6 +512,7 @@ export function useFasting() {
     if (match) setProtocol(match.id);
   }, [setProtocol]);
 
-  return { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry, setWindow };
+  return { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry, addEntry, setWindow };
+
 }
 

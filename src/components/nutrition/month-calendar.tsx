@@ -8,11 +8,29 @@ type Props = {
   /** Days (YYYY-MM-DD) that have logged data → small green dot */
   markedDays: Set<string>;
   locale?: string;
+  /** Category accent: Eten = alyva green, Vasten = soft lavender. */
+  accent?: "alyva" | "fasting";
   onSelect: (day: string) => void;
 };
 
+const ACCENT = {
+  alyva: {
+    selected: "bg-alyva text-alyva-foreground font-semibold",
+    today: "font-semibold text-alyva",
+    dot: "bg-alyva",
+    dotSelected: "bg-alyva-foreground",
+  },
+  fasting: {
+    selected: "bg-acc-fasting-soft text-acc-fasting font-semibold ring-1 ring-acc-fasting/30",
+    today: "font-semibold text-acc-fasting",
+    dot: "bg-acc-fasting",
+    dotSelected: "bg-acc-fasting",
+  },
+} as const;
+
 /** Quiet month calendar used by the Eten date selector. */
-export function MonthCalendar({ value, markedDays, locale, onSelect }: Props) {
+export function MonthCalendar({ value, markedDays, locale, accent = "alyva", onSelect }: Props) {
+  const tone = ACCENT[accent];
   const selected = useMemo(() => new Date(value + "T00:00:00"), [value]);
   const [cursor, setCursor] = useState(() => new Date(selected.getFullYear(), selected.getMonth(), 1));
   const todayKey = localDayKey();
@@ -78,18 +96,14 @@ export function MonthCalendar({ value, markedDays, locale, onSelect }: Props) {
               onClick={() => onSelect(key)}
               className={[
                 "relative grid h-10 place-items-center rounded-2xl text-[13px] tabular-nums transition-colors",
-                isSelected
-                  ? "bg-alyva text-alyva-foreground font-semibold"
-                  : isToday
-                    ? "font-semibold text-alyva"
-                    : "text-foreground",
+                isSelected ? tone.selected : isToday ? tone.today : "text-foreground",
                 isFuture ? "opacity-30" : "ios-press",
               ].join(" ")}
             >
               {d.getDate()}
               {markedDays.has(key) && (
                 <span
-                  className={`absolute bottom-1.5 size-1 rounded-full ${isSelected ? "bg-alyva-foreground" : "bg-alyva"}`}
+                  className={`absolute bottom-1.5 size-1 rounded-full ${isSelected ? tone.dotSelected : tone.dot}`}
                 />
               )}
             </button>

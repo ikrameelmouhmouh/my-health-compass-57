@@ -4,17 +4,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import type * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Timer, Play, Pause, Square, Bell, Pencil, Trash2, Check, ChevronLeft, ChevronRight,
-  History, Sparkles, Flame, TrendingUp, CalendarCheck, Lightbulb,
+  Timer, Play, Pause, Square, Plus, Pencil, Trash2, Check, ChevronLeft, ChevronRight,
+  Sparkles, Flame, TrendingUp, CalendarCheck, Lightbulb,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { MonthCalendar } from "@/components/nutrition/month-calendar";
 import {
   useFasting, FASTING_PROTOCOLS, getProtocol,
-  requestNotificationPermission, type FastEntry,
+  type FastEntry,
 } from "@/lib/dashboard-prefs";
 import { useI18n } from "@/lib/i18n";
 import { PaywallOverlay } from "@/components/paywall-gate";
@@ -61,9 +62,10 @@ const TAG_KEY: Record<string, string> = {
 function FastingPage() {
   const { t, lang } = useI18n();
   const locale = LOCALE_MAP[lang] ?? lang;
-  const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry } = useFasting();
+  const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry, addEntry } = useFasting();
   const [tab, setTab] = useState<"overview" | "insights">("overview");
-  const [historyOpen, setHistoryOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [tipsOpen, setTipsOpen] = useState(false);
   const [editStart, setEditStart] = useState(false);
   const [editEntry, setEditEntry] = useState<FastEntry | null>(null);
@@ -71,9 +73,6 @@ function FastingPage() {
   const [summaryIsLive, setSummaryIsLive] = useState(false);
   const [phaseSheet, setPhaseSheet] = useState<string | null>(null);
   const [dateOffset, setDateOffset] = useState(0);
-  const [notifPerm, setNotifPerm] = useState<NotificationPermission>(() =>
-    typeof window !== "undefined" && "Notification" in window ? Notification.permission : "denied"
-  );
 
   const [tick, setTick] = useState(0);
   useEffect(() => {
@@ -132,8 +131,28 @@ function FastingPage() {
 
   const tipIndex = useMemo(() => fastingTipOfTheDay(localDayKey(viewDate)), [viewDate]);
 
-  async function askNotif() {
-    setNotifPerm(await requestNotificationPermission());
+  const viewKey = localDayKey(viewDate);
+  const isToday = dateOffset === 0;
+
+  /** Days that hold at least one logged fast — soft lavender dot in the calendar. */
+  const markedDays = useMemo(
+    () => new Set(state.history.map((e) => localDayKey(new Date(e.endedAt)))),
+    [state.history],
+  );
+
+  const dayEntries = useMemo(
+    () => state.history
+      .filter((e) => localDayKey(new Date(e.endedAt)) === viewKey)
+      .sort((a, b) => +new Date(b.endedAt) - +new Date(a.endedAt)),
+    [state.history, viewKey],
+  );
+  const dayHours = dayEntries.reduce((a, e) => a + e.durationMs / 3_600_000, 0);
+
+  function selectDay(day: string) {
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    const target = new Date(day + "T12:00:00");
+    setDateOffset(Math.round((target.getTime() - today.getTime()) / 86_400_000));
+    setCalendarOpen(false);
   }
 
   return (
@@ -141,27 +160,7 @@ function FastingPage() {
       <div className="mb-5 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
 
       <header>
-        <div className="flex items-center justify-between gap-2">
-          <h1 className="font-display text-[26px] font-bold tracking-tight">{t("fast.title")}</h1>
-          <div className="flex items-center gap-1.5">
-            {notifPerm !== "granted" && (
-              <button
-                onClick={askNotif}
-                className="grid size-9 place-items-center rounded-full border border-border bg-card ios-press"
-                aria-label={t("fast.enable_notif")}
-              >
-                <Bell className="size-4" />
-              </button>
-            )}
-            <button
-              onClick={() => setHistoryOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-[12px] font-semibold ios-press"
-            >
-              <History className="size-3.5" />
-              {t("fast.history.btn")}
-            </button>
-          </div>
-        </div>
+        <h1 className="font-display text-[26px] font-bold tracking-tight">{t("fast.title")}</h1>
 
         <div className="mt-3 flex items-center gap-2">
           <button
@@ -171,11 +170,27 @@ function FastingPage() {
           >
             <ChevronLeft className="size-4" />
           </button>
-          <div className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center">
-            <span className="text-[13px] font-semibold capitalize">
-              {viewDate.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
-            </span>
-          </div>
+          <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+            <PopoverTrigger asChild>
+              <button
+                type="button"
+                className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center ios-press"
+              >
+                <span className="text-[13px] font-semibold capitalize">
+                  {viewDate.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
+                </span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="center" className="w-[320px] rounded-3xl p-4">
+              <MonthCalendar
+                value={viewKey}
+                markedDays={markedDays}
+                locale={locale}
+                accent="fasting"
+                onSelect={selectDay}
+              />
+            </PopoverContent>
+          </Popover>
           <button
             onClick={() => setDateOffset((d) => Math.min(0, d + 1))}
             disabled={dateOffset >= 0}
@@ -204,6 +219,7 @@ function FastingPage() {
       <PaywallOverlay feature={t("fast.title")} description={t("pay.overlay.fasting_desc")}>
         {tab === "overview" ? (
           <>
+            {isToday && (<>
             <FastingPhaseTimeline
               currentHours={live.active ? live.elapsedMs / 3_600_000 : 0}
               active={live.active}
@@ -351,6 +367,74 @@ function FastingPage() {
                 </div>
               </StatCard>
             </section>
+            </>)}
+
+            {/* Day history — soft lavender, editable */}
+            <section className="mt-4">
+              <div className="mb-2 flex items-baseline justify-between px-1">
+                <h2 className="font-display text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("fast.day.title")}
+                </h2>
+                {dayHours > 0 && (
+                  <span className="text-[11px] font-medium text-acc-fasting tabular-nums">
+                    {dayHours.toFixed(1)}u
+                  </span>
+                )}
+              </div>
+
+              {dayEntries.length === 0 ? (
+                <div className="rounded-[22px] border border-dashed border-border p-5 text-center text-[12.5px] text-muted-foreground">
+                  {t("fast.day.empty")}
+                </div>
+              ) : (
+                <ul className="space-y-2">
+                  {dayEntries.map((e) => (
+                    <li key={e.id} className="flex items-center gap-3 rounded-[20px] border border-border bg-card p-3">
+                      <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${
+                        e.completed ? "bg-acc-fasting-soft text-acc-fasting" : "bg-muted text-muted-foreground"
+                      }`}>
+                        {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
+                      </div>
+                      <button
+                        onClick={() => { setSummary(e); setSummaryIsLive(false); }}
+                        className="min-w-0 flex-1 text-left"
+                      >
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className="truncate font-display text-sm font-semibold">
+                            {formatHM(e.durationMs)} · {e.protocol}
+                          </span>
+                          <span className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider ${
+                            e.completed ? "text-acc-fasting" : "text-muted-foreground"
+                          }`}>
+                            {e.completed ? t("fast.done") : t("fast.aborted")}
+                          </span>
+                        </div>
+                        <p className="truncate text-[11px] text-muted-foreground">
+                          {new Date(e.startedAt).toLocaleString(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          {" → "}
+                          {new Date(e.endedAt).toLocaleString(locale, { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </button>
+                      <button onClick={() => setEditEntry(e)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.edit")}>
+                        <Pencil className="size-3.5" />
+                      </button>
+                      <button onClick={() => deleteEntry(e.id)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.delete")}>
+                        <Trash2 className="size-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setAddOpen(true)}
+                className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-[20px] border border-acc-fasting/25 bg-acc-fasting-soft/60 py-3 text-[13px] font-semibold text-acc-fasting ios-press"
+              >
+                <Plus className="size-4" />
+                {t("fast.add.btn")}
+              </button>
+            </section>
 
             {/* Tip of the day */}
             <button
@@ -407,65 +491,18 @@ function FastingPage() {
         )}
       </PaywallOverlay>
 
-      <Drawer open={historyOpen} onOpenChange={setHistoryOpen}>
-        <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader className="text-left">
-            <DrawerTitle className="font-display">{t("fast.history")}</DrawerTitle>
-            <DrawerDescription>{t("fast.subtitle")}</DrawerDescription>
-          </DrawerHeader>
-          <div className="overflow-y-auto px-4 pb-8">
-            {state.history.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                {t("fast.noHistory")}
-              </div>
-            ) : (
-              <ul className="space-y-2">
-                {state.history.slice(0, 50).map((e) => (
-                  <li key={e.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-                    <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${
-                      e.completed ? "bg-acc-fasting-soft text-acc-fasting" : "bg-muted text-muted-foreground"
-                    }`}>
-                      {e.completed ? <Check className="size-4" /> : <Timer className="size-4" />}
-                    </div>
-                    <button
-                      onClick={() => { setSummary(e); setSummaryIsLive(false); }}
-                      className="min-w-0 flex-1 text-left"
-                    >
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="truncate font-display text-sm font-semibold">
-                          {formatHM(e.durationMs)} · {e.protocol}
-                        </span>
-                        <span className={`shrink-0 text-[10px] font-semibold uppercase tracking-wider ${
-                          e.completed ? "text-acc-fasting" : "text-muted-foreground"
-                        }`}>
-                          {e.completed ? t("fast.done") : t("fast.aborted")}
-                        </span>
-                      </div>
-                      <p className="truncate text-[11px] text-muted-foreground">
-                        {new Date(e.startedAt).toLocaleString(locale, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                        {" → "}
-                        {new Date(e.endedAt).toLocaleString(locale, { hour: "2-digit", minute: "2-digit" })}
-                      </p>
-                    </button>
-                    <button onClick={() => setEditEntry(e)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.edit")}>
-                      <Pencil className="size-3.5" />
-                    </button>
-                    <button onClick={() => deleteEntry(e.id)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent" aria-label={t("common.delete")}>
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
-
       <EditStartDialog
         open={editStart}
         onOpenChange={setEditStart}
         startedAt={state.startedAt}
         onSave={(iso) => { setStartTime(iso); setEditStart(false); }}
+      />
+
+      <AddFastDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        dayKey={viewKey}
+        onSave={(startIso, endIso) => { addEntry(startIso, endIso); setAddOpen(false); }}
       />
 
       <EditEntryDialog
@@ -618,6 +655,72 @@ function StreakLine({ history, className, emptyLabel }: { history: FastEntry[]; 
 }
 
 /* ---------- Dialogs ---------- */
+/** Log a forgotten fast afterwards: pick start + end time, duration is derived. */
+function AddFastDialog({
+  open, onOpenChange, dayKey, onSave,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  dayKey: string;
+  onSave: (startIso: string, endIso: string) => void;
+}) {
+  const { t } = useI18n();
+  const [startTime, setStartTime] = useState("20:00");
+  const [endTime, setEndTime] = useState("12:00");
+
+  useEffect(() => {
+    if (open) { setStartTime("20:00"); setEndTime("12:00"); }
+  }, [open]);
+
+  const { startDate, endDate, hours } = useMemo(() => {
+    const end = new Date(`${dayKey}T${endTime || "00:00"}:00`);
+    const start = new Date(`${dayKey}T${startTime || "00:00"}:00`);
+    // End time earlier than or equal to start ⇒ the fast started the previous day.
+    if (start.getTime() >= end.getTime()) start.setDate(start.getDate() - 1);
+    return { startDate: start, endDate: end, hours: (end.getTime() - start.getTime()) / 3_600_000 };
+  }, [dayKey, startTime, endTime]);
+
+  const valid = hours > 0 && hours <= 72;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm rounded-3xl">
+        <DialogHeader>
+          <DialogTitle className="font-display">{t("fast.add.title")}</DialogTitle>
+          <DialogDescription>{t("fast.add.desc")}</DialogDescription>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-[12px]">{t("fast.add.start")}</Label>
+            <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-[12px]">{t("fast.add.end")}</Label>
+            <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+          </div>
+        </div>
+        <div className="flex items-center justify-between rounded-2xl bg-acc-fasting-soft px-3.5 py-2.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-acc-fasting">
+            {t("fast.add.duration")}
+          </span>
+          <span className="font-display text-[15px] font-semibold tabular-nums">
+            {valid ? `${Math.floor(hours)}u ${Math.round((hours % 1) * 60)}m` : "—"}
+          </span>
+        </div>
+        <DialogFooter>
+          <Button
+            className="h-11 w-full rounded-2xl"
+            disabled={!valid}
+            onClick={() => onSave(startDate.toISOString(), endDate.toISOString())}
+          >
+            {t("fast.add.save")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function EditStartDialog({
   open, onOpenChange, startedAt, onSave,
 }: {
