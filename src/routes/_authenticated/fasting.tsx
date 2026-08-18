@@ -354,7 +354,7 @@ function FastingPage() {
                             <span className={`truncate text-[11px] font-medium ${tint.text}`}>{t(TAG_KEY[p.id])}</span>
                           </span>
                         </span>
-                        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{p.window}</span>
+                        <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">{p.fast}u</span>
                         {selected && <Check className={`size-4 shrink-0 ${tint.text}`} />}
                       </button>
                     </li>
