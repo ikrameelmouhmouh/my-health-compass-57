@@ -1,3 +1,4 @@
+import type * as React from "react";
 import type { SVGProps } from "react";
 import type { MealType } from "@/lib/food";
 
