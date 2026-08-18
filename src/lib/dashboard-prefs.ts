@@ -272,17 +272,16 @@ export function useTodayWorkout() {
 // ----- Fasting -----
 export type FastingProtocol = "12:12" | "14:10" | "16:8" | "18:6" | "20:4" | "OMAD";
 
-export const FASTING_PROTOCOLS: { id: FastingProtocol; fast: number; eat: number; label: string; desc: string }[] = [
-  { id: "12:12", fast: 12, eat: 12, label: "12:12", desc: "Beginner • balanced" },
-  { id: "14:10", fast: 14, eat: 10, label: "14:10", desc: "Gentle daily fast" },
-  { id: "16:8",  fast: 16, eat: 8,  label: "16:8",  desc: "Most popular" },
-  { id: "18:6",  fast: 18, eat: 6,  label: "18:6",  desc: "Advanced" },
-  { id: "20:4",  fast: 20, eat: 4,  label: "20:4",  desc: "Warrior diet" },
-  { id: "OMAD",  fast: 23, eat: 1,  label: "OMAD",  desc: "One meal a day" },
+export const FASTING_PROTOCOLS: { id: FastingProtocol; fast: number; eat: number; label: string; desc: string; window: string }[] = [
+  { id: "16:8",  fast: 16, eat: 8,  label: "16:8",  desc: "Most popular", window: "12:00–20:00" },
+  { id: "14:10", fast: 14, eat: 10, label: "14:10", desc: "Beginner",     window: "10:00–20:00" },
+  { id: "18:6",  fast: 18, eat: 6,  label: "18:6",  desc: "Advanced",     window: "14:00–20:00" },
+  { id: "20:4",  fast: 20, eat: 4,  label: "20:4",  desc: "Challenging",  window: "16:00–20:00" },
+  { id: "OMAD",  fast: 23, eat: 1,  label: "OMAD",  desc: "One meal",     window: "23:00–23:00" },
 ];
 
 export function getProtocol(id: FastingProtocol) {
-  return FASTING_PROTOCOLS.find((p) => p.id === id) ?? FASTING_PROTOCOLS[2];
+  return FASTING_PROTOCOLS.find((p) => p.id === id) ?? FASTING_PROTOCOLS[0];
 }
 
 export type FastEntry = {
@@ -431,7 +430,7 @@ export function useFasting() {
       streak: newStreak,
       longestStreak: Math.max(s.longestStreak, newStreak),
       lastCompletedDate: completed ? today : s.lastCompletedDate,
-      history: [entry, ...s.history].slice(0, 365),
+      history: (durationMs < 60_000 ? s.history : [entry, ...s.history]).slice(0, 365),
     });
     return entry;
   }, []);
