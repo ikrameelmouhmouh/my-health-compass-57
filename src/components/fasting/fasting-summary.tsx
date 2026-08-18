@@ -61,8 +61,8 @@ export function FastingSummarySheet({
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
-        <div className="relative bg-gradient-to-br from-brand/20 via-brand/10 to-transparent px-6 pt-8 pb-6 text-center">
-          <div className="mx-auto grid size-16 place-items-center rounded-full bg-brand/20 text-brand">
+        <div className="relative bg-gradient-to-br from-acc-fasting/20 via-acc-fasting/10 to-transparent px-6 pt-8 pb-6 text-center">
+          <div className="mx-auto grid size-16 place-items-center rounded-full bg-acc-fasting/20 text-acc-fasting">
             <Flame className="size-8" />
           </div>
           <DialogHeader className="mt-3">
@@ -104,7 +104,7 @@ export function FastingSummarySheet({
 
           {entry.completed && typeof streak === "number" && streak > 0 && (
             <div className="flex items-center justify-center gap-2 rounded-2xl border border-border bg-card px-4 py-3">
-              <Trophy className="size-4 text-brand" />
+              <Trophy className="size-4 text-acc-fasting" />
               <span className="text-sm font-medium">
                 {t("fast.summary.streakNow", { n: streak })}
               </span>
@@ -125,9 +125,9 @@ export function FastingSummarySheet({
                     <div
                       className={`grid size-8 place-items-center rounded-full border ${
                         isCurrent
-                          ? "border-brand bg-primary text-primary-foreground"
+                          ? "border-acc-fasting bg-acc-fasting/70 text-foreground"
                           : active
-                          ? "border-brand/40 bg-brand/15 text-brand"
+                          ? "border-acc-fasting/40 bg-acc-fasting/15 text-acc-fasting"
                           : "border-border bg-muted text-muted-foreground"
                       }`}
                     >
@@ -144,7 +144,7 @@ export function FastingSummarySheet({
 
           {/* Reached phase card */}
           <div className="rounded-3xl border border-border bg-card p-5">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-brand">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-acc-fasting">
               {t(`fast.phase.${reached.key}.range` as const)}
             </div>
             <h3 className="mt-1 font-display text-lg font-semibold">
