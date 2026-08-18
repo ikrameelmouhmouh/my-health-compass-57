@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
-  Camera, CalendarDays, Sparkles, Utensils, Search, Lightbulb,
+  Camera, CalendarDays, Utensils, Search, Lightbulb,
 } from "lucide-react";
 import { FoodLogDialog } from "@/components/food-log-dialog";
 import { useRegisterAiQuickActions } from "@/lib/ai-quick-actions";
@@ -289,7 +289,7 @@ function MealSection({
         {!disabled && (
           <button
             onClick={onAdd}
-            className="grid size-8 place-items-center rounded-full bg-acc-nutrition-soft text-acc-nutrition"
+            className="grid size-8 place-items-center rounded-full bg-alyva/12 text-alyva"
             aria-label={tAddTo}
           >
             <Plus className="size-4" />
@@ -311,7 +311,7 @@ function MealSection({
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-bold tabular-nums text-brand">{m.kcal} {tKcal}</p>
+                <p className="text-xs font-bold tabular-nums text-alyva">{m.kcal} {tKcal}</p>
                 <p className="text-[10px] text-muted-foreground">
                   P{m.protein} · C{m.carbs} · F{m.fat}
                 </p>
