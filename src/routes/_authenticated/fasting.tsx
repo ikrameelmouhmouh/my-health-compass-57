@@ -65,6 +65,7 @@ function FastingPage() {
   const { t, lang } = useI18n();
   const locale = LOCALE_MAP[lang] ?? lang;
   const { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry, addEntry } = useFasting();
+  const { reminders, toggleReminder } = useFastReminders();
   const [tab, setTab] = useState<"overview" | "insights">("overview");
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
