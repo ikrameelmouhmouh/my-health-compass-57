@@ -113,26 +113,27 @@
   --alyva: oklch(0.46 0.10 152);
 
   /* Category colors — fixed mapping across the whole app */
-  --acc-fitness: oklch(0.60 0.11 240);          /* fitness / activity / steps = blue */
-  --acc-fitness-soft: oklch(0.955 0.03 240);
-  --acc-water: oklch(0.66 0.10 225);            /* water = light blue */
-  --acc-water-soft: oklch(0.96 0.03 225);
-  --acc-fasting: oklch(0.58 0.11 300);          /* fasting = lavender */
-  --acc-fasting-soft: oklch(0.955 0.03 300);
-  --acc-weight: oklch(0.68 0.13 55);            /* progress / weight = pastel orange */
-  --acc-weight-soft: oklch(0.965 0.045 60);
+  --acc-fitness: oklch(0.66 0.095 240);         /* fitness / activity / steps = pastel blue */
+  --acc-fitness-soft: oklch(0.955 0.032 240);
+  --acc-water: oklch(0.71 0.085 225);           /* water = pastel light blue */
+  --acc-water-soft: oklch(0.962 0.032 225);
+  --acc-fasting: oklch(0.65 0.095 300);         /* fasting = pastel lavender */
+  --acc-fasting-soft: oklch(0.958 0.034 300);
+  --acc-weight: oklch(0.73 0.11 55);            /* progress / weight = pastel orange */
+  --acc-weight-soft: oklch(0.966 0.045 60);
   --acc-nutrition: oklch(0.52 0.10 152);        /* food / calories / macros = Alyva green */
   --acc-nutrition-soft: oklch(0.95 0.03 152);
-  --acc-sleep: oklch(0.58 0.09 258);            /* sleep = soft blue */
-  --acc-sleep-soft: oklch(0.955 0.028 258);
-  --acc-cycle: oklch(0.68 0.11 350);            /* cycle = soft pink */
-  --acc-cycle-soft: oklch(0.96 0.03 350);
+  --acc-sleep: oklch(0.65 0.08 258);            /* sleep = pastel blue */
+  --acc-sleep-soft: oklch(0.958 0.03 258);
+  --acc-cycle: oklch(0.74 0.095 350);           /* cycle = pastel pink */
+  --acc-cycle-soft: oklch(0.963 0.032 350);
   --acc-carbs: oklch(0.82 0.08 145);            /* macro carbs = pastel mint green */
   --acc-carbs-soft: oklch(0.94 0.04 145);
   --acc-protein: oklch(0.82 0.09 55);           /* macro protein = pastel peach */
   --acc-protein-soft: oklch(0.96 0.04 55);
-  --acc-fat: oklch(0.87 0.08 95);               /* macro fat = pastel yellow */
-  --acc-fat-soft: oklch(0.96 0.035 95);
+  --acc-fat: oklch(0.83 0.115 88);              /* macro fat = warm pastel butter yellow */
+  --acc-fat-soft: oklch(0.955 0.055 88);
+
 
 }
 
