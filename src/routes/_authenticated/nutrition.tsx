@@ -234,7 +234,11 @@ function Nutrition() {
       )}
       </PaywallOverlay>
 
-      <section className="mt-5 flex items-start gap-4 rounded-[28px] bg-alyva/[0.045] px-5 py-5">
+      <button
+        type="button"
+        onClick={() => setTipsOpen(true)}
+        className="mt-5 flex w-full items-start gap-4 rounded-[28px] bg-alyva/[0.045] px-5 py-5 text-left ios-press"
+      >
         <span className="grid size-12 shrink-0 place-items-center rounded-full bg-alyva/10">
           <TipIcon className="size-6 text-alyva" />
         </span>
@@ -243,14 +247,16 @@ function Nutrition() {
             {t("nutr.tip_title")}
           </p>
           <p className="mt-1 font-display text-[15px] font-bold leading-tight">
-            {t("nutr.tip_headline")}
+            {t(`nutr.tip.${tipIndex + 1}.h`)}
           </p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
-            {t("today.aura.tip_default")}
+            {t(`nutr.tip.${tipIndex + 1}.b`)}
           </p>
         </div>
         <ChevRight className="mt-1 size-5 shrink-0 text-muted-foreground/70 rtl:rotate-180" />
-      </section>
+      </button>
+      <TipsSheet open={tipsOpen} onOpenChange={setTipsOpen} highlight={tipIndex} />
+
 
       {isToday && (
         <div className="mt-4 grid grid-cols-2 gap-3">
