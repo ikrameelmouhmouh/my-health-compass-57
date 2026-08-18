@@ -281,8 +281,35 @@ export const FASTING_PROTOCOLS: { id: FastingProtocol; fast: number; eat: number
 ];
 
 export function getProtocol(id: FastingProtocol) {
-  return FASTING_PROTOCOLS.find((p) => p.id === id) ?? FASTING_PROTOCOLS[0];
+  return (
+    FASTING_PROTOCOLS.find((p) => p.id === id) ??
+    FASTING_PROTOCOLS.find((p) => p.id === "16:8") ??
+    FASTING_PROTOCOLS[0]
+  );
 }
+
+// ----- Fasting reminders (local prefs) -----
+export type FastReminderPrefs = { before1h: boolean; before5m: boolean; atGoal: boolean };
+const FAST_REM_KEY = "vita.fasting.reminders.v1";
+const DEFAULT_FAST_REMINDERS: FastReminderPrefs = { before1h: false, before5m: false, atGoal: true };
+
+export function useFastReminders() {
+  const [prefs, setPrefs] = useState<FastReminderPrefs>(() => {
+    if (typeof window === "undefined") return DEFAULT_FAST_REMINDERS;
+    try {
+      const raw = localStorage.getItem(FAST_REM_KEY);
+      return raw ? { ...DEFAULT_FAST_REMINDERS, ...JSON.parse(raw) } : DEFAULT_FAST_REMINDERS;
+    } catch { return DEFAULT_FAST_REMINDERS; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(FAST_REM_KEY, JSON.stringify(prefs)); } catch {}
+  }, [prefs]);
+  const toggleReminder = useCallback((key: keyof FastReminderPrefs, value: boolean) => {
+    setPrefs((p) => ({ ...p, [key]: value }));
+  }, []);
+  return { reminders: prefs, toggleReminder };
+}
+
 
 export type FastEntry = {
   id: string;
