@@ -300,7 +300,7 @@ function Nutrition() {
         defaultMealType={defaultMealType}
         autoOpenScan={autoOpenScan}
         onLogged={(entry) => {
-          logMeal({ food: entry.food, serving: entry.serving, servingCount: entry.servingCount, mealType: entry.mealType });
+          logMeal({ food: entry.food, serving: entry.serving, servingCount: entry.servingCount, mealType: entry.mealType, date: viewDate });
           if (isToday) addMeal({ kcal: entry.kcal, protein: entry.protein, carbs: entry.carbs, fat: entry.fat });
           setOpen(false);
         }}
