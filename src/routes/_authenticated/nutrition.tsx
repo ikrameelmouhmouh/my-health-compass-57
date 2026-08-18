@@ -266,8 +266,8 @@ function Nutrition() {
             <p className="mt-3 font-display text-sm font-semibold">{t("mealplan.title")}</p>
             <p className="text-[11px] text-muted-foreground">{t("mealplan.sub_short")}</p>
           </Link>
-        </div>
-      )}
+      </div>
+
 
       <button
         type="button"
