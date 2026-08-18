@@ -7,10 +7,11 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
-  Camera, CalendarDays, Sparkles,
+  Camera, CalendarDays, Sparkles, Utensils, Search, Lightbulb,
 } from "lucide-react";
 import { FoodLogDialog } from "@/components/food-log-dialog";
-import { NutritionSpeedDial } from "@/components/nutrition-speed-dial";
+import { useRegisterAiQuickActions } from "@/lib/ai-quick-actions";
+import { useNavigate } from "@tanstack/react-router";
 import {
   useMeals, MEAL_TYPES,
   type MealType, type LoggedMeal,
