@@ -32,10 +32,10 @@ function AuthenticatedLayout() {
     );
   }
   return (
-    <>
+    <AiQuickActionsProvider>
       <Outlet />
       <AiFab />
       <BottomNav />
-    </>
+    </AiQuickActionsProvider>
   );
 }
