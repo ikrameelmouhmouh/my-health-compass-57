@@ -7,10 +7,11 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
-  Camera, CalendarDays, Sparkles,
+  Camera, CalendarDays, Utensils, Search, Lightbulb,
 } from "lucide-react";
 import { FoodLogDialog } from "@/components/food-log-dialog";
-import { NutritionSpeedDial } from "@/components/nutrition-speed-dial";
+import { useRegisterAiQuickActions } from "@/lib/ai-quick-actions";
+import { useNavigate } from "@tanstack/react-router";
 import {
   useMeals, MEAL_TYPES,
   type MealType, type LoggedMeal,
@@ -78,36 +79,54 @@ function Nutrition() {
     setOpen(true);
   }
 
+  const navigate = useNavigate();
+  useRegisterAiQuickActions(
+    [
+      { id: "add", label: t("nut.fab.add_meal"), icon: Utensils, run: () => openFor(undefined) },
+      { id: "scan", label: t("nutr.scan_meal"), icon: Camera, run: () => openScan() },
+      { id: "search", label: t("nutr.search_food"), icon: Search, run: () => openFor(undefined) },
+      {
+        id: "planner",
+        label: t("mealplan.title"),
+        icon: CalendarDays,
+        run: () => navigate({ to: "/meal-planner" }),
+      },
+    ],
+    [t, navigate],
+  );
 
   return (
     <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-8">
-      <div className="mb-4 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
-      <header className="flex items-center justify-between">
-        <button
-          onClick={() => setDateOffset((d) => d - 1)}
-          className="grid size-9 place-items-center rounded-full border border-border"
-          aria-label={t("nutr.prev")}
-        >
-          <ChevronLeft className="size-4" />
-        </button>
-        <div className="text-center">
-          <h1 className="font-display text-xl font-semibold tracking-tight">
-            {formatDate(viewDate, lang)}
-          </h1>
-          <p className="text-[11px] text-muted-foreground">{t("nutr.title")}</p>
+      <div className="mb-5 flex items-center justify-center"><AlyvaWordmark size="sm" /></div>
+
+      <header>
+        <h1 className="font-display text-[30px] font-semibold leading-tight tracking-tight">
+          {t("nutr.title")}
+        </h1>
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            onClick={() => setDateOffset((d) => d - 1)}
+            className="grid size-9 shrink-0 place-items-center rounded-full border border-border ios-press"
+            aria-label={t("nutr.prev")}
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <div className="flex-1 rounded-full border border-border bg-card px-4 py-2 text-center">
+            <span className="text-[13px] font-semibold capitalize">{formatDate(viewDate, lang)}</span>
+          </div>
+          <button
+            onClick={() => setDateOffset((d) => Math.min(0, d + 1))}
+            className="grid size-9 shrink-0 place-items-center rounded-full border border-border ios-press disabled:opacity-40"
+            aria-label={t("nutr.next")}
+            disabled={dateOffset >= 0}
+          >
+            <ChevronRight className="size-4" />
+          </button>
         </div>
-        <button
-          onClick={() => setDateOffset((d) => Math.min(0, d + 1))}
-          className="grid size-9 place-items-center rounded-full border border-border disabled:opacity-40"
-          aria-label={t("nutr.next")}
-          disabled={dateOffset >= 0}
-        >
-          <ChevronRight className="size-4" />
-        </button>
       </header>
 
       <PaywallOverlay feature={t("nutr.title")} description={t("pay.overlay.food_desc")}>
-      <section className="mt-5 rounded-3xl border border-border bg-card p-5">
+      <section className="mt-5 rounded-3xl border border-border bg-card p-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)]">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -123,13 +142,13 @@ function Nutrition() {
               <circle cx={40} cy={40} r={34} stroke="currentColor" strokeOpacity={0.12} strokeWidth={8} fill="none" />
               <circle
                 cx={40} cy={40} r={34}
-                stroke="currentColor" className="text-brand"
+                stroke="currentColor" className="text-alyva"
                 strokeWidth={8} strokeLinecap="round" fill="none"
                 strokeDasharray={2 * Math.PI * 34}
                 strokeDashoffset={2 * Math.PI * 34 - (pct / 100) * 2 * Math.PI * 34}
               />
             </svg>
-            <Flame className="absolute size-5 text-brand" />
+            <Flame className="absolute size-5 text-alyva" />
           </div>
         </div>
         <div className="mt-3 flex items-center justify-between text-[11px]">
@@ -140,42 +159,21 @@ function Nutrition() {
             {t("nutr.goal")}: <span className="font-semibold text-foreground">{calorieTarget}</span>
           </span>
         </div>
+        <div className="mt-2 h-2 overflow-hidden rounded-full bg-alyva/12">
+          <div className="h-full rounded-full bg-alyva transition-all" style={{ width: `${pct}%` }} />
+        </div>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
-          <MacroBlock label={t("food.carbs")} value={totals.carbs} goal={carbsTarget} color="text-pink-500" />
-          <MacroBlock label={t("food.protein")} value={totals.protein} goal={proteinTarget} color="text-blue-500" />
-          <MacroBlock label={t("food.fat")} value={totals.fat} goal={fatTarget} color="text-orange-500" />
+          <MacroBlock label={t("food.carbs")} value={totals.carbs} goal={carbsTarget} color="text-alyva" />
+          <MacroBlock label={t("food.protein")} value={totals.protein} goal={proteinTarget} color="text-alyva" />
+          <MacroBlock label={t("food.fat")} value={totals.fat} goal={fatTarget} color="text-alyva" />
         </div>
       </section>
       </PaywallOverlay>
 
-      {isToday && (
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <button
-            onClick={openScan}
-            className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
-          >
-            <div className="grid size-10 place-items-center rounded-2xl bg-acc-nutrition-soft text-acc-nutrition">
-              <Camera className="size-5" />
-            </div>
-            <p className="mt-3 font-display text-sm font-semibold">{t("nutr.scan_meal")}</p>
-            <p className="text-[11px] text-muted-foreground">{t("nutr.scan_sub")}</p>
-          </button>
-          <Link
-            to="/meal-planner"
-            className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
-          >
-            <div className="grid size-10 place-items-center rounded-2xl bg-accent text-foreground">
-              <CalendarDays className="size-5" />
-            </div>
-            <p className="mt-3 font-display text-sm font-semibold">{t("mealplan.title")}</p>
-            <p className="text-[11px] text-muted-foreground">{t("mealplan.sub_short")}</p>
-          </Link>
-        </div>
-      )}
-
       <PaywallOverlay feature={t("nutr.title")} description={t("pay.overlay.food_desc")}>
-      <section className="mt-5 space-y-3">
+      <h2 className="mt-7 font-display text-base font-semibold tracking-tight">{t("nutr.diary")}</h2>
+      <section className="mt-3 space-y-3">
         {MEAL_TYPES.map((m) => (
           <MealSection
             key={m.id}
@@ -196,8 +194,8 @@ function Nutrition() {
       </section>
 
       {dayMeals.length === 0 && (
-        <div className="mt-6 rounded-3xl border border-dashed border-border bg-card/50 p-8 text-center">
-          <div className="mx-auto mb-2 grid size-12 place-items-center rounded-full bg-acc-nutrition-soft text-acc-nutrition">
+        <div className="mt-4 rounded-3xl border border-dashed border-border bg-card/50 p-8 text-center">
+          <div className="mx-auto mb-2 grid size-12 place-items-center rounded-full bg-alyva/12 text-alyva">
             <Flame className="size-5" />
           </div>
           <p className="text-sm font-semibold">
@@ -206,11 +204,46 @@ function Nutrition() {
           <p className="mt-1 text-xs text-muted-foreground">{t("nutr.empty_desc")}</p>
         </div>
       )}
+      </PaywallOverlay>
+
+      <section className="mt-7 flex items-start gap-3 rounded-3xl border border-alyva/20 bg-alyva/[0.06] p-4">
+        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-alyva/15 text-alyva">
+          <Lightbulb className="size-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-alyva">
+            {t("nutr.tip_title")}
+          </p>
+          <p className="mt-0.5 text-[13px] leading-snug text-foreground/90">
+            {t("today.aura.tip_default")}
+          </p>
+        </div>
+      </section>
 
       {isToday && (
-        <NutritionSpeedDial onAddMeal={() => openFor(undefined)} onScan={openScan} />
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <button
+            onClick={openScan}
+            className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
+          >
+            <div className="grid size-10 place-items-center rounded-2xl bg-alyva/12 text-alyva">
+              <Camera className="size-5" />
+            </div>
+            <p className="mt-3 font-display text-sm font-semibold">{t("nutr.scan_meal")}</p>
+            <p className="text-[11px] text-muted-foreground">{t("nutr.scan_sub")}</p>
+          </button>
+          <Link
+            to="/meal-planner"
+            className="flex flex-col items-start rounded-3xl border border-border bg-card p-4 text-left ios-press"
+          >
+            <div className="grid size-10 place-items-center rounded-2xl bg-alyva/12 text-alyva">
+              <CalendarDays className="size-5" />
+            </div>
+            <p className="mt-3 font-display text-sm font-semibold">{t("mealplan.title")}</p>
+            <p className="text-[11px] text-muted-foreground">{t("mealplan.sub_short")}</p>
+          </Link>
+        </div>
       )}
-      </PaywallOverlay>
 
       <FoodLogDialog
         open={open}
@@ -223,17 +256,6 @@ function Nutrition() {
           setOpen(false);
         }}
       />
-
-      <Link
-        to="/ai-coach"
-        aria-label={t("fab.open_coach")}
-        className="fixed z-50 right-4 bottom-[calc(env(safe-area-inset-bottom)+168px)] group"
-      >
-        <span className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-alyva/30 blur-xl opacity-70 group-hover:opacity-100 transition-opacity" />
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-alyva text-alyva-foreground shadow-float ring-1 ring-black/5 transition-transform duration-300 ease-out active:scale-95 group-hover:scale-105">
-          <Sparkles className="size-6" strokeWidth={2.2} />
-        </span>
-      </Link>
     </main>
   );
 }
@@ -267,7 +289,7 @@ function MealSection({
         {!disabled && (
           <button
             onClick={onAdd}
-            className="grid size-8 place-items-center rounded-full bg-acc-nutrition-soft text-acc-nutrition"
+            className="grid size-8 place-items-center rounded-full bg-alyva/12 text-alyva"
             aria-label={tAddTo}
           >
             <Plus className="size-4" />
@@ -289,7 +311,7 @@ function MealSection({
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-bold tabular-nums text-brand">{m.kcal} {tKcal}</p>
+                <p className="text-xs font-bold tabular-nums text-alyva">{m.kcal} {tKcal}</p>
                 <p className="text-[10px] text-muted-foreground">
                   P{m.protein} · C{m.carbs} · F{m.fat}
                 </p>
@@ -358,7 +380,7 @@ const LOCALE_MAP: Record<string, string> = {
 
 function formatDate(iso: string, lang: string) {
   const d = new Date(iso + "T00:00:00");
-  return d.toLocaleDateString(LOCALE_MAP[lang] ?? undefined, { weekday: "short", day: "numeric", month: "short" });
+  return d.toLocaleDateString(LOCALE_MAP[lang] ?? undefined, { weekday: "long", day: "numeric", month: "long" });
 }
 
 function FastingCard() {
