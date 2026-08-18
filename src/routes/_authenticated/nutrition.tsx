@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Plus, Flame, Trash2, ChevronLeft, ChevronRight, Timer, Play, Square, ChevronRight as ChevRight,
-  Camera, CalendarDays, Utensils, Search,
+  Camera, CalendarDays, Utensils, Search, Droplet, Droplets,
 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MonthCalendar } from "@/components/nutrition/month-calendar";
