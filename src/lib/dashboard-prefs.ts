@@ -437,20 +437,45 @@ export function useFasting() {
 
 
   const deleteEntry = useCallback((id: string) => {
-    setState((s) => ({ ...s, history: s.history.filter((e) => e.id !== id) }));
+    setState((s) => ({ ...s, history: withStreaks(s, s.history.filter((e) => e.id !== id)) }));
   }, []);
 
   const updateEntry = useCallback((id: string, patch: Partial<Pick<FastEntry, "startedAt" | "endedAt">>) => {
     setState((s) => ({
       ...s,
-      history: s.history.map((e) => {
+      ...withStreakState(s, s.history.map((e) => {
         if (e.id !== id) return e;
         const startedAt = patch.startedAt ?? e.startedAt;
         const endedAt = patch.endedAt ?? e.endedAt;
         const durationMs = new Date(endedAt).getTime() - new Date(startedAt).getTime();
         return { ...e, startedAt, endedAt, durationMs, completed: durationMs >= e.targetMs };
-      }),
+      })),
     }));
+  }, []);
+
+  /** Add a historical (forgotten) fast without touching existing entries. */
+  const addEntry = useCallback((startedAt: string, endedAt: string, protocol?: FastingProtocol): FastEntry | null => {
+    const s = stateRef.current;
+    const proto = getProtocol(protocol ?? s.protocol);
+    const durationMs = new Date(endedAt).getTime() - new Date(startedAt).getTime();
+    if (!(durationMs > 0)) return null;
+    const targetMs = proto.fast * 3_600_000;
+    const entry: FastEntry = {
+      id: (typeof crypto !== "undefined" && "randomUUID" in crypto) ? crypto.randomUUID() : String(Date.now()),
+      startedAt,
+      endedAt,
+      durationMs,
+      targetMs,
+      completed: durationMs >= targetMs,
+      protocol: proto.id,
+    };
+    setState((prev) => {
+      const history = [entry, ...prev.history]
+        .sort((a, b) => +new Date(b.endedAt) - +new Date(a.endedAt))
+        .slice(0, 365);
+      return { ...prev, ...withStreakState(prev, history) };
+    });
+    return entry;
   }, []);
 
   const setWindow = useCallback((h: number) => {
@@ -458,6 +483,7 @@ export function useFasting() {
     if (match) setProtocol(match.id);
   }, [setProtocol]);
 
-  return { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry, setWindow };
+  return { state, start, pause, resume, stop, setProtocol, setStartTime, deleteEntry, updateEntry, addEntry, setWindow };
+
 }
 
