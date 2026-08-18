@@ -515,7 +515,7 @@ function IconBtn({ children, className, ...props }: React.ButtonHTMLAttributes<H
 }
 
 const TONES = {
-  brand: { bg: "bg-brand/12", fg: "text-brand", bar: "bg-brand" },
+  brand: { bg: "bg-brand/12", fg: "text-brand", bar: "bg-primary" },
   nutrition: { bg: "bg-acc-nutrition-soft", fg: "text-acc-nutrition", bar: "bg-acc-nutrition" },
   water: { bg: "bg-acc-water-soft", fg: "text-acc-water", bar: "bg-acc-water" },
   fasting: { bg: "bg-acc-fasting-soft", fg: "text-acc-fasting", bar: "bg-acc-fasting" },

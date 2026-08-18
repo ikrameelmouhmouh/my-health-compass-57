@@ -79,7 +79,7 @@ export function FastingPhaseSheet({
                   onClick={() => setIdx(i)}
                   className={`h-2 flex-1 rounded-full transition ${
                     cur
-                      ? "bg-brand"
+                      ? "bg-primary"
                       : active
                       ? "bg-brand/40"
                       : "bg-border"

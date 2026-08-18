@@ -263,7 +263,7 @@ function ProgressPage({ section }: { section: SubTab }) {
           </div>
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-background/60">
-          <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${goalProgress}%` }} />
+          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${goalProgress}%` }} />
         </div>
         <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
           <span>{startW ? t("prog.startK", { n: startW.toFixed(1) }) : t("prog.startLabel")}</span>

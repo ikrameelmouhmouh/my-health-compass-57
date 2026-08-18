@@ -163,7 +163,7 @@ export function WorkoutPlanChatFlow({
     <div className="space-y-3">
       {summaries.map((summary, index) => (
         <div key={`${summary}-${index}`} className="flex justify-end">
-          <div className="max-w-[85%] rounded-2xl rounded-br-md bg-brand px-4 py-2.5 text-sm text-brand-foreground">
+          <div className="max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
             {summary}
           </div>
         </div>

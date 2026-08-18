@@ -737,7 +737,7 @@ export function ChatScreen({
                         />
                       ))}
                       {text && (
-                        <div className="rounded-2xl rounded-br-md bg-brand px-4 py-2.5 text-sm text-brand-foreground">
+                        <div className="rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm text-primary-foreground">
                           {text}
                         </div>
                       )}

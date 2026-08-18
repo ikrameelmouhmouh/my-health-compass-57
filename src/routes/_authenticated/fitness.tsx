@@ -757,7 +757,7 @@ function ActivitiesSection() {
                   </div>
                   <span
                     aria-hidden
-                    className="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-brand/10 text-brand opacity-60 transition group-hover:opacity-100 group-hover:bg-brand group-hover:text-white"
+                    className="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-brand/10 text-brand opacity-60 transition group-hover:opacity-100 group-hover:bg-primary group-hover:text-primary-foreground"
                   >
                     <Play className="size-3.5 fill-current" />
                   </span>
