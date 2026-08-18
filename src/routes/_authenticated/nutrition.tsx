@@ -218,7 +218,6 @@ function Nutrition() {
             meals={byType[m.id]}
             onAdd={() => openFor(m.id)}
             onRemove={removeMeal}
-            disabled={!isToday}
             tAddTo={t("nutr.add_to", { meal: t(`meal.${m.id}`) })}
             tRemove={t("nutr.remove")}
             tItem={t("nutr.item_one")}
@@ -233,15 +232,20 @@ function Nutrition() {
           <p className="text-sm font-semibold">
             {isToday ? t("nutr.empty_title_today") : t("nutr.empty_title_day")}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">{t("nutr.empty_desc")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {isToday ? t("nutr.empty_desc") : t("nutr.backlog_hint")}
+          </p>
         </div>
       )}
       </PaywallOverlay>
 
+      {!isToday && (
+        <p className="mt-3 rounded-2xl bg-alyva/[0.06] px-4 py-3 text-center text-[12px] font-medium text-alyva">
+          {t("nutr.backlog_hint")}
+        </p>
+      )}
 
-
-      {isToday && (
-        <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             onClick={openScan}
             className="flex flex-col items-start rounded-3xl bg-acc-fitness-soft p-4 text-left ios-press"
@@ -262,8 +266,8 @@ function Nutrition() {
             <p className="mt-3 font-display text-sm font-semibold">{t("mealplan.title")}</p>
             <p className="text-[11px] text-muted-foreground">{t("mealplan.sub_short")}</p>
           </Link>
-        </div>
-      )}
+      </div>
+
 
       <button
         type="button"
@@ -296,7 +300,7 @@ function Nutrition() {
         defaultMealType={defaultMealType}
         autoOpenScan={autoOpenScan}
         onLogged={(entry) => {
-          logMeal({ food: entry.food, serving: entry.serving, servingCount: entry.servingCount, mealType: entry.mealType });
+          logMeal({ food: entry.food, serving: entry.serving, servingCount: entry.servingCount, mealType: entry.mealType, date: viewDate });
           if (isToday) addMeal({ kcal: entry.kcal, protein: entry.protein, carbs: entry.carbs, fat: entry.fat });
           setOpen(false);
         }}
