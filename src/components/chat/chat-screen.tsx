@@ -430,6 +430,15 @@ export function ChatScreen({
   const { lang } = useI18n();
   const { user } = useAuth();
   const [input, setInput] = useState("");
+  // Pick up a draft typed in the floating ALYVA AI panel.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const draft = sessionStorage.getItem("alyva.ai.prompt");
+    if (draft) {
+      sessionStorage.removeItem("alyva.ai.prompt");
+      setInput(draft);
+    }
+  }, []);
   const [file, setFile] = useState<File | null>(null);
   const [quickBusy, setQuickBusy] = useState(false);
   const [workoutFlowActive, setWorkoutFlowActive] = useState(false);
