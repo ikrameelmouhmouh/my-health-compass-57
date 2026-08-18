@@ -232,15 +232,20 @@ function Nutrition() {
           <p className="text-sm font-semibold">
             {isToday ? t("nutr.empty_title_today") : t("nutr.empty_title_day")}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">{t("nutr.empty_desc")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {isToday ? t("nutr.empty_desc") : t("nutr.backlog_hint")}
+          </p>
         </div>
       )}
       </PaywallOverlay>
 
+      {!isToday && (
+        <p className="mt-3 rounded-2xl bg-alyva/[0.06] px-4 py-3 text-center text-[12px] font-medium text-alyva">
+          {t("nutr.backlog_hint")}
+        </p>
+      )}
 
-
-      {isToday && (
-        <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             onClick={openScan}
             className="flex flex-col items-start rounded-3xl bg-acc-fitness-soft p-4 text-left ios-press"
