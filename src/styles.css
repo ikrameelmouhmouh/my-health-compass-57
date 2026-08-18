@@ -127,11 +127,11 @@
   --acc-sleep-soft: oklch(0.955 0.028 258);
   --acc-cycle: oklch(0.68 0.11 350);            /* cycle = soft pink */
   --acc-cycle-soft: oklch(0.96 0.03 350);
-  --acc-carbs: oklch(0.80 0.10 145);            /* macro carbs = pastel mint green */
+  --acc-carbs: oklch(0.82 0.08 145);            /* macro carbs = pastel mint green */
   --acc-carbs-soft: oklch(0.94 0.04 145);
-  --acc-protein: oklch(0.80 0.11 55);           /* macro protein = pastel peach */
+  --acc-protein: oklch(0.82 0.09 55);           /* macro protein = pastel peach */
   --acc-protein-soft: oklch(0.96 0.04 55);
-  --acc-fat: oklch(0.85 0.09 95);               /* macro fat = pastel yellow */
+  --acc-fat: oklch(0.87 0.08 95);               /* macro fat = pastel yellow */
   --acc-fat-soft: oklch(0.96 0.035 95);
 
 }
@@ -182,11 +182,11 @@
   --acc-sleep-soft: oklch(0.30 0.04 258);
   --acc-cycle: oklch(0.78 0.10 350);
   --acc-cycle-soft: oklch(0.31 0.04 350);
-  --acc-carbs: oklch(0.84 0.09 145);
+  --acc-carbs: oklch(0.85 0.08 145);
   --acc-carbs-soft: oklch(0.30 0.04 145);
-  --acc-protein: oklch(0.86 0.10 55);
+  --acc-protein: oklch(0.86 0.09 55);
   --acc-protein-soft: oklch(0.33 0.05 55);
-  --acc-fat: oklch(0.90 0.09 95);
+  --acc-fat: oklch(0.90 0.08 95);
   --acc-fat-soft: oklch(0.32 0.04 95);
 
 }
