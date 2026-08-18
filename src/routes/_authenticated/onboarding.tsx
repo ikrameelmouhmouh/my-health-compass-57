@@ -163,7 +163,7 @@ function Onboarding() {
       </div>
 
       <div className="mt-5 h-[3px] w-full overflow-hidden rounded-full bg-border">
-        <div className="h-full bg-brand transition-[width] duration-500 ease-out" style={{ width: `${progress}%` }} />
+        <div className="h-full bg-primary transition-[width] duration-500 ease-out" style={{ width: `${progress}%` }} />
       </div>
 
       <div className="mt-10 flex-1 overflow-y-auto -mx-6 px-6">

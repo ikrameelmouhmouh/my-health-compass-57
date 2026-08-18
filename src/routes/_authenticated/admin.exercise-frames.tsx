@@ -220,7 +220,7 @@ function AdminExerciseFramesPage() {
       {SHOW_BATCH_TOOLS ? (
         <>
           <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
-            <div className="h-full bg-brand transition-all" style={{ width: `${(doneCount / Math.max(1, total)) * 100}%` }} />
+            <div className="h-full bg-primary transition-all" style={{ width: `${(doneCount / Math.max(1, total)) * 100}%` }} />
           </div>
 
           <div className="mt-4 flex flex-wrap gap-2">

@@ -523,7 +523,7 @@ function FastingCard() {
         ) : (
           <button
             onClick={start}
-            className="inline-flex items-center gap-1 rounded-full bg-brand px-3 py-1.5 text-[12px] font-semibold text-brand-foreground ios-press"
+            className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[12px] font-semibold text-primary-foreground ios-press"
           >
             <Play className="size-3.5" /> {t("nut.startFast")}
           </button>

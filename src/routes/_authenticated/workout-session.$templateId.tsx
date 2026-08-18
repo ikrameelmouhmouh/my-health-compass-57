@@ -239,7 +239,7 @@ function SessionPage() {
           <span className="font-medium tabular-nums">{doneSets}/{totalSets}</span>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-card">
-          <div className="h-full rounded-full bg-brand transition-[width]" style={{ width: `${progressPct}%` }} />
+          <div className="h-full rounded-full bg-primary transition-[width]" style={{ width: `${progressPct}%` }} />
         </div>
         {nextExercise && (
           <p className="mt-1.5 truncate text-[11px] text-muted-foreground">
@@ -404,14 +404,14 @@ function SessionPage() {
                 )}
                 <button
                   onClick={clearRest}
-                  className="rounded-full bg-brand px-3 py-1 text-[11px] font-semibold text-brand-foreground"
+                  className="rounded-full bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground"
                 >
                   {done ? "OK" : t("session.skip_rest")}
                 </button>
               </div>
               <div className="h-1 bg-background">
                 <div
-                  className="h-full bg-brand transition-[width] duration-500 ease-linear"
+                  className="h-full bg-primary transition-[width] duration-500 ease-linear"
                   style={{ width: `${pct}%` }}
                 />
               </div>
