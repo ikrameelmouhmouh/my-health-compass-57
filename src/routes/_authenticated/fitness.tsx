@@ -23,6 +23,7 @@ import { useTodayWorkout } from "@/lib/dashboard-prefs";
 import { localizeDayNames, normalizeDay, todayDayName } from "@/lib/workout-today";
 import { useSessionHistory } from "@/lib/workout-session";
 import { ACTIVITIES, type ActivityCategory } from "@/lib/fitness-activities";
+import { FitnessTipCard } from "@/components/fitness/fitness-tips-sheet";
 
 
 export const Route = createFileRoute("/_authenticated/fitness")({
@@ -97,7 +98,7 @@ function FitnessPage() {
 
   if (!loaded) {
     return (
-      <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
+      <main className="section-fitness mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
         <Header />
         <ViewTabs view={view} setView={setView} />
         <div className="mt-6 space-y-3" aria-label={t("common.loading")}>
@@ -111,19 +112,20 @@ function FitnessPage() {
 
   if (view === "activities") {
     return (
-      <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
+      <main className="section-fitness mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
         <Header />
         <ViewTabs view={view} setView={setView} />
         <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
           <ActivitiesSection />
         </PaywallOverlay>
+        <FitnessTipCard />
       </main>
     );
   }
 
   if (!stored || showWizard) {
     return (
-      <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
+      <main className="section-fitness mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
         <Header />
         <ViewTabs view={view} setView={setView} />
         <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
@@ -269,7 +271,7 @@ function Dashboard({
 
   if (!stored || !plan || !wizard) {
     return (
-      <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
+      <main className="section-fitness mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
         <Header />
         <ViewTabs view={view} setView={setView} />
         <PaywallOverlay feature={t("fit.title")} description={t("pay.overlay.workouts_desc")}>
@@ -279,6 +281,7 @@ function Dashboard({
           <TemplatesSection headerOnly />
           <EmptyState onStart={onRegenerate} isPremium={isPremium} />
         </PaywallOverlay>
+        <FitnessTipCard />
       </main>
     );
   }
@@ -292,7 +295,7 @@ function Dashboard({
   const progressPct = trainingDays > 0 ? Math.min(100, Math.round((completedWeek / trainingDays) * 100)) : 0;
 
   return (
-    <main className="mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
+    <main className="section-fitness mx-auto min-h-[100dvh] w-full max-w-md bg-background px-5 pb-32 pt-10">
       <Header />
       <ViewTabs view={view} setView={setView} />
 
@@ -362,6 +365,7 @@ function Dashboard({
         {t("fit.clear")}
       </button>
       </PaywallOverlay>
+      <FitnessTipCard />
     </main>
   );
 }

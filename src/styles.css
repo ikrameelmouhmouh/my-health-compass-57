@@ -284,3 +284,20 @@
   --primary-foreground: oklch(0.92 0.06 300);
 }
 
+
+/* ------------------------------------------------------------------
+ * Section theme: fitness gets a calm blue identity. ALYVA green stays
+ * for branding, tips and the AI button (they use --alyva directly).
+ * ------------------------------------------------------------------ */
+.section-fitness {
+  --brand: var(--acc-fitness);
+  --primary: color-mix(in oklab, var(--acc-fitness) 20%, var(--card));
+  --primary-foreground: oklch(0.40 0.10 245);
+  --ring: var(--acc-fitness);
+  --accent: var(--acc-fitness-soft);
+}
+
+.dark .section-fitness {
+  --primary: color-mix(in oklab, var(--acc-fitness) 30%, var(--card));
+  --primary-foreground: oklch(0.93 0.05 245);
+}
