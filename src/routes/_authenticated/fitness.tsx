@@ -134,7 +134,7 @@ function FitnessPage() {
               <TodayCard plan={null} onCreate={openWizard} isPremium={isPremium} />
               <OwnProgramCard />
               <PlannedWeekSection />
-              <TemplatesSection headerOnly />
+              <TemplatesSection />
               <EmptyState onStart={openWizard} isPremium={isPremium} />
             </>
 
@@ -278,7 +278,7 @@ function Dashboard({
           <TodayCard plan={plan ?? null} onCreate={onRegenerate} isPremium={isPremium} />
           <OwnProgramCard />
           <PlannedWeekSection />
-          <TemplatesSection headerOnly />
+          <TemplatesSection />
           <EmptyState onStart={onRegenerate} isPremium={isPremium} />
         </PaywallOverlay>
         <FitnessTipCard />
@@ -330,7 +330,7 @@ function Dashboard({
       />
 
 
-      <TemplatesSection headerOnly />
+      <TemplatesSection />
 
       <div className="mt-6 rounded-2xl border border-border bg-card/50 p-3">
         <div className="flex items-center gap-3">
