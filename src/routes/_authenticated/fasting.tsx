@@ -127,7 +127,7 @@ function FastingPage() {
     if (reminders.before5m && leftMin <= 5 && leftMin > 0)
       fire("before5m", t("fast.rem.body5m"));
     if (reminders.atGoal && live.elapsedMs >= targetMs)
-      fire("atGoal", t("fast.rem.bodyAt", { h: formatHM(live.elapsedMs) }));
+      fire("atGoal", t("fast.rem.bodyAt", { h: formatHM(live.elapsedMs, t("unit.h")) }));
   }, [live.active, live.paused, live.elapsedMs, live.leftMs, goalAt, reminders, targetMs, state.startedAt, state.protocol, proto.label, t]);
 
   const viewDate = useMemo(() => {
@@ -269,15 +269,15 @@ function FastingPage() {
                   <p className="text-[12px] leading-snug text-muted-foreground">
                     {live.active
                       ? live.overMs > 0
-                        ? t("fast.overtime") + " " + formatHM(live.overMs)
-                        : t("fast.sub.untilWindow", { left: formatHM(live.leftMs), n: proto.eat })
+                        ? t("fast.overtime") + " " + formatHM(live.overMs, t("unit.h"))
+                        : t("fast.sub.untilWindow", { left: formatHM(live.leftMs, t("unit.h")), n: proto.eat })
                       : t("fast.tapStart")}
                   </p>
-                  <Row label={t("fast.elapsed")} value={live.active ? formatHM(live.elapsedMs) : "—"} />
-                  <Row label={t("fast.remaining")} value={live.active ? formatHM(live.leftMs) : "—"} />
-                  <Row label={t("fast.goalLabel")} value={`${proto.fast}u`} />
+                  <Row label={t("fast.elapsed")} value={live.active ? formatHM(live.elapsedMs, t("unit.h")) : "—"} />
+                  <Row label={t("fast.remaining")} value={live.active ? formatHM(live.leftMs, t("unit.h")) : "—"} />
+                  <Row label={t("fast.goalLabel")} value={`${proto.fast}${t("unit.h")}`} />
                   {live.active && live.overMs > 0 && (
-                    <Row label={t("fast.overtime")} value={`+${formatHM(live.overMs)}`} />
+                    <Row label={t("fast.overtime")} value={`+${formatHM(live.overMs, t("unit.h"))}`} />
                   )}
                 </div>
               </div>
@@ -412,7 +412,7 @@ function FastingPage() {
               <StatCard icon={Flame} tint="text-acc-weight" soft="bg-acc-weight-soft" label={t("fast.stat.longest")} value={`${state.longestStreak}${t("fast.unit.day")}`}>
                 <Spark values={last7.map((d) => d.hours)} className="text-acc-weight" />
               </StatCard>
-              <StatCard icon={CalendarCheck} tint="text-acc-fasting" soft="bg-acc-fasting-soft" label={t("fast.stat.total")} value={`${Math.round(totalHours)}u`}>
+              <StatCard icon={CalendarCheck} tint="text-acc-fasting" soft="bg-acc-fasting-soft" label={t("fast.stat.total")} value={`${Math.round(totalHours)}${t("unit.h")}`}>
                 <Spark values={last30.slice(-14).map((d) => d.hours)} className="text-acc-fasting" />
               </StatCard>
               <StatCard icon={TrendingUp} tint="text-acc-nutrition" soft="bg-acc-nutrition-soft" label={t("fast.stat.weekLeft")} value={`${weekLeft}${t("fast.unit.day")}`}>
@@ -458,7 +458,7 @@ function FastingPage() {
                         <div className="flex items-center justify-between gap-2">
                           <span className="flex min-w-0 items-center gap-1.5">
                             <span className="truncate font-display text-sm font-semibold">
-                              {formatHM(e.durationMs)}
+                              {formatHM(e.durationMs, t("unit.h"))}
                             </span>
                             <span className="shrink-0 rounded-full bg-acc-fasting-soft px-2 py-0.5 text-[10px] font-semibold tabular-nums text-acc-fasting">
                               {e.protocol}
@@ -898,11 +898,11 @@ function formatHMS(ms: number) {
   const sec = s % 60;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
 }
-function formatHM(ms: number) {
+function formatHM(ms: number, hUnit = "h") {
   const s = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
-  return `${h}u ${m}m`;
+  return `${h}${hUnit} ${m}m`;
 }
 function toLocalInput(iso: string) {
   const d = new Date(iso);
