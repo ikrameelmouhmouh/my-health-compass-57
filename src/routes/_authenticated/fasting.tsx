@@ -433,7 +433,7 @@ function FastingPage() {
                 </h2>
                 {dayHours > 0 && (
                   <span className="text-[11px] font-medium text-acc-fasting tabular-nums">
-                    {dayHours.toFixed(1)}u
+                    {dayHours.toFixed(1)}{t("unit.h")}
                   </span>
                 )}
               </div>
