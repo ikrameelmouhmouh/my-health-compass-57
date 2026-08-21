@@ -91,14 +91,14 @@
   --popover-foreground: oklch(0.22 0.01 265);
 
   /* Alyva soft sage action color — pastel surface, deep green ink */
-  --primary: oklch(0.93 0.022 131);
-  --primary-foreground: oklch(0.42 0.045 131);
+  --primary: oklch(0.93 0.04 145);
+  --primary-foreground: oklch(0.48 0.09 145);
 
   --secondary: oklch(0.968 0.003 265);
   --secondary-foreground: oklch(0.25 0.01 265);
   --muted: oklch(0.968 0.003 265);
   --muted-foreground: oklch(0.55 0.012 265);
-  --accent: oklch(0.965 0.008 131);
+  --accent: oklch(0.965 0.015 145);
   --accent-foreground: oklch(0.25 0.01 265);
   --destructive: oklch(0.62 0.21 27);
   --destructive-foreground: oklch(1 0 0);
@@ -106,11 +106,11 @@
   --border: oklch(0.925 0.004 265);
   --hairline: oklch(0.925 0.004 265);
   --input: oklch(0.94 0.004 265);
-  --ring: oklch(0.549 0.046 131);
+  --ring: oklch(0.684 0.0865 145);
 
-  --brand: oklch(0.549 0.046 131);        /* #68775B */
+  --brand: oklch(0.684 0.0865 145);        /* #78A878 */
   --brand-foreground: oklch(1 0 0);
-  --alyva: oklch(0.549 0.046 131);
+  --alyva: oklch(0.684 0.0865 145);
 
   /* Category colors — fixed mapping across the whole app */
   --acc-fitness: oklch(0.66 0.095 240);         /* fitness / activity / steps = pastel blue */
@@ -121,8 +121,8 @@
   --acc-fasting-soft: oklch(0.958 0.034 300);
   --acc-weight: oklch(0.73 0.11 55);            /* progress / weight = pastel orange */
   --acc-weight-soft: oklch(0.966 0.045 60);
-  --acc-nutrition: oklch(0.549 0.046 131);        /* food / calories / macros = Alyva green */
-  --acc-nutrition-soft: oklch(0.955 0.016 131);
+  --acc-nutrition: oklch(0.684 0.0865 145);        /* food / calories / macros = Alyva green */
+  --acc-nutrition-soft: oklch(0.955 0.028 145);
   --acc-sleep: oklch(0.65 0.08 258);            /* sleep = pastel blue */
   --acc-sleep-soft: oklch(0.958 0.03 258);
   --acc-cycle: oklch(0.74 0.095 350);           /* cycle = pastel pink */
@@ -148,8 +148,8 @@
   --popover: oklch(0.27 0.003 286);            /* #2c2c2e */
   --popover-foreground: oklch(1 0 0);
 
-  --primary: oklch(0.38 0.03 131);            /* muted sage surface for dark mode */
-  --primary-foreground: oklch(0.90 0.035 131);
+  --primary: oklch(0.40 0.05 145);            /* muted sage surface for dark mode */
+  --primary-foreground: oklch(0.91 0.06 145);
 
   --secondary: oklch(0.27 0.003 286);
   --secondary-foreground: oklch(1 0 0);
@@ -163,11 +163,11 @@
   --border: oklch(1 0 0 / 12%);                /* hairline separator dark */
   --hairline: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 14%);
-  --ring: oklch(0.68 0.05 131);
+  --ring: oklch(0.75 0.085 145);
 
-  --brand: oklch(0.68 0.05 131);
+  --brand: oklch(0.75 0.085 145);
   --brand-foreground: oklch(1 0 0);
-  --alyva: oklch(0.68 0.05 131);
+  --alyva: oklch(0.75 0.085 145);
 
   --acc-fitness: oklch(0.74 0.10 240);
   --acc-fitness-soft: oklch(0.30 0.04 240);
@@ -177,8 +177,8 @@
   --acc-fasting-soft: oklch(0.31 0.04 300);
   --acc-weight: oklch(0.80 0.12 60);
   --acc-weight-soft: oklch(0.32 0.05 60);
-  --acc-nutrition: oklch(0.72 0.05 131);
-  --acc-nutrition-soft: oklch(0.32 0.025 131);
+  --acc-nutrition: oklch(0.76 0.08 145);
+  --acc-nutrition-soft: oklch(0.33 0.045 145);
   --acc-sleep: oklch(0.74 0.09 258);
   --acc-sleep-soft: oklch(0.30 0.04 258);
   --acc-cycle: oklch(0.78 0.10 350);
