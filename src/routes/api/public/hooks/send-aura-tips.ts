@@ -17,7 +17,11 @@ export const Route = createFileRoute("/api/public/hooks/send-aura-tips")({
         }
 
         const vapidPublic = "BHdqCSyPw1FbZU1SH9mzadLqPI0q_maMGk1GyRuFDOLO38gtLVu6DmvFsBGg3cLlXzgSeQySQRhSoY-Zp4rTKu0";
-        const vapidPrivate = process.env.VAPID_PRIVATE_KEY!;
+        const vapidPrivate = (process.env.VAPID_PRIVATE_KEY ?? "")
+          .trim()
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, "");
         const rawSubject = process.env.VAPID_SUBJECT;
         const subject =
           rawSubject && /^(mailto:|https:\/\/)/i.test(rawSubject) ? rawSubject : "mailto:noreply@alyva.app";
