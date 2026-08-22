@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -6,7 +6,7 @@ import { usePremium } from "@/hooks/use-premium";
 import { useAppMode } from "@/hooks/use-app-mode";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
-import { ChevronLeft, Loader2, Shield, RotateCcw, Pencil, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Shield, RotateCcw, Pencil, Eye, Palette } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/edit")({
   head: () => ({
@@ -171,6 +171,27 @@ function AdminEditPage() {
             )}
           </p>
         </div>
+      </section>
+
+      {/* App style & branding */}
+      <section className="mt-4">
+        <Link
+          to="/admin/branding"
+          className="flex items-center gap-3 rounded-3xl border border-dashed border-border bg-card p-5 transition hover:bg-accent"
+        >
+          <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand/12 text-brand">
+            <Palette className="size-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-display text-[14px] font-semibold tracking-tight">
+              {t("admin.branding.title")}
+            </p>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              {t("admin.branding.subtitle")}
+            </p>
+          </div>
+          <ChevronRight className="size-4 shrink-0 text-muted-foreground rtl:rotate-180" />
+        </Link>
       </section>
     </main>
   );
