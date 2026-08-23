@@ -196,22 +196,7 @@ function AdminBrandingPage() {
             <ColorRow
               label={t(row.labelKey)}
               description={t(row.descKey)}
-              value={colors[row.key]}
-              onChange={(v) => setColor(row.key, v)}
-            />
-          </div>
-        ))}
-      </Card>
-
-      {/* 3. Base UI colors */}
-      <SectionLabel>{t("admin.branding.section.ui")}</SectionLabel>
-      <Card>
-        {UI_ROWS.map((row, i) => (
-          <div key={row.key}>
-            {i > 0 && <Divider />}
-            <ColorRow
-              label={t(row.labelKey)}
-              description={t(row.descKey)}
+              usedFor={t("admin.branding.used_for")}
               value={colors[row.key]}
               onChange={(v) => setColor(row.key, v)}
             />
