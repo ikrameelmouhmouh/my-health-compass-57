@@ -31,46 +31,46 @@ export const Route = createFileRoute("/_authenticated/admin/branding")({
   component: AdminBrandingPage,
 });
 
-const BRAND_ROWS: Array<{ key: ColorTokenKey | BrandColorKey; labelKey: string }> = [
-  { key: "brand-primary", labelKey: "admin.branding.brand.primary" },
-  { key: "brand-logo", labelKey: "admin.branding.brand.logo" },
-  { key: "brand-header", labelKey: "admin.branding.brand.header" },
-  { key: "brand-action", labelKey: "admin.branding.brand.action" },
-  { key: "brand-accent", labelKey: "admin.branding.brand.accent" },
+const BRAND_ROWS: Array<{ key: ColorTokenKey | BrandColorKey; labelKey: string; descKey: string }> = [
+  { key: "brand-primary", labelKey: "admin.branding.brand.primary", descKey: "admin.branding.brand.primary.desc" },
+  { key: "brand-logo", labelKey: "admin.branding.brand.logo", descKey: "admin.branding.brand.logo.desc" },
+  { key: "brand-header", labelKey: "admin.branding.brand.header", descKey: "admin.branding.brand.header.desc" },
+  { key: "brand-action", labelKey: "admin.branding.brand.action", descKey: "admin.branding.brand.action.desc" },
+  { key: "brand-accent", labelKey: "admin.branding.brand.accent", descKey: "admin.branding.brand.accent.desc" },
 ];
 
-const COMPONENT_ROWS: Array<{ key: ColorTokenKey; labelKey: string }> = [
-  { key: "color-calories", labelKey: "admin.branding.comp.calories" },
-  { key: "color-fasting", labelKey: "admin.branding.comp.fasting" },
-  { key: "color-steps", labelKey: "admin.branding.comp.steps" },
-  { key: "color-weight", labelKey: "admin.branding.comp.weight" },
-  { key: "color-workout", labelKey: "admin.branding.comp.workout" },
+const COMPONENT_ROWS: Array<{ key: ColorTokenKey; labelKey: string; descKey: string }> = [
+  { key: "color-calories", labelKey: "admin.branding.comp.calories", descKey: "admin.branding.comp.calories.desc" },
+  { key: "color-fasting", labelKey: "admin.branding.comp.fasting", descKey: "admin.branding.comp.fasting.desc" },
+  { key: "color-steps", labelKey: "admin.branding.comp.steps", descKey: "admin.branding.comp.steps.desc" },
+  { key: "color-weight", labelKey: "admin.branding.comp.weight", descKey: "admin.branding.comp.weight.desc" },
+  { key: "color-workout", labelKey: "admin.branding.comp.workout", descKey: "admin.branding.comp.workout.desc" },
 ];
 
-const UI_ROWS: Array<{ key: ColorTokenKey; labelKey: string }> = [
-  { key: "background-primary", labelKey: "admin.branding.ui.background" },
-  { key: "surface-card", labelKey: "admin.branding.ui.card" },
-  { key: "text-primary", labelKey: "admin.branding.ui.text_primary" },
-  { key: "text-secondary", labelKey: "admin.branding.ui.text_secondary" },
-  { key: "text-muted", labelKey: "admin.branding.ui.text_muted" },
-  { key: "border-default", labelKey: "admin.branding.ui.border" },
-  { key: "divider-line", labelKey: "admin.branding.ui.divider" },
-  { key: "input-background", labelKey: "admin.branding.ui.input" },
-  { key: "shadow-color", labelKey: "admin.branding.ui.shadow" },
+const UI_ROWS: Array<{ key: ColorTokenKey; labelKey: string; descKey: string }> = [
+  { key: "background-primary", labelKey: "admin.branding.ui.background", descKey: "admin.branding.ui.background.desc" },
+  { key: "surface-card", labelKey: "admin.branding.ui.card", descKey: "admin.branding.ui.card.desc" },
+  { key: "text-primary", labelKey: "admin.branding.ui.text_primary", descKey: "admin.branding.ui.text_primary.desc" },
+  { key: "text-secondary", labelKey: "admin.branding.ui.text_secondary", descKey: "admin.branding.ui.text_secondary.desc" },
+  { key: "text-muted", labelKey: "admin.branding.ui.text_muted", descKey: "admin.branding.ui.text_muted.desc" },
+  { key: "border-default", labelKey: "admin.branding.ui.border", descKey: "admin.branding.ui.border.desc" },
+  { key: "divider-line", labelKey: "admin.branding.ui.divider", descKey: "admin.branding.ui.divider.desc" },
+  { key: "input-background", labelKey: "admin.branding.ui.input", descKey: "admin.branding.ui.input.desc" },
+  { key: "shadow-color", labelKey: "admin.branding.ui.shadow", descKey: "admin.branding.ui.shadow.desc" },
 ];
 
-const FONT_ROWS: Array<{ key: FontTokenKey; labelKey: string }> = [
-  { key: "font-family-primary", labelKey: "admin.branding.type.primary" },
-  { key: "font-family-headings", labelKey: "admin.branding.type.headings" },
-  { key: "font-family-body", labelKey: "admin.branding.type.body" },
-  { key: "font-family-buttons", labelKey: "admin.branding.type.buttons" },
-  { key: "font-family-numbers", labelKey: "admin.branding.type.numbers" },
+const FONT_ROWS: Array<{ key: FontTokenKey; labelKey: string; descKey: string }> = [
+  { key: "font-family-primary", labelKey: "admin.branding.type.primary", descKey: "admin.branding.type.primary.desc" },
+  { key: "font-family-headings", labelKey: "admin.branding.type.headings", descKey: "admin.branding.type.headings.desc" },
+  { key: "font-family-body", labelKey: "admin.branding.type.body", descKey: "admin.branding.type.body.desc" },
+  { key: "font-family-buttons", labelKey: "admin.branding.type.buttons", descKey: "admin.branding.type.buttons.desc" },
+  { key: "font-family-numbers", labelKey: "admin.branding.type.numbers", descKey: "admin.branding.type.numbers.desc" },
 ];
 
-const WEIGHT_ROWS: Array<{ key: WeightTokenKey; labelKey: string }> = [
-  { key: "font-weight-headings", labelKey: "admin.branding.type.weight_headings" },
-  { key: "font-weight-body", labelKey: "admin.branding.type.weight_body" },
-  { key: "font-weight-buttons", labelKey: "admin.branding.type.weight_buttons" },
+const WEIGHT_ROWS: Array<{ key: WeightTokenKey; labelKey: string; descKey: string }> = [
+  { key: "font-weight-headings", labelKey: "admin.branding.type.weight_headings.label", descKey: "admin.branding.type.weight_headings.desc" },
+  { key: "font-weight-body", labelKey: "admin.branding.type.weight_body.label", descKey: "admin.branding.type.weight_body.desc" },
+  { key: "font-weight-buttons", labelKey: "admin.branding.type.weight_buttons.label", descKey: "admin.branding.type.weight_buttons.desc" },
 ];
 
 function AdminBrandingPage() {
@@ -169,7 +169,8 @@ function AdminBrandingPage() {
               {i > 0 && <Divider />}
               <ColorRow
                 label={t(row.labelKey)}
-                token={row.key}
+                description={t(row.descKey)}
+                usedFor={t("admin.branding.used_for")}
                 value={colors[row.key]}
                 disabled={linked}
                 linked={isSub ? linked : undefined}
@@ -194,7 +195,8 @@ function AdminBrandingPage() {
             {i > 0 && <Divider />}
             <ColorRow
               label={t(row.labelKey)}
-              token={row.key}
+              description={t(row.descKey)}
+              usedFor={t("admin.branding.used_for")}
               value={colors[row.key]}
               onChange={(v) => setColor(row.key, v)}
             />
@@ -210,7 +212,8 @@ function AdminBrandingPage() {
             {i > 0 && <Divider />}
             <ColorRow
               label={t(row.labelKey)}
-              token={row.key}
+              description={t(row.descKey)}
+              usedFor={t("admin.branding.used_for")}
               value={colors[row.key]}
               onChange={(v) => setColor(row.key, v)}
             />
@@ -225,11 +228,15 @@ function AdminBrandingPage() {
           <div key={row.key}>
             {i > 0 && <Divider />}
             <div className="px-5 py-3.5">
-              <RowHead label={t(row.labelKey)} token={row.key} />
+              <RowHead label={t(row.labelKey)} />
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                <span className="font-medium text-foreground/80">{t("admin.branding.used_for")}</span>{" "}
+                {t(row.descKey)}
+              </p>
               <select
                 value={typo[row.key]}
                 onChange={(e) => setTypo(row.key, e.target.value)}
-                className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-[13px] outline-none"
+                className="mt-2.5 w-full rounded-xl border border-border bg-background px-3 py-2 text-[13px] outline-none"
               >
                 {FONT_OPTIONS.map((f) => (
                   <option key={f.id} value={f.stack}>
@@ -244,11 +251,15 @@ function AdminBrandingPage() {
           <div key={row.key}>
             <Divider />
             <div className="px-5 py-3.5">
-              <RowHead label={t(row.labelKey)} token={row.key} />
+              <RowHead label={t(row.labelKey)} />
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                <span className="font-medium text-foreground/80">{t("admin.branding.used_for")}</span>{" "}
+                {t(row.descKey)}
+              </p>
               <select
                 value={typo[row.key]}
                 onChange={(e) => setTypo(row.key, e.target.value)}
-                className="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2 text-[13px] outline-none"
+                className="mt-2.5 w-full rounded-xl border border-border bg-background px-3 py-2 text-[13px] outline-none"
               >
                 {FONT_WEIGHT_OPTIONS.map((w) => (
                   <option key={w} value={w}>
@@ -388,18 +399,18 @@ function Divider() {
   return <div className="mx-5 h-px bg-border" />;
 }
 
-function RowHead({ label, token }: { label: string; token: string }) {
+function RowHead({ label }: { label: string }) {
   return (
     <div className="flex items-baseline justify-between gap-2">
       <p className="font-display text-[14px] font-semibold tracking-tight">{label}</p>
-      <code className="text-[10px] text-muted-foreground">{token}</code>
     </div>
   );
 }
 
 function ColorRow({
   label,
-  token,
+  description,
+  usedFor,
   value,
   onChange,
   disabled,
@@ -408,7 +419,8 @@ function ColorRow({
   followsLabel,
 }: {
   label: string;
-  token: string;
+  description: string;
+  usedFor: string;
   value: string;
   onChange: (hex: string) => void;
   disabled?: boolean;
@@ -419,8 +431,12 @@ function ColorRow({
   const hex = value.toUpperCase();
   return (
     <div className="px-5 py-3.5">
-      <RowHead label={label} token={token} />
-      <div className="mt-2 flex items-center gap-2">
+      <RowHead label={label} />
+      <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+        <span className="font-medium text-foreground/80">{usedFor}</span>{" "}
+        {description}
+      </p>
+      <div className="mt-2.5 flex items-center gap-2">
         <label
           className={`relative inline-flex size-9 shrink-0 overflow-hidden rounded-xl border border-border ${
             disabled ? "opacity-50" : "cursor-pointer"
@@ -465,6 +481,7 @@ function ColorRow({
     </div>
   );
 }
+
 
 function normalizeHex(v: string): string {
   return /^#[0-9a-fA-F]{6}$/.test(v) ? v : "#000000";
