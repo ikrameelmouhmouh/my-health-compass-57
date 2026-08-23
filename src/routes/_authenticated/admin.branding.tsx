@@ -170,6 +170,7 @@ function AdminBrandingPage() {
               <ColorRow
                 label={t(row.labelKey)}
                 description={t(row.descKey)}
+                usedFor={t("admin.branding.used_for")}
                 value={colors[row.key]}
                 disabled={linked}
                 linked={isSub ? linked : undefined}
