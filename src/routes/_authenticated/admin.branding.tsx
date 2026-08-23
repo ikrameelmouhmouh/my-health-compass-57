@@ -465,11 +465,6 @@ function ColorRow({
   );
 }
 
-function tLabel(key: "used_for"): string {
-  // Helper used inside ColorRow because useT must be called at top level of a component.
-  // We render ColorRow inside AdminBrandingPage, so this hook call is valid.
-  return useT()(`admin.branding.${key}`);
-}
 
 function normalizeHex(v: string): string {
   return /^#[0-9a-fA-F]{6}$/.test(v) ? v : "#000000";
