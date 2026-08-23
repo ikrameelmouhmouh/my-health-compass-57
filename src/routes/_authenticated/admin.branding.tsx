@@ -393,6 +393,7 @@ function RowHead({ label }: { label: string }) {
 function ColorRow({
   label,
   description,
+  usedFor,
   value,
   onChange,
   disabled,
@@ -402,6 +403,7 @@ function ColorRow({
 }: {
   label: string;
   description: string;
+  usedFor: string;
   value: string;
   onChange: (hex: string) => void;
   disabled?: boolean;
@@ -414,7 +416,7 @@ function ColorRow({
     <div className="px-5 py-3.5">
       <RowHead label={label} />
       <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-        <span className="font-medium text-foreground/80">{tLabel("used_for")}</span>{" "}
+        <span className="font-medium text-foreground/80">{usedFor}</span>{" "}
         {description}
       </p>
       <div className="mt-2.5 flex items-center gap-2">
