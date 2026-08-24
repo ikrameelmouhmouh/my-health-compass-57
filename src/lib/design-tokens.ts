@@ -96,7 +96,7 @@ export const FONT_WEIGHT_OPTIONS = ["300", "400", "500", "600", "700", "800"] as
 
 /* ---------- Defaults ---------- */
 
-const BRAND_DEFAULT = "#68775B";
+const BRAND_DEFAULT = "#78A878";
 
 const LIGHT_COLORS: Record<ColorTokenKey, string> = {
   // ALYVA branding
