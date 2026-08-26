@@ -196,7 +196,7 @@ export function VisualEditorProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-function k_isBrandSub(key: ColorTokenKey) {
+function k_isBrandSub(key: ColorTokenKey): key is BrandColorKey {
   return key === "brand-logo" || key === "brand-header" || key === "brand-action" || key === "brand-accent";
 }
 
