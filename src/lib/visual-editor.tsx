@@ -94,7 +94,7 @@ export function buildCss(config: DesignConfig, mode: ThemeMode): string {
     ].join(" ");
     rules.push(`button, [role="button"] { ${decl} }`);
   }
-  const scale = Number(typo["font-size-scale"] ?? "100");
+  const scale = Number((typo as Record<string, string>)["font-size-scale"] ?? "100");
   if (!Number.isNaN(scale) && scale !== 100) {
     rules.push(`html { font-size: ${(16 * scale) / 100}px; }`);
   }
