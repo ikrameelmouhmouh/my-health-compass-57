@@ -4,6 +4,7 @@ import {
   getDefaultDesignConfig,
   loadDesignConfig,
   saveDesignConfig,
+  type BrandColorKey,
   type ColorTokenKey,
   type DesignConfig,
   type ThemeMode,
@@ -94,7 +95,7 @@ export function buildCss(config: DesignConfig, mode: ThemeMode): string {
     ].join(" ");
     rules.push(`button, [role="button"] { ${decl} }`);
   }
-  const scale = Number(typo["font-size-scale"] ?? "100");
+  const scale = Number((typo as Record<string, string>)["font-size-scale"] ?? "100");
   if (!Number.isNaN(scale) && scale !== 100) {
     rules.push(`html { font-size: ${(16 * scale) / 100}px; }`);
   }
@@ -154,7 +155,7 @@ export function VisualEditorProvider({ children }: { children: ReactNode }) {
             if (next.themes[m].brandLinks[k]) next.themes[m].colors[k] = hex;
           }
         } else if (k_isBrandSub(key)) {
-          next.themes[m].brandLinks[key as never] = false;
+          next.themes[m].brandLinks[key] = false;
         }
       }
       return next;
@@ -196,7 +197,7 @@ export function VisualEditorProvider({ children }: { children: ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-function k_isBrandSub(key: ColorTokenKey) {
+function k_isBrandSub(key: ColorTokenKey): key is BrandColorKey {
   return key === "brand-logo" || key === "brand-header" || key === "brand-action" || key === "brand-accent";
 }
 
