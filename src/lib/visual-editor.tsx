@@ -4,6 +4,7 @@ import {
   getDefaultDesignConfig,
   loadDesignConfig,
   saveDesignConfig,
+  type BrandColorKey,
   type ColorTokenKey,
   type DesignConfig,
   type ThemeMode,
