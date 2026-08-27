@@ -173,25 +173,21 @@ function AdminEditPage() {
         </div>
       </section>
 
-      {/* App style & branding */}
+      {/* Visual editor hint */}
       <section className="mt-4">
-        <Link
-          to="/admin/branding"
-          className="flex items-center gap-3 rounded-3xl border border-dashed border-border bg-card p-5 transition hover:bg-accent"
-        >
+        <div className="flex items-start gap-3 rounded-3xl border border-dashed border-border bg-card p-5">
           <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand/12 text-brand">
             <Palette className="size-4" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-display text-[14px] font-semibold tracking-tight">
-              {t("admin.branding.title")}
+              {t("admin.visual.title")}
             </p>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {t("admin.branding.subtitle")}
+            <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+              {t("admin.visual.hint")}
             </p>
           </div>
-          <ChevronRight className="size-4 shrink-0 text-muted-foreground rtl:rotate-180" />
-        </Link>
+        </div>
       </section>
     </main>
   );
