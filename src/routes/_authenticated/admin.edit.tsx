@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -6,7 +6,7 @@ import { usePremium } from "@/hooks/use-premium";
 import { useAppMode } from "@/hooks/use-app-mode";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n";
-import { ChevronLeft, ChevronRight, Loader2, Shield, RotateCcw, Pencil, Eye, Palette } from "lucide-react";
+import { ChevronLeft, Loader2, Shield, RotateCcw, Pencil, Eye, Palette } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/edit")({
   head: () => ({
