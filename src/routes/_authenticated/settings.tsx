@@ -7,13 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronLeft, ChevronRight, Sun, Moon, Globe, LogOut, Check,
-  Sparkles, RefreshCw,
+  Sparkles, RefreshCw, Shield,
 } from "lucide-react";
 import { PushToggle } from "@/components/push-toggle";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePremium } from "@/hooks/use-premium";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Alyva" }] }),
@@ -41,6 +42,7 @@ function SettingsPage() {
   });
 
   const { isPremium } = usePremium();
+  const { isAdmin } = useIsAdmin();
 
   async function changeLanguage(code: Language) {
     setLang(code);
