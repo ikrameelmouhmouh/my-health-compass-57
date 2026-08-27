@@ -173,6 +173,18 @@ function SettingsPage() {
         </button>
       </Group>
 
+      {/* Admin */}
+      {isAdmin && (
+        <>
+          <SectionLabel>{t("admin.settings.section")}</SectionLabel>
+          <Group>
+            <button className="w-full" onClick={() => navigate({ to: "/admin/edit" })}>
+              <Row icon={Shield} label={t("admin.edit.title")} sub={t("admin.visual.entry_sub")} />
+            </button>
+          </Group>
+        </>
+      )}
+
       {/* Account */}
       <SectionLabel>{t("set.section.account")}</SectionLabel>
       <Group>
