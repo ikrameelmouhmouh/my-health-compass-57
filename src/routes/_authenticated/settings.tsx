@@ -7,13 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronLeft, ChevronRight, Sun, Moon, Globe, LogOut, Check,
-  Sparkles, RefreshCw,
+  Sparkles, RefreshCw, Shield,
 } from "lucide-react";
 import { PushToggle } from "@/components/push-toggle";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePremium } from "@/hooks/use-premium";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Alyva" }] }),
@@ -41,6 +42,7 @@ function SettingsPage() {
   });
 
   const { isPremium } = usePremium();
+  const { isAdmin } = useIsAdmin();
 
   async function changeLanguage(code: Language) {
     setLang(code);
@@ -172,6 +174,18 @@ function SettingsPage() {
           <Row icon={RefreshCw} label={t("set.recalc")} sub={t("set.recalc_sub")} />
         </button>
       </Group>
+
+      {/* Admin */}
+      {isAdmin && (
+        <>
+          <SectionLabel>{t("admin.settings.section")}</SectionLabel>
+          <Group>
+            <button className="w-full" onClick={() => navigate({ to: "/admin/edit" })}>
+              <Row icon={Shield} label={t("admin.edit.title")} sub={t("admin.visual.entry_sub")} />
+            </button>
+          </Group>
+        </>
+      )}
 
       {/* Account */}
       <SectionLabel>{t("set.section.account")}</SectionLabel>
