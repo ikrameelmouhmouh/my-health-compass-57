@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/auth-context";
 import { BottomNav } from "@/components/bottom-nav";
 import { AiFab } from "@/components/ai-fab";
 import { AiQuickActionsProvider } from "@/lib/ai-quick-actions";
+import { VisualEditorProvider } from "@/lib/visual-editor";
+import { VisualEditorLayer } from "@/components/admin/visual-editor-layer";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
