@@ -33,10 +33,13 @@ function AuthenticatedLayout() {
     );
   }
   return (
-    <AiQuickActionsProvider>
-      <Outlet />
-      <AiFab />
-      <BottomNav />
-    </AiQuickActionsProvider>
+    <VisualEditorProvider>
+      <AiQuickActionsProvider>
+        <Outlet />
+        <AiFab />
+        <BottomNav />
+        <VisualEditorLayer />
+      </AiQuickActionsProvider>
+    </VisualEditorProvider>
   );
 }
