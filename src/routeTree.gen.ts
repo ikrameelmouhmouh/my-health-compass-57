@@ -48,7 +48,9 @@ import { Route as ApiPublicWidgetAuraRouteImport } from './routes/api/public/wid
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 import { Route as ApiPublicHooksSendAuraTipsRouteImport } from './routes/api/public/hooks/send-aura-tips'
+import { Route as ApiPublicExportManifestRouteImport } from './routes/api/public/export/manifest'
 import { Route as ApiExerciseFrameIdIRouteImport } from './routes/api/exercise-frame.$id.$i'
+import { Route as ApiPublicExportExerciseFrameIdIRouteImport } from './routes/api/public/export/exercise-frame.$id.$i'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -259,11 +261,22 @@ const ApiPublicHooksSendAuraTipsRoute =
     path: '/api/public/hooks/send-aura-tips',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicExportManifestRoute = ApiPublicExportManifestRouteImport.update({
+  id: '/api/public/export/manifest',
+  path: '/api/public/export/manifest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiExerciseFrameIdIRoute = ApiExerciseFrameIdIRouteImport.update({
   id: '/api/exercise-frame/$id/$i',
   path: '/api/exercise-frame/$id/$i',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicExportExerciseFrameIdIRoute =
+  ApiPublicExportExerciseFrameIdIRouteImport.update({
+    id: '/api/public/export/exercise-frame/$id/$i',
+    path: '/api/public/export/exercise-frame/$id/$i',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -301,10 +314,12 @@ export interface FileRoutesByFullPath {
   '/api/admin/bootstrap-admin': typeof ApiAdminBootstrapAdminRoute
   '/api/admin/generate-exercise-frames': typeof ApiAdminGenerateExerciseFramesRoute
   '/api/exercise-frame/$id/$i': typeof ApiExerciseFrameIdIRoute
+  '/api/public/export/manifest': typeof ApiPublicExportManifestRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/widget/aura': typeof ApiPublicWidgetAuraRoute
+  '/api/public/export/exercise-frame/$id/$i': typeof ApiPublicExportExerciseFrameIdIRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -342,10 +357,12 @@ export interface FileRoutesByTo {
   '/api/admin/bootstrap-admin': typeof ApiAdminBootstrapAdminRoute
   '/api/admin/generate-exercise-frames': typeof ApiAdminGenerateExerciseFramesRoute
   '/api/exercise-frame/$id/$i': typeof ApiExerciseFrameIdIRoute
+  '/api/public/export/manifest': typeof ApiPublicExportManifestRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/widget/aura': typeof ApiPublicWidgetAuraRoute
+  '/api/public/export/exercise-frame/$id/$i': typeof ApiPublicExportExerciseFrameIdIRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -385,10 +402,12 @@ export interface FileRoutesById {
   '/api/admin/bootstrap-admin': typeof ApiAdminBootstrapAdminRoute
   '/api/admin/generate-exercise-frames': typeof ApiAdminGenerateExerciseFramesRoute
   '/api/exercise-frame/$id/$i': typeof ApiExerciseFrameIdIRoute
+  '/api/public/export/manifest': typeof ApiPublicExportManifestRoute
   '/api/public/hooks/send-aura-tips': typeof ApiPublicHooksSendAuraTipsRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/api/public/widget/aura': typeof ApiPublicWidgetAuraRoute
+  '/api/public/export/exercise-frame/$id/$i': typeof ApiPublicExportExerciseFrameIdIRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -428,10 +447,12 @@ export interface FileRouteTypes {
     | '/api/admin/bootstrap-admin'
     | '/api/admin/generate-exercise-frames'
     | '/api/exercise-frame/$id/$i'
+    | '/api/public/export/manifest'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
     | '/api/public/widget/aura'
+    | '/api/public/export/exercise-frame/$id/$i'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -469,10 +490,12 @@ export interface FileRouteTypes {
     | '/api/admin/bootstrap-admin'
     | '/api/admin/generate-exercise-frames'
     | '/api/exercise-frame/$id/$i'
+    | '/api/public/export/manifest'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
     | '/api/public/widget/aura'
+    | '/api/public/export/exercise-frame/$id/$i'
   id:
     | '__root__'
     | '/'
@@ -511,10 +534,12 @@ export interface FileRouteTypes {
     | '/api/admin/bootstrap-admin'
     | '/api/admin/generate-exercise-frames'
     | '/api/exercise-frame/$id/$i'
+    | '/api/public/export/manifest'
     | '/api/public/hooks/send-aura-tips'
     | '/api/public/hooks/send-reminders'
     | '/api/public/payments/webhook'
     | '/api/public/widget/aura'
+    | '/api/public/export/exercise-frame/$id/$i'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -533,10 +558,12 @@ export interface RootRouteChildren {
   ApiAdminBootstrapAdminRoute: typeof ApiAdminBootstrapAdminRoute
   ApiAdminGenerateExerciseFramesRoute: typeof ApiAdminGenerateExerciseFramesRoute
   ApiExerciseFrameIdIRoute: typeof ApiExerciseFrameIdIRoute
+  ApiPublicExportManifestRoute: typeof ApiPublicExportManifestRoute
   ApiPublicHooksSendAuraTipsRoute: typeof ApiPublicHooksSendAuraTipsRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
   ApiPublicWidgetAuraRoute: typeof ApiPublicWidgetAuraRoute
+  ApiPublicExportExerciseFrameIdIRoute: typeof ApiPublicExportExerciseFrameIdIRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -814,11 +841,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSendAuraTipsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/export/manifest': {
+      id: '/api/public/export/manifest'
+      path: '/api/public/export/manifest'
+      fullPath: '/api/public/export/manifest'
+      preLoaderRoute: typeof ApiPublicExportManifestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/exercise-frame/$id/$i': {
       id: '/api/exercise-frame/$id/$i'
       path: '/api/exercise-frame/$id/$i'
       fullPath: '/api/exercise-frame/$id/$i'
       preLoaderRoute: typeof ApiExerciseFrameIdIRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/export/exercise-frame/$id/$i': {
+      id: '/api/public/export/exercise-frame/$id/$i'
+      path: '/api/public/export/exercise-frame/$id/$i'
+      fullPath: '/api/public/export/exercise-frame/$id/$i'
+      preLoaderRoute: typeof ApiPublicExportExerciseFrameIdIRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -904,10 +945,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminBootstrapAdminRoute: ApiAdminBootstrapAdminRoute,
   ApiAdminGenerateExerciseFramesRoute: ApiAdminGenerateExerciseFramesRoute,
   ApiExerciseFrameIdIRoute: ApiExerciseFrameIdIRoute,
+  ApiPublicExportManifestRoute: ApiPublicExportManifestRoute,
   ApiPublicHooksSendAuraTipsRoute: ApiPublicHooksSendAuraTipsRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
   ApiPublicWidgetAuraRoute: ApiPublicWidgetAuraRoute,
+  ApiPublicExportExerciseFrameIdIRoute: ApiPublicExportExerciseFrameIdIRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
